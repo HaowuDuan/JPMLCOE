@@ -1,0 +1,406 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{enumitem}
+
+\geometry{margin=1in}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{8pt}
+
+\title{\textbf{Notes}}
+\author{}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\tableofcontents 
+\newpage
+
+\section{State Space Models and Filtering Methods}
+
+\subsection{Overview and Big Picture}
+
+Filtering methods estimate hidden states of dynamical systems from noisy measurements. The choice of filter depends on three key properties: \textbf{linearity of dynamics}, \textbf{process noise distribution}, and \textbf{measurement noise distribution}.
+
+\textbf{Key Insight:} Process noise $\mathbf{w}_t$ and measurement noise $\mathbf{v}_t$ can have \textbf{different distributions} independently.
+
+\begin{center}
+\begin{tabular}{@{}llll@{}}
+\toprule
+\textbf{Linearity} & \textbf{Process Noise} & \textbf{Measurement Noise} & \textbf{Filter} \\
+\midrule
+Linear & Gaussian & Gaussian & Kalman (exact, optimal) \\
+Nonlinear & Gaussian & Gaussian & EKF / UKF (approximate) \\
+Any & Non-Gaussian & Gaussian & Particle / Hybrid \\
+Any & Gaussian & Non-Gaussian & Particle / Robust Kalman \\
+Any & Non-Gaussian & Non-Gaussian & Particle / Flow \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Filtering Hierarchy:}
+\begin{itemize}
+\item \textbf{Exact (Linear + Both Gaussian):} Kalman Filter
+\item \textbf{Approximate (Nonlinear + Both Gaussian):}
+\begin{itemize}
+\item EKF: Linearization via Jacobian (1st-order)
+\item UKF: Sigma point transform (3rd-order)
+\end{itemize}
+\item \textbf{Sampling-based (At Least One Non-Gaussian):}
+\begin{itemize}
+\item Standard Particle Filter: Stochastic sampling + resampling
+\item Particle Flow Filters: Deterministic ODE evolution
+\item Hybrid Methods: Rao-Blackwellized PF, Robust Kalman, Gaussian Sum
+\end{itemize}
+\end{itemize}
+
+All methods solve the Bayesian filtering problem: compute $p(\mathbf{x}_t | \mathbf{y}_{1:t})$ recursively.
+
+\subsection{General Framework}
+
+State space models (SSM) describe dynamical systems with hidden states observed through noisy measurements.
+
+\textbf{Evolution (Process Model):}
+\begin{equation}
+\mathbf{x}_t = f(\mathbf{x}_{t-1}) + \mathbf{w}_t, \quad \mathbf{w}_t \sim p_w(\cdot)
+\end{equation}
+
+\textbf{Measurement (Observation Model):}
+\begin{equation}
+\mathbf{y}_t = h(\mathbf{x}_t) + \mathbf{v}_t, \quad \mathbf{v}_t \sim p_v(\cdot)
+\end{equation}
+
+where $f(\cdot)$ is the evolution function, $h(\cdot)$ is the measurement function, $p_w(\cdot)$ is the \textbf{process noise distribution}, and $p_v(\cdot)$ is the \textbf{measurement noise distribution}. These two noise distributions are \textbf{independent} and can be of different types (e.g., one Gaussian, one non-Gaussian).
+
+\textbf{Goal:} Estimate hidden state $\mathbf{x}_t$ given measurements $\mathbf{y}_{1:t}$ by computing the posterior $p(\mathbf{x}_t | \mathbf{y}_{1:t})$.
+
+\subsection{Kalman Filter: Linear-Gaussian Case}
+
+For linear dynamics with \textbf{both} process and measurement noise Gaussian:
+\begin{align}
+\mathbf{x}_t &= \hat{\mathbf{F}} \mathbf{x}_{t-1} + \mathbf{w}_t, \quad \mathbf{w}_t \sim \mathcal{N}(0, \mathbf{Q}) \quad \text{(process noise)} \\
+\mathbf{y}_t &= \hat{\mathbf{H}} \mathbf{x}_t + \mathbf{v}_t, \quad \mathbf{v}_t \sim \mathcal{N}(0, \mathbf{R}) \quad \text{(measurement noise)}
+\end{align}
+
+where $\hat{\mathbf{F}}$ is the state transition matrix (evolution operator), $\hat{\mathbf{H}}$ is the measurement matrix, $\mathbf{Q}$ is the process noise covariance, and $\mathbf{R}$ is the measurement noise covariance.
+
+The Kalman filter provides the \textbf{exact, closed-form} optimal solution when all conditions hold (linear + both Gaussian).
+
+\textbf{Notation:}
+\begin{itemize}
+\item $\hat{\mathbf{x}}_t^-$ (also $\hat{\mathbf{x}}_{t|t-1}$, $\bar{\mathbf{x}}_t$, or $\mathbf{x}_t^f$) = \textit{a priori} state estimate (prediction/forecast)
+\item $\hat{\mathbf{x}}_t^+$ (also $\hat{\mathbf{x}}_{t|t}$, $\hat{\mathbf{x}}_t$, or $\mathbf{x}_t^a$) = \textit{a posteriori} state estimate (correction/analysis)
+\item $\mathbf{P}_t^-$ (also $\mathbf{P}_{t|t-1}$ or $\bar{\mathbf{P}}_t$) = \textit{a priori} error covariance
+\item $\mathbf{P}_t^+$ (also $\mathbf{P}_{t|t}$ or $\mathbf{P}_t$) = \textit{a posteriori} error covariance
+\end{itemize}
+
+\textbf{Prediction Step:}
+\begin{align}
+\hat{\mathbf{x}}_t^- &= \mathbf{\hat F} \hat{\mathbf{x}}_{t-1}^+ \\
+\mathbf{P}_t^- &= \mathbf{\hat F} \mathbf{P}_{t-1}^+ \mathbf{\hat F}^T + \mathbf{Q}
+\end{align}
+
+\textbf{Correction Step:}
+\begin{align}
+\mathbf{\hat K}_t &= \mathbf{P}_t^- \mathbf{H}^T \left[\mathbf{H} \mathbf{P}_t^- \mathbf{H}^T + \mathbf{R}\right]^{-1} \quad \text{(Kalman gain)} \\
+\hat{\mathbf{x}}_t^+ &= \hat{\mathbf{x}}_t^- + \mathbf{K}_t (\mathbf{y}_t - \mathbf{H}\hat{\mathbf{x}}_t^-) \\
+\mathbf{\hat P}_t^+ &= (\mathbf{I} - \mathbf{K}_t \mathbf{H}) \mathbf{P}_t^-
+\end{align}
+
+where $\mathbf{K}_t$ is the Kalman gain (optimal adaptive learning rate matrix) and $(\mathbf{y}_t - \mathbf{H}\hat{\mathbf{x}}_t^-)$ is the innovation (also called residual or measurement surprise).
+
+The Kalman gain balances model prediction versus measurement based on their respective uncertainties: larger $\mathbf{R}$ (noisy sensors) reduces gain; larger $\mathbf{P}_t^-$ (uncertain prediction) increases gain.
+
+
+Consider a linear-Gaussian state-space model at time \( t \):
+
+\begin{itemize}
+    \item State vector: \( \mathbf{x}_t \in \mathbb{R}^n \), the hidden state.
+    \item Observation vector: \( \mathbf{z}_t \in \mathbb{R}^m \), the noisy measurement.
+    \item Transition matrix: \( F \in \mathbb{R}^{n \times n} \), linear dynamics operator.
+    \item Observation matrix: \( H \in \mathbb{R}^{m \times n} \), linear measurement operator.
+    \item Process noise: \( \mathbf{v}_t \sim \mathcal{N}(\mathbf{0}, Q) \), with covariance \( Q \in \mathbb{R}^{n \times n} \).
+    \item Measurement noise: \( \mathbf{w}_t \sim \mathcal{N}(\mathbf{0}, R) \), with covariance \( R \in \mathbb{R}^{m \times m} \).
+\end{itemize}
+
+The model equations are:
+\begin{align}
+    \mathbf{x}_t &= F \mathbf{x}_{t-1} + \mathbf{v}_t, \label{eq:state_transition} \\
+    \mathbf{z}_t &= H \mathbf{x}_t + \mathbf{w}_t. \label{eq:observation}
+\end{align}
+
+% Prior distribution
+The predicted state (prior) given observations up to \( t-1 \) is:
+\begin{itemize}
+    \item Mean: \( \hat{\mathbf{x}}_{t|t-1} = F \hat{\mathbf{x}}_{t-1|t-1} \),
+    \item Covariance: \( P_{t|t-1} = F P_{t-1|t-1} F^\top + Q \).
+\end{itemize}
+Thus, the prior distribution is:
+\[
+p(\mathbf{x}_t \mid \mathbf{z}_{1:t-1}) = \mathcal{N}(\hat{\mathbf{x}}_{t|t-1}, P_{t|t-1}).
+\]
+The likelihood is:
+\[
+p(\mathbf{z}_t \mid \mathbf{x}_t) = \mathcal{N}(H \mathbf{x}_t, R).
+\]
+
+% Joint Gaussian distribution
+The posterior \( p(\mathbf{x}_t \mid \mathbf{z}_{1:t}) \propto p(\mathbf{z}_t \mid \mathbf{x}_t) p(\mathbf{x}_t \mid \mathbf{z}_{1:t-1}) \) is Gaussian. To derive the Kalman gain, consider the joint Gaussian distribution of \( \mathbf{x}_t \) and \( \mathbf{z}_t \) (conditional on \( \mathbf{z}_{1:t-1} \)):
+\[
+\begin{bmatrix}
+\mathbf{x}_t \\
+\mathbf{z}_t
+\end{bmatrix}
+\sim \mathcal{N} \left(
+\begin{bmatrix}
+\hat{\mathbf{x}}_{t|t-1} \\
+H \hat{\mathbf{x}}_{t|t-1}
+\end{bmatrix},
+\begin{bmatrix}
+P_{t|t-1} & P_{t|t-1} H^\top \\
+H P_{t|t-1} & H P_{t|t-1} H^\top + R
+\end{bmatrix}
+\right).
+\]
+
+% Conditional Gaussian formula
+For jointly Gaussian vectors \( \mathbf{x} \) and \( \mathbf{z} \) with means \( \boldsymbol{\mu}_x, \boldsymbol{\mu}_z \), covariances \( \Sigma_{xx}, \Sigma_{zz} \), and cross-covariance \( \Sigma_{xz} \), the conditional distribution is:
+\[
+\mathbf{x} \mid \mathbf{z} \sim \mathcal{N} \left( \boldsymbol{\mu}_x + \Sigma_{xz} \Sigma_{zz}^{-1} (\mathbf{z} - \boldsymbol{\mu}_z), \ \Sigma_{xx} - \Sigma_{xz} \Sigma_{zz}^{-1} \Sigma_{zx} \right).
+\]
+
+% Applying to Kalman filter
+Substitute:
+\begin{itemize}
+    \item \( \boldsymbol{\mu}_x = \hat{\mathbf{x}}_{t|t-1} \),
+    \item \( \boldsymbol{\mu}_z = H \hat{\mathbf{x}}_{t|t-1} \),
+    \item \( \Sigma_{xx} = P_{t|t-1} \),
+    \item \( \Sigma_{zz} = H P_{t|t-1} H^\top + R \),
+    \item \( \Sigma_{xz} = P_{t|t-1} H^\top \), \( \Sigma_{zx} = H P_{t|t-1} \).
+\end{itemize}
+
+The posterior mean is:
+\begin{align}
+\hat{\mathbf{x}}_{t|t} &= \hat{\mathbf{x}}_{t|t-1} + P_{t|t-1} H^\top (H P_{t|t-1} H^\top + R)^{-1} (\mathbf{z}_t - H \hat{\mathbf{x}}_{t|t-1}). \label{eq:posterior_mean}
+\end{align}
+
+% Defining the Kalman gain
+Define the Kalman gain as:
+\[
+K_t = P_{t|t-1} H^\top (H P_{t|t-1} H^\top + R)^{-1}. \label{eq:kalman_gain}
+\]
+
+The innovation (residual) is \( \tilde{\mathbf{y}}_t = \mathbf{z}_t - H \hat{\mathbf{x}}_{t|t-1} \), so the update becomes:
+\[
+\hat{\mathbf{x}}_{t|t} = \hat{\mathbf{x}}_{t|t-1} + K_t \tilde{\mathbf{y}}_t. \label{eq:state_update}
+\]
+
+% Posterior covariance
+The posterior covariance is:
+\begin{align}
+P_{t|t} &= P_{t|t-1} - P_{t|t-1} H^\top (H P_{t|t-1} H^\top + R)^{-1} H P_{t|t-1} \notag \\
+&= (I - K_t H) P_{t|t-1}, \label{eq:posterior_cov}
+\end{align}
+where \( I \) is the identity matrix. This Joseph stabilized form ensures numerical stability.
+
+% Intuition
+\section*{Intuition}
+The Kalman gain \( K_t \) balances the trust between the prior prediction \( \hat{\mathbf{x}}_{t|t-1} \) (with uncertainty \( P_{t|t-1} \)) and the measurement \( \mathbf{z}_t \) (with noise \( R \)). A large \( R \) (noisy measurement) reduces \( K_t \), relying more on the prior; a large \( P_{t|t-1} \) (uncertain prediction) increases \( K_t \), favoring the measurement. This minimizes the trace of \( P_{t|t} \), ensuring the minimum mean-squared error (MMSE) estimate.
+
+
+\subsection{Extended Kalman Filter (EKF)}
+
+\textbf{When:} Nonlinear $f, h$ with \textbf{both} process and measurement noise Gaussian.
+
+\textbf{Strategy:} Linearize via first-order Taylor expansion around current estimate.
+
+\textbf{Jacobians:}
+\begin{equation}
+\mathbf{F}_t = \left.\frac{\partial f}{\partial \mathbf{x}}\right|_{\mathbf{x} = \hat{\mathbf{x}}_{t-1}^+}, \quad
+\mathbf{H}_t = \left.\frac{\partial h}{\partial \mathbf{x}}\right|_{\mathbf{x} = \hat{\mathbf{x}}_t^-}
+\end{equation}
+
+Apply Kalman filter equations using time-varying $\mathbf{F}_t, \mathbf{H}_t$.
+
+\textbf{Prediction:}
+\begin{align}
+\hat{\mathbf{x}}_t^- &= f(\hat{\mathbf{x}}_{t-1}^+) \\
+\mathbf{P}_t^- &= \mathbf{F}_t \mathbf{P}_{t-1}^+ \mathbf{F}_t^T + \mathbf{Q}
+\end{align}
+
+\textbf{Correction:} Same as Kalman filter but with $\mathbf{H}_t$ and predicted measurement $\hat{\mathbf{y}}_t^- = h(\hat{\mathbf{x}}_t^-)$.
+
+\textbf{Limitations:} Only first-order accurate; can diverge for strong nonlinearity; requires Jacobian computation (may be expensive or analytically intractable); assumes Gaussian noises.
+
+\subsection{Unscented Kalman Filter (UKF)}
+
+\textbf{When:} Nonlinear $f, h$ with \textbf{both} noises Gaussian; better for strong nonlinearity than EKF.
+
+\textbf{Strategy:} Propagate uncertainty through nonlinear functions using \textbf{sigma points} (also called unscented points) - deterministically chosen samples that capture mean and covariance.
+
+\textbf{Sigma Points:} For state with mean $\hat{\mathbf{x}}$ and covariance $\mathbf{P}$, generate $2n+1$ points:
+\begin{align}
+\mathcal{X}^{(0)} &= \hat{\mathbf{x}} \\
+\mathcal{X}^{(i)} &= \hat{\mathbf{x}} + \left(\sqrt{(n+\lambda)\mathbf{P}}\right)_i, \quad i=1,\ldots,n \\
+\mathcal{X}^{(i)} &= \hat{\mathbf{x}} - \left(\sqrt{(n+\lambda)\mathbf{P}}\right)_{i-n}, \quad i=n+1,\ldots,2n
+\end{align}
+
+where $\mathcal{X}^{(i)}$ denotes the $i$-th sigma point, $n$ is the state dimension, and $\lambda$ is a scaling parameter.
+
+\textbf{Transform:} Pass each sigma point through actual nonlinear function:
+\begin{equation}
+\mathcal{Y}^{(i)} = h(\mathcal{X}^{(i)})
+\end{equation}
+
+\textbf{Reconstruct:} Compute weighted mean and covariance of transformed points:
+\begin{align}
+\hat{\mathbf{y}} &= \sum_{i=0}^{2n} W^{(i)} \mathcal{Y}^{(i)} \\
+\mathbf{P}_y &= \sum_{i=0}^{2n} W^{(i)} (\mathcal{Y}^{(i)} - \hat{\mathbf{y}})(\mathcal{Y}^{(i)} - \hat{\mathbf{y}})^T
+\end{align}
+
+where $W^{(i)}$ are predetermined weights.
+
+\textbf{Advantages:} No Jacobian needed (derivative-free); captures up to 3rd-order accuracy (vs. EKF's 1st-order); same $O(n^3)$ complexity as EKF.
+
+\textbf{Limitations:} Still assumes both noises are Gaussian.
+
+\subsection{Particle Filter (Sequential Monte Carlo)}
+
+\textbf{When:} Arbitrary nonlinearity and/or \textbf{at least one} non-Gaussian noise; multimodal distributions.
+
+\textbf{Strategy:} Represent posterior distribution using $N$ weighted particles (samples):
+\begin{equation}
+p(\mathbf{x}_t | \mathbf{y}_{1:t}) \approx \sum_{i=1}^{N} w_t^{(i)} \delta(\mathbf{x}_t - \mathbf{x}_t^{(i)})
+\end{equation}
+
+where $\mathbf{x}_t^{(i)}$ is the $i$-th particle (sample state), $w_t^{(i)}$ is its weight, and $\delta(\cdot)$ is the Dirac delta function.
+
+\textbf{Algorithm (SIS: Sequential Importance Sampling with Resampling):}
+
+1. \textbf{Prediction (stochastic):} For each particle $i = 1, \ldots, N$:
+\begin{equation}
+\mathbf{x}_t^{(i)} = f(\mathbf{x}_{t-1}^{(i)}) + \mathbf{w}_t^{(i)}, \quad \mathbf{w}_t^{(i)} \sim p_w
+\end{equation}
+Particles evolve by random sampling from the process noise distribution $p_w$ (can be non-Gaussian).
+
+2. \textbf{Update Weights:} Compute likelihood and normalize:
+\begin{equation}
+w_t^{(i)} \propto w_{t-1}^{(i)} \cdot p(\mathbf{y}_t | \mathbf{x}_t^{(i)}), \quad \sum_i w_t^{(i)} = 1
+\end{equation}
+
+where $p(\mathbf{y}_t | \mathbf{x}_t^{(i)})$ is the measurement likelihood (depends on $p_v$, can be non-Gaussian).
+
+3. \textbf{Resampling (stochastic):} Resample particles with replacement according to weights to avoid degeneracy (also called particle depletion or weight collapse). High-weight particles get duplicated; low-weight particles die out.
+
+4. \textbf{Estimate:} Compute weighted average:
+\begin{equation}
+\hat{\mathbf{x}}_t = \sum_{i=1}^N w_t^{(i)} \mathbf{x}_t^{(i)}
+\end{equation}
+
+\textbf{Advantages:} Handles arbitrary nonlinearity; handles non-Gaussian noise in \textbf{either or both} process and measurement; can represent multimodal distributions; asymptotically exact as $N \to \infty$.
+
+\textbf{Limitations:} Computationally expensive ($O(Nn^2)$); curse of dimensionality for high-dimensional states ($n > 10$); particle degeneracy issues despite resampling.
+
+\subsection{Particle Flow Filters (Advanced)}
+
+\textbf{When:} Similar to particle filters but with \textbf{deterministic} particle evolution to avoid degeneracy.
+
+\textbf{Key Difference:} Standard particle filters use \textbf{stochastic} sampling and resampling (Monte Carlo). Particle flow filters move particles \textbf{deterministically} via continuous-time flow.
+
+\textbf{Strategy:} Move particles via ODE from prior to posterior, rather than random sampling.
+
+\textbf{Homotopy Flow:} Define parameter $\lambda \in [0,1]$ where $\lambda=0$ is prior $p(\mathbf{x}_t | \mathbf{y}_{1:t-1})$ and $\lambda=1$ is posterior $p(\mathbf{x}_t | \mathbf{y}_{1:t})$.
+
+Particles evolve via:
+\begin{equation}
+\frac{d\mathbf{x}^{(i)}}{d\lambda} = \mathbf{u}(\mathbf{x}^{(i)}, \lambda)
+\end{equation}
+
+where $\mathbf{u}$ is a drift function designed to morph the prior into the posterior.
+
+\textbf{Example (Log-Homotopy):} 
+\begin{equation}
+p_\lambda(\mathbf{x}) \propto p(\mathbf{x}_t | \mathbf{y}_{1:t-1}) \cdot p(\mathbf{y}_t | \mathbf{x})^\lambda
+\end{equation}
+
+As $\lambda$ increases from 0 to 1, likelihood is gradually incorporated.
+
+\textbf{Common Methods:}
+\begin{itemize}
+\item Daum-Huang Filter: Original exact ODE formulation
+\item Feedback Particle Filter: Control-theoretic approach
+\item Stein Variational Gradient Descent (SVGD): ML/variational inference perspective
+\end{itemize}
+
+\textbf{Advantages:} No particle degeneracy; no resampling needed; better for high-dimensional problems; smoother convergence; connects to optimal transport theory; handles non-Gaussian noises.
+
+\textbf{Limitations:} Higher computational cost ($O(N^2n^2)$ per step); requires gradients $\nabla_\mathbf{x} \log p(\mathbf{y}_t | \mathbf{x})$; more complex implementation.
+
+\subsection{Hybrid and Special Methods}
+
+When noise types differ or have special structure, specialized methods can be more efficient than full particle filtering.
+
+\textbf{Rao-Blackwellized (Marginalized) Particle Filter:}
+If state decomposes as $\mathbf{x}_t = [\mathbf{x}_t^{(1)}, \mathbf{x}_t^{(2)}]^T$ where part $(2)$ is conditionally linear-Gaussian given part $(1)$:
+\begin{itemize}
+\item Use particle filter for $\mathbf{x}_t^{(1)}$ (non-Gaussian part)
+\item Use Kalman filter for $\mathbf{x}_t^{(2)} | \mathbf{x}_t^{(1)}$ (Gaussian part)
+\item Much more efficient than full particle filtering
+\end{itemize}
+
+\textbf{Robust Kalman Filter:}
+For mostly Gaussian measurement noise with occasional outliers:
+\begin{itemize}
+\item Run standard Kalman filter
+\item Detect outliers via chi-squared test on innovation
+\item Reject or downweight suspicious measurements
+\end{itemize}
+
+\textbf{Gaussian Sum Filter:}
+For noise that is a mixture of Gaussians: $p(\mathbf{w}) = \sum_{k=1}^K \alpha_k \mathcal{N}(\mathbf{w}; \boldsymbol{\mu}_k, \mathbf{\Sigma}_k)$
+\begin{itemize}
+\item Run $K$ parallel Kalman filters (one per mixture component)
+\item Combine outputs via weighted sum
+\end{itemize}
+
+\subsection{Summary and Selection Guide}
+
+\begin{center}
+\begin{tabular}{@{}lllllll@{}}
+\toprule
+\textbf{Filter} & $f, h$ & \textbf{Proc. Noise} & \textbf{Meas. Noise} & \textbf{Method} & \textbf{Complexity} & \textbf{Accuracy} \\
+\midrule
+Kalman & Linear & Gaussian & Gaussian & Exact & $O(n^3)$ & Optimal \\
+EKF & Nonlinear & Gaussian & Gaussian & 1st-order lin. & $O(n^3)$ & Good (mild) \\
+UKF & Nonlinear & Gaussian & Gaussian & Sigma points & $O(n^3)$ & Better (strong) \\
+Particle & Arbitrary & Arbitrary & Arbitrary & Stochastic MC & $O(Nn^2)$ & Asymptotic \\
+Flow & Arbitrary & Arbitrary & Arbitrary & Deterministic ODE & $O(N^2n^2)$ & Asymptotic \\
+Hybrid & Mixed & Mixed & Mixed & Combined & Varies & Problem-specific \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Decision Tree:}
+\begin{itemize}
+\item Linear $f, h$ + both Gaussian $\rightarrow$ \textbf{Kalman Filter} (exact, optimal)
+\item Nonlinear $f$ or $h$ + both Gaussian:
+\begin{itemize}
+\item Mild nonlinearity $\rightarrow$ \textbf{EKF} (fast, needs Jacobian)
+\item Strong nonlinearity $\rightarrow$ \textbf{UKF} (better accuracy, derivative-free)
+\end{itemize}
+\item At least one non-Gaussian noise:
+\begin{itemize}
+\item Standard case or low-D ($n < 10$) $\rightarrow$ \textbf{Particle Filter}
+\item Special structure (part linear-Gaussian) $\rightarrow$ \textbf{Rao-Blackwellized PF}
+\item Occasional outliers only $\rightarrow$ \textbf{Robust Kalman}
+\item Mixture of Gaussians $\rightarrow$ \textbf{Gaussian Sum Filter}
+\item High-D or degeneracy issues $\rightarrow$ \textbf{Particle Flow}
+\end{itemize}
+\end{itemize}
+
+\textbf{Core Insight:} All methods solve the same Bayesian filtering problem $p(\mathbf{x}_t | \mathbf{y}_{1:t})$ using different computational strategies. The Kalman gain concept (optimal weighting of prediction vs. measurement based on uncertainty) underlies all approaches, appearing explicitly in Kalman/EKF/UKF and implicitly in particle methods. Process and measurement noises are independent and can have different distributions.
+
+\end{document}
