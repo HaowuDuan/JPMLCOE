@@ -4,12 +4,9 @@ This is the repository for the second interview problem: Particle Flow Filter an
 
 1. **A document that explains hidden state markov model from intuitive perspective.**
 
-
 2, **A literature review**
 
-
 3, **A report for the problems**
-
 
 4, **code for part 1**
 
