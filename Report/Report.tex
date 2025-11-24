@@ -1,492 +1,80 @@
 \documentclass[11pt,a4paper]{article}
 \usepackage{amsmath,amssymb,amsthm}
+\usepackage[utf8]{inputenc}
 \usepackage{geometry}
 \usepackage{hyperref}
 \usepackage{booktabs}
 \usepackage{enumitem}
 \usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
 \geometry{margin=1in}
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{8pt}
+\renewcommand{\v}[1]{ \ensuremath{ {\mathbf{#1}} }}  
 
-\title{\textbf{Notes}}
-\author{}
+
+\title{\textbf{Report for the problems}}
+\author{Haowu Duan}
 \date{\today}
 
 \begin{document}
 
 \maketitle
+
+\begin{abstract}
+\noindent
+The current state of the report is for part one and not polished. I organize my understanding of the problem and derive the key formulas in the overview section. Limitations of each methods mostly have been addressed in the overview in details. When it comes to more recent methods, the literature review is not complete. I have what I need to procede to work on part 2 and the bonus. I will refine part one later. As for testing, due to lack of experience, it is still work in progress. 
+\end{abstract}
+
+\newpage
 \tableofcontents 
 \newpage
-
-\section{State Space Models and Filtering Methods}
-
-\subsection{Overview and Big Picture}
-Given the most general time series, \\
-\textbf{Evolution (Process Model):}
+%------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+\section{Overview for part one:}
+In this section, I want to lay out clear theoretical foundation for the problem at hand. Let us start with the general case for a State space model with additive noise. The evolution is governed by
 \begin{equation}
-\mathbf{x}_t = f(\mathbf{x}_{t-1}) + \mathbf{w}_t, \quad \mathbf{w}_t \sim p_w(\cdot)
+\v{x}_t = f(\v{x}_{t-1}) + \v{w}_t, \quad \v{w}_t \sim p_w(\cdot)
 \end{equation}
-
-\textbf{Measurement (Observation Model):}
+and the observation model is,
 \begin{equation}
-\mathbf{y}_t = h(\mathbf{x}_t) + \mathbf{v}_t, \quad \mathbf{v}_t \sim p_v(\cdot)
+\v{y}_t = h(\v{x}_t) + \v{v}_t, \quad \v{v}_t \sim p_v(\cdot)
 \end{equation}
-Filtering methods estimate hidden states of dynamical systems from noisy measurements. The choice of filter depends on three key properties: \textbf{linearity of dynamics}, \textbf{process noise distribution}, and \textbf{measurement noise distribution}.
+if there is no measurement uncertainty, then we are just dealing with the evolution of the state $\v x_t$. Obviously, we want to be able to determine $p_t(\v x_t)$. {\color{red} Add the path integral discussion here.}
 
-\textbf{Key Insight:} Process noise $\mathbf{w}_t$ and measurement noise $\mathbf{v}_t$ can have \textbf{different distributions} independently.
-
-\begin{center}
-\begin{tabular}{@{}llll@{}}
-\toprule
-\textbf{Linearity} & \textbf{Process Noise} & \textbf{Measurement Noise} & \textbf{Filter} \\
-\midrule
-Linear & Gaussian & Gaussian & Kalman (exact, optimal) \\
-Nonlinear & Gaussian & Gaussian & EKF / UKF (approximate) \\
-Any & Non-Gaussian & Gaussian & Particle / Hybrid \\
-Any & Gaussian & Non-Gaussian & Particle / Robust Kalman \\
-Any & Non-Gaussian & Non-Gaussian & Particle / Flow \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-\textbf{Filtering Hierarchy:}
-\begin{itemize}
-\item \textbf{Exact (Linear + Both Gaussian):} Kalman Filter
-\item \textbf{Approximate (Nonlinear + Both Gaussian):}
-\begin{itemize}
-\item EKF: Linearization via Jacobian (1st-order)
-\item UKF: Sigma point transform (3rd-order)
-\end{itemize}
-\item \textbf{Sampling-based (At Least One Non-Gaussian):}
-\begin{itemize}
-\item Standard Particle Filter: Stochastic sampling + resampling
-\item Particle Flow Filters: Deterministic ODE evolution
-\item Hybrid Methods: Rao-Blackwellized PF, Robust Kalman, Gaussian Sum
-\end{itemize}
-\end{itemize}
-
-All methods solve the Bayesian filtering problem: compute $p(\mathbf{x}_t | \mathbf{y}_{1:t})$ recursively. where $p(x_t|y_{1:t})$ is the filtering distribution or posterior distribution of the hidden state at time t given all observations up to time t.
-
-\subsection{General Framework}
-
-State space models (SSM) describe dynamical systems with hidden states observed through noisy measurements.
-
-\textbf{Evolution (Process Model):}
-\begin{equation}
-\mathbf{x}_t = f(\mathbf{x}_{t-1}) + \mathbf{w}_t, \quad \mathbf{w}_t \sim p_w(\cdot)
-\end{equation}
-
-\textbf{Measurement (Observation Model):}
-\begin{equation}
-\mathbf{y}_t = h(\mathbf{x}_t) + \mathbf{v}_t, \quad \mathbf{v}_t \sim p_v(\cdot)
-\end{equation}
-
-where $f(\cdot)$ is the evolution function, $h(\cdot)$ is the measurement function, $p_w(\cdot)$ is the \textbf{process noise distribution}, and $p_v(\cdot)$ is the \textbf{measurement noise distribution}. These two noise distributions are \textbf{independent} and can be of different types (e.g., one Gaussian, one non-Gaussian).
-
-\textbf{Goal:} Estimate hidden state $\mathbf{x}_t$ given measurements $\mathbf{y}_{1:t}$ by computing the posterior $p(\mathbf{x}_t | \mathbf{y}_{1:t})$.
-
-\subsection{\color{red} To add, discussion for noiseless case}
-
-\subsection{Kalman Filter: Linear-Gaussian Case}
-
-For linear dynamics with \textbf{both} process and measurement noise Gaussian:
-\begin{align}
-\mathbf{x}_t &= \hat{\mathbf{F}} \mathbf{x}_{t-1} + \mathbf{w}_t, \quad \mathbf{w}_t \sim \mathcal{N}(0, \mathbf{Q}) \quad \text{(process noise)} \\
-\mathbf{y}_t &= \hat{\mathbf{H}} \mathbf{x}_t + \mathbf{v}_t, \quad \mathbf{v}_t \sim \mathcal{N}(0, \mathbf{R}) \quad \text{(measurement noise)}
-\end{align}
-
-where $\hat{\mathbf{F}}$ is the state transition matrix (evolution operator), $\hat{\mathbf{H}}$ is the measurement matrix, $\mathbf{Q}$ is the process noise covariance, and $\mathbf{R}$ is the measurement noise covariance.
-
-The Kalman filter provides the \textbf{exact, closed-form} optimal solution when all conditions hold (linear + both Gaussian).
-
-\textbf{Notation:}
-\begin{itemize}
-\item $\hat{\mathbf{x}}_t^-$ (also $\hat{\mathbf{x}}_{t|t-1}$, $\bar{\mathbf{x}}_t$, or $\mathbf{x}_t^f$) = \textit{a priori} state estimate (mean of the predicted distribution)
-\item $\hat{\mathbf{x}}_t^+$ (also $\hat{\mathbf{x}}_{t|t}$, $\hat{\mathbf{x}}_t$, or $\mathbf{x}_t^a$) = \textit{a posteriori} state estimate (mean of the predicted distribution)
-\item $\mathbf{P}_t^-$ (also $\mathbf{P}_{t|t-1}$ or $\bar{\mathbf{P}}_t$) = \textit{a priori} error covariance
-\item $\mathbf{P}_t^+$ (also $\mathbf{P}_{t|t}$ or $\mathbf{P}_t$) = \textit{a posteriori} error covariance
-\end{itemize}
-
-\textbf{Prediction Step:}
-\begin{align}
-\hat{\mathbf{x}}_t^- &= \mathbf{\hat F} \hat{\mathbf{x}}_{t-1}^+ \\
-\mathbf{P}_t^- &= \mathbf{\hat F} \mathbf{P}_{t-1}^+ \mathbf{\hat F}^T + \mathbf{Q}
-\end{align}
-
-\textbf{Correction Step:}
-\begin{align}
-\mathbf{\hat K}_t &= \mathbf{P}_t^- \mathbf{H}^T \left[\mathbf{H} \mathbf{P}_t^- \mathbf{H}^T + \mathbf{R}\right]^{-1} \quad \text{(Kalman gain)} \\
-\hat{\mathbf{x}}_t^+ &= \hat{\mathbf{x}}_t^- + \mathbf{K}_t (\mathbf{y}_t - \mathbf{H}\hat{\mathbf{x}}_t^-) \\
-\mathbf{\hat P}_t^+ &= (\mathbf{I} - \mathbf{K}_t \mathbf{H}) \mathbf{P}_t^-
-\end{align}
-
-where $\mathbf{K}_t$ is the Kalman gain (optimal adaptive learning rate matrix) and $(\mathbf{y}_t - \mathbf{H}\hat{\mathbf{x}}_t^-)$ is the innovation (also called residual or measurement surprise).
-
-The Kalman gain balances model prediction versus measurement based on their respective uncertainties: larger $\mathbf{R}$ (noisy sensors) reduces gain; larger $\mathbf{P}_t^-$ (uncertain prediction) increases gain.
-
-
-Consider a linear-Gaussian state-space model at time \( t \):
-
-\begin{itemize}
-    \item State vector: \( \mathbf{x}_t \in \mathbb{R}^n \), the hidden state.
-    \item Observation vector: \( \mathbf{z}_t \in \mathbb{R}^m \), the noisy measurement.
-    \item Transition matrix: \( F \in \mathbb{R}^{n \times n} \), linear dynamics operator.
-    \item Observation matrix: \( H \in \mathbb{R}^{m \times n} \), linear measurement operator.
-    \item Process noise: \( \mathbf{v}_t \sim \mathcal{N}(\mathbf{0}, Q) \), with covariance \( Q \in \mathbb{R}^{n \times n} \).
-    \item Measurement noise: \( \mathbf{w}_t \sim \mathcal{N}(\mathbf{0}, R) \), with covariance \( R \in \mathbb{R}^{m \times m} \).
-\end{itemize}
-
-The model equations are:
-\begin{align}
-    \mathbf{x}_t &= F \mathbf{x}_{t-1} + \mathbf{v}_t, \label{eq:state_transition} \\
-    \mathbf{z}_t &= H \mathbf{x}_t + \mathbf{w}_t. \label{eq:observation}
-\end{align}
-
-% Prior distribution
-The predicted state (prior) given observations up to \( t-1 \) is:
-\begin{itemize}
-    \item Mean: \( \hat{\mathbf{x}}_{t|t-1} = F \hat{\mathbf{x}}_{t-1|t-1} \),
-    \item Covariance: \( P_{t|t-1} = F P_{t-1|t-1} F^\top + Q \).
-\end{itemize}
-Thus, the prior distribution is:
-\[
-p(\mathbf{x}_t \mid \mathbf{z}_{1:t-1}) = \mathcal{N}(\hat{\mathbf{x}}_{t|t-1}, P_{t|t-1}).
-\]
-The likelihood is:
-\[
-p(\mathbf{z}_t \mid \mathbf{x}_t) = \mathcal{N}(H \mathbf{x}_t, R).
-\]
-
-% Joint Gaussian distribution
-The posterior \( p(\mathbf{x}_t \mid \mathbf{z}_{1:t}) \propto p(\mathbf{z}_t \mid \mathbf{x}_t) p(\mathbf{x}_t \mid \mathbf{z}_{1:t-1}) \) is Gaussian. To derive the Kalman gain, consider the joint Gaussian distribution of \( \mathbf{x}_t \) and \( \mathbf{z}_t \) (conditional on \( \mathbf{z}_{1:t-1} \)):
-\[
-\begin{bmatrix}
-\mathbf{x}_t \\
-\mathbf{z}_t
-\end{bmatrix}
-\sim \mathcal{N} \left(
-\begin{bmatrix}
-\hat{\mathbf{x}}_{t|t-1} \\
-H \hat{\mathbf{x}}_{t|t-1}
-\end{bmatrix},
-\begin{bmatrix}
-P_{t|t-1} & P_{t|t-1} H^\top \\
-H P_{t|t-1} & H P_{t|t-1} H^\top + R
-\end{bmatrix}
-\right).
-\]
-
-% Conditional Gaussian formula
-For jointly Gaussian vectors \( \mathbf{x} \) and \( \mathbf{z} \) with means \( \boldsymbol{\mu}_x, \boldsymbol{\mu}_z \), covariances \( \Sigma_{xx}, \Sigma_{zz} \), and cross-covariance \( \Sigma_{xz} \), the conditional distribution is:
-\[
-\mathbf{x} \mid \mathbf{z} \sim \mathcal{N} \left( \boldsymbol{\mu}_x + \Sigma_{xz} \Sigma_{zz}^{-1} (\mathbf{z} - \boldsymbol{\mu}_z), \ \Sigma_{xx} - \Sigma_{xz} \Sigma_{zz}^{-1} \Sigma_{zx} \right).
-\]
-
-% Applying to Kalman filter
-Substitute:
-\begin{itemize}
-    \item \( \boldsymbol{\mu}_x = \hat{\mathbf{x}}_{t|t-1} \),
-    \item \( \boldsymbol{\mu}_z = H \hat{\mathbf{x}}_{t|t-1} \),
-    \item \( \Sigma_{xx} = P_{t|t-1} \),
-    \item \( \Sigma_{zz} = H P_{t|t-1} H^\top + R \),
-    \item \( \Sigma_{xz} = P_{t|t-1} H^\top \), \( \Sigma_{zx} = H P_{t|t-1} \).
-\end{itemize}
-
-The posterior mean is:
-\begin{align}
-\hat{\mathbf{x}}_{t|t} &= \hat{\mathbf{x}}_{t|t-1} + P_{t|t-1} H^\top (H P_{t|t-1} H^\top + R)^{-1} (\mathbf{z}_t - H \hat{\mathbf{x}}_{t|t-1}). \label{eq:posterior_mean}
-\end{align}
-
-% Defining the Kalman gain
-Define the Kalman gain as:
-\[
-K_t = P_{t|t-1} H^\top (H P_{t|t-1} H^\top + R)^{-1}. \label{eq:kalman_gain}
-\]
-
-The innovation (residual) is \( \tilde{\mathbf{y}}_t = \mathbf{z}_t - H \hat{\mathbf{x}}_{t|t-1} \), so the update becomes:
-\[
-\hat{\mathbf{x}}_{t|t} = \hat{\mathbf{x}}_{t|t-1} + K_t \tilde{\mathbf{y}}_t. \label{eq:state_update}
-\]
-
-% Posterior covariance
-The posterior covariance is:
-\begin{align}
-P_{t|t} &= P_{t|t-1} - P_{t|t-1} H^\top (H P_{t|t-1} H^\top + R)^{-1} H P_{t|t-1} \notag \\
-&= (I - K_t H) P_{t|t-1}, \label{eq:posterior_cov}
-\end{align}
-where \( I \) is the identity matrix. This Joseph stabilized form ensures numerical stability.
-
-% Intuition
-\section*{Intuition}
-The Kalman gain \( K_t \) balances the trust between the prior prediction \( \hat{\mathbf{x}}_{t|t-1} \) (with uncertainty \( P_{t|t-1} \)) and the measurement \( \mathbf{z}_t \) (with noise \( R \)). A large \( R \) (noisy measurement) reduces \( K_t \), relying more on the prior; a large \( P_{t|t-1} \) (uncertain prediction) increases \( K_t \), favoring the measurement. This minimizes the trace of \( P_{t|t} \), ensuring the minimum mean-squared error (MMSE) estimate.
-
-
-\subsection{Extended Kalman Filter (EKF)}
-
-\textbf{When:} Nonlinear $f, h$ with \textbf{both} process and measurement noise Gaussian.
-
-\textbf{Strategy:} Linearize via first-order Taylor expansion around current estimate.
-
-\textbf{Jacobians:}
-\begin{equation}
-\mathbf{F}_t = \left.\frac{\partial f}{\partial \mathbf{x}}\right|_{\mathbf{x} = \hat{\mathbf{x}}_{t-1}^+}, \quad
-\mathbf{H}_t = \left.\frac{\partial h}{\partial \mathbf{x}}\right|_{\mathbf{x} = \hat{\mathbf{x}}_t^-}
-\end{equation}
-
-Apply Kalman filter equations using time-varying $\mathbf{F}_t, \mathbf{H}_t$.
-
-\textbf{Prediction:}
-\begin{align}
-\hat{\mathbf{x}}_t^- &= f(\hat{\mathbf{x}}_{t-1}^+) \\
-\mathbf{P}_t^- &= \mathbf{F}_t \mathbf{P}_{t-1}^+ \mathbf{F}_t^T + \mathbf{Q}
-\end{align}
-
-\textbf{Correction:} Same as Kalman filter but with $\mathbf{H}_t$ and predicted measurement $\hat{\mathbf{y}}_t^- = h(\hat{\mathbf{x}}_t^-)$.
-
-\textbf{Limitations:} Only first-order accurate; can diverge for strong nonlinearity; requires Jacobian computation (may be expensive or analytically intractable); assumes Gaussian noises.
-
-\subsection{Unscented Kalman Filter (UKF)}
-
-\textbf{When:} Nonlinear $f, h$ with \textbf{both} noises Gaussian; better for strong nonlinearity than EKF.
-
-\textbf{Strategy:} Propagate uncertainty through nonlinear functions using \textbf{sigma points} (also called unscented points) - deterministically chosen samples that capture mean and covariance.
-
-\textbf{Sigma Points:} For state with mean $\hat{\mathbf{x}}$ and covariance $\mathbf{P}$, generate $2n+1$ points:
-\begin{align}
-\mathcal{X}^{(0)} &= \hat{\mathbf{x}} \\
-\mathcal{X}^{(i)} &= \hat{\mathbf{x}} + \left(\sqrt{(n+\lambda)\mathbf{P}}\right)_i, \quad i=1,\ldots,n \\
-\mathcal{X}^{(i)} &= \hat{\mathbf{x}} - \left(\sqrt{(n+\lambda)\mathbf{P}}\right)_{i-n}, \quad i=n+1,\ldots,2n
-\end{align}
-
-where $\mathcal{X}^{(i)}$ denotes the $i$-th sigma point, $n$ is the state dimension, and $\lambda$ is a scaling parameter.
-
-\textbf{Transform:} Pass each sigma point through actual nonlinear function:
-\begin{equation}
-\mathcal{Y}^{(i)} = h(\mathcal{X}^{(i)})
-\end{equation}
-
-\textbf{Reconstruct:} Compute weighted mean and covariance of transformed points:
-\begin{align}
-\hat{\mathbf{y}} &= \sum_{i=0}^{2n} W^{(i)} \mathcal{Y}^{(i)} \\
-\mathbf{P}_y &= \sum_{i=0}^{2n} W^{(i)} (\mathcal{Y}^{(i)} - \hat{\mathbf{y}})(\mathcal{Y}^{(i)} - \hat{\mathbf{y}})^T
-\end{align}
-
-where $W^{(i)}$ are predetermined weights.
-
-\textbf{Advantages:} No Jacobian needed (derivative-free); captures up to 3rd-order accuracy (vs. EKF's 1st-order); same $O(n^3)$ complexity as EKF.
-
-\textbf{Limitations:} Still assumes both noises are Gaussian.
-
-\subsection{Particle Filter (Sequential Monte Carlo)}
-
-\textbf{When:} Arbitrary nonlinearity and/or \textbf{at least one} non-Gaussian noise; multimodal distributions.
-
-\textbf{Strategy:} Represent posterior distribution using $N$ weighted particles (samples):
-\begin{equation}
-p(\mathbf{x}_t | \mathbf{y}_{1:t}) \approx \sum_{i=1}^{N} w_t^{(i)} \delta(\mathbf{x}_t - \mathbf{x}_t^{(i)})
-\end{equation}
-
-where $\mathbf{x}_t^{(i)}$ is the $i$-th particle (sample state), $w_t^{(i)}$ is its weight, and $\delta(\cdot)$ is the Dirac delta function.
-
-\textbf{Algorithm (SIS: Sequential Importance Sampling with Resampling):}
-
-1. \textbf{Prediction (stochastic):} For each particle $i = 1, \ldots, N$:
-\begin{equation}
-\mathbf{x}_t^{(i)} = f(\mathbf{x}_{t-1}^{(i)}) + \mathbf{w}_t^{(i)}, \quad \mathbf{w}_t^{(i)} \sim p_w
-\end{equation}
-Particles evolve by random sampling from the process noise distribution $p_w$ (can be non-Gaussian).
-
-2. \textbf{Update Weights:} Compute likelihood and normalize:
-\begin{equation}
-w_t^{(i)} \propto w_{t-1}^{(i)} \cdot p(\mathbf{y}_t | \mathbf{x}_t^{(i)}), \quad \sum_i w_t^{(i)} = 1
-\end{equation}
-
-where $p(\mathbf{y}_t | \mathbf{x}_t^{(i)})$ is the measurement likelihood (depends on $p_v$, can be non-Gaussian).
-
-3. \textbf{Resampling (stochastic):} Resample particles with replacement according to weights to avoid degeneracy (also called particle depletion or weight collapse). High-weight particles get duplicated; low-weight particles die out.
-
-4. \textbf{Estimate:} Compute weighted average:
-\begin{equation}
-\hat{\mathbf{x}}_t = \sum_{i=1}^N w_t^{(i)} \mathbf{x}_t^{(i)}
-\end{equation}
-
-\textbf{Advantages:} Handles arbitrary nonlinearity; handles non-Gaussian noise in \textbf{either or both} process and measurement; can represent multimodal distributions; asymptotically exact as $N \to \infty$.
-
-\textbf{Limitations:} Computationally expensive ($O(Nn^2)$); curse of dimensionality for high-dimensional states ($n > 10$); particle degeneracy issues despite resampling.
-
-\subsection{Particle Flow Filters (Advanced)}
-
-\textbf{When:} Similar to particle filters but with \textbf{deterministic} particle evolution to avoid degeneracy.
-
-\textbf{Key Difference:} Standard particle filters use \textbf{stochastic} sampling and resampling (Monte Carlo). Particle flow filters move particles \textbf{deterministically} via continuous-time flow.
-
-\textbf{Strategy:} Move particles via ODE from prior to posterior, rather than random sampling.
-
-\textbf{Homotopy Flow:} Define parameter $\lambda \in [0,1]$ where $\lambda=0$ is prior $p(\mathbf{x}_t | \mathbf{y}_{1:t-1})$ and $\lambda=1$ is posterior $p(\mathbf{x}_t | \mathbf{y}_{1:t})$.
-
-Particles evolve via:
-\begin{equation}
-\frac{d\mathbf{x}^{(i)}}{d\lambda} = \mathbf{u}(\mathbf{x}^{(i)}, \lambda)
-\end{equation}
-
-where $\mathbf{u}$ is a drift function designed to morph the prior into the posterior.
-
-\textbf{Example (Log-Homotopy):} 
-\begin{equation}
-p_\lambda(\mathbf{x}) \propto p(\mathbf{x}_t | \mathbf{y}_{1:t-1}) \cdot p(\mathbf{y}_t | \mathbf{x})^\lambda
-\end{equation}
-
-As $\lambda$ increases from 0 to 1, likelihood is gradually incorporated.
-
-\textbf{Common Methods:}
-\begin{itemize}
-\item Daum-Huang Filter: Original exact ODE formulation
-\item Feedback Particle Filter: Control-theoretic approach
-\item Stein Variational Gradient Descent (SVGD): ML/variational inference perspective
-\end{itemize}
-
-\textbf{Advantages:} No particle degeneracy; no resampling needed; better for high-dimensional problems; smoother convergence; connects to optimal transport theory; handles non-Gaussian noises.
-
-\textbf{Limitations:} Higher computational cost ($O(N^2n^2)$ per step); requires gradients $\nabla_\mathbf{x} \log p(\mathbf{y}_t | \mathbf{x})$; more complex implementation.
-
-\subsection{Hybrid and Special Methods}
-
-When noise types differ or have special structure, specialized methods can be more efficient than full particle filtering.
-
-\textbf{Rao-Blackwellized (Marginalized) Particle Filter:}
-If state decomposes as $\mathbf{x}_t = [\mathbf{x}_t^{(1)}, \mathbf{x}_t^{(2)}]^T$ where part $(2)$ is conditionally linear-Gaussian given part $(1)$:
-\begin{itemize}
-\item Use particle filter for $\mathbf{x}_t^{(1)}$ (non-Gaussian part)
-\item Use Kalman filter for $\mathbf{x}_t^{(2)} | \mathbf{x}_t^{(1)}$ (Gaussian part)
-\item Much more efficient than full particle filtering
-\end{itemize}
-
-\textbf{Robust Kalman Filter:}
-For mostly Gaussian measurement noise with occasional outliers:
-\begin{itemize}
-\item Run standard Kalman filter
-\item Detect outliers via chi-squared test on innovation
-\item Reject or downweight suspicious measurements
-\end{itemize}
-
-\textbf{Gaussian Sum Filter:}
-For noise that is a mixture of Gaussians: $p(\mathbf{w}) = \sum_{k=1}^K \alpha_k \mathcal{N}(\mathbf{w}; \boldsymbol{\mu}_k, \mathbf{\Sigma}_k)$
-\begin{itemize}
-\item Run $K$ parallel Kalman filters (one per mixture component)
-\item Combine outputs via weighted sum
-\end{itemize}
-
-\subsection{Summary and Selection Guide}
-
-\begin{center}
-\begin{tabular}{@{}lllllll@{}}
-\toprule
-\textbf{Filter} & $f, h$ & \textbf{Proc. Noise} & \textbf{Meas. Noise} & \textbf{Method} & \textbf{Complexity} & \textbf{Accuracy} \\
-\midrule
-Kalman & Linear & Gaussian & Gaussian & Exact & $O(n^3)$ & Optimal \\
-EKF & Nonlinear & Gaussian & Gaussian & 1st-order lin. & $O(n^3)$ & Good (mild) \\
-UKF & Nonlinear & Gaussian & Gaussian & Sigma points & $O(n^3)$ & Better (strong) \\
-Particle & Arbitrary & Arbitrary & Arbitrary & Stochastic MC & $O(Nn^2)$ & Asymptotic \\
-Flow & Arbitrary & Arbitrary & Arbitrary & Deterministic ODE & $O(N^2n^2)$ & Asymptotic \\
-Hybrid & Mixed & Mixed & Mixed & Combined & Varies & Problem-specific \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-\textbf{Decision Tree:}
-\begin{itemize}
-\item Linear $f, h$ + both Gaussian $\rightarrow$ \textbf{Kalman Filter} (exact, optimal)
-\item Nonlinear $f$ or $h$ + both Gaussian:
-\begin{itemize}
-\item Mild nonlinearity $\rightarrow$ \textbf{EKF} (fast, needs Jacobian)
-\item Strong nonlinearity $\rightarrow$ \textbf{UKF} (better accuracy, derivative-free)
-\end{itemize}
-\item At least one non-Gaussian noise:
-\begin{itemize}
-\item Standard case or low-D ($n < 10$) $\rightarrow$ \textbf{Particle Filter}
-\item Special structure (part linear-Gaussian) $\rightarrow$ \textbf{Rao-Blackwellized PF}
-\item Occasional outliers only $\rightarrow$ \textbf{Robust Kalman}
-\item Mixture of Gaussians $\rightarrow$ \textbf{Gaussian Sum Filter}
-\item High-D or degeneracy issues $\rightarrow$ \textbf{Particle Flow}
-\end{itemize}
-\end{itemize}
-
-\textbf{Core Insight:} All methods solve the same Bayesian filtering problem $p(\mathbf{x}_t | \mathbf{y}_{1:t})$ using different computational strategies. The Kalman gain concept (optimal weighting of prediction vs. measurement based on uncertainty) underlies all approaches, appearing explicitly in Kalman/EKF/UKF and implicitly in particle methods. Process and measurement noises are independent and can have different distributions.
-\newpage
-\section{Theoretical intuition}
-In this section, I want to lay out clear theoretical foundation for the problem at hand. Let us start with the most general case for a time series, \\
-\textbf{Evolution (Process Model):}
-\begin{equation}
-\mathbf{x}_t = f(\mathbf{x}_{t-1}) + \mathbf{w}_t, \quad \mathbf{w}_t \sim p_w(\cdot)
-\end{equation}
-
-\textbf{Measurement (Observation Model):}
-\begin{equation}
-\mathbf{y}_t = h(\mathbf{x}_t) + \mathbf{v}_t, \quad \mathbf{v}_t \sim p_v(\cdot)
-\end{equation}
-
-where $f(\cdot)$ is the evolution function, $h(\cdot)$ is the measurement function, $p_w(\cdot)$ is the \textbf{process noise distribution}, and $p_v(\cdot)$ is the \textbf{measurement noise distribution}. These two noise distributions are \textbf{independent} and can be of different types (e.g., one Gaussian, one non-Gaussian). 
-
-\subsection{One-dimensional problems}
-Suppose the observation is perfect, we ask given the distribution of $\mathbf{x}_{t-1}$, $\rho_{t-1}(x)$, how do we compute the distribution at $t$, namely $\rho_t$. Let us use one dimension as a demonstration,
+\subsection{1-d Linear Gaussian model and Kalman filter}
+For most of methods we discuss here, except the flow methods. We can run the evolution and filtering independently. Here we first discuss how Kalman filter works in one dimension then we summarize what do we want to get out of a filter. In one dimension,
 \begin{equation}
 \begin{split}
-\rho_t(x_t)=\int dw_t\;\; p_w(w_t)\int dx_{t-1} \; \;  \rho_t(x_{t-1}) \; \delta\Big(x_t-  f(x_{t-1}) + w_t\Big)
+x_t =& a x_{t-1} + w_t, \quad w_t \sim \mathcal{N}(0, Q) \\
+y_t =& h x_t + v_t, \quad v_t \sim \mathcal{N}(0, R)
 \end{split}
 \end{equation}
-This is very difficult to compute for arbitrary function $f(\cdot)$ in high dimension, even without observation noise, due to the difficulty of convergence in high dimension.  If somehow we are luck enough to deal with a system where we can expand $f(x_{t-1})$. 
-\begin{equation}
-\begin{split}
-\rho_t(x_t)=&\int dw_t\;\; p_w(w_t)\int dx_{t-1} \; \;  \rho_t(x_{t-1}) \; \delta\Big(x_t-  f(x_{t-1}) + w_t\Big) \\
-=& \int dw_t\;\; p_w(w_t)\int dx_{t-1} \; \;  \rho_t(x_{t-1}) \; \delta\Big(x_t- (1+ f_t) x_{t-1}+ w_t\Big) \\
-=&  \int dx_{t-1} \; \;  \rho_t(x_{t-1}) p_w((1+ f_t) x_{t-1}-x_t)
-\end{split}
-\end{equation}
-where $f_{t-1}=\partial_{x}f(x)|_{x_{t-1}}$. We can make the problem even easier, such that $f$ becomes a constant. The problem is straightforward but difficult. 
-However if we have imperfect observation, things become much more involved. 
-\begin{equation}
-x_t =f x_{t-1} +  w_t, \quad w_t \sim p_w(\cdot)
-\end{equation}
-\begin{equation}
-y_t = hx_t + v_t, \quad v_t \sim p_v(\cdot)
-\end{equation}
-now the goal, is to, given the information about ${y_1,y_2.....,y_t}$, determine the probability $P(x_t|y_{1:t})$. The core idea of filtering method is,
-\begin{equation}
-\begin{split}
-p(x_t | y_{1:t-1}) &= \int dx_{t-1} \;\;p(x_t | x_{t-1}) p(x_{t-1} | y_{1:t-1}) \\
-p(x_t | y_{1:t}) &= p(y_t | x_t) · p(x_t | y_{1:t-1})
-\end{split}
-\end{equation}
-Now, this looks like not much more complicated than the case of perfect observation, namely the same number of integrals for certain discretization scheme.\\
-\textbf{Derivation of 1D Kalman Filter}
-
-
-\textbf{State Evolution:}
-\begin{equation}
-x_t = a x_{t-1} + w_t, \quad w_t \sim \mathcal{N}(0, Q)
-\end{equation}
-
-\textbf{Observation:}
-\begin{equation}
-y_t = h x_t + v_t, \quad v_t \sim \mathcal{N}(0, R)
-\end{equation}
-
-\textbf{Initial Condition:}
+we have the following initial condition, 
 \begin{equation}
 p(x_0) = \mathcal{N}(x_0 | m_0, P_0)
 \end{equation}
+{\color{red} sensitivity for initial condition should be discussed as well.} \\
 
-\textbf{Goal}
-Compute the filtering distribution $p(x_t | y_{1:t}) = \mathcal{N}(x_t | m_t, P_t)$ recursively.
+\textbf{Notation:}
+\\
+\begin{itemize}
+\item $\v m^-_{t}$= \textit{a priori} state estimate (mean of the predicted distribution)
+\item $\v m_t$= \textit{a posteriori} state estimate (mean of the updated distribution)
+\item $\v P^-_t$ = \textit{a priori} error covariance
+\item $\v P_t$ = \textit{a posteriori} error covariance
+\item $p(x_k|y_{1:k-1})$=  prior distribution 
+\item $p(x_k | y_{1:k})$ =  posterior Distribution
+\item  $p(y_k | x_k)$ = likelihood
+\end{itemize}
 
-\textbf{Key Fact}
-The filtering distribution remains Gaussian at all times. We only need to track the mean $m_t$ and variance $P_t$.
+For Kalman filter, the noise and operators are both Gaussian, so the distributions stay at Gaussian at all times. All we need to do is to keep track of the mean and variance of the prior distribution $p(x_k | y_{1:k})$.
 
-\textbf{Predict Step}
-
-\textbf{Goal:} Compute $p(x_t | y_{1:t-1})$ from $p(x_{t-1} | y_{1:t-1})$.
-
+In the predict step, the goal is to compute $p(x_t | y_{1:t-1})$ from $p(x_{t-1} | y_{1:t-1})$.
 Given $p(x_{t-1} | y_{1:t-1}) = \mathcal{N}(x_{t-1} | m_{t-1}, P_{t-1})$, we have:
 \begin{equation}
 p(x_t | y_{1:t-1}) = \int dx_{t-1} \, p(x_t | x_{t-1}) \, p(x_{t-1} | y_{1:t-1})
@@ -496,24 +84,21 @@ From the state evolution model:
 \begin{equation}
 p(x_t | x_{t-1}) = \mathcal{N}(x_t | a x_{t-1}, Q)
 \end{equation}
-
-\textbf{Computing the predicted mean:}
+predicted/evolved mean is,
 \begin{align}
 m_t^- &= \mathbb{E}[x_t | y_{1:t-1}] \\
 &= \mathbb{E}[\mathbb{E}[x_t | x_{t-1}, y_{1:t-1}] | y_{1:t-1}] \\
 &= \mathbb{E}[a x_{t-1} | y_{1:t-1}] \\
 &= a m_{t-1}
 \end{align}
-
-\textbf{Computing the predicted variance:}
+predicted/evolved variance
 \begin{align}
 P_t^- &= \text{Var}[x_t | y_{1:t-1}] \\
 &= \mathbb{E}[\text{Var}[x_t | x_{t-1}, y_{1:t-1}] | y_{1:t-1}] + \text{Var}[\mathbb{E}[x_t | x_{t-1}, y_{1:t-1}] | y_{1:t-1}] \\
 &= \mathbb{E}[Q | y_{1:t-1}] + \text{Var}[a x_{t-1} | y_{1:t-1}] \\
 &= Q + a^2 P_{t-1}
 \end{align}
-
-\textbf{Result:}
+from the predict step, we get,
 \begin{equation}
 p(x_t | y_{1:t-1}) = \mathcal{N}(x_t | m_t^-, P_t^-)
 \end{equation}
@@ -521,15 +106,10 @@ where
 \begin{equation}
 \boxed{m_t^- = a m_{t-1}, \quad P_t^- = a^2 P_{t-1} + Q}
 \end{equation}
-
-\textbf{Update Step}
-
-\textbf{Goal:} Incorporate observation $y_t$ using Bayes' rule.
-
+In the update step, we need to incorporate observation $y_t$ using Bayes' rule.
 \begin{equation}
 p(x_t | y_{1:t}) = \frac{p(y_t | x_t) \, p(x_t | y_{1:t-1})}{p(y_t | y_{1:t-1})}
 \end{equation}
-
 From the observation model:
 \begin{equation}
 p(y_t | x_t) = \mathcal{N}(y_t | h x_t, R)
@@ -551,15 +131,12 @@ Collecting terms in $x_t^2$ and $x_t$:
 = -\frac{1}{2}\left[\left(\frac{h^2}{R} + \frac{1}{P_t^-}\right) x_t^2 - 2\left(\frac{h y_t}{R} + \frac{m_t^-}{P_t^-}\right) x_t + \text{const}\right]
 \end{equation}
 
-This is a Gaussian in $x_t$. Completing the square:
-
-\textbf{Posterior variance:}
+This is a Gaussian in $x_t$. Completing the square, we have $\frac{1}{P_t} = \frac{h^2}{R} + \frac{1}{P_t^-}$. $P$ is the uncertainty so the inverse of $P$ is like precision, by adding information about the measurement $\frac{h^2}{R}$, we get additional precision which is exactly what we are aiming for. When $\frac{h^2}{R}=0$, namely large noise from observation, we say we can't trust the measurement and we should stick with the dynamics. We see that both mean and variance will receive no update. On the other hand, if $\frac{h^2}{R} \ll \frac{1}{P_t^-}$, then observation will carry more weight and the result from dynamics should be disregarded.
+The updated variance is
 \begin{align}
-\frac{1}{P_t} &= \frac{h^2}{R} + \frac{1}{P_t^-} \\
-P_t &= \frac{1}{\frac{h^2}{R} + \frac{1}{P_t^-}} = \frac{R P_t^-}{h^2 P_t^- + R}
+P_t = \frac{R P_t^-}{h^2 P_t^- + R}
 \end{align}
-
-Define the \textbf{Kalman gain:}
+For simplicity, we define the \textbf{Kalman gain:}
 \begin{equation}
 K_t = \frac{P_t^- h}{h^2 P_t^- + R}
 \end{equation}
@@ -569,27 +146,26 @@ Then:
 P_t = (1 - K_t h) P_t^-
 \end{equation}
 
-\textbf{Posterior mean:}
-\begin{align}
-\frac{m_t}{P_t} &= \frac{h y_t}{R} + \frac{m_t^-}{P_t^-} \\
-m_t &= P_t \left(\frac{h y_t}{R} + \frac{m_t^-}{P_t^-}\right)
-\end{align}
+%\textbf{Posterior mean:}
+%\begin{align}
+%\frac{m_t}{P_t} &= \frac{h y_t}{R} + \frac{m_t^-}{P_t^-} \\
+%m_t &= P_t \left(\frac{h y_t}{R} + \frac{m_t^-}{P_t^-}\right)
+%\end{align}
 
-Substituting $P_t = (1 - K_t h) P_t^-$:
-\begin{align}
-m_t &= (1 - K_t h) P_t^- \left(\frac{h y_t}{R} + \frac{m_t^-}{P_t^-}\right) \\
-&= (1 - K_t h) \left(\frac{P_t^- h y_t}{R} + m_t^-\right) \\
-&= (1 - K_t h) m_t^- + (1 - K_t h) \frac{P_t^- h y_t}{R}
-\end{align}
+%Substituting $P_t = (1 - K_t h) P_t^-$:
+%\begin{align}
+%m_t &= (1 - K_t h) P_t^- \left(\frac{h y_t}{R} + \frac{m_t^-}{P_t^-}\right) \\
+%&= (1 - K_t h) \left(\frac{P_t^- h y_t}{R} + m_t^-\right) \\
+%&= (1 - K_t h) m_t^- + (1 - K_t h) \frac{P_t^- h y_t}{R}
+%\end{align}
 
-Using $K_t = \frac{P_t^- h}{h^2 P_t^- + R}$, we have $\frac{P_t^- h}{R} = K_t \frac{h^2 P_t^- + R}{R} = K_t (1 + \frac{h^2 P_t^-}{R})$.
+%Using $K_t = \frac{P_t^- h}{h^2 P_t^- + R}$, we have $\frac{P_t^- h}{R} = K_t \frac{h^2 P_t^- + R}{R} = K_t (1 + \frac{h^2 P_t^-}{R})$.
 
 After algebra:
 \begin{equation}
 m_t = m_t^- + K_t (y_t - h m_t^-)
 \end{equation}
-
-\textbf{Result:}
+In summary, we get,
 \begin{equation}
 \boxed{
 \begin{aligned}
@@ -599,358 +175,947 @@ P_t &= (1 - K_t h) P_t^-
 \end{aligned}
 }
 \end{equation}
+at this point, we can already see that what filter does is to correct the distribution based on the observed data point. Essentially, we want the mean and covariance from the updated distribution at each time step.
 
-\textbf{Summary: 1D Kalman Filter Algorithm}
 
-\textbf{Initialize:} $m_0, P_0$
 
-\textbf{For} $t = 1, 2, 3, \ldots$:
 
-\textbf{Predict:}
+
+
+% \textbf{Initialize:} $m_0, P_0$
+
+% \textbf{For} $t = 1, 2, 3, \ldots$:
+
+% \textbf{Predict:}
+% \begin{align}
+% m_t^- &= a m_{t-1} \\
+% P_t^- &= a^2 P_{t-1} + Q
+% \end{align}
+
+% \textbf{Update:}
+% \begin{align}
+% K_t &= \frac{P_t^- h}{h^2 P_t^- + R} \\
+% m_t &= m_t^- + K_t (y_t - h m_t^-) \\
+% P_t &= (1 - K_t h) P_t^-
+% \end{align}
+ 
+For higher dimension, all we have to do is to promote the scalar recursive relation into matrices.  
+\textbf{Prediction Step:}
 \begin{align}
-m_t^- &= a m_{t-1} \\
-P_t^- &= a^2 P_{t-1} + Q
+\hat{\v{x}}_t^- &= \v{\hat F} \hat{\v{x}}_{t-1}^+ \\
+\v{P}_t^- &= \v{\hat F} \v{P}_{t-1}^+ \v{\hat F}^T + \v{Q}
 \end{align}
 
-\textbf{Update:}
+\textbf{Correction Step:}
 \begin{align}
-K_t &= \frac{P_t^- h}{h^2 P_t^- + R} \\
-m_t &= m_t^- + K_t (y_t - h m_t^-) \\
-P_t &= (1 - K_t h) P_t^-
+\v{\hat K}_t &= \v{P}_t^- \v{H}^T \left[\v{H} \v{P}_t^- \v{H}^T + \v{R}\right]^{-1} \quad \text{(Kalman gain)} \\
+\hat{\v{x}}_t^+ &= \hat{\v{x}}_t^- + \v{K}_t (\v{y}_t - \v{H}\hat{\v{x}}_t^-) \\
+\v{\hat P}_t^+ &= (\v{I} - \v{K}_t \v{H}) \v{P}_t^-
 \end{align}
 
-\textbf{Output:} $p(x_t | y_{1:t}) = \mathcal{N}(x_t | m_t, P_t)$
+\subsection{Generalization of Kalman filter}
+We know that Kalman filter requires linear models and Gaussian noise. But this is very restrictive. For the cases where the noises are Gaussian but models are non-linear, we have extended Kalman filter (EKF) and unscented Kalman Filter (UKF). The idea for the extension is somehow make approximation so that we can use Kalman filter.
 
-From here it is trivial to generalize to higher dimension.
+EKF linearizes the models via first-order Taylor expansion around current estimate.
 
-
-\textbf{Stochastic Volatility Model (1D)}
-
-\textbf{State Evolution:}
 \begin{equation}
-x_t = \alpha x_{t-1} + \sigma w_t, \quad w_t \sim \mathcal{N}(0, 1)
+\v{F}_t = \left.\frac{\partial f}{\partial \v{x}}\right|_{\v{x} = \hat{\v{x}}_{t-1}^+}, \quad
+\v{H}_t = \left.\frac{\partial h}{\partial \v{x}}\right|_{\v{x} = \hat{\v{x}}_t^-}
 \end{equation}
 
-\textbf{Observation:}
+Apply Kalman filter equations using time-varying $\v{F}_t, \v{H}_t$. Evolve using time-dependent operators,
+
+\begin{align}
+\hat{\v{x}}_t^- &= f(\hat{\v{x}}_{t-1}^+) \\
+\v{P}_t^- &= \v{F}_t \v{P}_{t-1}^+ \v{F}_t^T + \v{Q}
+\end{align}
+Update using  $\v{H}_t$ and predicted measurement $\hat{\v{y}}_t^- = h(\hat{\v{x}}_t^-)$.
+
+\begin{align}
+\v{\hat K}_t &= \v{P}_t^- \v{H}_t^T \left[\v{H}_t \v{P}_t^- \v{H}_t^T + \v{R}\right]^{-1} \quad \text{(Kalman gain)} \\
+\hat{\v{x}}_t^+ &= \hat{\v{x}}_t^- + \v{K}_t (\v{y}_t - \v{H}_t\hat{\v{x}}_t^-) \\
+\v{\hat P}_t^+ &= (\v{I} - \v{K}_t \v{H}_t) \v{P}_t^-
+\end{align}
+
+However, there is strong limitations of this approach, namely, only first-order accurate; can diverge for strong nonlinearity; requires Jacobian computation (may be expensive or analytically intractable); assumes Gaussian noises. As for the UKF, propagate uncertainty through nonlinear functions using \textbf{sigma points} (also called unscented points) - deterministically chosen samples that capture mean and covariance.
+
+\textbf{Sigma Points:} For state with mean $\hat{\v{x}}$ and covariance $\v{P}$, generate $2n+1$ points:
+\begin{align}
+\mathcal{X}^{(0)} &= \hat{\v{x}} \\
+\mathcal{X}^{(i)} &= \hat{\v{x}} + \left(\sqrt{(n+\lambda)\v{P}}\right)_i, \quad i=1,\ldots,n \\
+\mathcal{X}^{(i)} &= \hat{\v{x}} - \left(\sqrt{(n+\lambda)\v{P}}\right)_{i-n}, \quad i=n+1,\ldots,2n
+\end{align}
+
+where $\mathcal{X}^{(i)}$ denotes the $i$-th sigma point, $n$ is the state dimension, and $\lambda$ is a scaling parameter. Then pass each sigma point through actual nonlinear function:
 \begin{equation}
-y_t = \beta \exp\left(\frac{x_t}{2}\right) v_t, \quad v_t \sim \mathcal{N}(0, 1)
+\mathcal{Y}^{(i)} = h(\mathcal{X}^{(i)})
+\end{equation}
+Compute weighted mean and covariance of transformed points:
+\begin{align}
+\hat{\v{y}} &= \sum_{i=0}^{2n} W^{(i)} \mathcal{Y}^{(i)} \\
+\v{P}_y &= \sum_{i=0}^{2n} W^{(i)} (\mathcal{Y}^{(i)} - \hat{\v{y}})(\mathcal{Y}^{(i)} - \hat{\v{y}})^T
+\end{align}
+
+where $W^{(i)}$ are predetermined weights. This approach still assumes both noises are Gaussian but it captures higher order patterns.
+
+
+\subsection{Use particles}
+
+Particle based methods are so far the most general approach for our problem, but it will be limited by computational complexity and efficiency.
+
+Represent posterior distribution using $N$ weighted particles (samples):
+\begin{equation}
+p(\v{x}_t | \v{y}_{1:t}) \approx \sum_{i=1}^{N} w_t^{(i)} \delta(\v{x}_t - \v{x}_t^{(i)})
 \end{equation}
 
-\textbf{Parameters:}
+where $\v{x}_t^{(i)}$ is the $i$-th particle (sample state), $w_t^{(i)}$ is its weight, and $\delta(\cdot)$ is the Dirac delta function. This is essentially a coarse-grained optimal transport problem. Imagine we want to represent the probability distribution with particles, or data points. Then high probability region has higher particle density and low probability has lower particle density. If we have infinite number of particles, then particle density will approach the real probability distribution. However, if we have finite number of particles, we have to compromise, therefore, by not distinguish the particle that are close to each other, we add weights.
+
+\begin{equation}
+\sum_{j=1}  \delta(\v{x}_t - \v{x}_t^{(j)}) \Big|_{|\v{x}_t^{(j)}- \v x_t^{(i)}| < \epsilon} \approx w_t^{(i)} \delta(\v{x}_t - \v{x}_t^{(i)})
+\end{equation}
+
+
+
+
+
+\textbf{Algorithm :}
+
+\textbf{Initialize:} Sample $N$ particles from the initial state distribution and set uniform weights:
+\begin{equation}
+\v{x}_0^{(i)} \sim p(\v{x}_0), \quad w_0^{(i)} = \frac{1}{N}, \quad i = 1, \ldots, N
+\end{equation}
+where $p(\v{x}_0)$ is the initial state distribution. For example, if the initial state is Gaussian with mean $\v{m}_0$ and covariance $\v{P}_0$, then:
+\begin{equation}
+\v{x}_0^{(i)} \sim \mathcal{N}(\v{m}_0, \v{P}_0), \quad w_0^{(i)} = \frac{1}{N}
+\end{equation}
+
+1. \textbf{Prediction (stochastic):} For each particle $i = 1, \ldots, N$:
+\begin{equation}
+\v{x}_t^{(i)} = f(\v{x}_{t-1}^{(i)}) + \v{w}_t^{(i)}, \quad \v{w}_t^{(i)} \sim p_w
+\end{equation}
+Particles evolve by random sampling from the process noise distribution $p_w$ (can be non-Gaussian). Namely, we can actually write $f(\v{x}_{t-1}^{(i)}) + \v{w}_t^{(i)} \Rightarrow f(\v{x}_{t-1}^{(i)}, \v{w}_t^{(i)} )$ 
+
+2. \textbf{Update Weights:} Compute likelihood and normalize:
+
+\textbf{Unnormalized weights:} For each particle $i = 1, \ldots, N$:
+\begin{equation}
+\tilde{w}_t^{(i)} = w_{t-1}^{(i)} \cdot p(\v{y}_t | \v{x}_t^{(i)})
+\end{equation}
+
+where $p(\v{y}_t | \v{x}_t^{(i)})$ is the measurement likelihood.
+
+\textbf{Normalization:} Normalize weights to sum to unity:
+\begin{equation}
+w_t^{(i)} = \frac{\tilde{w}_t^{(i)}}{\sum_{j=1}^N \tilde{w}_t^{(j)}} = \frac{w_{t-1}^{(i)} \cdot p(\v{y}_t | \v{x}_t^{(i)})}{\sum_{j=1}^N w_{t-1}^{(j)} \cdot p(\v{y}_t | \v{x}_t^{(j)})}
+\end{equation}
+
+\textbf{Effective sample size:} A measure of weight degeneracy:
+\begin{equation}
+N_{\text{eff}} = \frac{1}{\sum_{i=1}^N (w_t^{(i)})^2}
+\end{equation}
+When $N_{\text{eff}} \ll N$, the particle filter suffers from degeneracy and resampling is needed. To see why this gives effects sample size, 
+\begin{equation}
+\begin{split}
+\frac{1}{N_{\text{eff}}} = \sum_{i=1}^N (w_t^{(i)})^2 = \bar w
+\end{split}
+\end{equation}
+where $\bar w$ is the average weight for each particle with $N_{\text{eff}}=\frac{1}{\bar w}$ number of particles.
+
+
+
+3. \textbf{Resampling (stochastic):} Resample particles with replacement according to weights to avoid degeneracy (also called particle depletion or weight collapse). High-weight particles get duplicated; low-weight particles die out. This step is typically performed when $N_{\text{eff}} < N_{\text{threshold}}$ (e.g., $N_{\text{threshold}} = N/2$). The most straightforward resampling method is Multinomial resampling, namely, generate $N$ independent samples from the categorical distribution:
+\begin{equation}
+\v{x}_t^{(i)} \sim \text{Categorical}(\{w_t^{(j)}\}_{j=1}^N), \quad i = 1, \ldots, N
+\end{equation}
+where particle $\v{x}_t^{(j)}$ is selected with probability $w_t^{(j)}$. After resampling, set all weights to $w_t^{(i)} = 1/N$ for $i = 1, \ldots, N$. In the code, we will use systematic resampling, which is more efficient. For each sample we generate a single uniform random number $u \sim \mathcal{U}(0, 1/N)$ and define:
+\begin{equation}
+u^{(i)} = u + \frac{i-1}{N}, \quad i = 1, \ldots, N
+\end{equation}
+Then select particle indices $j_i$ such that:
+\begin{equation}
+\sum_{k=1}^{j_i-1} w_t^{(k)} < u^{(i)} \leq \sum_{k=1}^{j_i} w_t^{(k)}
+\end{equation}
+Set $\v{x}_t^{(i)} = \v{x}_t^{(j_i)}$ and $w_t^{(i)} = 1/N$ for all $i$. The particles relying on the duplicates or multiplicity to mimic the underlying distribution. 
+
+4. \textbf{Estimate:} Compute weighted average:
+\begin{equation}
+\hat{\v{x}}_t = \sum_{i=1}^N w_t^{(i)} \v{x}_t^{(i)}
+\end{equation}
+
+\textbf{Advantages:} Handles arbitrary nonlinearity; handles non-Gaussian noise in \textbf{either or both} process and measurement; can represent multimodal distributions; asymptotically exact as $N \to \infty$.
+
+\textbf{Limitations:} Computationally expensive ($O(Nn^2)$); curse of dimensionality for high-dimensional states ($n > 10$).
+
+
+\subsection{Particle flow}
+\textbf{References:
 \begin{itemize}
-\item $x_t$ = log-volatility (hidden state)
-\item $y_t$ = observed returns
-\item $\alpha \in (0, 1)$ = persistence parameter
-\item $\sigma$ = volatility of volatility
-\item $\beta$ = scale parameter
+\item Daum (10), Exact particle flow for nonlinear filters
+\item Daum (11), Particle Degeneracy: Root Cause and Solution
+\end{itemize}
+}
+Previously, we have discussed how after each resampling, the information of the distribution is concentrated on the multiplicity distribution of the particles, and the diversity of the particles have been lost. If we look at the particle methods, it's clearly that we either use weights or multiplicity distribution to mimic distribution. The culprit of the particle degeneracy is the consecutive multiplication of small numbers $p(y_t | x_t^{(i)})$ will make a large number of particles irrelevant after view steps. And the observation was done independently and there is no way to control the value of $p(y_t | x_t^{(i)})$. In Daum (10), and Daum (11), the author proposed to use the multiplicity to store the information of the distribution and invented an alternative evolution for the particles such that $p(y_t | x_t^{(i)})$ was never too small. The limitation of these two papers is that to solve the equation, which we will talk about later, they have to assume linear or nearly linearly observation model and dynamics with additive Gaussian noise. The evolution for the particles is complete different equation than underlying dynamics for the ground truth. Later, we will see the methods that generalize the equation for more general noise distribution. Let us first derive the evolution equations. First, we have the prediction step: 
+\begin{align}
+p(x_t | z_{1:t-1})=g(x_t)
+\end{align}
+and the "observation" step,
+\begin{align}
+p(z_t | x_t)=h(x_t)
+\end{align}
+combine both information, the updated probability for $x_t$ should be,
+\begin{equation}
+p(x_t|z_{1:t}) \propto g(x_t)h(x_t)
+\end{equation}
+The normalization will be handled implicitly by the particles. The difference between the paritlce flow and the particle filter is how you do the update. Since we are moving the particles directly, we demand,
+\begin{equation}
+\log p(x,\lambda) = \log g(x) + \lambda \log h(x)
+\end{equation}
+we always start with $\lambda=0$, and end with $\lambda=1$, therefore we can assure the particle flows to the desired position. By definition, the evolution is driven entirely by the observation model. This is where the limitation of the flow model comes in.
+
+Assuming particles evolve in pseudo-time $\lambda$ according to the ordinary differential equation:
+\begin{equation}
+\frac{d\v{x}}{d\lambda} = f(\v{x}, \lambda)
+\end{equation}
+where $f(\v{x}, \lambda)$ is the flow field that transports particles from the prior distribution at $\lambda=0$ to the posterior distribution at $\lambda=1$. This deterministic evolution of particles leads to a corresponding evolution of the probability density $p(\v{x}, \lambda)$.
+
+The evolution of the probability density is governed by the Fokker-Planck equation with zero diffusion. Starting from the continuity equation for probability conservation, and noting that the flow is deterministic (no diffusion term), we obtain:
+\begin{equation}
+\frac{\partial p}{\partial \lambda} = -\nabla \cdot (pf)
+\end{equation}
+This is the zero-diffusion Fokker-Planck equation, which expresses that the rate of change of probability density equals the negative divergence of the probability flux $pf$. To work with log-probabilities, we divide both sides by $p$ and apply the product rule for divergence, $\nabla \cdot (pf) = p\nabla \cdot f + (\nabla p) \cdot f$, yielding:
+Recognizing that $\frac{1}{p}\frac{\partial p}{\partial \lambda} = \frac{\partial \log p}{\partial \lambda}$ and $\frac{\nabla p}{p} = \nabla \log p$, we obtain:
+\begin{equation}
+\frac{\partial \log p}{\partial \lambda} = -\nabla \cdot f - (\nabla \log p) \cdot f
+\end{equation}
+From the log-homotopy definition, we have $\frac{\partial \log p}{\partial \lambda} = \log h(x)$, which leads to the fundamental PDE:
+\begin{equation}
+\boxed{\log h(x) = -\nabla \cdot f - (\nabla \log p) \cdot f}
+\end{equation}
+
+To solve this equation, we assume an affine flow ansatz:
+\begin{equation}
+f(x,\lambda) = A(\lambda)x + b(\lambda)
+\end{equation}
+where $A(\lambda)$ and $b(\lambda)$ are to be determined. The goal is to find expressions for these functions such that particles following this flow evolve from the prior distribution $g(x)$ at $\lambda=0$ to the posterior distribution proportional to $g(x)h(x)$ at $\lambda=1$.
+
+We begin by computing the gradient of the log-homotopy. Using the Gaussian form for both $g(x)$ and $h(x)$, and substituting the explicit forms of the prior and likelihood into the log-homotopy:
+\begin{equation}
+\log p(x,\lambda) = -\frac{1}{2}(x-\bar{\eta}_0)^T P^{-1}(x-\bar{\eta}_0) - \frac{\lambda}{2}(z-Hx)^T R^{-1}(z-Hx) + \text{const}
+\end{equation}
+Taking the gradient with respect to $x$:
+\begin{align}
+\nabla_x \log p(x,\lambda) &= -P^{-1}(x-\bar{\eta}_0) + \lambda H^T R^{-1}(z-Hx) \\
+&= -P^{-1}x + P^{-1}\bar{\eta}_0 + \lambda H^T R^{-1}z - \lambda H^T R^{-1}Hx
+\end{align}
+
+For the affine flow, the divergence is simply the trace of the matrix $A$:
+\begin{equation}
+\nabla \cdot f = \nabla \cdot (Ax + b) = \text{Tr}(A)
+\end{equation}
+The dot product $(\nabla \log p) \cdot f$ expands as:
+\begin{align}
+(\nabla \log p) \cdot f &= [-P^{-1}(x-\bar{\eta}_0) + \lambda H^T R^{-1}(z-Hx)]^T [Ax + b] \\
+&= -(x-\bar{\eta}_0)^T P^{-1}Ax - (x-\bar{\eta}_0)^T P^{-1}b \\
+&\quad + \lambda(z-Hx)^T R^{-1}HAx + \lambda(z-Hx)^T R^{-1}Hb
+\end{align}
+
+
+The log-likelihood for the linear-Gaussian observation model can be expanded as:
+\begin{align}
+\log h(x) &= -\frac{1}{2}(z-Hx)^T R^{-1}(z-Hx) + \text{const} \\
+&= -\frac{1}{2}z^T R^{-1}z + z^T R^{-1}Hx - \frac{1}{2}x^T H^T R^{-1}Hx + \text{const}
+\end{align}
+
+A key insight for the EDH flow is that, under Gaussian assumptions, the distribution at any pseudo-time $\lambda$ remains Gaussian. Specifically, the posterior at $\lambda$ is:
+\begin{equation}
+p(x,\lambda) \sim \mathcal{N}(\bar{\eta}_\lambda, P_\lambda)
+\end{equation}
+where the precision matrix and mean evolve according to:
+\begin{align}
+P_\lambda^{-1} &= P^{-1} + \lambda H^T R^{-1}H \\
+\bar{\eta}_\lambda &= P_\lambda[P^{-1}\bar{\eta}_0 + \lambda H^T R^{-1}z]
+\end{align}
+This allows us to express the gradient of the log-probability in a compact form:
+\begin{equation}
+\nabla \log p(x,\lambda) = -P_\lambda^{-1}(x - \bar{\eta}_\lambda)
+\end{equation}
+Substituting this into the fundamental PDE, we obtain an alternative formulation:
+\begin{equation}
+\log h(x) = -\text{Tr}(A) + (x-\bar{\eta}_\lambda)^T P_\lambda^{-1}(Ax + b)
+\end{equation}
+
+A more direct approach to determining $A(\lambda)$ and $b(\lambda)$ comes from requiring that particles starting from a Gaussian distribution remain Gaussian under the flow. For an affine flow $f = Ax + b$, the evolution of the mean and covariance must satisfy:
+\begin{equation}
+\frac{d\bar{\eta}_\lambda}{d\lambda} = A\bar{\eta}_\lambda + b, \quad \frac{dP_\lambda}{d\lambda} = AP_\lambda + P_\lambda A^T
+\end{equation}
+From Kalman filter theory, we know that the precision matrix evolves as:
+\begin{equation}
+\frac{dP_\lambda^{-1}}{d\lambda} = H^T R^{-1}H
+\end{equation}
+Using the identity $\frac{dP_\lambda}{d\lambda} = -P_\lambda \frac{dP_\lambda^{-1}}{d\lambda} P_\lambda$, we find:
+\begin{equation}
+\frac{dP_\lambda}{d\lambda} = -P_\lambda H^T R^{-1}H P_\lambda
+\end{equation}
+Matching this with the covariance evolution equation $AP_\lambda + P_\lambda A^T = -P_\lambda H^T R^{-1}H P_\lambda$, and solving the resulting Riccati-type equation with boundary condition $P_0 = P$, we obtain:
+\begin{equation}
+\boxed{A(\lambda) = -\frac{1}{2}P_\lambda H^T R^{-1}H = -\frac{1}{2}PH^T(\lambda HPH^T + R)^{-1}H}
+\end{equation}
+
+For the mean evolution, we require that $\frac{d\bar{\eta}_\lambda}{d\lambda} = H^T R^{-1}(z - H\bar{\eta}_\lambda)$ equals $A\bar{\eta}_\lambda + b$. Solving for $b$:
+\begin{equation}
+b(\lambda) = P_\lambda H^T R^{-1}z - A\bar{\eta}_\lambda
+\end{equation}
+After algebraic manipulation, this simplifies to:
+\begin{equation}
+\boxed{b(\lambda) = (I+2\lambda A)[(I+\lambda A)PH^T R^{-1}z + A\bar{\eta}_0]}
+\end{equation}
+
+The EDH flow equations are derived by requiring that Gaussian distributions remain Gaussian under the flow, that the flow satisfies the Fokker-Planck equation, and that the boundary conditions $p(x,0) = g(x)$ and $p(x,1) \propto g(x)h(x)$ are satisfied. The resulting solution provides an \textbf{exact} method for transporting particles from the prior to the posterior in the linear-Gaussian case, avoiding the weight degeneracy issues that plague standard particle filters. As for the LEDH, the difference is that each particle has their own equation. That is because the expansion of the model are taken at their individual location instead of the average position.
+
+
+
+
+
+\subsection{(Invertible) Particle flow particle filter}
+\textbf{References:
+\begin{itemize}
+\item Particle Filtering with Invertible Particle Flow (Li, Coates, 17)
+\end{itemize}
+}
+
+The particle flow particle filter method is directly built up on the EDH and LEDH. The improvement is to add weight redistribution for each particle. This will introduce addition expressiveness to the framework. There is however, one ore subtle point, which is the correction of the weight. {\color{red} Of course in principle, we can also track the effective sample size. This will be added later.} Here we want to introduce a concept call the proposed distribution q. So far, we have not met this concept, but later for the particle flow filter kernel method, we will see that this is also important.
+
+For any filtering algorithm at time step $k$, we must distinguish between:
+\begin{itemize}
+    \item \textbf{Theoretical target}: The true Bayesian posterior
+    \begin{equation}
+        p(\mathbf{x}_k | \mathbf{z}_{1:k}) = \frac{p(\mathbf{z}_k | \mathbf{x}_k) p(\mathbf{x}_k | \mathbf{z}_{1:k-1})}{\int p(\mathbf{z}_k | \mathbf{x}_k) p(\mathbf{x}_k | \mathbf{z}_{1:k-1}) d\mathbf{x}_k}
+    \end{equation}
+    
+    \item \textbf{Procedural distribution}: What the algorithm actually produces
+    \begin{equation}
+        \hat{p}(\mathbf{x}_k | \mathbf{z}_{1:k})
+    \end{equation}
+    
+    \item \textbf{Correction mechanism}: How the algorithm accounts for discrepancies between target and procedure
 \end{itemize}
 
-\textbf{Key Features:}
-\begin{itemize}
-\item \textbf{Nonlinear observation:} $\exp(x_t/2)$ makes observation nonlinear in state
-\item \textbf{Non-Gaussian likelihood:} $p(y_t | x_t)$ is not Gaussian in $x_t$
-\item Linear state evolution + nonlinear/non-Gaussian observations $\Rightarrow$ Kalman Filter fails
-\end{itemize}
+The \textbf{proposal distribution} $q(\mathbf{x}_k | \mathbf{x}_{k-1}, \mathbf{z}_k)$ is the distribution from which candidate states are drawn. The relationship to Bayes' rule determines the weight correction needed.
 
+For the Kalman filter, there is not discrepancy between the theoretical target and the proposed candidate. While there is a discrepancy between these two in EKL and UKF, there is \textbf{no mechanism} within the EKF/UKF framework to detect or compensate for these errors. The algorithm blindly propagates Gaussian moments regardless of approximation quality.
+\subsubsection{Particle Flow Particle Filter (EDH/LEDH)}
 
-\textbf{Range-Bearing Observation Model}
+\paragraph{Setup:} Combine prediction step (standard PF) with flow-based update.
 
-A nonlinear tracking problem with polar observations.
+\paragraph{Theoretical target:} Same posterior $p(\mathbf{x}_k | \mathbf{z}_{1:k})$.
 
-\textbf{State (Cartesian coordinates):}
+\paragraph{Exact Daum-Huang (EDH) Flow:} Assumes additive Gaussian observation noise:
 \begin{equation}
-\mathbf{x}_t = \begin{bmatrix} p_x \\ p_y \\ v_x \\ v_y \end{bmatrix}_t
-\end{equation}
-where $(p_x, p_y)$ = position, $(v_x, v_y)$ = velocity.
-
-\textbf{State Evolution (linear):}
-\begin{equation}
-\mathbf{x}_t = \mathbf{F} \mathbf{x}_{t-1} + \mathbf{w}_t, \quad \mathbf{w}_t \sim \mathcal{N}(\mathbf{0}, \mathbf{Q})
-\end{equation}
-\begin{equation}
-\mathbf{F} = \begin{bmatrix}
-1 & 0 & \Delta t & 0 \\
-0 & 1 & 0 & \Delta t \\
-0 & 0 & 1 & 0 \\
-0 & 0 & 0 & 1
-\end{bmatrix}
-\end{equation}
-
-\textbf{Observation (nonlinear):}
-\begin{equation}
-\mathbf{y}_t = \begin{bmatrix} r_t \\ \theta_t \end{bmatrix} = h(\mathbf{x}_t) + \mathbf{v}_t, \quad \mathbf{v}_t \sim \mathcal{N}(\mathbf{0}, \mathbf{R})
-\end{equation}
-where:
-\begin{align}
-r_t &= \sqrt{p_x^2 + p_y^2} \quad \text{(range)} \\
-\theta_t &= \arctan(p_y, p_x) \quad \text{(bearing)}
-\end{align}
-
-\textbf{Key Features:}
-\begin{itemize}
-\item Highly nonlinear observation function (Cartesian $\to$ polar transformation)
-\item Linear state dynamics but nonlinear measurement
-\item Standard benchmark for nonlinear filtering methods
-\end{itemize}
-
-
-\textbf{Model Reminder:}
-\begin{align}
-x_t &= \alpha x_{t-1} + \sigma w_t, \quad w_t \sim \mathcal{N}(0, 1) \\
-y_t &= \beta \exp\left(\frac{x_t}{2}\right) v_t, \quad v_t \sim \mathcal{N}(0, 1)
-\end{align}
-
-\subsubsection*{1. Extended Kalman Filter (EKF)}
-
-\textbf{Idea:} Linearize the nonlinear observation function around the current state estimate.
-
-\textbf{State Transition:}
-\begin{equation}
-f(x_{t-1}) = \alpha x_{t-1}, \quad F_t = \frac{\partial f}{\partial x}\Big|_{x=m_{t-1}} = \alpha
-\end{equation}
-
-\textbf{Observation Function:}
-\begin{equation}
-h(x_t) = \beta \exp\left(\frac{x_t}{2}\right) \cdot 0 = 0 \quad \text{(mean of observation given } x_t\text{)}
-\end{equation}
-
-Wait, this needs clarification. The observation model is:
-\begin{equation}
-y_t | x_t \sim \mathcal{N}\left(0, \beta^2 \exp(x_t)\right)
-\end{equation}
-
-So $h(x_t) = 0$ (mean) but variance depends on $x_t$.
-
-For EKF, we linearize the observation model. Since $y_t = \beta \exp(x_t/2) v_t$, we have:
-\begin{equation}
-p(y_t | x_t) = \mathcal{N}(y_t | 0, \beta^2 \exp(x_t))
+    \mathbf{z}_k = h(\mathbf{x}_k) + \mathbf{v}_k, \quad \mathbf{v}_k \sim \mathcal{N}(\mathbf{0}, \mathbf{R}_k)
 \end{equation}
 
 The log-likelihood is:
 \begin{equation}
-\log p(y_t | x_t) = -\frac{1}{2}\log(2\pi) - \frac{1}{2}\log(\beta^2 \exp(x_t)) - \frac{y_t^2}{2\beta^2 \exp(x_t)}
+    \log p(\mathbf{z}_k | \mathbf{x}_k) = -\frac{1}{2}(\mathbf{z}_k - h(\mathbf{x}_k))^T \mathbf{R}_k^{-1} (\mathbf{z}_k - h(\mathbf{x}_k)) + \text{const}
 \end{equation}
+
+Gradient:
 \begin{equation}
-= -\frac{1}{2}\log(2\pi) - \frac{1}{2}\log(\beta^2) - \frac{x_t}{2} - \frac{y_t^2}{2\beta^2 \exp(x_t)}
+    \nabla_{\mathbf{x}} \log p(\mathbf{z}_k | \mathbf{x}_k) = \mathbf{H}(\mathbf{x}_k)^T \mathbf{R}_k^{-1} (\mathbf{z}_k - h(\mathbf{x}_k))
 \end{equation}
+where $\mathbf{H}(\mathbf{x}_k) = \partial h / \partial \mathbf{x}$.
 
-For EKF, we linearize around the predicted mean $m_t^-$:
+\paragraph{EDH flow velocity:} Linearize $h(\mathbf{x})$ around ensemble mean $\bar{\mathbf{x}}(\lambda)$:
 \begin{equation}
-y_t \approx h(m_t^-) + H_t (x_t - m_t^-) + \text{noise}
+    h(\mathbf{x}) \approx h(\bar{\mathbf{x}}) + \mathbf{H}(\bar{\mathbf{x}})(\mathbf{x} - \bar{\mathbf{x}})
 \end{equation}
 
-where $h(x) = 0$ and 
+The EDH flow is:
 \begin{equation}
-H_t = \frac{\partial h}{\partial x}\Big|_{x=m_t^-} = 0
+    \mathbf{g}(\mathbf{x}, \lambda) = \mathbf{C}_{\mathbf{x}\mathbf{z}}(\lambda) [\mathbf{C}_{\mathbf{z}\mathbf{z}}(\lambda) + \mathbf{R}_k]^{-1} [\mathbf{z}_k - \bar{\mathbf{z}}(\lambda)]
 \end{equation}
-
-\textbf{Problem:} The standard EKF linearization doesn't work well here because the observation mean is always 0. 
-
-\textbf{Alternative EKF Approach:} Linearize the observation variance. We approximate:
-\begin{equation}
-\sigma_y^2(x_t) = \beta^2 \exp(x_t) \approx \beta^2 \exp(m_t^-) \cdot \exp(x_t - m_t^-)
-\end{equation}
-
-Using first-order Taylor expansion: $\exp(x_t - m_t^-) \approx 1 + (x_t - m_t^-)$
-
-This gives:
-\begin{equation}
-\sigma_y^2(x_t) \approx \beta^2 \exp(m_t^-) [1 + (x_t - m_t^-)]
-\end{equation}
-
-\textbf{EKF Algorithm:}
-
-\textbf{Predict:}
+where
 \begin{align}
-m_t^- &= \alpha m_{t-1} \\
-P_t^- &= \alpha^2 P_{t-1} + \sigma^2
+    \bar{\mathbf{z}}(\lambda) &= \frac{1}{N} \sum_{i=1}^N h(\mathbf{x}_k^{(i)}(\lambda)) \\
+    \mathbf{C}_{\mathbf{x}\mathbf{z}}(\lambda) &= \frac{1}{N} \sum_{i=1}^N (\mathbf{x}_k^{(i)}(\lambda) - \bar{\mathbf{x}}(\lambda))(h(\mathbf{x}_k^{(i)}(\lambda)) - \bar{\mathbf{z}}(\lambda))^T \\
+    \mathbf{C}_{\mathbf{z}\mathbf{z}}(\lambda) &= \frac{1}{N} \sum_{i=1}^N (h(\mathbf{x}_k^{(i)}(\lambda)) - \bar{\mathbf{z}}(\lambda))(h(\mathbf{x}_k^{(i)}(\lambda)) - \bar{\mathbf{z}}(\lambda))^T
 \end{align}
 
-\textbf{Update:}
-
-The EKF update for this model is non-standard because the observation noise variance depends on the state. A common approximation is to use the predicted state to evaluate the observation noise:
+\paragraph{Key property of EDH:} The flow velocity is \textbf{globally linear in state}:
 \begin{equation}
-R_t = \beta^2 \exp(m_t^-)
+    \mathbf{g}(\mathbf{x}, \lambda) = \mathbf{K}(\lambda)[\mathbf{z}_k - \bar{\mathbf{z}}(\lambda) - \mathbf{H}(\bar{\mathbf{x}})(\mathbf{x} - \bar{\mathbf{x}})]
+\end{equation}
+where $\mathbf{K}(\lambda)$ depends on ensemble statistics but not individual $\mathbf{x}$.
+
+This means:
+\begin{equation}
+    \frac{\partial \mathbf{g}}{\partial \mathbf{x}} = \text{constant across all particles}
 \end{equation}
 
-Then apply a modified update based on the innovation:
+Therefore, the Jacobian is \textbf{particle-independent}:
 \begin{equation}
-\nu_t = y_t^2 - \beta^2 \exp(m_t^-) \quad \text{(innovation in squared observation)}
+    \mathbf{J}_i = \mathbf{J} \quad \forall i
 \end{equation}
 
-The linearization of $\mathbb{E}[y_t^2 | x_t] = \beta^2 \exp(x_t)$ gives:
+\paragraph{Weight update for EDH:}
 \begin{equation}
-H_t = \beta^2 \exp(m_t^-)
+    \tilde{w}_k^{(i)} \propto w_{k|k-1}^{(i)} \cdot |\det \mathbf{J}|
 \end{equation}
 
+After normalization:
 \begin{equation}
-S_t = H_t P_t^- H_t + \text{Var}[y_t^2] \approx 2\beta^4 \exp(2m_t^-)
+    w_k^{(i)} = \frac{w_{k|k-1}^{(i)} |\det \mathbf{J}|}{\sum_{j=1}^N w_{k|k-1}^{(j)} |\det \mathbf{J}|} = \frac{w_{k|k-1}^{(i)}}{\sum_{j=1}^N w_{k|k-1}^{(j)}} = w_{k|k-1}^{(i)}
 \end{equation}
 
+\textbf{The Jacobian cancels}. If prior weights were uniform, posterior weights remain uniform.
+
+\paragraph{Local Exact Daum-Huang (LEDH):} Linearize around \textbf{each individual particle} instead of ensemble mean:
+\begin{equation}
+    h(\mathbf{x}) \approx h(\mathbf{x}_k^{(i)}) + \mathbf{H}(\mathbf{x}_k^{(i)})(\mathbf{x} - \mathbf{x}_k^{(i)})
+\end{equation}
+
+The LEDH flow becomes:
+\begin{equation}
+    \mathbf{f}^{(i)}(\mathbf{x}, \lambda) = \mathbf{C}_{\mathbf{x}\mathbf{z}}^{(i)}(\lambda) [\mathbf{C}_{\mathbf{z}\mathbf{z}}^{(i)}(\lambda) + \mathbf{R}_k]^{-1} [\mathbf{z}_k - h(\mathbf{x}_k^{(i)}(\lambda))]
+\end{equation}
+
+Now the flow is \textbf{particle-specific}:
+\begin{equation}
+    \mathbf{f}^{(i)} \neq \mathbf{f}^{(j)} \quad \text{for } i \neq j
+\end{equation}
+
+Each particle has its own Jacobian:
+\begin{equation}
+    \mathbf{J}_i = \frac{\partial \Psi^{(i)}}{\partial \mathbf{x}}\bigg|_{\mathbf{x}_k^{(i)}(0)}
+\end{equation}
+
+\paragraph{Weight update for LEDH:}
+\begin{equation}
+    \tilde{w}_k^{(i)} \propto w_{k|k-1}^{(i)} \cdot |\det \mathbf{J}_i|
+\end{equation}
+
+Jacobians are \textbf{different}, so:
+\begin{equation}
+    w_k^{(i)} = \frac{w_{k|k-1}^{(i)} |\det \mathbf{J}_i|}{\sum_{j=1}^N w_{k|k-1}^{(j)} |\det \mathbf{J}_j|}
+\end{equation}
+
+\textbf{Jacobians do NOT cancel}. Weights become non-uniform even if they started uniform. 
+
+The particle flow ODE
+\begin{equation}
+    \frac{d\mathbf{x}(\lambda)}{d\lambda} = \mathbf{f}(\mathbf{x}(\lambda), \lambda), \quad \lambda \in [0,1]
+\end{equation}
+is approximated by discretizing the pseudo-time interval into $N_\lambda$ steps: $0 = \lambda_0 < \lambda_1 < \cdots < \lambda_{N_\lambda} = 1$.
+
+At each discrete step $j$, the flow velocity is linearized:
+\begin{equation}
+    \mathbf{f}(\mathbf{x}, \lambda_j) \approx \mathbf{A}_j \mathbf{x} + \mathbf{b}_j
+\end{equation}
+
+The Euler integration step from $\lambda_{j-1}$ to $\lambda_j$ is:
+\begin{equation}
+    \mathbf{x}(\lambda_j) = \mathbf{x}(\lambda_{j-1}) + \Delta\lambda_j \cdot [\mathbf{A}_j \mathbf{x}(\lambda_{j-1}) + \mathbf{b}_j]
+\end{equation}
+where $\Delta\lambda_j = \lambda_j - \lambda_{j-1}$.
+
+\paragraph{Rearranging as an affine map:}
+\begin{equation}
+    \mathbf{x}(\lambda_j) = (\mathbf{I} + \Delta\lambda_j \mathbf{A}_j) \mathbf{x}(\lambda_{j-1}) + \Delta\lambda_j \mathbf{b}_j
+\end{equation}
+
+Define:
 \begin{align}
-K_t &= P_t^- H_t S_t^{-1} \\
-m_t &= m_t^- + K_t \nu_t \\
-P_t &= (1 - K_t H_t) P_t^-
+    \mathbf{M}_j &= \mathbf{I} + \Delta\lambda_j \mathbf{A}_j \quad \text{(linear part)} \\
+    \mathbf{c}_j &= \Delta\lambda_j \mathbf{b}_j \quad \text{(translation)}
 \end{align}
 
-\textbf{Note:} EKF for stochastic volatility is notoriously poor because the linearization is inadequate for the exponential nonlinearity.
-
-\subsubsection*{2. Unscented Kalman Filter (UKF)}
-
-\textbf{Idea:} Use sigma points to propagate mean and covariance through the nonlinearity without linearization.
-
-\textbf{Predict Step:}
-
-\textbf{1. Generate sigma points from } $p(x_{t-1} | y_{1:t-1}) = \mathcal{N}(m_{t-1}, P_{t-1})$:
-
-For 1D, use 3 sigma points:
-\begin{align}
-\chi_{t-1}^{(0)} &= m_{t-1} \\
-\chi_{t-1}^{(1)} &= m_{t-1} + \sqrt{(1 + \lambda) P_{t-1}} \\
-\chi_{t-1}^{(2)} &= m_{t-1} - \sqrt{(1 + \lambda) P_{t-1}}
-\end{align}
-
-with weights:
-\begin{align}
-W_0^{(m)} &= \frac{\lambda}{1 + \lambda}, \quad W_0^{(c)} = \frac{\lambda}{1 + \lambda} + (1 - \alpha^2 + \beta) \\
-W_i^{(m)} &= W_i^{(c)} = \frac{1}{2(1 + \lambda)}, \quad i = 1, 2
-\end{align}
-
-where $\lambda = \alpha^2(1 + \kappa) - 1$ (typical: $\alpha = 10^{-3}, \kappa = 0, \beta = 2$).
-
-\textbf{2. Propagate through state dynamics:}
+So each discrete step is:
 \begin{equation}
-\chi_{t|t-1}^{(i)} = \alpha \chi_{t-1}^{(i)}, \quad i = 0, 1, 2
+    \mathbf{x}(\lambda_j) = \mathbf{M}_j \mathbf{x}(\lambda_{j-1}) + \mathbf{c}_j
+\end{equation}
+\subsubsection{Jacobian of an Affine Map}
+
+For an affine map $\mathbf{y} = \mathbf{M}\mathbf{x} + \mathbf{c}$:
+\begin{equation}
+    \frac{\partial \mathbf{y}}{\partial \mathbf{x}} = \mathbf{M}
 \end{equation}
 
-\textbf{3. Compute predicted mean and covariance:}
-\begin{align}
-m_t^- &= \sum_{i=0}^{2} W_i^{(m)} \chi_{t|t-1}^{(i)} \\
-P_t^- &= \sum_{i=0}^{2} W_i^{(c)} (\chi_{t|t-1}^{(i)} - m_t^-)^2 + \sigma^2
-\end{align}
+The translation $\mathbf{c}$ disappears because $\frac{\partial \mathbf{c}}{\partial \mathbf{x}} = \mathbf{0}$.
 
-\textbf{Update Step:}
+\paragraph{Intuition:} The Jacobian measures how a small change in input $\mathbf{x}$ affects the output $\mathbf{y}$. Translations shift everything uniformly, so they don't affect the rate of change.
 
-\textbf{1. Generate sigma points from predicted distribution:}
-\begin{align}
-\chi_t^{(0)} &= m_t^- \\
-\chi_t^{(1)} &= m_t^- + \sqrt{(1 + \lambda) P_t^-} \\
-\chi_t^{(2)} &= m_t^- - \sqrt{(1 + \lambda) P_t^-}
-\end{align}
-
-\textbf{2. Propagate through observation function:}
-
-For stochastic volatility, the observation mean is 0, but we work with the variance. A common approach is to use the transformed observation $z_t = y_t^2$:
+For composed functions $\mathbf{x}_{N_\lambda} = f_{N_\lambda} \circ f_{N_\lambda-1} \circ \cdots \circ f_1(\mathbf{x}_0)$, the chain rule gives:
 \begin{equation}
-\gamma_t^{(i)} = \beta^2 \exp(\chi_t^{(i)}), \quad i = 0, 1, 2
+    \frac{\partial \mathbf{x}_{N_\lambda}}{\partial \mathbf{x}_0} = \frac{\partial \mathbf{x}_{N_\lambda}}{\partial \mathbf{x}_{N_\lambda-1}} \cdot \frac{\partial \mathbf{x}_{N_\lambda-1}}{\partial \mathbf{x}_{N_\lambda-2}} \cdots \frac{\partial \mathbf{x}_2}{\partial \mathbf{x}_1} \cdot \frac{\partial \mathbf{x}_1}{\partial \mathbf{x}_0}
 \end{equation}
 
-\textbf{3. Compute predicted observation statistics:}
-\begin{align}
-\hat{z}_t &= \sum_{i=0}^{2} W_i^{(m)} \gamma_t^{(i)} \\
-S_t &= \sum_{i=0}^{2} W_i^{(c)} (\gamma_t^{(i)} - \hat{z}_t)^2 + 2\beta^4 \exp(2m_t^-) \\
-C_t &= \sum_{i=0}^{2} W_i^{(c)} (\chi_t^{(i)} - m_t^-)(\gamma_t^{(i)} - \hat{z}_t)
-\end{align}
-
-\textbf{4. Kalman update:}
-\begin{align}
-K_t &= C_t S_t^{-1} \\
-m_t &= m_t^- + K_t (y_t^2 - \hat{z}_t) \\
-P_t &= P_t^- - K_t S_t K_t^T
-\end{align}
-
-\textbf{Note:} UKF better captures the nonlinearity than EKF but still assumes the posterior remains approximately Gaussian.
-
-\subsubsection*{3. Particle Filter}
-
-\textbf{Idea:} Represent the filtering distribution $p(x_t | y_{1:t})$ using weighted particles (samples).
-
-\textbf{Representation:}
+For our affine maps:
 \begin{equation}
-p(x_t | y_{1:t}) \approx \sum_{i=1}^{N} w_t^{(i)} \delta(x_t - x_t^{(i)})
+    \frac{\partial \mathbf{x}_{N_\lambda}}{\partial \mathbf{x}_0} = \mathbf{M}_{N_\lambda} \cdot \mathbf{M}_{N_\lambda-1} \cdots \mathbf{M}_2 \cdot \mathbf{M}_1 = \prod_{j=N_\lambda}^{1} \mathbf{M}_j
 \end{equation}
 
-where $\{x_t^{(i)}, w_t^{(i)}\}_{i=1}^{N}$ are particles and weights, with $\sum_{i=1}^{N} w_t^{(i)} = 1$.
-
-\textbf{Sequential Importance Sampling (SIS):}
-
-\textbf{Initialization} ($t = 0$):
-\begin{align}
-x_0^{(i)} &\sim p(x_0), \quad i = 1, \ldots, N \\
-w_0^{(i)} &= \frac{1}{N}
-\end{align}
-
-\textbf{For } $t = 1, 2, \ldots$:
-
-\textbf{1. Predict (Propagate particles):}
-
-Sample from the state transition:
+Substituting $\mathbf{M}_j = \mathbf{I} + \Delta\lambda_j \mathbf{A}_j$:
 \begin{equation}
-x_t^{(i)} = \alpha x_{t-1}^{(i)} + \sigma \epsilon^{(i)}, \quad \epsilon^{(i)} \sim \mathcal{N}(0, 1)
+    \mathbf{J} = \frac{\partial \mathbf{x}_{N_\lambda}}{\partial \mathbf{x}_0} = \prod_{j=N_\lambda}^{1} (\mathbf{I} + \Delta\lambda_j \mathbf{A}_j)
 \end{equation}
 
-\textbf{2. Update (Weight particles):}
+This is the **Jacobian matrix** of the flow map.
 
-Compute importance weights based on the observation likelihood:
-\begin{equation}
-p(y_t | x_t^{(i)}) = \mathcal{N}(y_t | 0, \beta^2 \exp(x_t^{(i)}))
-\end{equation}
-\begin{equation}
-= \frac{1}{\sqrt{2\pi \beta^2 \exp(x_t^{(i)})}} \exp\left(-\frac{y_t^2}{2\beta^2 \exp(x_t^{(i)})}\right)
-\end{equation}
+\subsubsection{Determinant of the Jacobian}
 
-Update weights:
+The Jacobian determinant is:
 \begin{equation}
-\tilde{w}_t^{(i)} = w_{t-1}^{(i)} \cdot p(y_t | x_t^{(i)})
+    \det(\mathbf{J}) = \det\left(\prod_{j=N_\lambda}^{1} (\mathbf{I} + \Delta\lambda_j \mathbf{A}_j)\right)
 \end{equation}
 
-\textbf{3. Normalize weights:}
+Using the property $\det(\mathbf{AB}) = \det(\mathbf{A})\det(\mathbf{B})$:
 \begin{equation}
-w_t^{(i)} = \frac{\tilde{w}_t^{(i)}}{\sum_{j=1}^{N} \tilde{w}_t^{(j)}}
+    \det(\mathbf{J}) = \prod_{j=1}^{N_\lambda} \det(\mathbf{I} + \Delta\lambda_j \mathbf{A}_j)
 \end{equation}
 
-\textbf{4. Resampling (when needed):}
-
-Check effective sample size:
+Taking absolute value for the weight update:
 \begin{equation}
-N_{\text{eff}} = \frac{1}{\sum_{i=1}^{N} (w_t^{(i)})^2}
+    |\det(\mathbf{J})| = \prod_{j=1}^{N_\lambda} |\det(\mathbf{I} + \Delta\lambda_j \mathbf{A}_j)|
 \end{equation}
 
-If $N_{\text{eff}} < N_{\text{threshold}}$ (e.g., $N/2$), resample:
+\subsubsection{Summary: Computational Recipe}
+
+To compute the Jacobian determinant for discretized particle flow:
+
+\begin{enumerate}
+    \item At each pseudo-time step $j = 1, \ldots, N_\lambda$:
+    \begin{itemize}
+        \item Compute flow parameters $\mathbf{A}_j$ and $\mathbf{b}_j$ via linearization
+        \item Form the matrix $\mathbf{M}_j = \mathbf{I} + \Delta\lambda_j \mathbf{A}_j$
+        \item Compute $\det(\mathbf{M}_j)$
+    \end{itemize}
+    
+    \item Multiply all determinants:
+    \begin{equation}
+        |\det(\mathbf{J})| = \prod_{j=1}^{N_\lambda} |\det(\mathbf{M}_j)|
+    \end{equation}
+\end{enumerate}
+
+
+
+\subsubsection{Connection to Weight Update}
+\begin{equation}
+    w_k^{(i)} \propto \frac{p(\eta_1^{(i)} | \mathbf{x}_{k-1}^{(i)}) \cdot p(\mathbf{z}_k | \eta_1^{(i)})}{p(\eta_0^{(i)} | \mathbf{x}_{k-1}^{(i)}) \cdot \left|\det \mathbf{J}_i\right|} \cdot w_{k-1}^{(i)}
+\end{equation}
+
+where:
 \begin{itemize}
-\item Draw $N$ new particles $\{\bar{x}_t^{(i)}\}_{i=1}^{N}$ from $\{x_t^{(i)}\}_{i=1}^{N}$ with probabilities $\{w_t^{(i)}\}_{i=1}^{N}$
-\item Set $x_t^{(i)} = \bar{x}_t^{(i)}$ and $w_t^{(i)} = 1/N$ for all $i$
+    \item $\mathbf{x}_{k-1}^{(i)}$ is the particle state at time $k-1$
+    \item $\eta_0^{(i)}$ is the particle after propagation through dynamics (before flow)
+    \item $\eta_1^{(i)}$ is the particle after particle flow (final state at time $k$)
+    \item $\mathbf{z}_k$ is the observation at time $k$
+    \item $\left|\det \mathbf{J}_i\right| = \prod_{j=1}^{N_\lambda} \left|\det(\mathbf{I} + \Delta\lambda_j \mathbf{A}_j^{(i)})\right|$ is the Jacobian determinant
+\end{itemize}
+What this does is two fold, what want to use the flow equation to move the particles, however, in a perfect world, we would have the the probability of the evolved sample equal to the initial sample times the Jacobian, however this is not the case in practice. I want to make sure we are incorporating the information about the numerator, therefore, we need to correct the discrepancy.
+
+
+
+
+
+\subsection{Particle flow filter (kernel method)}
+\textbf{References:
+\begin{itemize}
+\item Sequential Monte Carlo with kernel embedded mappings: The mapping particle filter (Pulidoa,  Leeuwen, 19)
+\item A particle flow filter for high-dimensional system applications (Hu, Leeuwen, 21)
+\end{itemize}
+}
+
+Our problem is the same as particle filter particle flow, move the particles to the desired location, without touching the weights, so that we get the target probability distribution $p(x_t | y_{1:t}) \propto p(y_t | x_t) p(x_t | y_{1:t-1})$. 
+
+\subsubsection{Optimal Transport via Gradient Flow}
+
+Define target posterior $\pi(x) := p(x_t | y_{1:t})$ and intermediate density $q_\lambda(x)$ at pseudo-time $\lambda \in [0,1]$. With $q_0 = p(x_t | y_{1:t-1})$ (prior), $q_1 = \pi$ (posterior).
+\begin{equation}
+\frac{dx_\lambda}{d\lambda} = v_\lambda(x_\lambda)
+\end{equation}
+Choose velocity $v_\lambda$ to minimize KL divergence as fast as possible:
+\begin{equation}
+D_{KL}(q_\lambda \| \pi) = \int q_\lambda(x) \log \frac{q_\lambda(x)}{\pi(x)} dx
+\end{equation}
+we need to formulate the above equation into an optimization problem. But the intuition of this method is clear, you want to evolve the point along a "straight" direction to the desire point. 
+
+
+\subsubsection{Deriving Optimal Velocity via Kernel Restriction}
+
+Under velocity field $v$, density evolves via Liouville equation:
+\begin{equation}
+\frac{\partial q_\lambda}{\partial \lambda} = -\nabla_x \cdot (q_\lambda v)
+\end{equation}
+
+Time derivative of $D_{KL}$:
+\begin{align}
+\frac{d}{d\lambda} D_{KL} &= \int \frac{\partial q_\lambda}{\partial \lambda} \left[\log q_\lambda(x) - \log \pi(x) + 1\right] dx \\
+&= -\int \nabla_x \cdot (q_\lambda v) \left[\log q_\lambda(x) - \log \pi(x) + 1\right] dx
+\end{align}
+
+Using $\nabla_x q_\lambda = q_\lambda \nabla_x \log q_\lambda$ and integrating by parts:
+\begin{equation}
+\frac{d}{d\lambda} D_{KL} = -\int q_\lambda \left[\nabla_x \log \pi(x) \cdot v + \nabla_x \cdot v\right] dx 
+\end{equation}
+
+The derivative with respect to the evolution parameter gives the vector field along the trajectory. To make things computatble, we restrict $v$ to functions generated by kernel $K(x,x')$. Any such function has form:
+\begin{equation}
+v(x) = \int \alpha(x') K(x', x) dx'
+\end{equation}
+for some coefficient function $\alpha(x')$. Substitute this into directional derivative.
+
+\begin{align}
+\frac{d}{d\lambda}D_{KL} &= -\int q_\lambda(x) \left[\nabla_x \log \pi(x) \cdot \int \alpha(x') K(x', x) dx' + \nabla_x \cdot \int \alpha(x') K(x', x) dx'\right] dx
+\end{align}
+
+Interchange integrals and use integration by parts:
+\begin{equation}
+\frac{d}{d\lambda} D_{KL} = \int \alpha(x) \cdot \phi(x) dx
+\end{equation}
+where
+\begin{equation}
+\phi(x) = -\int q_\lambda(x') \left[K(x,x')\nabla_{x'} \log \pi(x') + \nabla_{x'} K(x,x')\right] dx'
+\end{equation}
+
+We have $\frac{d}{d\lambda} D_{KL} = \langle \alpha, \phi \rangle$ (inner product in function space).
+
+To minimize this quantity (make KL decrease fastest), choose $\alpha$ antiparallel to $\phi$. By Cauchy-Schwarz, the minimum is achieved when:
+\begin{equation}
+\alpha(x) = -\phi(x)
+\end{equation}
+
+Therefore, optimal velocity field:
+\begin{align}
+v_\lambda(x) &= \int \alpha(x') K(x', x) dx' \\
+&= -\int \phi(x') K(x', x) dx'
+\end{align}
+
+By the reproducing property of the kernel, this simplifies to:
+\begin{equation}
+\boxed{v_\lambda(x) = \mathbb{E}_{x' \sim q_\lambda}\left[K(x,x')\nabla_{x'} \log \pi(x') + \nabla_{x'} K(x,x')\right]}
+\end{equation}
+Monte Carlo approximation with particles $\{x_\lambda^{(i)}\}_{i=1}^{N_p} \sim q_\lambda$:
+\begin{equation}
+v_\lambda(x) \approx \frac{1}{N_p} \sum_{i=1}^{N_p} \left[K(x^{(i)}_\lambda, x)\nabla \log \pi(x^{(i)}_\lambda) + \nabla K(x^{(i)}_\lambda, x)\right]
+\end{equation}
+
+Posterior gradient:
+\begin{equation}
+\nabla \log \pi(x) = \nabla \log p(y_t | x) + \nabla \log p(x | y_{1:t-1})
+\end{equation}
+First term = likelihood gradient (known). Second term = prior gradient (approximated from ensemble).
+
+Update rule:
+\begin{equation}
+x_{\lambda+\epsilon}^{(j)} = x_\lambda^{(j)} + \frac{\epsilon}{N_p} \sum_{i=1}^{N_p} \left[K(x^{(i)}_\lambda, x^{(j)}_\lambda)\nabla \log \pi(x^{(i)}_\lambda) + \nabla K(x^{(i)}_\lambda, x^{(j)}_\lambda)\right]
+\end{equation}
+
+Key advantage: All particles maintain equal weight $w^{(i)} = 1/N_p$ throughout. No resampling needed.
+
+Generality: Works for any differentiable likelihood $p(y_t | x_t)$ - not limited to Gaussian noise.
+\subsubsection{Scalar Kernel}
+
+Standard choice: isotropic Gaussian
+\begin{equation}
+K(x,x') = \exp\left(-\frac{1}{2\alpha\sigma^2}\|x-x'\|^2\right), \quad \alpha \sim n_x
+\end{equation}
+
+Gradient: $\nabla_x K(x,x') = -\frac{1}{\alpha\sigma^2}(x-x') K(x,x')$
+
+Single scalar $K(x,x')$ weights all components identically.
+
+Failure in high dimensions with sparse observations:
+
+Consider 1000-D state, 250 observations (25\% coverage):
+\begin{enumerate}
+\item Observed components converge rapidly (strong likelihood gradient)
+\item Unobserved components remain dispersed (weak/no gradient)
+\item Distance $\|x^{(i)} - x^{(j)}\|$ dominated by unobserved components
+\item Even when observed components nearly coincide, $K(x^{(i)}, x^{(j)}) \approx 0$
+\item Repulsion $\nabla K \propto K \approx 0$ in all directions
+\item Observed components collapse to posterior mode
+\end{enumerate}
+
+Global distance cannot distinguish heterogeneous convergence rates.
+
+\subsubsection{Matrix-Valued Kernel}
+
+Measure distance independently per component:
+\begin{equation}
+\mathbf{K}(x,x') = \text{diag}\left[K^{(1)}(x,x'), \ldots, K^{(n_x)}(x,x')\right]
+\end{equation}
+where
+\begin{equation}
+K^{(d)}(x,x') = \exp\left(-\frac{(x^{(d)} - x'^{(d)})^2}{2\alpha (\sigma^{(d)})^2}\right), \quad \alpha = \frac{1}{N_p}
+\end{equation}
+
+Component-wise repulsion:
+\begin{equation}
+\left[\nabla_x \cdot \mathbf{K}(x,x')\right]^{(d)} = -\frac{x^{(d)} - x'^{(d)}}{\alpha (\sigma^{(d)})^2} K^{(d)}(x,x')
+\end{equation}
+
+
+\begin{itemize}
+\item Observed component $d$: $x^{(d)} \approx x'^{(d)} \Rightarrow K^{(d)} \approx 1 \Rightarrow$ strong repulsion
+\item Unobserved component $d'$: $x^{(d')} \not\approx x'^{(d')} \Rightarrow K^{(d')} \approx 0 \Rightarrow$ weak repulsion
+\item Repulsion in dimension $d$ independent of distances in other dimensions
 \end{itemize}
 
-\textbf{State Estimates:}
+Observed dimensions maintain diversity regardless of unobserved dimension spread.
 
-Filtered mean:
+
+
+
+
+
+\newpage
+\section{Part one}
+\subsection{Kalman filter}
+\subsubsection{1-d filter implementation}
+This is just to set the foundation for later experiments. This is a one-dimensional linear-Gaussian state-space model:
+\begin{align}
+x_{t+1} &= 0.9 x_t + 0.5 + w_t, \quad w_t \sim \mathcal{N}(0, 1) \\
+y_t &= 1.1 x_t + 0.3  v_t, \quad v_t \sim \mathcal{N}(0, 1)
+\end{align}
+
+with initial state $x_0 \sim \mathcal{N}(0, 1)$ and $T = 15,000$ time steps. The filter uses the standard covariance update form (not Joseph form).
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{../part1/results/kexp1_plot1.png}
+\caption{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{../part1/results/kexp1_plot2.png}
+\caption{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{../part1/results/kexp1_plot31.png}
+\caption{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{../part1/results/kexp1_plot32.png}
+\caption{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{../part1/results/kexp1_plot4.png}
+\caption{}
+\end{figure}
+We see that the filter worked very well.
+\subsubsection{Joseph form vs standard covariance update}
+\textbf{Standard Covariance Update:}
 \begin{equation}
-\hat{x}_t = \sum_{i=1}^{N} w_t^{(i)} x_t^{(i)}
+P_{t|t} = (I - K_t H) P_{t|t-1}
+\end{equation}
+where $K_t = P_{t|t-1} H^T S_t^{-1}$ and $S_t = H P_{t|t-1} H^T + R$.
+
+\textbf{Tiny Observation Noise ($R \to 0$)}
+
+When $R = \epsilon I$ with $\epsilon \ll 1$:
+\begin{equation}
+S_t = H P_{t|t-1} H^T + \epsilon I
 \end{equation}
 
-Filtered variance:
+The condition number is:
 \begin{equation}
-\hat{P}_t = \sum_{i=1}^{N} w_t^{(i)} (x_t^{(i)} - \hat{x}_t)^2
+\kappa(S_t) = \frac{\lambda_{\max}(HP_{t|t-1}H^T) + \epsilon}{\epsilon} \approx \frac{\lambda_{\max}}{\epsilon}
 \end{equation}
 
-\textbf{Key Issues:}
+For $\epsilon = 10^{-10}$ and $\lambda_{\max} \sim 1$, we have $\kappa(S_t) \sim 10^{10}$.
+
+Computing $S_t^{-1}$ in finite precision with machine epsilon $\epsilon_{\text{mach}} \sim 10^{-16}$:
+\begin{equation}
+\text{Relative error in } S_t^{-1} \sim \kappa(S_t) \cdot \epsilon_{\text{mach}} \sim 10^{10} \times 10^{-16} = 10^{-6}
+\end{equation}
+
+This propagates to $K_t$ and then to:
+\begin{equation}
+P_{t|t} = P_{t|t-1} - K_t S_t K_t^T + \mathcal{O}(\text{error})
+\end{equation}
+
+Small errors in $K_t$ destroy positive definiteness through the subtraction.
+
+% \textbf{Case 2: Large Eigenvalue Spread in $F$}
+
+% Consider:
+% \begin{equation}
+% F = \text{diag}(\lambda_1, \lambda_2), \quad \lambda_1 = 100, \; \lambda_2 = 0.01
+% \end{equation}
+
+% After $t$ prediction steps:
+% \begin{equation}
+% P_{t|t-1} \approx F^t P_0 (F^T)^t + \text{noise terms}
+% \end{equation}
+
+% Eigenvalues of $P_{t|t-1}$ scale as $\lambda_i^{2t}$, giving condition number:
+% \begin{equation}
+% \kappa(P_{t|t-1}) = \frac{(100)^{2t}}{(0.01)^{2t}} = (10^4)^t
+% \end{equation}
+
+% After $t=5$ steps: $\kappa \sim 10^{20}$, causing catastrophic loss of precision.
+
+% The standard update $P_{t|t} = (I - KH)P_{t|t-1}$ requires subtracting nearly equal numbers across different magnitude ranges, leading to loss of significance and potential loss of positive definiteness.
+
+% \textbf{Case 3: Redundant Observations}
+
+% For:
+% \begin{equation}
+% H = \begin{pmatrix} 1 & 0 \\ 1 & 0 \end{pmatrix}
+% \end{equation}
+
+% we have $H^T H = \begin{pmatrix} 2 & 0 \\ 0 & 0 \end{pmatrix}$, which is singular.
+
+% The innovation covariance becomes:
+% \begin{equation}
+% S_t = HP_{t|t-1}H^T + R = \begin{pmatrix} p_{11} + r & p_{11} \\ p_{11} & p_{11} + r \end{pmatrix}
+% \end{equation}
+
+% with determinant:
+% \begin{equation}
+% \det(S_t) = (p_{11}+r)^2 - p_{11}^2 = r(2p_{11} + r)
+% \end{equation}
+
+% When $r \ll p_{11}$, the matrix is nearly singular and:
+% \begin{equation}
+% S_t^{-1} \propto \frac{1}{r(2p_{11} + r)} \sim \frac{1}{2rp_{11}}
+% \end{equation}
+
+% amplifying numerical errors by factor $\sim 1/r$.
+
+% \textbf{Case 4: High Dimension with Partial Observation}
+
+% For state dimension $n = 50$ and observation dimension $m = 2$, the observation matrix $H \in \mathbb{R}^{2 \times 50}$ projects to a 2D subspace, leaving a 48-dimensional null space unobserved.
+
+% In unobserved directions, covariance grows unbounded:
+% \begin{equation}
+% P_{t|t-1}^{\text{unobs}} \to \infty
+% \end{equation}
+
+% While $KH$ only affects 2 directions, numerical errors accumulate in the computation of $(I - KH)P_{t|t-1}$ over many steps:
+% \begin{equation}
+% \text{Accumulated error} \sim t \cdot \epsilon_{\text{mach}} \cdot \|P_{t|t-1}\|
+% \end{equation}
+
+% This can eventually destroy the matrix structure.
+
+\textbf{Why Joseph Form Fixes This}
+
+The Joseph form:
+\begin{equation}
+P_{t|t} = (I - KH)P_{t|t-1}(I - KH)^T + K R K^T
+\end{equation}
+
+To demonstrate why this works, we go back to one dimension.
+
+\begin{equation}
+    P^+ = (1-KH)^2 P^- + K^2 R
+    \end{equation}
+
+This structure guarantees $P_{t|t} \geq 0$ regardless of numerical errors in $K$. Even if $K$ is computed incorrectly due to ill-conditioning, the form preserves positive definiteness, whereas the standard form requires precise cancellation in $P - KHP$ which fails under poor conditioning. Result is that, only tiny Observation Noise will break it. 
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{../part1/results/kexp2f_plot3.png}
+\caption{Standard covariance update with tiny observation noise ($R = 10^{-8}I$).}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{../part1/results/kexp2t_plot3.png}
+\caption{Joseph form covariance update with tiny observation noise ($R = 10^{-8}I$).}
+\end{figure}
+We clearly see that Joseph covariance update will solve this numerical instability. There are 3 more cases where I did the test but not included here, mostly due to the fact that original update worked fine. 
+\subsection{EKF, UKF and particle filter}
 \begin{itemize}
-\item \textbf{Particle degeneracy:} After several iterations, most weights become negligible
-\item \textbf{Sample impoverishment:} After resampling, many particles are duplicates
-\item \textbf{Curse of dimensionality:} Number of particles needed grows exponentially with state dimension
+\item Non-linearality completely broke EKF and UKF, but particle filter works.
+\item For the range-bearing, all three of them works but degeneracy problem is much worse due to high dimension. (\color{red} Implemented in the code, did some preliminary test, did not have time to do comprehensive tests)
 \end{itemize}
 
-\textbf{Advantages:}
-\begin{itemize}
-\item No linearity or Gaussianity assumptions
-\item Asymptotically exact as $N \to \infty$
-\item Can handle arbitrary nonlinearities
-\end{itemize}
+We use the following Stochastic Volatility model,
 
-\section{Literature review for part one}
+\begin{align}
+x_{t+1} &= 0.91 x_t +  w_t, \quad w_t \sim \mathcal{N}(0, 1) \\
+y_t &= 0.5 \exp(x_t/2) \cdot v_t, \quad v_t \sim \mathcal{N}(0, 1)
+\end{align}
+with the initial condition drawn from $N(0,\frac{\sigma^2}{1-\alpha^2})$, where $\alpha=0.91, \sigma=1$. $EKF: 0.1101 seconds, UKF: 0.1975 seconds, PF: 84.2930 seconds$
 
-\subsection{}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{../part1/results/EKF1.png}
+\caption{Extended Kalman Filter (EKF) results.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{../part1/results/UKF1.png}
+\caption{Unscented Kalman Filter (UKF) results.}
+\end{figure}
+Both Kalman-like methods failed completely. There is no update at all, as a matter of fact, the mean states at zero and variance stays constant. It's easy to see that these are just the initial condition of the filter. This is due to the multiplicative nature of the noise, the h of the process was mistaken as zero, which leads to zero Kalman gain.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{../part1/results/PF1.png}
+\caption{Particle Filter result compared with ground truth with uncertainty}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{../part1/results/PF2.png}
+\caption{Particle Filter effective sample size. We see that ESS constantly drops below half of the total particle number which mean we need to resample}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{../part1/results/PF3.png}
+\caption{Particle Filter result compared with ground truth with observation}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{../part1/results/PF4.png}
+\caption{Number of unique particles as a function of time}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{../part1/results/PF5.png}
+\caption{Particle weight distribution. We see large weight particles dominate}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{../part1/results/PF6.png}
+\caption{Log likelihood as a function of time. Comparison between all three filter}
+\end{figure}
+
+we see that for most of the time, particle filter log likelihood is above the other two filter. More experiments should be taken, for example, maybe the cross over point corresponds to resampling. Log likelihood is just the $\log p(y_t| y_{1:t-1})$, the better the filter, the higher the probability to predict the next observation.
+
+
+\subsection{All about particle flow}
+\subsubsection{EDH, LEDH and PF-PF}
+ 
+\subsubsection{PFF-kernel method}
+
+
+\newpage
+\section{Part two}
+\newpage
+
+
+\section{Bonues}
+
+
+
+
+
 
  
 

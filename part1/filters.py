@@ -13,7 +13,8 @@ This module provides four filtering algorithms:
 import numpy as np
 from typing import Tuple, Optional, Dict, List
 from models import StateSpaceModel
-from scipy.spatial.distance import cdist
+from concurrent.futures import ThreadPoolExecutor
+import os
 
 class KalmanFilter:
     """
@@ -558,7 +559,7 @@ class ParticleFilter:
     """
     
     def __init__(self, model: StateSpaceModel, n_particles: int = 1000,
-                 resample_threshold: float = 0.5):
+                 resample_threshold: float = 0.5, n_threads: Optional[int] = None):
         """
         Initialize the Particle Filter.
         
@@ -566,11 +567,18 @@ class ParticleFilter:
             model: State-space model instance
             n_particles: Number of particles (default 1000)
             resample_threshold: Resample when ESS/N < threshold (default 0.5)
+            n_threads: Number of threads for parallelization (default: CPU count, None = no threading)
         """
         self.model = model
         self.state_dim = model.state_dim
         self.n_particles = n_particles
         self.resample_threshold = resample_threshold
+        
+        # Threading setup
+        if n_threads is None:
+            self.n_threads = os.cpu_count() if os.cpu_count() else 1
+        else:
+            self.n_threads = max(1, int(n_threads))
         
         # Particles and weights
         self.particles = None
@@ -646,11 +654,24 @@ class ParticleFilter:
         if random_state is not None:
             self.random_state = random_state
         
-        # Sample initial particles
-        self.particles = np.array([
-            self.model.sample_initial_state(self.random_state)
-            for _ in range(self.n_particles)
-        ])
+        # Sample initial particles (parallelized if n_threads > 1)
+        if self.n_threads > 1:
+            # Pre-generate seeds to avoid race conditions
+            seeds = self.random_state.integers(0, 2**32, size=self.n_particles)
+            
+            def sample_particle(args):
+                i, seed = args
+                # Create a new RNG for each thread to avoid race conditions
+                thread_rng = np.random.default_rng(seed)
+                return self.model.sample_initial_state(thread_rng)
+            
+            with ThreadPoolExecutor(max_workers=self.n_threads) as executor:
+                self.particles = np.array(list(executor.map(sample_particle, enumerate(seeds))))
+        else:
+            self.particles = np.array([
+                self.model.sample_initial_state(self.random_state)
+                for _ in range(self.n_particles)
+            ])
         
         # Uniform weights
         self.weights = np.ones(self.n_particles) / self.n_particles
@@ -666,11 +687,24 @@ class ParticleFilter:
     
     def predict(self):
         """Prediction step: propagate particles through state transition."""
-        # Sample new particles from state transition
-        self.particles = np.array([
-            self.model.sample_state_transition(self.particles[i], self.random_state)
-            for i in range(self.n_particles)
-        ])
+        # Sample new particles from state transition (parallelized if n_threads > 1)
+        if self.n_threads > 1:
+            # Pre-generate seeds to avoid race conditions
+            seeds = self.random_state.integers(0, 2**32, size=self.n_particles)
+            
+            def propagate_particle(args):
+                i, seed = args
+                # Create a new RNG for each thread to avoid race conditions
+                thread_rng = np.random.default_rng(seed)
+                return self.model.sample_state_transition(self.particles[i], thread_rng)
+            
+            with ThreadPoolExecutor(max_workers=self.n_threads) as executor:
+                self.particles = np.array(list(executor.map(propagate_particle, zip(range(self.n_particles), seeds))))
+        else:
+            self.particles = np.array([
+                self.model.sample_state_transition(self.particles[i], self.random_state)
+                for i in range(self.n_particles)
+            ])
     
     def update(self, y: np.ndarray, timestep: int):
         """
@@ -680,11 +714,18 @@ class ParticleFilter:
             y: Observation, shape (obs_dim,)
             timestep: Current timestep (for resampling tracking)
         """
-        # Compute observation log-likelihoods
-        log_weights = np.array([
-            self.model.log_observation_prob(y, self.particles[i])
-            for i in range(self.n_particles)
-        ])
+        # Compute observation log-likelihoods (parallelized if n_threads > 1)
+        if self.n_threads > 1:
+            def compute_log_weight(i):
+                return self.model.log_observation_prob(y, self.particles[i])
+            
+            with ThreadPoolExecutor(max_workers=self.n_threads) as executor:
+                log_weights = np.array(list(executor.map(compute_log_weight, range(self.n_particles))))
+        else:
+            log_weights = np.array([
+                self.model.log_observation_prob(y, self.particles[i])
+                for i in range(self.n_particles)
+            ])
         
         # Normalize weights (log-sum-exp trick for numerical stability)
         max_log_weight = np.max(log_weights)
@@ -692,7 +733,6 @@ class ParticleFilter:
         self.weights = np.exp(log_weights_normalized)
         self.weights = self.weights / np.sum(self.weights)
         
-        # Save weights BEFORE resampling (for diagnostics)
         self.weights_history.append(self.weights.copy())
         
         # Log-likelihood estimate: log p(y_t | y_{1:t-1})
@@ -791,7 +831,8 @@ class ExactDaumHuangFlow:
     """
     
     def __init__(self, model, n_particles: int = 1000, 
-                 n_lambda_steps: int = 100, integration_method: str = 'euler'):
+                 n_lambda_steps: int = 100, integration_method: str = 'euler',
+                 n_threads: Optional[int] = None):
         """
         Initialize Exact Daum-Huang Flow Filter.
         
@@ -800,6 +841,7 @@ class ExactDaumHuangFlow:
             n_particles: Number of particles
             n_lambda_steps: Number of discretization steps for λ ∈ [0,1]
             integration_method: 'euler' or 'rk4' for ODE integration
+            n_threads: Number of threads for parallelization (default: CPU count, None = no threading)
         """
         self.model = model
         self.state_dim = model.state_dim
@@ -808,13 +850,18 @@ class ExactDaumHuangFlow:
         self.n_lambda_steps = n_lambda_steps
         self.integration_method = integration_method
         
+        # Threading setup
+        if n_threads is None:
+            self.n_threads = os.cpu_count() if os.cpu_count() else 1
+        else:
+            self.n_threads = max(1, int(n_threads))
+        
         # Particles (all have equal weight 1/N)
         self.particles = None
         
         # Storage
         self.means = []
         self.covs = []
-        self.flow_diagnostics = []
         
         # Random state
         self.random_state = np.random.default_rng()
@@ -829,10 +876,17 @@ class ExactDaumHuangFlow:
         Returns:
             h_particles: Shape (N, obs_dim)
         """
-        h_particles = np.array([
-            self.model.observation_function(particles[i])
-            for i in range(self.n_particles)
-        ])
+        if self.n_threads > 1:
+            def compute_h(i):
+                return self.model.observation_function(particles[i])
+            
+            with ThreadPoolExecutor(max_workers=self.n_threads) as executor:
+                h_particles = np.array(list(executor.map(compute_h, range(self.n_particles))))
+        else:
+            h_particles = np.array([
+                self.model.observation_function(particles[i])
+                for i in range(self.n_particles)
+            ])
         return h_particles
     
     def _compute_gain(self, particles: np.ndarray, lambda_val: float) -> np.ndarray:
@@ -846,7 +900,7 @@ class ExactDaumHuangFlow:
         
         Args:
             particles: Current particle locations, shape (N, state_dim)
-            lambda_val: Current pseudo-time λ (for diagnostics)
+            lambda_val: Current pseudo-time λ
             
         Returns:
             K: Gain matrix, shape (state_dim, obs_dim)
@@ -945,10 +999,23 @@ class ExactDaumHuangFlow:
     
     def predict(self):
         """Prediction step: propagate particles through state transition."""
-        self.particles = np.array([
-            self.model.sample_state_transition(self.particles[i], self.random_state)
-            for i in range(self.n_particles)
-        ])
+        if self.n_threads > 1:
+            # Pre-generate seeds to avoid race conditions
+            seeds = self.random_state.integers(0, 2**32, size=self.n_particles)
+            
+            def propagate_particle(args):
+                i, seed = args
+                # Create a new RNG for each thread to avoid race conditions
+                thread_rng = np.random.default_rng(seed)
+                return self.model.sample_state_transition(self.particles[i], thread_rng)
+            
+            with ThreadPoolExecutor(max_workers=self.n_threads) as executor:
+                self.particles = np.array(list(executor.map(propagate_particle, zip(range(self.n_particles), seeds))))
+        else:
+            self.particles = np.array([
+                self.model.sample_state_transition(self.particles[i], self.random_state)
+                for i in range(self.n_particles)
+            ])
     
     def update(self, y: np.ndarray):
         """
@@ -967,23 +1034,7 @@ class ExactDaumHuangFlow:
         # Flow integration
         particles_flow = self.particles.copy()
         
-        flow_diagnostic = {
-            'particle_spread': [],
-            'mean_shift': []
-        }
-        
-        prev_mean = np.mean(particles_flow, axis=0)
-        
         for i, lambda_val in enumerate(lambdas[:-1]):
-            # Store diagnostics
-            particle_std = np.std(particles_flow, axis=0).mean()
-            flow_diagnostic['particle_spread'].append(particle_std)
-            
-            if i > 0:
-                mean_shift = np.linalg.norm(np.mean(particles_flow, axis=0) - prev_mean)
-                flow_diagnostic['mean_shift'].append(mean_shift)
-            prev_mean = np.mean(particles_flow, axis=0)
-            
             # Take flow step
             if self.integration_method == 'euler':
                 particles_flow = self._flow_step_euler(particles_flow, y, lambda_val, d_lambda)
@@ -994,9 +1045,6 @@ class ExactDaumHuangFlow:
         
         # Update particles (now at λ=1, representing posterior)
         self.particles = particles_flow
-        
-        # Store diagnostics
-        self.flow_diagnostics.append(flow_diagnostic)
     
     def _estimate_mean_cov(self) -> Tuple[np.ndarray, np.ndarray]:
         """
@@ -1016,15 +1064,27 @@ class ExactDaumHuangFlow:
         if random_state is not None:
             self.random_state = random_state
         
-        self.particles = np.array([
-            self.model.sample_initial_state(self.random_state)
-            for _ in range(self.n_particles)
-        ])
+        if self.n_threads > 1:
+            # Pre-generate seeds to avoid race conditions
+            seeds = self.random_state.integers(0, 2**32, size=self.n_particles)
+            
+            def sample_particle(args):
+                i, seed = args
+                # Create a new RNG for each thread to avoid race conditions
+                thread_rng = np.random.default_rng(seed)
+                return self.model.sample_initial_state(thread_rng)
+            
+            with ThreadPoolExecutor(max_workers=self.n_threads) as executor:
+                self.particles = np.array(list(executor.map(sample_particle, enumerate(seeds))))
+        else:
+            self.particles = np.array([
+                self.model.sample_initial_state(self.random_state)
+                for _ in range(self.n_particles)
+            ])
         
         # Reset storage
         self.means = []
         self.covs = []
-        self.flow_diagnostics = []
     
     def filter(self, observations: np.ndarray,
                random_state: Optional[np.random.Generator] = None) -> Tuple[np.ndarray, np.ndarray]:
@@ -1054,7 +1114,6 @@ class ExactDaumHuangFlow:
     def get_diagnostics(self) -> dict:
         """Return diagnostic information about flow convergence."""
         return {
-            'flow_diagnostics': self.flow_diagnostics,
             'final_particles': self.particles
         }
 
@@ -1070,14 +1129,16 @@ class LocalExactDaumHuangFlow(ExactDaumHuangFlow):
     def __init__(self, model, n_particles: int = 1000,
                  n_lambda_steps: int = 100, integration_method: str = 'euler',
                  kernel_bandwidth: Optional[float] = None,
-                 kernel_type: str = 'gaussian'):
+                 kernel_type: str = 'gaussian',
+                 n_threads: Optional[int] = None):
         """
         Args:
             kernel_bandwidth: Bandwidth for kernel density estimation.
                             If None, use Silverman's rule: σ * N^{-1/(d+4)}
             kernel_type: 'gaussian' or 'epanechnikov'
+            n_threads: Number of threads for parallelization (default: CPU count, None = no threading)
         """
-        super().__init__(model, n_particles, n_lambda_steps, integration_method)
+        super().__init__(model, n_particles, n_lambda_steps, integration_method, n_threads)
         self.kernel_bandwidth = kernel_bandwidth
         self.kernel_type = kernel_type
     
@@ -1176,18 +1237,34 @@ class LocalExactDaumHuangFlow(ExactDaumHuangFlow):
         # Evaluate h(x) once for all particles
         h_particles = self._compute_observation_matrix(particles)
         
-        # Update each particle using its local gain
+        # Update each particle using its local gain (parallelized if n_threads > 1)
         particles_new = particles.copy()
-        for i in range(self.n_particles):
-            # Compute local gain for particle i
-            K_i = self._compute_local_gain(i, particles, h_particles, bandwidth)
+        
+        if self.n_threads > 1:
+            def update_particle(i):
+                # Compute local gain for particle i
+                K_i = self._compute_local_gain(i, particles, h_particles, bandwidth)
+                
+                # Innovation for particle i
+                innovation = y - h_particles[i]  # (obs_dim,)
+                
+                # Flow update
+                dx = K_i @ innovation  # (state_dim,)
+                return particles[i] + dx * d_lambda
             
-            # Innovation for particle i
-            innovation = y - h_particles[i]  # (obs_dim,)
-            
-            # Flow update
-            dx = K_i @ innovation  # (state_dim,)
-            particles_new[i] = particles[i] + dx * d_lambda
+            with ThreadPoolExecutor(max_workers=self.n_threads) as executor:
+                particles_new = np.array(list(executor.map(update_particle, range(self.n_particles))))
+        else:
+            for i in range(self.n_particles):
+                # Compute local gain for particle i
+                K_i = self._compute_local_gain(i, particles, h_particles, bandwidth)
+                
+                # Innovation for particle i
+                innovation = y - h_particles[i]  # (obs_dim,)
+                
+                # Flow update
+                dx = K_i @ innovation  # (state_dim,)
+                particles_new[i] = particles[i] + dx * d_lambda
         
         return particles_new
     
@@ -1196,5 +1273,4 @@ class LocalExactDaumHuangFlow(ExactDaumHuangFlow):
         """RK4 with local gains - significantly more expensive."""
         # Would require 4 evaluations of local gains per particle
         # Fall back to Euler for now
-        print("Warning: RK4 not implemented for local flow, using Euler")
         return self._flow_step_euler(particles, y, lambda_val, d_lambda)
