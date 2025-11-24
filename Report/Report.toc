@@ -1,0 +1,36 @@
+\contentsline {section}{\numberline {1}Overview for part one:}{3}{section.1}%
+\contentsline {subsection}{\numberline {1.1}1-d Linear Gaussian model and Kalman filter}{3}{subsection.1.1}%
+\contentsline {subsection}{\numberline {1.2}Generalization of Kalman filter}{5}{subsection.1.2}%
+\contentsline {subsection}{\numberline {1.3}Use particles}{6}{subsection.1.3}%
+\contentsline {subsection}{\numberline {1.4}Particle flow}{8}{subsection.1.4}%
+\contentsline {subsection}{\numberline {1.5}(Invertible) Particle flow particle filter}{11}{subsection.1.5}%
+\contentsline {subsubsection}{\numberline {1.5.1}Particle Flow Particle Filter (EDH/LEDH)}{12}{subsubsection.1.5.1}%
+\contentsline {paragraph}{Setup:}{12}{section*.2}%
+\contentsline {paragraph}{Theoretical target:}{12}{section*.3}%
+\contentsline {paragraph}{Exact Daum-Huang (EDH) Flow:}{12}{section*.4}%
+\contentsline {paragraph}{EDH flow velocity:}{13}{section*.5}%
+\contentsline {paragraph}{Key property of EDH:}{13}{section*.6}%
+\contentsline {paragraph}{Weight update for EDH:}{13}{section*.7}%
+\contentsline {paragraph}{Local Exact Daum-Huang (LEDH):}{13}{section*.8}%
+\contentsline {paragraph}{Weight update for LEDH:}{14}{section*.9}%
+\contentsline {paragraph}{Rearranging as an affine map:}{14}{section*.10}%
+\contentsline {subsubsection}{\numberline {1.5.2}Jacobian of an Affine Map}{14}{subsubsection.1.5.2}%
+\contentsline {paragraph}{Intuition:}{15}{section*.11}%
+\contentsline {subsubsection}{\numberline {1.5.3}Determinant of the Jacobian}{15}{subsubsection.1.5.3}%
+\contentsline {subsubsection}{\numberline {1.5.4}Summary: Computational Recipe}{15}{subsubsection.1.5.4}%
+\contentsline {subsubsection}{\numberline {1.5.5}Connection to Weight Update}{16}{subsubsection.1.5.5}%
+\contentsline {subsection}{\numberline {1.6}Particle flow filter (kernel method)}{16}{subsection.1.6}%
+\contentsline {subsubsection}{\numberline {1.6.1}Optimal Transport via Gradient Flow}{16}{subsubsection.1.6.1}%
+\contentsline {subsubsection}{\numberline {1.6.2}Deriving Optimal Velocity via Kernel Restriction}{17}{subsubsection.1.6.2}%
+\contentsline {subsubsection}{\numberline {1.6.3}Scalar Kernel}{18}{subsubsection.1.6.3}%
+\contentsline {subsubsection}{\numberline {1.6.4}Matrix-Valued Kernel}{19}{subsubsection.1.6.4}%
+\contentsline {section}{\numberline {2}Part one}{20}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Kalman filter}{20}{subsection.2.1}%
+\contentsline {subsubsection}{\numberline {2.1.1}1-d filter implementation}{20}{subsubsection.2.1.1}%
+\contentsline {subsubsection}{\numberline {2.1.2}Joseph form vs standard covariance update}{22}{subsubsection.2.1.2}%
+\contentsline {subsection}{\numberline {2.2}EKF, UKF and particle filter}{23}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}All about particle flow}{27}{subsection.2.3}%
+\contentsline {subsubsection}{\numberline {2.3.1}EDH, LEDH and PF-PF}{27}{subsubsection.2.3.1}%
+\contentsline {subsubsection}{\numberline {2.3.2}PFF-kernel method}{27}{subsubsection.2.3.2}%
+\contentsline {section}{\numberline {3}Part two}{28}{section.3}%
+\contentsline {section}{\numberline {4}Bonues}{29}{section.4}%
