@@ -8,5 +8,7 @@ This is the repository for the second interview problem: Particle Flow Filter an
 - **code for bonus questions**
 
 **Implementation Progress:** Part one algorithms implemented, did not have time to reproduce the test in the paper for the particle flow particle filter and particle flow filter  
+
 **Testing Progress:** In progress, learning the framework
-**Report Progress:** Derived and understood the part one algorithms, can see the motivation for later part.
+
+**Report Progress:** Derived and understood the part one algorithms, can see the motivation for later part. Did not include the result of all experiments in the report yet.
