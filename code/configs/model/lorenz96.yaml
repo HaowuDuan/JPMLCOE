@@ -1,0 +1,22 @@
+# Lorenz 96 Model Configuration
+_target_: src.models.lorenz96.Lorenz96Model
+
+# Lorenz 96 parameters
+state_dim: 1000      # 1000-dimensional system
+forcing: 8.0         # F = 8 (chaotic regime)
+dt: 0.01             # RK4 time step Δt = 0.01
+
+# Observation timing
+# Δt_obs = 20 model time units = 2000 RK4 steps (20 / 0.01 = 2000)
+obs_interval: 20
+
+# Observation configuration (25% coverage)
+obs_spacing: 4       # Observe every 4th variable (indices 3, 7, 11, ...)
+obs_noise_std: 0.7071  # sqrt(0.5), so R = 0.5 * I matches paper
+
+# Process noise (deterministic dynamics as in paper)
+process_noise_std: 0.0
+
+# Initial condition
+initial_spread: 1.414  # sqrt(2) from N(0, 2I)
+spinup_steps: 1000     # 1000 integration steps = 10 model time units

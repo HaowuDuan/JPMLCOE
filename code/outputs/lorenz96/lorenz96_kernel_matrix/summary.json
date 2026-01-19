@@ -1,0 +1,52 @@
+{
+  "rmse": 1.6007974453539404,
+  "log_likelihood": null,
+  "metadata": {
+    "filter_type": "KernelMappingPF",
+    "kernel_type": "matrix",
+    "n_particles": 20,
+    "mean_iterations": 370.0,
+    "total_iterations": 740,
+    "n_integration_steps": 1,
+    "performance": {
+      "wall_time_seconds": 17.099345208029263,
+      "time_per_timestep_ms": 8549.672604014631,
+      "peak_memory_mb": 61.87199878692627,
+      "memory_increase_mb": 214.375,
+      "start_memory_mb": 532.765625,
+      "end_memory_mb": 747.140625,
+      "num_timesteps": 2
+    }
+  },
+  "config": {
+    "model": {
+      "_target_": "src.models.lorenz96.Lorenz96Model",
+      "state_dim": 1000,
+      "forcing": 8.0,
+      "dt": 0.01,
+      "obs_interval": 20,
+      "obs_spacing": 4,
+      "obs_noise_std": 0.7071,
+      "process_noise_std": 0.0,
+      "initial_spread": 1.414,
+      "spinup_steps": 1000
+    },
+    "filter": {
+      "_target_": "src.filters.particle.kernel_flow.KernelMappingPF",
+      "n_particles": 20,
+      "kernel_type": "matrix",
+      "max_iter": 500,
+      "initial_dt": 0.05,
+      "convergence_tol": 0.01,
+      "alpha": null,
+      "localization_radius": 4.0,
+      "use_preconditioner": true,
+      "adaptive_dt": true
+    },
+    "seed": 42,
+    "T": 2,
+    "output_dir": "outputs/lorenz96/lorenz96_kernel_matrix",
+    "plot": true,
+    "verbose": true
+  }
+}

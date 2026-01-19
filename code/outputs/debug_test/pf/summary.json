@@ -1,0 +1,57 @@
+{
+  "rmse": 246.08970119171374,
+  "log_likelihood": 1041.3741272244056,
+  "metadata": {
+    "filter_type": "ParticleFilter",
+    "n_particles": 1000,
+    "resampling_rate": 0.006666666666666667,
+    "performance": {
+      "wall_time_seconds": 35.2967487500282,
+      "time_per_timestep_ms": 117.65582916676067,
+      "peak_memory_mb": 4.931873321533203,
+      "memory_increase_mb": 3.5625,
+      "start_memory_mb": 494.359375,
+      "end_memory_mb": 497.921875,
+      "num_timesteps": 300
+    }
+  },
+  "config": {
+    "model": {
+      "_target_": "src.models.acoustic_tracking.AcousticTrackingModel",
+      "sensor_positions": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          40.0,
+          0.0
+        ],
+        [
+          0.0,
+          40.0
+        ],
+        [
+          40.0,
+          40.0
+        ]
+      ],
+      "source_intensity": 10.0,
+      "regularization": 0.1,
+      "measurement_noise_std": 0.1,
+      "process_noise_cov": null,
+      "dt": 1.0
+    },
+    "filter": {
+      "_target_": "src.filters.particle.bootstrap_pf.ParticleFilter",
+      "_recursive_": false,
+      "n_particles": 1000,
+      "resample_threshold": 0.5
+    },
+    "seed": 42,
+    "T": 300,
+    "output_dir": "outputs/debug_test/pf",
+    "plot": true,
+    "verbose": true
+  }
+}

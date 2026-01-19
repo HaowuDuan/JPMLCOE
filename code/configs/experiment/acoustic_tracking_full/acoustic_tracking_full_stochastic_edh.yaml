@@ -1,0 +1,14 @@
+# @package _global_
+
+# Experiment: Stochastic EDH Filter on Multi-Target Acoustic Tracking Model
+
+defaults:
+  - override /model: acoustic_tracking_full
+  - override /filter: stochastic_edh
+
+# Override settings
+T: 50
+seed: 42
+plot: true
+output_dir: outputs/acoustic_tracking_full/acoustic_tracking_full_stochastic_edh
+

@@ -1,0 +1,20 @@
+# @package _global_
+
+# Experiment: Bootstrap Particle Filter with Soft Resampling (alpha=0.7) on Stochastic Volatility
+# Medium alpha = balanced between exploration and exploitation
+
+defaults:
+  - override /model: stochastic_volatility
+  - override /filter: particle_tf_soft
+
+# Override settings
+T: 500
+seed: 42
+plot: true
+output_dir: outputs/stochastic_volatility/stochastic_volatility_pf_soft_alpha0.7
+
+# Override filter parameters
+filter:
+  resampling_config:
+    alpha: 0.7  # Balanced resampling
+

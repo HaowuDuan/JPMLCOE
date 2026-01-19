@@ -1,0 +1,10 @@
+# Unscented Kalman Filter Configuration
+
+_target_: src.filters.kalman.unscented_kalman.UnscentedKalmanFilter
+
+# model: will be passed from experiment
+
+# UKF parameters
+alpha: 1.0e-3  # Spread of sigma points
+beta: 2.0      # Prior knowledge (2 = Gaussian)
+kappa: 0.0     # Secondary scaling

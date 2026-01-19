@@ -1,0 +1,39 @@
+{
+  "rmse": 0.4806690688370413,
+  "log_likelihood": null,
+  "metadata": {
+    "filter_type": "StochasticEDHFlow",
+    "n_particles": 500,
+    "n_lambda_steps": 100,
+    "integration_method": "euler",
+    "performance": {
+      "wall_time_seconds": 8.55509345792234,
+      "time_per_timestep_ms": 85.5509345792234,
+      "peak_memory_mb": 1.4574317932128906,
+      "memory_increase_mb": 5.921875,
+      "start_memory_mb": 497.28125,
+      "end_memory_mb": 503.203125,
+      "num_timesteps": 100
+    }
+  },
+  "config": {
+    "model": {
+      "_target_": "src.models.range_bearing.RangeBearingModel",
+      "sigma_range": 0.1,
+      "sigma_bearing": 0.01
+    },
+    "filter": {
+      "_target_": "src.filters.particle.stochastic_edh.StochasticEDHFlow",
+      "n_particles": 500,
+      "n_lambda_steps": 100,
+      "diffusion_scale": 0.001,
+      "schedule_func": null,
+      "n_threads": null
+    },
+    "seed": 42,
+    "T": 100,
+    "output_dir": "outputs/range_bearing/range_bearing_stochastic_edh",
+    "plot": true,
+    "verbose": true
+  }
+}

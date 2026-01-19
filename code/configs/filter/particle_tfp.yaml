@@ -1,0 +1,12 @@
+# TensorFlow Probability Particle Filter Configuration
+# Cross-validation implementation using TFP's optimized particle_filter
+
+_target_: src.filters.particle.particle_tfp.ParticleFilterTFP
+
+# Model will be passed at runtime from experiment
+_recursive_: false
+
+n_particles: 1000          # Number of particles (match bootstrap PF)
+resample_threshold: 0.5    # Resample when ESS/N < threshold (match bootstrap PF)
+seed: 42                   # Random seed for reproducibility
+
