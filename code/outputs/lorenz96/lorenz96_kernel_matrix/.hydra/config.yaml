@@ -1,0 +1,27 @@
+model:
+  _target_: src.models.lorenz96.Lorenz96Model
+  state_dim: 1000
+  forcing: 8.0
+  dt: 0.01
+  obs_interval: 20
+  obs_spacing: 4
+  obs_noise_std: 0.7071
+  process_noise_std: 0.0
+  initial_spread: 1.414
+  spinup_steps: 1000
+filter:
+  _target_: src.filters.particle.kernel_flow.KernelMappingPF
+  n_particles: 20
+  kernel_type: matrix
+  max_iter: 500
+  initial_dt: 0.05
+  convergence_tol: 0.01
+  alpha: null
+  localization_radius: 4.0
+  use_preconditioner: true
+  adaptive_dt: true
+seed: 42
+T: 2
+output_dir: outputs/lorenz96/lorenz96_kernel_matrix
+plot: true
+verbose: true

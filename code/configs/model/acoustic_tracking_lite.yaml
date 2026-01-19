@@ -1,0 +1,22 @@
+# Single-Target Acoustic Tracking Model Configuration (Paper-Inspired)
+# Based on Li & Coates (2017) Section V but with 1 target
+
+_target_: src.models.acoustic_tracking_lite.AcousticTrackingLiteModel
+
+# 1 target, 25 sensors
+sensor_grid_size: 5  # 5×5 grid = 25 sensors
+
+# Paper parameters from Section V
+source_intensity: 10.0        # Ψ = 10 in paper
+regularization: 0.1           # d_0 = 0.1 in paper
+
+# Measurement noise (sigma_w^2 = 0.01 in paper)
+measurement_noise_std: 0.1  # sqrt(0.01) = 0.1
+
+# Use V_filter for filtering algorithms (NOT V_true)
+# V_true is used for data generation, V_filter for algorithms
+use_true_process_noise: false
+
+# Time step
+dt: 1.0
+

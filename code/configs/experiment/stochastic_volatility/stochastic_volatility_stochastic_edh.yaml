@@ -1,0 +1,15 @@
+# @package _global_
+
+# Experiment: Stochastic EDH Flow (Linear Schedule) on Stochastic Volatility Model
+# Tests stochastic particle flow on nonlinear observation model
+
+defaults:
+  - override /model: stochastic_volatility
+  - override /filter: stochastic_edh
+
+# Override settings
+T: 500
+seed: 42
+plot: true
+output_dir: outputs/stochastic_volatility/stochastic_volatility_stochastic_edh
+

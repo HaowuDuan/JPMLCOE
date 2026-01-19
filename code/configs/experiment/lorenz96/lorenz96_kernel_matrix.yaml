@@ -1,0 +1,17 @@
+# @package _global_
+
+# Experiment: Kernel Flow Filter (Matrix Kernel) on Lorenz 96
+# Recreates Figure 3 comparison from Hu & van Leeuwen (2021)
+
+defaults:
+  - override /model: lorenz96
+  - override /filter: kernel_flow_matrix
+
+# Experiment settings
+# T = number of filter steps (assimilation cycles)
+# Each filter step = 400 RK4 steps = 20 model time units
+# T=1 shows first assimilation at t=20 (Figure 3)
+T: 2
+seed: 42
+plot: true
+output_dir: outputs/lorenz96/lorenz96_kernel_matrix

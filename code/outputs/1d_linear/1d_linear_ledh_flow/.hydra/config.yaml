@@ -1,0 +1,28 @@
+model:
+  _target_: src.models.linear_gaussian.LinearGaussianModel
+  F:
+  - - 0.95
+  B:
+  - - 0.5
+  H:
+  - - 1.0
+  D:
+  - - 0.3
+  mu_0:
+  - 0.0
+  Sigma_0:
+  - - 1.0
+filter:
+  _target_: src.filters.particle.ledh_flow.LocalExactDaumHuangFlow
+  n_particles: 500
+  n_lambda_steps: 29
+  integration_method: euler
+  filter_type: ekf
+  use_feedback: true
+  regularization: 1.0e-05
+  n_threads: null
+seed: 42
+T: 20
+output_dir: outputs/1d_linear/1d_linear_ledh_flow
+plot: true
+verbose: true

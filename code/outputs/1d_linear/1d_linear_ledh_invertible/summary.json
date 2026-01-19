@@ -1,0 +1,64 @@
+{
+  "rmse": 0.19902761553339332,
+  "log_likelihood": -0.851829333249607,
+  "metadata": {
+    "filter_type": "LEDHParticleFlowFilter",
+    "n_particles": 500,
+    "n_lambda_steps": 29,
+    "resampling_rate": 0.2,
+    "performance": {
+      "wall_time_seconds": 27.322787415934727,
+      "time_per_timestep_ms": 1366.1393707967363,
+      "peak_memory_mb": 0.9969673156738281,
+      "memory_increase_mb": 2.71875,
+      "start_memory_mb": 497.9375,
+      "end_memory_mb": 500.65625,
+      "num_timesteps": 20
+    }
+  },
+  "config": {
+    "model": {
+      "_target_": "src.models.linear_gaussian.LinearGaussianModel",
+      "F": [
+        [
+          0.95
+        ]
+      ],
+      "B": [
+        [
+          0.5
+        ]
+      ],
+      "H": [
+        [
+          1.0
+        ]
+      ],
+      "D": [
+        [
+          0.3
+        ]
+      ],
+      "mu_0": [
+        0.0
+      ],
+      "Sigma_0": [
+        [
+          1.0
+        ]
+      ]
+    },
+    "filter": {
+      "_target_": "src.filters.particle.ledh_invertible.LEDHParticleFlowFilter",
+      "n_particles": 500,
+      "n_lambda_steps": 29,
+      "filter_type": "ekf",
+      "resample_threshold": 0.5
+    },
+    "seed": 42,
+    "T": 20,
+    "output_dir": "outputs/1d_linear/1d_linear_ledh_invertible",
+    "plot": true,
+    "verbose": true
+  }
+}

@@ -1,0 +1,14 @@
+# @package _global_
+
+# Experiment: Extended Kalman Filter on Stochastic Volatility Model
+# Tests EKF performance on nonlinear observation model with multiplicative noise
+
+defaults:
+  - override /model: stochastic_volatility
+  - override /filter: ekf
+
+# Override settings
+T: 500
+seed: 42
+plot: true
+output_dir: outputs/stochastic_volatility/stochastic_volatility_ekf

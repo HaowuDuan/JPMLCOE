@@ -1,0 +1,15 @@
+# @package _global_
+
+# Experiment: Joseph Form Kalman Filter with Tiny Observation Noise (2D)
+# Tests numerical stability with Joseph form covariance update
+# Matches setup from solutions_kalman.ipynb
+
+defaults:
+  - override /model: 2d_linear_gaussian_tiny_obs_noise
+  - override /filter: kalman_joseph
+
+# Override settings
+T: 200
+seed: 42
+plot: true
+output_dir: outputs/kalman/kalman_joseph_tiny_noise

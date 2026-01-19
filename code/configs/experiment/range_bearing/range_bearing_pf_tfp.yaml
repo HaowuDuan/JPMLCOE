@@ -1,0 +1,15 @@
+# @package _global_
+
+# Experiment: TFP Particle Filter on Range-Bearing Model
+# Cross-validation against bootstrap PF implementation
+
+defaults:
+  - override /model: range_bearing
+  - override /filter: particle_tfp
+
+# Override settings (match existing _pf experiments)
+T: 100
+seed: 42
+plot: true
+output_dir: outputs/range_bearing/range_bearing_pf_tfp
+

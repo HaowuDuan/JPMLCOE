@@ -1,0 +1,13 @@
+# @package _global_
+
+# Experiment: Kernel Mapping Particle Filter (Scalar kernel) on Range-Bearing Model
+
+defaults:
+  - override /model: range_bearing
+  - override /filter: kernel_flow_scalar
+
+# Override settings
+T: 100
+seed: 42
+plot: true
+output_dir: outputs/range_bearing/range_bearing_kernel_scalar

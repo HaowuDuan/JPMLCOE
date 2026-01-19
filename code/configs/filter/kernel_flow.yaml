@@ -1,0 +1,14 @@
+# Kernel Flow Filter (default configuration)
+# Hu & van Leeuwen (2021) Particle Flow Filter
+
+_target_: src.filters.particle.kernel_flow.KernelMappingPF
+
+n_particles: 1000
+kernel_type: scalar          # 'scalar' or 'matrix'
+max_iter: 500                # Maximum pseudo-time iterations
+initial_dt: 0.05             # Initial pseudo-time step
+alpha: null                  # Kernel bandwidth (null = auto)
+localization_radius: 4.0     # Localization length scale
+use_preconditioner: true     # Use B as preconditioner
+adaptive_dt: true            # Adaptive time stepping
+convergence_tol: 1e-6        # Early stopping threshold

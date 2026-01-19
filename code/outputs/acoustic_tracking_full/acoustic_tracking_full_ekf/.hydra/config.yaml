@@ -1,0 +1,16 @@
+model:
+  _target_: src.models.acoustic_tracking_full.AcousticTrackingFullModel
+  n_targets: 4
+  sensor_grid_size: 5
+  source_intensity: 10.0
+  regularization: 0.1
+  measurement_noise_std: 0.1
+  use_true_process_noise: false
+  dt: 1.0
+filter:
+  _target_: src.filters.kalman.extended_kalman.ExtendedKalmanFilter
+seed: 42
+T: 50
+output_dir: outputs/acoustic_tracking_full/acoustic_tracking_full_ekf
+plot: true
+verbose: true

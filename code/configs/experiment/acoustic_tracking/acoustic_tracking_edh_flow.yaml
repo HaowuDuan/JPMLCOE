@@ -1,0 +1,13 @@
+# @package _global_
+
+# Experiment: Exact Daum-Huang Flow on Acoustic Tracking Model
+
+defaults:
+  - override /model: acoustic_tracking
+  - override /filter: edh_flow
+
+# Override settings
+T: 50
+seed: 42
+plot: true
+output_dir: outputs/acoustic_tracking/acoustic_tracking_edh_flow

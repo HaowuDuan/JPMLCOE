@@ -1,0 +1,14 @@
+# @package _global_
+
+# Experiment: Bootstrap Particle Filter on Single-Target Acoustic Tracking Model (25 sensors)
+
+defaults:
+  - override /model: acoustic_tracking_lite
+  - override /filter: particle
+
+# Override settings
+T: 50
+seed: 42
+plot: true
+output_dir: outputs/acoustic_tracking_lite/acoustic_tracking_lite_pf
+

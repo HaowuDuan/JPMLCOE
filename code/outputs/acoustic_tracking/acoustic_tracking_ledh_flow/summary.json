@@ -1,0 +1,62 @@
+{
+  "rmse": 17.555156481033116,
+  "log_likelihood": null,
+  "metadata": {
+    "filter_type": "LocalExactDaumHuangFlow",
+    "n_particles": 500,
+    "n_lambda_steps": 29,
+    "integration_method": "euler",
+    "performance": {
+      "wall_time_seconds": 137.03284079104196,
+      "time_per_timestep_ms": 2740.6568158208393,
+      "peak_memory_mb": 1.2740116119384766,
+      "memory_increase_mb": -32.140625,
+      "start_memory_mb": 450.109375,
+      "end_memory_mb": 417.96875,
+      "num_timesteps": 50
+    }
+  },
+  "config": {
+    "model": {
+      "_target_": "src.models.acoustic_tracking.AcousticTrackingModel",
+      "sensor_positions": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          40.0,
+          0.0
+        ],
+        [
+          0.0,
+          40.0
+        ],
+        [
+          40.0,
+          40.0
+        ]
+      ],
+      "source_intensity": 10.0,
+      "regularization": 0.1,
+      "measurement_noise_std": 0.1,
+      "process_noise_cov": null,
+      "dt": 1.0
+    },
+    "filter": {
+      "_target_": "src.filters.particle.ledh_flow.LocalExactDaumHuangFlow",
+      "n_particles": 500,
+      "n_lambda_steps": 29,
+      "integration_method": "euler",
+      "filter_type": "ekf",
+      "use_feedback": true,
+      "regularization": 1e-05,
+      "n_threads": null
+    },
+    "seed": 42,
+    "T": 50,
+    "output_dir": "outputs/acoustic_tracking/acoustic_tracking_ledh_flow",
+    "plot": true,
+    "verbose": true
+  }
+}

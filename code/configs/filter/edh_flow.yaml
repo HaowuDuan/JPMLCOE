@@ -1,0 +1,7 @@
+_target_: src.filters.particle.edh_flow.ExactDaumHuangFlow
+
+n_particles: 500
+n_lambda_steps: 29  # Exponential decay schedule (same as ledh_invertible)
+integration_method: euler  # 'euler' or 'rk4'
+filter_type: ekf  # 'ekf' or 'ukf' for covariance guidance
+n_threads: null  # null = use CPU count
