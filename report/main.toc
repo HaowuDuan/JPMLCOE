@@ -1,0 +1,28 @@
+\contentsline {section}{\numberline {1}Literature Review}{2}{section.1}%
+\contentsline {subsection}{\numberline {1.1}State-Space Modeling in Financial Markets: The Big Picture}{2}{subsection.1.1}%
+\contentsline {subsubsection}{\numberline {1.1.1}The gist of performing filtering}{2}{subsubsection.1.1.1}%
+\contentsline {subsubsection}{\numberline {1.1.2}Parameter estimation}{3}{subsubsection.1.1.2}%
+\contentsline {subsection}{\numberline {1.2}The Kalman Family and Semi-Exact Methods}{3}{subsection.1.2}%
+\contentsline {subsection}{\numberline {1.3}Particle-Based Methods}{3}{subsection.1.3}%
+\contentsline {subsubsection}{\numberline {1.3.1}Flow and Kernel Flow}{5}{subsubsection.1.3.1}%
+\contentsline {subsubsection}{\numberline {1.3.2}Optimal Transport Resampling}{5}{subsubsection.1.3.2}%
+\contentsline {section}{\numberline {2}Problems and experiments}{7}{section.2}%
+\contentsline {subsection}{\numberline {2.1}State Space models}{7}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Part I}{9}{subsection.2.2}%
+\contentsline {subsubsection}{\numberline {2.2.1}Kalman-Joseph update-condition number}{9}{subsubsection.2.2.1}%
+\contentsline {subsubsection}{\numberline {2.2.2}KF, EKF, UKF Broken by Strongly Nonlinear Model}{9}{subsubsection.2.2.2}%
+\contentsline {subsubsection}{\numberline {2.2.3}Particle Filter and Particle Degeneracy}{11}{subsubsection.2.2.3}%
+\contentsline {subsubsection}{\numberline {2.2.4}EDH (LEDH) Flow and Filter}{13}{subsubsection.2.2.4}%
+\contentsline {subsubsection}{\numberline {2.2.5}Matrix Kernel Preventing Collapse}{14}{subsubsection.2.2.5}%
+\contentsline {subsection}{\numberline {2.3}Part II}{15}{subsection.2.3}%
+\contentsline {subsubsection}{\numberline {2.3.1}Stochastic Flow}{15}{subsubsection.2.3.1}%
+\contentsline {subsubsection}{\numberline {2.3.2}Soft Resampling and OT Resampling}{15}{subsubsection.2.3.2}%
+\contentsline {section}{\numberline {3}A Few Words of Reflection}{16}{section.3}%
+\contentsline {section}{\numberline {A}Kalman Family}{17}{appendix.A}%
+\contentsline {section}{\numberline {B}Particle flow and particle filter}{21}{appendix.B}%
+\contentsline {subsection}{\numberline {B.1}Particle flow}{21}{subsection.B.1}%
+\contentsline {subsection}{\numberline {B.2}Particle Flow Filter (Kernel Method)}{23}{subsection.B.2}%
+\contentsline {subsubsection}{\numberline {B.2.1}Optimal Transport via Gradient Flow}{23}{subsubsection.B.2.1}%
+\contentsline {subsubsection}{\numberline {B.2.2}Deriving Optimal Velocity via Kernel Restriction}{23}{subsubsection.B.2.2}%
+\contentsline {subsubsection}{\numberline {B.2.3}Scalar Kernel}{24}{subsubsection.B.2.3}%
+\contentsline {subsubsection}{\numberline {B.2.4}Matrix-Valued Kernel}{25}{subsubsection.B.2.4}%
