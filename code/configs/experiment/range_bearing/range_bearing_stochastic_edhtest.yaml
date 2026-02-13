@@ -8,10 +8,12 @@ defaults:
   - override /filter: stochastic_edh
 
 # Override settings
-T: 10
+T: 100
 seed: 42
 plot: true
-output_dir: outputs/range_bearing/range_bearing_stochastic_edh
+# zero noise for test
+diffusion_scale: 0.00
+output_dir: outputs/range_bearing/range_bearing_stochastic_edh_test
 
 
 

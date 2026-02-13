@@ -112,11 +112,12 @@ hydra:
     hydra:
     - hydra.mode=RUN
     task:
+    - device=auto
     - experiment=range_bearing/range_bearing_edh_flow
   job:
     name: run_experiment
     chdir: null
-    override_dirname: experiment=range_bearing/range_bearing_edh_flow
+    override_dirname: device=auto,experiment=range_bearing/range_bearing_edh_flow
     id: ???
     num: ???
     config_name: config

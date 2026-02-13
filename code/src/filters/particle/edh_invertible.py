@@ -128,6 +128,9 @@ class EDHParticleFlowFilter:
         else:
             self.debug_info = None
 
+        # Precompute exponentially spaced step sizes (constant across timesteps)
+        self._generate_lambda_steps()
+
     def _create_filter(self, initial_mean: tf.Tensor, initial_cov: tf.Tensor):
         """Create EKF for global covariance guidance."""
         initial_mean_np = initial_mean.numpy() if isinstance(initial_mean, tf.Tensor) else initial_mean
@@ -170,6 +173,10 @@ class EDHParticleFlowFilter:
 
         self.global_filter = self._create_filter(initial_mean_tf, initial_cov_tf)
 
+        # Pre-allocate Variables used in predict() to avoid per-timestep allocation
+        self.particles_prev = tf.Variable(tf.zeros_like(particles_tf), dtype=tf.float32)
+        self.eta_0 = tf.Variable(tf.zeros([self.n_particles, self.state_dim], dtype=tf.float32))
+
         self.means = []
         self.covs = []
         self.log_likelihoods = []
@@ -178,14 +185,12 @@ class EDHParticleFlowFilter:
         self.resampled_at = []
         self.n_unique_particles = []
 
-    def _generate_step_sizes(self) -> tf.Tensor:
-        """Generate exponentially spaced step sizes (author's recommendation)."""
+    def _generate_lambda_steps(self):
+        """Precompute exponentially spaced step sizes as TF tensor (called once in __init__)."""
         q = 1.2
-        N = self.n_lambda_steps
-        # ε_1 = (1-q)/(1-q^N) ensures sum = 1
-        epsilon_1 = (1 - q) / (1 - q**N)
-        step_sizes = epsilon_1 * (q ** tf.range(N, dtype=tf.float32))
-        return step_sizes
+        epsilon_1 = (1 - q) / (1 - q**self.n_lambda_steps)
+        lambda_steps_np = epsilon_1 * q**np.arange(self.n_lambda_steps)
+        self.lambda_steps = tf.constant(lambda_steps_np, dtype=tf.float32)
 
     @tf.function
     def _compute_drift(self, particles: tf.Tensor, A: tf.Tensor, b: tf.Tensor) -> tf.Tensor:
@@ -200,7 +205,7 @@ class EDHParticleFlowFilter:
     def predict(self):
         """Prediction step (Algorithm 2, lines 4-8)."""
         # Store previous particles for weight calculation
-        self.particles_prev = tf.Variable(self.particles.value(), dtype=tf.float32)
+        self.particles_prev.assign(self.particles.value())
 
         # Line 4: EKF/UKF prediction to get P_{k|k-1}
         # Feed back WEIGHTED ensemble mean to global filter (all TF ops)
@@ -222,7 +227,7 @@ class EDHParticleFlowFilter:
         eta_0 = self.model.state_transition_batch(self.particles.value(), seed)
 
         self.particles.assign(eta_0)
-        self.eta_0 = tf.Variable(eta_0, dtype=tf.float32)
+        self.eta_0.assign(eta_0)
 
     def update(self, y: tf.Tensor):
         """Update step (Algorithm 2, lines 9-29)."""
@@ -233,18 +238,15 @@ class EDHParticleFlowFilter:
             self.R_inv_cache = tf.linalg.inv(tf.transpose(L)) @ tf.linalg.inv(L)
             self.L_cache = L
 
-        # Line 9: Set η̄ = η̄_0
-        eta_bar = tf.Variable(self.eta_bar_0, dtype=tf.float32)
+        # Line 9: Set η̄ = η̄_0 (plain tensor, reassigned each step)
+        eta_bar = self.eta_bar_0
 
         # Line 10: λ = 0
         lambda_val = tf.constant(0.0, dtype=tf.float32)
 
-        # Generate step sizes (TF tensor)
-        step_sizes = self._generate_step_sizes()
-
         # Lines 11-18: Flow loop (all TF tensor operations)
         for j in tf.range(self.n_lambda_steps):
-            epsilon_j = step_sizes[j]
+            epsilon_j = self.lambda_steps[j]
 
             # Line 12: λ = λ + ε_j
             lambda_val = lambda_val + epsilon_j
@@ -253,7 +255,7 @@ class EDHParticleFlowFilter:
             # EDH uses ensemble mean as linearization point, no regularization
             A, b = compute_flow_params(
                 self.model,
-                eta_bar.value(),
+                eta_bar,
                 lambda_val,
                 y,
                 self.predicted_cov,
@@ -264,7 +266,7 @@ class EDHParticleFlowFilter:
             )
 
             # Line 14: Migrate η̄ (epsilon_j is TF scalar, euler_step accepts it)
-            eta_bar.assign(euler_step(eta_bar.value(), self._compute_drift, epsilon_j, A, b))
+            eta_bar = euler_step(eta_bar, self._compute_drift, epsilon_j, A, b)
 
             # Lines 15-17: Migrate particles
             self.particles.assign(euler_step(self.particles.value(), self._compute_drift_batch, epsilon_j, A, b))

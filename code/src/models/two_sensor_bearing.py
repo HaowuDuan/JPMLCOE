@@ -272,6 +272,41 @@ class TwoSensorBearingOnlyModel(StateSpaceModel):
     # Batch methods for optimized particle filtering
 
     @tf.function
+    def observation_jacobian_batch(self, particles: tf.Tensor) -> tf.Tensor:
+        """Vectorized Jacobian for two-sensor bearing: (N, 2, 2)."""
+        # Sensor 1
+        dx1 = particles[:, 0] - self.sensor_positions[0, 0]
+        dy1 = particles[:, 1] - self.sensor_positions[0, 1]
+        r1_sq = tf.maximum(dx1**2 + dy1**2, 1e-10)
+
+        # Sensor 2
+        dx2 = particles[:, 0] - self.sensor_positions[1, 0]
+        dy2 = particles[:, 1] - self.sensor_positions[1, 1]
+        r2_sq = tf.maximum(dx2**2 + dy2**2, 1e-10)
+
+        # H[i] = [[-dy1/r1^2, dx1/r1^2], [-dy2/r2^2, dx2/r2^2]]
+        row0 = tf.stack([-dy1 / r1_sq, dx1 / r1_sq], axis=1)  # (N, 2)
+        row1 = tf.stack([-dy2 / r2_sq, dx2 / r2_sq], axis=1)  # (N, 2)
+        return tf.stack([row0, row1], axis=1)  # (N, 2, 2)
+
+    @tf.function
+    def observation_function_batch(self, particles: tf.Tensor) -> tf.Tensor:
+        """Vectorized h(x) = [bearing_1, bearing_2]: (N, 2)."""
+        dx1 = particles[:, 0] - self.sensor_positions[0, 0]
+        dy1 = particles[:, 1] - self.sensor_positions[0, 1]
+        dx2 = particles[:, 0] - self.sensor_positions[1, 0]
+        dy2 = particles[:, 1] - self.sensor_positions[1, 1]
+        bearing1 = tf.atan2(dy1, dx1)
+        bearing2 = tf.atan2(dy2, dx2)
+        return tf.stack([bearing1, bearing2], axis=1)  # (N, 2)
+
+    @tf.function
+    def state_jacobian_batch(self, particles: tf.Tensor) -> tf.Tensor:
+        """F is constant (identity) — broadcast to (N, 2, 2)."""
+        N = tf.shape(particles)[0]
+        return tf.tile(tf.expand_dims(self.F, 0), [N, 1, 1])
+
+    @tf.function
     def state_transition_mean_batch(self, particles: tf.Tensor) -> tf.Tensor:
         """Vectorized state transition mean: identity for static target."""
         return tf.identity(particles)

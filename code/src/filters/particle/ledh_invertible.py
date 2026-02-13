@@ -6,9 +6,8 @@ from typing import Tuple, Optional, Callable, Dict, Any
 from ...core.model_base import StateSpaceModel
 from ...core.types import FilterResult
 from ..kalman.batched_ekf import batched_ekf_predict, batched_ekf_update
-from ...utils.flow_params import compute_flow_params
+from ...utils.flow_params import compute_flow_params_batch
 from ...utils.distributions import compute_flow_weights
-from ...utils.ode_solvers import euler_step
 from ...resampling import systematic_resample, soft_resample, ot_entropy_resample
 from ...resampling.diagnosis import effective_sample_size as ess_tf
 
@@ -89,6 +88,9 @@ class LEDHParticleFlowFilter:
         # Per-particle covariances (managed via batched EKF)
         self.particle_covs = None
 
+        # Cache R_inv (constant across timesteps)
+        self.R_inv_cache = None
+
         # Storage
         self.means = []
         self.covs = []
@@ -166,6 +168,11 @@ class LEDHParticleFlowFilter:
             dtype=tf.float32
         )
 
+        # Pre-allocate Variables used in predict() to avoid per-timestep allocation
+        self.particles_prev = tf.Variable(tf.zeros_like(particles_tf), dtype=tf.float32)
+        self.eta_bar_0 = tf.Variable(tf.zeros([self.n_particles, self.state_dim], dtype=tf.float32))
+        self.eta_0 = tf.Variable(tf.zeros([self.n_particles, self.state_dim], dtype=tf.float32))
+
         self.means = []
         self.covs = []
         self.log_likelihoods = []
@@ -174,14 +181,9 @@ class LEDHParticleFlowFilter:
         self.resampled_at = []
         self.n_unique_particles = []
 
-    @tf.function
-    def _compute_drift_single(self, x: tf.Tensor, A: tf.Tensor, b: tf.Tensor) -> tf.Tensor:
-        """Compute drift for a single state vector: dx/dλ = Ax + b."""
-        return tf.linalg.matvec(A, x) + b
-
     def predict(self):
         """Prediction step with batched EKF (all TF ops)."""
-        self.particles_prev = tf.Variable(self.particles.value(), dtype=tf.float32)
+        self.particles_prev.assign(self.particles.value())
 
         # Batched EKF predict - single tf.function call (all TF tensors)
         eta_bar_0_tf, cov_pred_tf = batched_ekf_predict(
@@ -189,56 +191,16 @@ class LEDHParticleFlowFilter:
         )
         self.particle_covs.assign(cov_pred_tf)
 
-        self.eta_bar_0 = tf.Variable(eta_bar_0_tf, dtype=tf.float32)
+        self.eta_bar_0.assign(eta_bar_0_tf)
 
         # Stochastic prediction - use batch method
         seed = tf.constant([self.seed_counter, 0], dtype=tf.int32)
         self.seed_counter += 1
         eta_0_tf = self.model.state_transition_batch(self.particles_prev.value(), seed)
-        self.eta_0 = tf.Variable(eta_0_tf, dtype=tf.float32)
-
-    def _update_single_particle(self, i: tf.Tensor, eta_bar_current: tf.Tensor,
-                               eta_1_current: tf.Tensor, particle_covs_tf: tf.Tensor,
-                               eta_bar_0_tf: tf.Tensor, y_tf: tf.Tensor,
-                               lambda_val_tf: tf.Tensor, d_lambda_tf: tf.Tensor,
-                               R: tf.Tensor, R_inv: tf.Tensor,
-                               regularization_tf: tf.Tensor) -> Tuple[tf.Tensor, tf.Tensor, tf.Tensor]:
-        """
-        Update a single particle using local flow parameters.
-
-        Returns:
-            eta_bar_new: Updated eta_bar for particle i
-            eta_1_new: Updated eta_1 for particle i
-            log_det_M: Log determinant of Jacobian for particle i
-        """
-        P_i = particle_covs_tf[i]
-
-        # Compute flow parameters - LEDH uses individual particle as linearization point
-        A_i, b_i = compute_flow_params(
-            self.model,
-            eta_bar_current[i],
-            lambda_val_tf,
-            y_tf,
-            P_i,
-            R,
-            R_inv,
-            eta_bar_0_tf[i],
-            self.state_dim,
-            regularization_tf
-        )
-
-        # Migrate both streams
-        eta_bar_i_new = euler_step(eta_bar_current[i], self._compute_drift_single, d_lambda_tf, A_i, b_i)
-        eta_1_i_new = euler_step(eta_1_current[i], self._compute_drift_single, d_lambda_tf, A_i, b_i)
-
-        # Track Jacobian determinant
-        M_i = tf.eye(self.state_dim, dtype=tf.float32) + d_lambda_tf * A_i
-        log_det_M_i = tf.math.log(tf.abs(tf.linalg.det(M_i)))
-
-        return eta_bar_i_new, eta_1_i_new, log_det_M_i
+        self.eta_0.assign(eta_0_tf)
 
     def update(self, y: tf.Tensor):
-        """Update step with per-particle local flow (all TF ops in hot path)."""
+        """Update step with per-particle local flow using batched operations."""
         R = self.model.observation_noise_cov
 
         eta_1 = self.eta_0.value()
@@ -247,44 +209,41 @@ class LEDHParticleFlowFilter:
         lambda_val = tf.constant(0.0, dtype=tf.float32)
         log_theta = tf.zeros(self.n_particles, dtype=tf.float32)
 
-        # Compute R_inv once (shared across all particles)
-        R_inv = tf.linalg.inv(R)
+        # Cache R_inv (constant across timesteps)
+        if self.R_inv_cache is None:
+            self.R_inv_cache = tf.linalg.inv(R)
+        R_inv = self.R_inv_cache
         regularization_tf = tf.constant(self.regularization, dtype=tf.float32)
 
         # Use TF tensors directly (particle_covs is TF Variable, eta_bar_0 is TF Variable)
         particle_covs_tf = self.particle_covs.value()
         eta_bar_0_tf = self.eta_bar_0.value()
 
-        # Flow loop (all TF tensor operations — no per-step tf.constant calls)
+        I_sd = tf.eye(self.state_dim, dtype=tf.float32)
+
+        # Flow loop — batched over all N particles per lambda step
         for j in range(self.n_lambda_steps):
             d_lambda = self.lambda_steps[j]
             lambda_val = lambda_val + d_lambda
 
-            # eta_bar and eta_1 are already TF tensors (from .value() or map_fn output)
-            eta_bar_current = eta_bar
-            eta_1_current = eta_1
-
-            # Process all particles using tf.map_fn
-            def process_particle(i):
-                return self._update_single_particle(
-                    i, eta_bar_current, eta_1_current, particle_covs_tf, eta_bar_0_tf,
-                    y, lambda_val, d_lambda, R, R_inv, regularization_tf
-                )
-
-            results = tf.map_fn(
-                process_particle,
-                tf.range(self.n_particles),
-                fn_output_signature=(
-                    tf.TensorSpec([self.state_dim], tf.float32),  # eta_bar_new
-                    tf.TensorSpec([self.state_dim], tf.float32),  # eta_1_new
-                    tf.TensorSpec([], tf.float32)                   # log_det_M
-                ),
-                parallel_iterations=10
+            # ONE batch call for all N particles (per-particle P_i from batched EKF)
+            A_batch, b_batch = compute_flow_params_batch(
+                self.model, eta_bar, lambda_val, y, particle_covs_tf,
+                R, R_inv, eta_bar_0_tf, self.state_dim, regularization_tf
             )
 
-            eta_bar = results[0]
-            eta_1 = results[1]
-            log_theta = log_theta + results[2]
+            # Vectorized Euler step for eta_bar: dx/dλ = A@x + b
+            drift_bar = tf.einsum('nij,nj->ni', A_batch, eta_bar) + b_batch
+            eta_bar = eta_bar + d_lambda * drift_bar
+
+            # Vectorized Euler step for eta_1 (same A, b)
+            drift_1 = tf.einsum('nij,nj->ni', A_batch, eta_1) + b_batch
+            eta_1 = eta_1 + d_lambda * drift_1
+
+            # Vectorized log-det of Jacobian: M = I + dλ * A
+            M_batch = tf.expand_dims(I_sd, 0) + d_lambda * A_batch  # (N, sd, sd)
+            log_det_M = tf.math.log(tf.abs(tf.linalg.det(M_batch)))  # (N,)
+            log_theta = log_theta + log_det_M
 
         # Normalize Jacobians for numerical stability
         max_log_theta = tf.reduce_max(log_theta)

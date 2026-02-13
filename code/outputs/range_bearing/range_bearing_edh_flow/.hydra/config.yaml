@@ -9,7 +9,7 @@ filter:
   integration_method: euler
   n_threads: null
 seed: 42
-T: 10
+T: 100
 output_dir: outputs/range_bearing/range_bearing_edh_flow
 plot: true
 device: auto

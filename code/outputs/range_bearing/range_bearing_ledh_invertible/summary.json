@@ -1,0 +1,39 @@
+{
+  "rmse": 0.11298361578785482,
+  "log_likelihood": 1040.42724609375,
+  "metadata": {
+    "filter_type": "LEDHParticleFlowFilter",
+    "n_particles": 500,
+    "n_lambda_steps": 29,
+    "resampling_method": "systematic",
+    "resampling_rate": 0.572,
+    "performance": {
+      "wall_time_seconds": 474.0571907921694,
+      "time_per_timestep_ms": 948.1143815843388,
+      "peak_memory_mb": 503.16772270202637,
+      "memory_increase_mb": 947.046875,
+      "start_memory_mb": 417.453125,
+      "end_memory_mb": 1364.5,
+      "num_timesteps": 500
+    }
+  },
+  "config": {
+    "model": {
+      "_target_": "src.models.range_bearing.RangeBearingModel",
+      "sigma_range": 0.1,
+      "sigma_bearing": 0.1
+    },
+    "filter": {
+      "_target_": "src.filters.particle.ledh_invertible.LEDHParticleFlowFilter",
+      "n_particles": 500,
+      "n_lambda_steps": 29,
+      "resample_threshold": 0.5
+    },
+    "seed": 42,
+    "T": 500,
+    "output_dir": "outputs/range_bearing/range_bearing_ledh_invertible",
+    "plot": true,
+    "device": "auto",
+    "verbose": true
+  }
+}
