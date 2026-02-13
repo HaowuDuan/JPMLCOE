@@ -7,7 +7,7 @@ tf.map_fn, for significant speedup when processing N (mean, cov) pairs.
 
 import tensorflow as tf
 from typing import Tuple
-from ...utils.linalg import symmetrize
+from ...utils.linalg import symmetrize, safe_cholesky
 
 
 @tf.function
@@ -96,18 +96,23 @@ def batched_ekf_update(
     S = tf.matmul(H_cov, H_T) + tf.expand_dims(R, 0)
 
     # Kalman gain: K = cov @ H^T @ S^{-1}: (N, sd, od)
-    S_inv = tf.linalg.inv(S)  # (N, od, od)
-    cov_HT = tf.matmul(covs, H_T)  # (N, sd, od)
-    K = tf.matmul(cov_HT, S_inv)  # (N, sd, od)
+    # Solve via Cholesky: S K^T = H cov  (S, cov symmetric)
+    L_S = safe_cholesky(S)  # (N, od, od)
+    K_T = tf.linalg.cholesky_solve(L_S, tf.matmul(H_batch, covs))  # (N, od, sd)
+    K = tf.linalg.matrix_transpose(K_T)  # (N, sd, od)
 
     # Update mean: mean + K @ innovation: (N, sd)
     mean_updated = means + tf.einsum('nij,nj->ni', K, innovation)
 
-    # Update covariance: (I - K @ H) @ cov: (N, sd, sd)
-    I = tf.eye(model.state_dim, dtype=tf.float32)
-    KH = tf.matmul(K, H_batch)  # (N, sd, sd)
-    I_KH = tf.expand_dims(I, 0) - KH
-    cov_updated = tf.matmul(I_KH, covs)
-    cov_updated = symmetrize(cov_updated)
+    # Joseph form: (I - KH) @ P @ (I - KH)^T + K @ R @ K^T
+    I = tf.eye(model.state_dim, dtype=covs.dtype)
+    KH = tf.matmul(K, H_batch)                          # (N, sd, sd)
+    I_KH = tf.expand_dims(I, 0) - KH                    # (N, sd, sd)
+    I_KH_T = tf.linalg.matrix_transpose(I_KH)           # (N, sd, sd)
+    term1 = tf.matmul(tf.matmul(I_KH, covs), I_KH_T)   # (N, sd, sd)
+    K_R = tf.matmul(K, tf.expand_dims(R, 0))            # (N, sd, od)
+    K_T = tf.linalg.matrix_transpose(K)                 # (N, od, sd)
+    term2 = tf.matmul(K_R, K_T)                         # (N, sd, sd)
+    cov_updated = symmetrize(term1 + term2)
 
     return mean_updated, cov_updated

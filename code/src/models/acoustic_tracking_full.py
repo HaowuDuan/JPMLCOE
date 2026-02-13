@@ -45,7 +45,8 @@ class AcousticTrackingFullModel(StateSpaceModel):
         regularization: float = 0.1,
         measurement_noise_std: float = 0.1,
         use_true_process_noise: bool = False,
-        dt: float = 1.0
+        dt: float = 1.0,
+        dtype=tf.float64
     ):
         """
         Initialize Multi-Target Acoustic Tracking Model (Pure TensorFlow).
@@ -58,17 +59,20 @@ class AcousticTrackingFullModel(StateSpaceModel):
             measurement_noise_std: Measurement noise std (sigma_w = 0.1)
             use_true_process_noise: If True, use V_true; if False, use V_filter
             dt: Time step
+            dtype: TensorFlow dtype for numerical precision (default: tf.float64)
         """
         self.n_targets = n_targets
         self.dt = dt
         self.source_intensity_val = source_intensity
         self.regularization_val = regularization
         self.measurement_noise_std = measurement_noise_std
+        self.dtype = dtype
+        self.np_dtype = np.float64 if dtype == tf.float64 else np.float32
 
         # Build 5×5 sensor grid spanning [0, 40] × [0, 40]
         self.sensor_grid_size = sensor_grid_size
         sensor_positions_np = self._build_sensor_grid()
-        self.sensor_positions = tf.constant(sensor_positions_np, dtype=tf.float32)
+        self.sensor_positions = tf.constant(sensor_positions_np, dtype=self.dtype)
         self.n_sensors = len(sensor_positions_np)
 
         # Build single-target transition matrix
@@ -77,12 +81,12 @@ class AcousticTrackingFullModel(StateSpaceModel):
             [0, 1, 0, dt],
             [0, 0, 1, 0],
             [0, 0, 0, 1]
-        ], dtype=np.float32)
+        ], dtype=self.np_dtype)
 
         # Build block diagonal F matrix (16×16 for 4 targets)
         F_blocks = [F_single for _ in range(n_targets)]
         F_np = self._block_diag(F_blocks)
-        self.F = tf.constant(F_np, dtype=tf.float32)
+        self.F = tf.constant(F_np, dtype=self.dtype)
 
         # V_true: Paper's true process noise for data generation
         V_true_single = (1.0 / 20.0) * np.array([
@@ -90,7 +94,7 @@ class AcousticTrackingFullModel(StateSpaceModel):
             [0.0,      1.0/3.0,  0.0,  0.5],
             [0.5,      0.0,      1.0,  0.0],
             [0.0,      0.5,      0.0,  1.0]
-        ], dtype=np.float32)
+        ], dtype=self.np_dtype)
 
         # V_filter: Paper's filter process noise (larger uncertainty)
         V_filter_single = np.array([
@@ -98,7 +102,7 @@ class AcousticTrackingFullModel(StateSpaceModel):
             [0.0,  3.0,   0.0,  0.1],
             [0.1,  0.0,   0.03, 0.0],
             [0.0,  0.1,   0.0,  0.03]
-        ], dtype=np.float32)
+        ], dtype=self.np_dtype)
 
         # Build block diagonal process noise matrices
         V_true_blocks = [V_true_single for _ in range(n_targets)]
@@ -109,11 +113,11 @@ class AcousticTrackingFullModel(StateSpaceModel):
 
         # Q is either V_true or V_filter depending on use case
         Q_np = V_true_np if use_true_process_noise else V_filter_np
-        self.Q = tf.constant(Q_np, dtype=tf.float32)
+        self.Q = tf.constant(Q_np, dtype=self.dtype)
 
         # Observation noise covariance (25×25)
-        R_np = np.eye(self.n_sensors, dtype=np.float32) * (measurement_noise_std ** 2)
-        self.R = tf.constant(R_np, dtype=tf.float32)
+        R_np = np.eye(self.n_sensors, dtype=self.np_dtype) * (measurement_noise_std ** 2)
+        self.R = tf.constant(R_np, dtype=self.dtype)
 
         # Paper's 4 initial target states (page 8, Section V-A1)
         all_initial_states = [
@@ -122,17 +126,17 @@ class AcousticTrackingFullModel(StateSpaceModel):
             [20.0, 13.0, -0.1, 0.01],       # Target 3
             [15.0, 35.0, 0.002, 0.002],     # Target 4
         ]
-        paper_initial_states = np.concatenate(all_initial_states[:n_targets]).astype(np.float32)
-        self.mu_0 = tf.constant(paper_initial_states, dtype=tf.float32)
+        paper_initial_states = np.concatenate(all_initial_states[:n_targets]).astype(self.np_dtype)
+        self.mu_0 = tf.constant(paper_initial_states, dtype=self.dtype)
 
         # Initial state covariance: σ = 10 for positions, σ = 1 for velocities
-        single_target_cov = np.array([100.0, 100.0, 1.0, 1.0], dtype=np.float32)  # σ² = [10², 10², 1², 1²]
+        single_target_cov = np.array([100.0, 100.0, 1.0, 1.0], dtype=self.np_dtype)  # σ² = [10², 10², 1², 1²]
         Sigma_0_np = np.diag(np.tile(single_target_cov, n_targets))
-        self.Sigma_0 = tf.constant(Sigma_0_np, dtype=tf.float32)
+        self.Sigma_0 = tf.constant(Sigma_0_np, dtype=self.dtype)
 
         # TensorFlow constants for observation function
-        self.psi = tf.constant(source_intensity, dtype=tf.float32)
-        self.d0 = tf.constant(regularization, dtype=tf.float32)
+        self.psi = tf.constant(source_intensity, dtype=self.dtype)
+        self.d0 = tf.constant(regularization, dtype=self.dtype)
 
     def _build_sensor_grid(self) -> np.ndarray:
         """Build 5×5 sensor grid at intersections of 10m spacing."""
@@ -143,12 +147,12 @@ class AcousticTrackingFullModel(StateSpaceModel):
                 x = i * spacing
                 y = j * spacing
                 sensors.append([x, y])
-        return np.array(sensors, dtype=np.float32)
+        return np.array(sensors, dtype=self.np_dtype)
 
     def _block_diag(self, matrices):
         """Create block diagonal matrix from list of matrices."""
         from scipy.linalg import block_diag
-        return block_diag(*matrices).astype(np.float32)
+        return block_diag(*matrices).astype(self.np_dtype)
 
     @property
     def state_dim(self) -> int:
@@ -179,7 +183,7 @@ class AcousticTrackingFullModel(StateSpaceModel):
         covariance with σ=10 for positions, σ=1 for velocities.
         """
         L = tf.linalg.cholesky(self.Sigma_0)
-        z = tf.random.stateless_normal([self.state_dim], seed=seed, dtype=tf.float32)
+        z = tf.random.stateless_normal([self.state_dim], seed=seed, dtype=self.dtype)
         return self.mu_0 + tf.linalg.matvec(L, z)
 
     @tf.function
@@ -189,7 +193,7 @@ class AcousticTrackingFullModel(StateSpaceModel):
 
         # Sample noise from N(0, Q)
         L = tf.linalg.cholesky(self.Q)
-        z = tf.random.stateless_normal([self.state_dim], seed=seed, dtype=tf.float32)
+        z = tf.random.stateless_normal([self.state_dim], seed=seed, dtype=self.dtype)
         noise = tf.linalg.matvec(L, z)
 
         return mean + noise
@@ -204,7 +208,7 @@ class AcousticTrackingFullModel(StateSpaceModel):
         amplitudes = self._compute_amplitudes(x)
 
         # Add Gaussian noise
-        noise = tf.random.stateless_normal([self.n_sensors], seed=seed, dtype=tf.float32) * self.measurement_noise_std
+        noise = tf.random.stateless_normal([self.n_sensors], seed=seed, dtype=self.dtype) * self.measurement_noise_std
         return amplitudes + noise
 
     @tf.function
@@ -248,7 +252,7 @@ class AcousticTrackingFullModel(StateSpaceModel):
                 sensor_pos = self.sensor_positions[s]
 
                 # Sum contributions from all targets for each particle
-                amp_sum = tf.zeros(N, dtype=tf.float32)
+                amp_sum = tf.zeros(N, dtype=self.dtype)
                 for c in range(self.n_targets):
                     target_x = x[:, c * 4]
                     target_y = x[:, c * 4 + 1]
@@ -321,7 +325,7 @@ class AcousticTrackingFullModel(StateSpaceModel):
                 dh_dx = -self.psi * dx / denominator
                 dh_dy = -self.psi * dy / denominator
 
-                row.extend([dh_dx, dh_dy, tf.constant(0.0), tf.constant(0.0)])
+                row.extend([dh_dx, dh_dy, tf.constant(0.0, dtype=self.dtype), tf.constant(0.0, dtype=self.dtype)])
 
             H_rows.append(tf.stack(row))
 
@@ -378,7 +382,7 @@ class AcousticTrackingFullModel(StateSpaceModel):
             Initial states, shape (n, 16)
         """
         L = tf.linalg.cholesky(self.Sigma_0)
-        z = tf.random.stateless_normal([n, self.state_dim], seed=seed, dtype=tf.float32)
+        z = tf.random.stateless_normal([n, self.state_dim], seed=seed, dtype=self.dtype)
         return self.mu_0 + tf.linalg.matmul(z, L, transpose_b=True)
 
     @tf.function
@@ -400,7 +404,7 @@ class AcousticTrackingFullModel(StateSpaceModel):
 
         # Noise: sample from N(0, Q)
         L = tf.linalg.cholesky(self.Q)
-        z = tf.random.stateless_normal([N, self.state_dim], seed=seed, dtype=tf.float32)
+        z = tf.random.stateless_normal([N, self.state_dim], seed=seed, dtype=self.dtype)
         noise = tf.linalg.matmul(z, L, transpose_b=True)
 
         return mean + noise
@@ -421,7 +425,7 @@ class AcousticTrackingFullModel(StateSpaceModel):
         """
         N = tf.shape(particles)[0]
         # Initialize H as zeros: (N, n_sensors, state_dim)
-        H = tf.zeros([N, self.n_sensors, self.state_dim], dtype=tf.float32)
+        H = tf.zeros([N, self.n_sensors, self.state_dim], dtype=self.dtype)
 
         for c in range(self.n_targets):
             # Extract target positions: (N,)
@@ -443,13 +447,13 @@ class AcousticTrackingFullModel(StateSpaceModel):
                 idx_y = c * 4 + 1  # column for target y position
 
                 # Create update tensors and add to H
-                update_x = tf.zeros([N, self.n_sensors, self.state_dim], dtype=tf.float32)
-                update_y = tf.zeros([N, self.n_sensors, self.state_dim], dtype=tf.float32)
+                update_x = tf.zeros([N, self.n_sensors, self.state_dim], dtype=self.dtype)
+                update_y = tf.zeros([N, self.n_sensors, self.state_dim], dtype=self.dtype)
 
                 # Use index assignment via one_hot masking
-                sensor_mask = tf.one_hot(s, self.n_sensors, dtype=tf.float32)  # (n_sensors,)
-                col_mask_x = tf.one_hot(idx_x, self.state_dim, dtype=tf.float32)  # (state_dim,)
-                col_mask_y = tf.one_hot(idx_y, self.state_dim, dtype=tf.float32)  # (state_dim,)
+                sensor_mask = tf.one_hot(s, self.n_sensors, dtype=self.dtype)  # (n_sensors,)
+                col_mask_x = tf.one_hot(idx_x, self.state_dim, dtype=self.dtype)  # (state_dim,)
+                col_mask_y = tf.one_hot(idx_y, self.state_dim, dtype=self.dtype)  # (state_dim,)
 
                 # (N,) * (n_sensors,) * (state_dim,) -> (N, n_sensors, state_dim)
                 H = H + dh_dx[:, tf.newaxis, tf.newaxis] * sensor_mask[tf.newaxis, :, tf.newaxis] * col_mask_x[tf.newaxis, tf.newaxis, :]
@@ -467,6 +471,11 @@ class AcousticTrackingFullModel(StateSpaceModel):
         """F is constant — broadcast to (N, state_dim, state_dim)."""
         N = tf.shape(particles)[0]
         return tf.tile(tf.expand_dims(self.F, 0), [N, 1, 1])
+
+    @tf.function
+    def state_transition_mean_batch(self, particles: tf.Tensor) -> tf.Tensor:
+        """Vectorized state transition mean: particles @ F.T."""
+        return particles @ tf.transpose(self.F)
 
     @tf.function
     def log_observation_prob_batch(self, observation: tf.Tensor, particles: tf.Tensor) -> tf.Tensor:

@@ -29,6 +29,7 @@ class LEDHParticleFlowFilter:
         resampling_method: Optional[Callable] = None,
         resampling_config: Optional[Dict[str, Any]] = None,
         debug_mode: bool = False,
+        dtype=tf.float64,
         **filter_kwargs
     ):
         """
@@ -41,8 +42,10 @@ class LEDHParticleFlowFilter:
             resampling_method: Resampling function (systematic/soft/ot_entropy)
             resampling_config: Dict of additional parameters for resampling
             debug_mode: If True, store detailed diagnostics
+            dtype: TensorFlow dtype for numerical precision (default: tf.float64)
         """
         self.model = model
+        self.dtype = dtype
         self.state_dim = model.state_dim
         self.obs_dim = model.obs_dim
         self.n_particles = n_particles
@@ -128,7 +131,7 @@ class LEDHParticleFlowFilter:
         q = 1.2
         epsilon_1 = (1 - q) / (1 - q**self.n_lambda_steps)
         lambda_steps_np = epsilon_1 * q**np.arange(self.n_lambda_steps)
-        self.lambda_steps = tf.constant(lambda_steps_np, dtype=tf.float32)
+        self.lambda_steps = tf.constant(lambda_steps_np, dtype=self.dtype)
 
     def initialize(self, initial_mean: Optional[np.ndarray] = None,
                    initial_cov: Optional[np.ndarray] = None,
@@ -139,7 +142,7 @@ class LEDHParticleFlowFilter:
 
         if initial_mean is None:
             # Use model's initial mean directly (not a random sample)
-            initial_mean = np.asarray(self.model.mu_0, dtype=np.float32)
+            initial_mean = np.asarray(self.model.mu_0, dtype=np.float64 if self.dtype == tf.float64 else np.float32)
 
         if initial_cov is None:
             if hasattr(self.model, 'Sigma_0'):
@@ -152,26 +155,26 @@ class LEDHParticleFlowFilter:
         # Sample initial particles using TensorFlow
         seed = tf.constant([self.seed_counter, 0], dtype=tf.int32)
         self.seed_counter += 1
-        initial_mean_tf = tf.constant(initial_mean, dtype=tf.float32)
-        initial_cov_tf = tf.constant(initial_cov, dtype=tf.float32)
+        initial_mean_tf = tf.constant(initial_mean, dtype=self.dtype)
+        initial_cov_tf = tf.constant(initial_cov, dtype=self.dtype)
 
         L = tf.linalg.cholesky(initial_cov_tf)
-        z = tf.random.stateless_normal([self.n_particles, self.state_dim], seed=seed, dtype=tf.float32)
+        z = tf.random.stateless_normal([self.n_particles, self.state_dim], seed=seed, dtype=self.dtype)
         particles_tf = initial_mean_tf + tf.linalg.matmul(z, L, transpose_b=True)
 
-        self.particles = tf.Variable(particles_tf, dtype=tf.float32)
-        self.weights = tf.Variable(tf.ones(self.n_particles, dtype=tf.float32) / self.n_particles)
+        self.particles = tf.Variable(particles_tf, dtype=self.dtype)
+        self.weights = tf.Variable(tf.ones(self.n_particles, dtype=self.dtype) / self.n_particles)
 
         # Per-particle covariances for batched EKF (TF Variable)
         self.particle_covs = tf.Variable(
             tf.tile(tf.expand_dims(initial_cov_tf, 0), [self.n_particles, 1, 1]),
-            dtype=tf.float32
+            dtype=self.dtype
         )
 
         # Pre-allocate Variables used in predict() to avoid per-timestep allocation
-        self.particles_prev = tf.Variable(tf.zeros_like(particles_tf), dtype=tf.float32)
-        self.eta_bar_0 = tf.Variable(tf.zeros([self.n_particles, self.state_dim], dtype=tf.float32))
-        self.eta_0 = tf.Variable(tf.zeros([self.n_particles, self.state_dim], dtype=tf.float32))
+        self.particles_prev = tf.Variable(tf.zeros_like(particles_tf), dtype=self.dtype)
+        self.eta_bar_0 = tf.Variable(tf.zeros([self.n_particles, self.state_dim], dtype=self.dtype))
+        self.eta_0 = tf.Variable(tf.zeros([self.n_particles, self.state_dim], dtype=self.dtype))
 
         self.means = []
         self.covs = []
@@ -206,20 +209,20 @@ class LEDHParticleFlowFilter:
         eta_1 = self.eta_0.value()
         eta_bar = self.eta_bar_0.value()
 
-        lambda_val = tf.constant(0.0, dtype=tf.float32)
-        log_theta = tf.zeros(self.n_particles, dtype=tf.float32)
+        lambda_val = tf.constant(0.0, dtype=self.dtype)
+        log_theta = tf.zeros(self.n_particles, dtype=self.dtype)
 
         # Cache R_inv (constant across timesteps)
         if self.R_inv_cache is None:
             self.R_inv_cache = tf.linalg.inv(R)
         R_inv = self.R_inv_cache
-        regularization_tf = tf.constant(self.regularization, dtype=tf.float32)
+        regularization_tf = tf.constant(self.regularization, dtype=self.dtype)
 
         # Use TF tensors directly (particle_covs is TF Variable, eta_bar_0 is TF Variable)
         particle_covs_tf = self.particle_covs.value()
         eta_bar_0_tf = self.eta_bar_0.value()
 
-        I_sd = tf.eye(self.state_dim, dtype=tf.float32)
+        I_sd = tf.eye(self.state_dim, dtype=self.dtype)
 
         # Flow loop — batched over all N particles per lambda step
         for j in range(self.n_lambda_steps):
@@ -310,7 +313,7 @@ class LEDHParticleFlowFilter:
             resampled_particles, new_weights = result
         else:
             resampled_particles = result
-            new_weights = tf.ones(self.n_particles, dtype=tf.float32) / tf.cast(self.n_particles, tf.float32)
+            new_weights = tf.ones(self.n_particles, dtype=self.dtype) / tf.cast(self.n_particles, self.dtype)
 
         # Match resampled particles to original indices using TF distance computation
         # dists[i, j] = ||resampled[i] - original[j]||^2
@@ -349,7 +352,7 @@ class LEDHParticleFlowFilter:
         T = len(observations)
 
         # Pre-convert observations to TF once
-        obs_tf = tf.constant(observations, dtype=tf.float32)
+        obs_tf = tf.constant(observations, dtype=self.dtype)
 
         for t in range(T):
             self.predict()

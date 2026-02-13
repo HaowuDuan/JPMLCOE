@@ -28,8 +28,8 @@ def soft_resample(particles: tf.Tensor, weights: tf.Tensor, alpha: float,
         - new_weights: (N,) Normalized importance weights for the next step
     """
     N = tf.shape(particles)[0]
-    N_float = tf.cast(N, tf.float32)
-    alpha_f = tf.cast(alpha, tf.float32)
+    N_float = tf.cast(N, weights.dtype)
+    alpha_f = tf.cast(alpha, weights.dtype)
 
     # 1. Compute mixture distribution q(k)
     # q mixes the current belief with a uniform distribution
@@ -41,7 +41,7 @@ def soft_resample(particles: tf.Tensor, weights: tf.Tensor, alpha: float,
     
     # Generate systematic samples: u + k/N
     u = tf.random.stateless_uniform([], seed=seed, minval=0.0, maxval=1.0/N_float)
-    u_vals = u + tf.range(N, dtype=tf.float32) / N_float
+    u_vals = u + tf.range(N, dtype=weights.dtype) / N_float
 
     # Find indices using the q_weights cumulative sum
     indices = tf.searchsorted(cumsum, u_vals, side='right')

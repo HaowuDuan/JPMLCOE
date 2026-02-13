@@ -26,15 +26,15 @@ def systematic_resample(particles: tf.Tensor, weights: tf.Tensor,
         Resampled particles of shape (N, state_dim)
     """
     N = tf.shape(particles)[0]
-    N_float = tf.cast(N, tf.float32)
+    N_float = tf.cast(N, weights.dtype)
 
     # Compute cumulative sum of weights
     cumsum = tf.cumsum(weights)
 
     # Generate systematic samples: u + k/N for k = 0, ..., N-1
     # where u ~ Uniform[0, 1/N]
-    u = tf.random.stateless_uniform([], seed=seed, minval=0.0, maxval=1.0/N_float)
-    u_vals = u + tf.range(N, dtype=tf.float32) / N_float
+    u = tf.random.stateless_uniform([], seed=seed, minval=0.0, maxval=1.0/N_float, dtype=weights.dtype)
+    u_vals = u + tf.range(N, dtype=weights.dtype) / N_float
 
     # Find indices: for each u_val, find the smallest index where cumsum[idx] >= u_val
     # Using searchsorted (binary search)
@@ -68,7 +68,7 @@ def systematic_resample_with_weights(particles: tf.Tensor, weights: tf.Tensor,
     resampled_particles = systematic_resample(particles, weights, seed)
 
     N = tf.shape(particles)[0]
-    N_float = tf.cast(N, tf.float32)
-    uniform_weights = tf.ones(N, dtype=tf.float32) / N_float
+    N_float = tf.cast(N, weights.dtype)
+    uniform_weights = tf.ones(N, dtype=weights.dtype) / N_float
 
     return resampled_particles, uniform_weights

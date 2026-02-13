@@ -57,14 +57,26 @@ def safe_solve(A: tf.Tensor, b: tf.Tensor, method: str = 'default') -> tf.Tensor
     Returns:
         x: Solution of same shape as b
     """
+    # Check if b is a vector (needs extra dim) or already a matrix
+    b_is_vector = (len(b.shape) < len(A.shape))
+    
+    if b_is_vector:
+        b_rhs = b[..., tf.newaxis]
+    else:
+        b_rhs = b
+    
     if method == 'cholesky':
         L = safe_cholesky(A)
-        return tf.linalg.cholesky_solve(L, b[..., tf.newaxis])[..., 0]
+        result = tf.linalg.cholesky_solve(L, b_rhs)
     elif method == 'lstsq':
-        return tf.linalg.lstsq(A, b[..., tf.newaxis], fast=False)[..., 0]
+        result = tf.linalg.lstsq(A, b_rhs, fast=False)
     else:
         # Default: use direct solve
-        return tf.linalg.solve(A, b[..., tf.newaxis])[..., 0]
+        result = tf.linalg.solve(A, b_rhs)
+    
+    if b_is_vector:
+        return result[..., 0]
+    return result
 
 
 @tf.function
