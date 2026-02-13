@@ -16,7 +16,7 @@ def compute_flow_params(
     R_inv: tf.Tensor,
     eta_bar_0: tf.Tensor,
     state_dim: int,
-    regularization: tf.Tensor = tf.constant(0.0, dtype=tf.float32)
+    regularization: tf.Tensor = None
 ) -> Tuple[tf.Tensor, tf.Tensor]:
     """
     Compute A(λ) and b(λ) from Equations (10) and (11).
@@ -51,6 +51,8 @@ def compute_flow_params(
         A: Matrix A(λ), shape (state_dim, state_dim)
         b: Vector b(λ), shape (state_dim,)
     """
+    if regularization is None:
+        regularization = tf.constant(0.0, dtype=P.dtype)
     # Linearize at given point: H = ∂h/∂x |_x
     H = model.observation_jacobian(linearization_point)
     # Regularize P before computing S
@@ -68,7 +70,7 @@ def compute_flow_params(
 
     # Compute A(λ) from Equation (10)
     # A(λ) = -1/2 * P @ H^T @ (λ*H@P@H^T + R)^(-1) @ H
-    HPH = H @ P @ tf.transpose(H)
+    HPH = H @ P_reg @ tf.transpose(H)
     S = lambda_val * HPH + R
 
 
@@ -77,7 +79,7 @@ def compute_flow_params(
     S_inv_H = safe_solve(S, H, method='cholesky')
 
     # Compute A(λ)
-    A = -0.5 * P @ tf.transpose(H) @ S_inv_H
+    A = -0.5 * P_reg @ tf.transpose(H) @ S_inv_H
 
     # Compute e(λ) for b(λ) - Equation (11)
     # e(λ) = h(x) - H@x
@@ -86,9 +88,9 @@ def compute_flow_params(
 
     # Compute b(λ) from Equation (11)
     # b(λ) = (I + 2λA)[(I + λA)P@H^T@R^(-1)@(z - e) + A@η̄_0]
-    I = tf.eye(state_dim, dtype=tf.float32)
+    I = tf.eye(state_dim, dtype=P.dtype)
 
-    term1 = tf.linalg.matvec((I + lambda_val * A) @ P @ tf.transpose(H) @ R_inv, observation - e)
+    term1 = tf.linalg.matvec((I + lambda_val * A) @ P_reg @ tf.transpose(H) @ R_inv, observation - e)
     term2 = tf.linalg.matvec(A, eta_bar_0)
     b = tf.linalg.matvec(I + 2 * lambda_val * A, term1 + term2)
 
@@ -106,7 +108,7 @@ def compute_flow_params_batch(
     R_inv: tf.Tensor,
     eta_bar_0: tf.Tensor,
     state_dim: int,
-    regularization: tf.Tensor = tf.constant(0.0, dtype=tf.float32)
+    regularization: tf.Tensor = None
 ) -> Tuple[tf.Tensor, tf.Tensor]:
     """
     Batched computation of A(λ) and b(λ) for N particles simultaneously.
@@ -129,6 +131,8 @@ def compute_flow_params_batch(
         A_batch: (N, state_dim, state_dim)
         b_batch: (N, state_dim)
     """
+    if regularization is None:
+        regularization = tf.constant(0.0, dtype=P.dtype)
     # Broadcast P to (N, sd, sd) if global (sd, sd)
     if len(P.shape) == 2:
         P_b = tf.expand_dims(P, 0)  # (1, sd, sd) — broadcasts with (N, ...)
@@ -171,7 +175,7 @@ def compute_flow_params_batch(
     e_batch = h_batch - Hx
 
     # b = (I + 2λA) @ [(I + λA) @ P @ H^T @ R_inv @ (z - e) + A @ η̄_0]
-    I_sd = tf.eye(state_dim, dtype=tf.float32)
+    I_sd = tf.eye(state_dim, dtype=P_b.dtype)
     I_batch = tf.expand_dims(I_sd, 0)  # (1, sd, sd)
 
     # (I + λA): (N, sd, sd)

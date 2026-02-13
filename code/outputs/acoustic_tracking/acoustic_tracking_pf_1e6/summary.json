@@ -1,0 +1,45 @@
+{
+  "rmse": 12.946769121003925,
+  "log_likelihood": "-1271.6813",
+  "metadata": {
+    "filter_type": "ParticleFilterTF",
+    "n_particles": 1000,
+    "resampling_rate": 1.0,
+    "resampling_method": "systematic",
+    "resampling_config": {},
+    "performance": {
+      "wall_time_seconds": 5.41404666705057,
+      "time_per_timestep_ms": 108.2809333410114,
+      "peak_memory_mb": 6.000537872314453,
+      "memory_increase_mb": 699.5625,
+      "start_memory_mb": 929.390625,
+      "end_memory_mb": 1628.953125,
+      "num_timesteps": 50
+    }
+  },
+  "config": {
+    "model": {
+      "_target_": "src.models.acoustic_tracking_full.AcousticTrackingFullModel",
+      "n_targets": 4,
+      "sensor_grid_size": 5,
+      "source_intensity": 10.0,
+      "regularization": 0.1,
+      "measurement_noise_std": 0.1,
+      "use_true_process_noise": false,
+      "dt": 1.0
+    },
+    "filter": {
+      "_target_": "src.filters.particle.bootstrap_pf_tf.ParticleFilterTF",
+      "_recursive_": false,
+      "n_particles": 1000,
+      "resample_threshold": 0.5
+    },
+    "seed": 42,
+    "T": 50,
+    "output_dir": "outputs/acoustic_tracking/acoustic_tracking_pf_1e6",
+    "plot": true,
+    "device": "auto",
+    "verbose": true,
+    "n_particles": 1000000
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "rmse": 67.93338327926853,
+  "log_likelihood": -13029.326171875,
+  "metadata": {
+    "filter_type": "EDHParticleFlowFilter",
+    "n_particles": 500,
+    "n_lambda_steps": 29,
+    "resampling_method": "systematic",
+    "resampling_rate": 1.0,
+    "performance": {
+      "wall_time_seconds": 77.86731562484056,
+      "time_per_timestep_ms": 1557.3463124968112,
+      "peak_memory_mb": 12.484192848205566,
+      "memory_increase_mb": 2179.0,
+      "start_memory_mb": 933.734375,
+      "end_memory_mb": 3112.734375,
+      "num_timesteps": 50
+    }
+  },
+  "config": {
+    "model": {
+      "_target_": "src.models.acoustic_tracking_full.AcousticTrackingFullModel",
+      "n_targets": 4,
+      "sensor_grid_size": 5,
+      "source_intensity": 10.0,
+      "regularization": 0.1,
+      "measurement_noise_std": 0.1,
+      "use_true_process_noise": false,
+      "dt": 1.0
+    },
+    "filter": {
+      "_target_": "src.filters.particle.edh_invertible.EDHParticleFlowFilter",
+      "n_particles": 500,
+      "n_lambda_steps": 29,
+      "resample_threshold": 0.5
+    },
+    "seed": 42,
+    "T": 50,
+    "output_dir": "outputs/acoustic_tracking/acoustic_tracking_edh_invertible",
+    "plot": true,
+    "device": "auto",
+    "verbose": true
+  }
+}
