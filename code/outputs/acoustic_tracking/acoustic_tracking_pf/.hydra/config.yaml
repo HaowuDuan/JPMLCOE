@@ -13,9 +13,11 @@ filter:
   n_particles: 1000
   resample_threshold: 0.5
 seed: 42
+dtype: float64
 T: 50
 output_dir: outputs/acoustic_tracking/acoustic_tracking_pf
 plot: true
 device: auto
+tf_log_level: 2
 verbose: true
-n_particles: 10000
+show_progress: true

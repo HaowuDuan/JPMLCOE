@@ -2,8 +2,9 @@
 
 import numpy as np
 import tensorflow as tf
+import time
 from scipy import linalg
-from typing import Optional, Tuple, List
+from typing import Optional, Tuple, List, Callable
 import warnings
 
 from ...core.types import FilterResult
@@ -62,6 +63,8 @@ class KernelMappingPF:
             convergence_tol: Early stopping threshold for flow magnitude
         """
         self.model = model
+        self.dtype = getattr(model, 'dtype', tf.float64)
+        self.np_dtype = np.float64 if self.dtype == tf.float64 else np.float32
         self.n_particles = n_particles
         self.state_dim = model.state_dim
         self.kernel_type = kernel_type
@@ -407,69 +410,74 @@ class KernelMappingPF:
             
         for i in range(self.n_particles):
             seed = tf.constant(rng.integers(0, 2**31, size=2), dtype=tf.int32)
-            x = tf.constant(self.particles[i], dtype=tf.float32)
+            x = tf.constant(self.particles[i], dtype=self.dtype)
             self.particles[i] = np.asarray(self.model.sample_state_transition(x, seed))
     
     def filter(self, observations: np.ndarray,
                initial_particles: Optional[np.ndarray] = None,
-               n_integration_steps: int = 1) -> FilterResult:
+               n_integration_steps: int = 1,
+               progress_callback: Optional[Callable[[int, int, float], None]] = None) -> FilterResult:
         """
         Run the filter on a sequence of observations.
-        
+
         Follows the predict-update cycle for each observation:
         1. Predict: Propagate particles through dynamics
         2. Update: Apply kernel flow to move prior -> posterior
-        
+
         Args:
             observations: Array of shape (T, obs_dim) containing observations
             initial_particles: Optional initial particle ensemble (n_particles, state_dim)
             n_integration_steps: Number of dynamics steps between observations
                                 (default 1, set to 20 for paper's Δt_obs = 1.0)
-        
+            progress_callback: Optional callback(t, T, step_time_sec) called after each step
+
         Returns:
             FilterResult with filtered means, covariances, and metadata
         """
         observations = np.asarray(observations)
         if observations.ndim == 1:
             observations = observations[:, np.newaxis]
-            
+
         T = len(observations)
         rng = np.random.default_rng()
-        
+
         # Initialize particles
         if initial_particles is not None:
             self.particles = initial_particles.copy()
         else:
             self.initialize(rng)
-        
+
         # Storage
         means: List[np.ndarray] = []
         covs: List[np.ndarray] = []
         iteration_counts: List[int] = []
         prior_particles: List[np.ndarray] = []
         posterior_particles: List[np.ndarray] = []
-        
+
         # Filter loop: predict first, then update
         # Note: Despite predict-first loop, this filter uses observe_initial=True
         # (standard alignment where observations[0] observes the initial state)
         for t in range(T):
+            t0 = time.perf_counter()
             # Predict: propagate through dynamics
             for _ in range(n_integration_steps):
                 self.predict(rng)
-            
+
             # Store prior particles (before update)
             prior_particles.append(self.particles.copy())
-            
+
             # Update: kernel flow from prior to posterior
             diagnostics = self.update(observations[t])
             iteration_counts.append(diagnostics['n_iterations'])
-            
+
             # Store posterior particles (after update)
             posterior_particles.append(self.particles.copy())
-            
+
             # Record posterior estimates
             means.append(self.get_mean())
             covs.append(self.get_covariance())
+            if progress_callback is not None:
+                progress_callback(t, T, time.perf_counter() - t0)
         
         return FilterResult(
             means=np.array(means),

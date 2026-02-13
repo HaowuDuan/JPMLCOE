@@ -1,6 +1,6 @@
 {
-  "rmse": 30.034306923497883,
-  "log_likelihood": "-27304.254",
+  "rmse": 23.613278271254813,
+  "log_likelihood": -14158.41065785921,
   "metadata": {
     "filter_type": "ParticleFilterTF",
     "n_particles": 1000,
@@ -8,12 +8,12 @@
     "resampling_method": "systematic",
     "resampling_config": {},
     "performance": {
-      "wall_time_seconds": 5.462088749743998,
-      "time_per_timestep_ms": 109.24177499487996,
-      "peak_memory_mb": 5.999661445617676,
-      "memory_increase_mb": 690.359375,
-      "start_memory_mb": 934.5,
-      "end_memory_mb": 1624.859375,
+      "wall_time_seconds": 3.2630938752554357,
+      "time_per_timestep_ms": 65.26187750510871,
+      "peak_memory_mb": 6.002963066101074,
+      "memory_increase_mb": 101.296875,
+      "start_memory_mb": 450.0625,
+      "end_memory_mb": 551.359375,
       "num_timesteps": 50
     }
   },
@@ -35,11 +35,13 @@
       "resample_threshold": 0.5
     },
     "seed": 42,
+    "dtype": "float64",
     "T": 50,
     "output_dir": "outputs/acoustic_tracking/acoustic_tracking_pf",
     "plot": true,
     "device": "auto",
+    "tf_log_level": 2,
     "verbose": true,
-    "n_particles": 10000
+    "show_progress": true
   }
 }

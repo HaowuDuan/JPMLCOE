@@ -2,6 +2,7 @@
 
 import tensorflow as tf
 import numpy as np
+import time
 from typing import Tuple, Optional, Callable, Dict, Any
 from ...core.model_base import StateSpaceModel
 from ...core.types import FilterResult
@@ -29,7 +30,6 @@ class LEDHParticleFlowFilter:
         resampling_method: Optional[Callable] = None,
         resampling_config: Optional[Dict[str, Any]] = None,
         debug_mode: bool = False,
-        dtype=tf.float64,
         **filter_kwargs
     ):
         """
@@ -42,10 +42,9 @@ class LEDHParticleFlowFilter:
             resampling_method: Resampling function (systematic/soft/ot_entropy)
             resampling_config: Dict of additional parameters for resampling
             debug_mode: If True, store detailed diagnostics
-            dtype: TensorFlow dtype for numerical precision (default: tf.float64)
         """
         self.model = model
-        self.dtype = dtype
+        self.dtype = getattr(model, 'dtype', tf.float64)
         self.state_dim = model.state_dim
         self.obs_dim = model.obs_dim
         self.n_particles = n_particles
@@ -346,7 +345,8 @@ class LEDHParticleFlowFilter:
     def filter(self, observations: np.ndarray,
                initial_mean: Optional[np.ndarray] = None,
                initial_cov: Optional[np.ndarray] = None,
-               random_seed: Optional[int] = None) -> FilterResult:
+               random_seed: Optional[int] = None,
+               progress_callback: Optional[Callable[[int, int, float], None]] = None) -> FilterResult:
         """Run filter on sequence of observations."""
         self.initialize(initial_mean, initial_cov, random_seed)
         T = len(observations)
@@ -355,11 +355,14 @@ class LEDHParticleFlowFilter:
         obs_tf = tf.constant(observations, dtype=self.dtype)
 
         for t in range(T):
+            t0 = time.perf_counter()
             self.predict()
             self.update(obs_tf[t])
             mean, cov = self._estimate_mean_cov()
             self.means.append(mean)  # TF tensor
             self.covs.append(cov)    # TF tensor
+            if progress_callback is not None:
+                progress_callback(t, T, time.perf_counter() - t0)
 
         resampling_rate = len(self.resampled_at) / T if T > 0 else 0.0
 

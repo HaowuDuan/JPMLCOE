@@ -2,7 +2,8 @@
 
 import tensorflow as tf
 import numpy as np
-from typing import Optional, Tuple
+import time
+from typing import Optional, Tuple, Callable
 from ...core.filter_base import Filter
 from ...core.types import FilterResult
 from ...core.model_base import StateSpaceModel
@@ -47,6 +48,7 @@ class ExtendedKalmanFilter(Filter):
             random_seed: Random seed for sampling initial mean (only used if sample_initial_mean=True)
         """
         self.model = model
+        self.dtype = getattr(model, 'dtype', tf.float64)
         self.state_dim = model.state_dim
 
         # Store initial state
@@ -56,29 +58,29 @@ class ExtendedKalmanFilter(Filter):
                 raise ValueError("Model must have sample_initial_state method to use sample_initial_mean=True")
             seed = tf.constant([random_seed if random_seed is not None else 0, 0], dtype=tf.int32)
             mean_0_tf = self.model.sample_initial_state(seed)
-            self.mean_0 = tf.cast(mean_0_tf, tf.float32)
+            self.mean_0 = tf.cast(mean_0_tf, self.dtype)
         elif mean_0 is None:
             # Try to use model's initial_state_mean property
             if hasattr(self.model, 'initial_state_mean'):
                 mean_0_val = self.model.initial_state_mean
-                self.mean_0 = tf.cast(mean_0_val, tf.float32) if isinstance(mean_0_val, tf.Tensor) else tf.constant(mean_0_val, dtype=tf.float32)
+                self.mean_0 = tf.cast(mean_0_val, self.dtype) if isinstance(mean_0_val, tf.Tensor) else tf.constant(mean_0_val, dtype=self.dtype)
             else:
-                self.mean_0 = tf.zeros(self.state_dim, dtype=tf.float32)
+                self.mean_0 = tf.zeros(self.state_dim, dtype=self.dtype)
         else:
-            self.mean_0 = tf.constant(mean_0, dtype=tf.float32)
+            self.mean_0 = tf.constant(mean_0, dtype=self.dtype)
 
         if Sigma_0 is None:
             # Try to use model's initial_state_cov property
             if hasattr(self.model, 'initial_state_cov'):
                 Sigma_0_val = self.model.initial_state_cov
-                self.Sigma_0 = tf.cast(Sigma_0_val, tf.float32) if isinstance(Sigma_0_val, tf.Tensor) else tf.constant(Sigma_0_val, dtype=tf.float32)
+                self.Sigma_0 = tf.cast(Sigma_0_val, self.dtype) if isinstance(Sigma_0_val, tf.Tensor) else tf.constant(Sigma_0_val, dtype=self.dtype)
             # Otherwise use stationary covariance if available
             elif hasattr(self.model, 'stationary_var'):
-                self.Sigma_0 = tf.eye(self.state_dim, dtype=tf.float32) * self.model.stationary_var
+                self.Sigma_0 = tf.eye(self.state_dim, dtype=self.dtype) * self.model.stationary_var
             else:
-                self.Sigma_0 = tf.eye(self.state_dim, dtype=tf.float32)
+                self.Sigma_0 = tf.eye(self.state_dim, dtype=self.dtype)
         else:
-            self.Sigma_0 = tf.constant(Sigma_0, dtype=tf.float32)
+            self.Sigma_0 = tf.constant(Sigma_0, dtype=self.dtype)
 
         # Filter state (will be tf.Variable for mutable state)
         self.mean = None
@@ -91,8 +93,8 @@ class ExtendedKalmanFilter(Filter):
 
     def reset(self):
         """Reset filter to initial state and clear history."""
-        self.mean = tf.Variable(self.mean_0, dtype=tf.float32)
-        self.cov = tf.Variable(self.Sigma_0, dtype=tf.float32)
+        self.mean = tf.Variable(self.mean_0, dtype=self.dtype)
+        self.cov = tf.Variable(self.Sigma_0, dtype=self.dtype)
         self.log_likelihoods = []
 
     @tf.function(reduce_retracing=True)
@@ -171,7 +173,7 @@ class ExtendedKalmanFilter(Filter):
 
             # Update covariance: Joseph form for numerical stability
             # P_{n|n} = (I - K·H)·P_{n|n-1}·(I - K·H)^T + K·R·K^T
-            I = tf.eye(self.state_dim, dtype=tf.float32)
+            I = tf.eye(self.state_dim, dtype=self.dtype)
             I_KH = I - K @ H
             cov_updated = I_KH @ cov @ tf.transpose(I_KH) + K @ R @ tf.transpose(K)
             cov_updated = symmetrize(cov_updated)
@@ -212,7 +214,7 @@ class ExtendedKalmanFilter(Filter):
         Args:
             observation: Observation, shape (obs_dim,)
         """
-        obs_tf = tf.constant(observation, dtype=tf.float32)
+        obs_tf = tf.constant(observation, dtype=self.dtype)
 
         mean_updated, cov_updated, log_lik = self._update_step(
             self.mean.value(),
@@ -226,12 +228,14 @@ class ExtendedKalmanFilter(Filter):
         # Store log-likelihood as TF scalar (converted in filter())
         self.log_likelihoods.append(log_lik)
 
-    def filter(self, observations: np.ndarray) -> FilterResult:
+    def filter(self, observations: np.ndarray,
+               progress_callback: Optional[Callable[[int, int, float], None]] = None) -> FilterResult:
         """
         Run the filter on a sequence of observations.
 
         Args:
             observations: Array of shape (T, obs_dim) containing observations
+            progress_callback: Optional callback(t, T, step_time_sec) called after each step
 
         Returns:
             FilterResult with filtered means, covariances, and diagnostics
@@ -245,11 +249,14 @@ class ExtendedKalmanFilter(Filter):
         covs = []
 
         for t in range(T):
+            t0 = time.perf_counter()
             self.predict()
             self.update(observations[t])
             # Store TF tensors — convert once after loop
             means.append(self.mean.value())
             covs.append(self.cov.value())
+            if progress_callback is not None:
+                progress_callback(t, T, time.perf_counter() - t0)
 
         # Convert accumulated TF tensors to numpy once
         means_np = tf.stack(means).numpy()

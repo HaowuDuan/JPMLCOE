@@ -52,7 +52,8 @@ class AcousticTrackingModel(StateSpaceModel):
         regularization: float = 0.1,
         measurement_noise_std: float = 0.1,
         process_noise_cov: Optional[list] = None,
-        dt: float = 1.0
+        dt: float = 1.0,
+        dtype=None
     ):
         """
         Initialize Amplitude-based Acoustic Tracking Model.
@@ -67,6 +68,11 @@ class AcousticTrackingModel(StateSpaceModel):
                               default: Paper's filter covariance
             dt: Time step
         """
+        import tensorflow as tf
+        if dtype is None:
+            dtype = tf.float32
+        self.dtype = dtype
+        self.np_dtype = np.float64 if dtype == tf.float64 else np.float32
         self.dt = dt
         self.source_intensity = source_intensity
         self.regularization = regularization
@@ -334,8 +340,8 @@ class AcousticTrackingModel(StateSpaceModel):
             input_shape = tf.shape(x_tf)
 
             # Convert F and Q to tensors
-            F_tf = tf.constant(self.F, dtype=tf.float32)
-            Q_tf = tf.constant(self.Q, dtype=tf.float32)
+            F_tf = tf.constant(self.F, dtype=self.dtype)
+            Q_tf = tf.constant(self.Q, dtype=self.dtype)
 
             # Mean: F @ x
             if len(x_tf.shape) == 1:
@@ -366,13 +372,13 @@ class AcousticTrackingModel(StateSpaceModel):
             Returns:
                 Log probabilities, shape (N,) or scalar
             """
-            sensor_positions = tf.constant(self.sensor_positions, dtype=tf.float32)
-            R_tf = tf.constant(self.R, dtype=tf.float32)
+            sensor_positions = tf.constant(self.sensor_positions, dtype=self.dtype)
+            R_tf = tf.constant(self.R, dtype=self.dtype)
             R_inv = tf.linalg.inv(R_tf)
             log_det_2pi_R = tf.math.log(tf.linalg.det(2.0 * np.pi * R_tf))
 
-            psi = tf.constant(self.source_intensity, dtype=tf.float32)
-            d0 = tf.constant(self.regularization, dtype=tf.float32)
+            psi = tf.constant(self.source_intensity, dtype=self.dtype)
+            d0 = tf.constant(self.regularization, dtype=self.dtype)
 
             # Handle both single and batch inputs
             if len(x_tf.shape) == 1:

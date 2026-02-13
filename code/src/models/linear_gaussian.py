@@ -36,7 +36,8 @@ class LinearGaussianModel(StateSpaceModel):
         H: Union[np.ndarray, List, tf.Tensor],
         D: Union[np.ndarray, List, tf.Tensor],
         mu_0: Optional[Union[np.ndarray, List, tf.Tensor]] = None,
-        Sigma_0: Optional[Union[np.ndarray, List, tf.Tensor]] = None
+        Sigma_0: Optional[Union[np.ndarray, List, tf.Tensor]] = None,
+        dtype=tf.float32
     ):
         """
         Initialize Linear-Gaussian Model (TensorFlow-only).
@@ -49,11 +50,15 @@ class LinearGaussianModel(StateSpaceModel):
             mu_0: Initial state mean (nx,). If None, uses zero vector.
             Sigma_0: Initial state covariance (nx, nx). If None, uses identity.
         """
+        # Store dtype
+        self.dtype = dtype
+        self.np_dtype = np.float64 if dtype == tf.float64 else np.float32
+
         # Convert to TensorFlow tensors
-        self.F = tf.constant(F, dtype=tf.float32)
-        self.B = tf.constant(B, dtype=tf.float32)
-        self.H = tf.constant(H, dtype=tf.float32)
-        self.D = tf.constant(D, dtype=tf.float32)
+        self.F = tf.constant(F, dtype=self.dtype)
+        self.B = tf.constant(B, dtype=self.dtype)
+        self.H = tf.constant(H, dtype=self.dtype)
+        self.D = tf.constant(D, dtype=self.dtype)
 
         # Store dimensions
         self.nx = int(self.F.shape[0])  # State dimension
@@ -77,14 +82,14 @@ class LinearGaussianModel(StateSpaceModel):
 
         # Initial state distribution (compute dimensions first, then use)
         if mu_0 is None:
-            self.mu_0 = tf.zeros(self.nx, dtype=tf.float32)
+            self.mu_0 = tf.zeros(self.nx, dtype=self.dtype)
         else:
-            self.mu_0 = tf.constant(mu_0, dtype=tf.float32)
+            self.mu_0 = tf.constant(mu_0, dtype=self.dtype)
 
         if Sigma_0 is None:
-            self.Sigma_0 = tf.eye(self.nx, dtype=tf.float32)
+            self.Sigma_0 = tf.eye(self.nx, dtype=self.dtype)
         else:
-            self.Sigma_0 = tf.constant(Sigma_0, dtype=tf.float32)
+            self.Sigma_0 = tf.constant(Sigma_0, dtype=self.dtype)
 
         if self.mu_0.shape != (self.nx,):
             raise ValueError(f"mu_0 must be ({self.nx},), got {self.mu_0.shape}")
@@ -108,7 +113,7 @@ class LinearGaussianModel(StateSpaceModel):
         if hasattr(seed, 'standard_normal'):
             # NumPy rng from generate_data
             rng = seed
-            z = rng.standard_normal(self.nx).astype(np.float32)
+            z = rng.standard_normal(self.nx).astype(self.np_dtype)
             L = np.linalg.cholesky(np.array(self.Sigma_0))
             return np.array(self.mu_0) + L @ z
         return self._sample_initial_state_tf(seed)
@@ -117,7 +122,7 @@ class LinearGaussianModel(StateSpaceModel):
     def _sample_initial_state_tf(self, seed: tf.Tensor) -> tf.Tensor:
         """TF implementation for filters that pass seed."""
         L = tf.linalg.cholesky(self.Sigma_0)
-        z = tf.random.stateless_normal([self.nx], seed=seed, dtype=tf.float32)
+        z = tf.random.stateless_normal([self.nx], seed=seed, dtype=self.dtype)
         return self.mu_0 + tf.linalg.matvec(L, z)
 
     def sample_state_transition(self, x, seed: Union[tf.Tensor, np.random.Generator]):
@@ -125,7 +130,7 @@ class LinearGaussianModel(StateSpaceModel):
         if hasattr(seed, 'standard_normal'):
             rng = seed
             x_np = np.asarray(x)
-            v = rng.standard_normal(self.nv).astype(np.float32)
+            v = rng.standard_normal(self.nv).astype(self.np_dtype)
             F_np, B_np = np.array(self.F), np.array(self.B)
             return F_np @ x_np + B_np @ v
         return self._sample_state_transition_tf(x, seed)
@@ -133,7 +138,7 @@ class LinearGaussianModel(StateSpaceModel):
     @tf.function
     def _sample_state_transition_tf(self, x: tf.Tensor, seed: tf.Tensor) -> tf.Tensor:
         """TF implementation for filters that pass seed."""
-        v = tf.random.stateless_normal([self.nv], seed=seed, dtype=tf.float32)
+        v = tf.random.stateless_normal([self.nv], seed=seed, dtype=self.dtype)
         return tf.linalg.matvec(self.F, x) + tf.linalg.matvec(self.B, v)
 
     def sample_observation(self, x, seed: Union[tf.Tensor, np.random.Generator]):
@@ -141,7 +146,7 @@ class LinearGaussianModel(StateSpaceModel):
         if hasattr(seed, 'standard_normal'):
             rng = seed
             x_np = np.asarray(x)
-            w = rng.standard_normal(self.nw).astype(np.float32)
+            w = rng.standard_normal(self.nw).astype(self.np_dtype)
             H_np, D_np = np.array(self.H), np.array(self.D)
             return H_np @ x_np + D_np @ w
         return self._sample_observation_tf(x, seed)
@@ -149,7 +154,7 @@ class LinearGaussianModel(StateSpaceModel):
     @tf.function
     def _sample_observation_tf(self, x: tf.Tensor, seed: tf.Tensor) -> tf.Tensor:
         """TF implementation for filters that pass seed."""
-        w = tf.random.stateless_normal([self.nw], seed=seed, dtype=tf.float32)
+        w = tf.random.stateless_normal([self.nw], seed=seed, dtype=self.dtype)
         return tf.linalg.matvec(self.H, x) + tf.linalg.matvec(self.D, w)
 
     def state_transition_mean(self, x: tf.Tensor) -> tf.Tensor:
@@ -185,7 +190,7 @@ class LinearGaussianModel(StateSpaceModel):
         Returns:
             Tensor of shape (obs_dim, state_dim, state_dim), all zeros.
         """
-        return tf.zeros((self.obs_dim, self.state_dim, self.state_dim), dtype=tf.float32)
+        return tf.zeros((self.obs_dim, self.state_dim, self.state_dim), dtype=self.dtype)
 
     def log_observation_prob(self, y: tf.Tensor, x: tf.Tensor) -> tf.Tensor:
         """
@@ -277,7 +282,7 @@ class LinearGaussianModel(StateSpaceModel):
         # Sample from N(mu_0, Sigma_0)
         # Use Cholesky: X = mu_0 + L·Z where L·L^T = Sigma_0, Z ~ N(0, I)
         L = tf.linalg.cholesky(self.Sigma_0)
-        z = tf.random.stateless_normal([n, self.nx], seed=seed, dtype=tf.float32)
+        z = tf.random.stateless_normal([n, self.nx], seed=seed, dtype=self.dtype)
 
         # Correct batch multiplication: z @ L^T
         return self.mu_0 + tf.linalg.matmul(z, L, transpose_b=True)

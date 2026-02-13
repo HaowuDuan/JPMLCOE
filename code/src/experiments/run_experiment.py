@@ -1,5 +1,8 @@
 """Hydra-based experiment runner for filter evaluation."""
 
+import os
+os.environ.setdefault('TF_CPP_MIN_LOG_LEVEL', '2')  # 0=all, 1=no DEBUG, 2=no INFO, 3=ERROR only
+
 import hydra
 from omegaconf import DictConfig, OmegaConf
 import numpy as np
@@ -8,7 +11,7 @@ import json
 import time
 import tracemalloc
 import psutil
-from typing import Dict, Any, Tuple
+from typing import Dict, Any, Tuple, Optional, Callable
 
 from ..models.utils import generate_data
 
@@ -93,11 +96,34 @@ def _create_filter(cfg: DictConfig, model, initial_state: np.ndarray,
     return filter_obj, initial_mean, initial_cov
 
 
+def _make_progress_callback(T: int) -> Callable[[int, int, float], None]:
+    """Build a progress callback that prints step-by-step timing."""
+    step_times = []
+    def cb(t: int, total: int, step_time: float) -> None:
+        step_times.append(step_time)
+        elapsed = sum(step_times)
+        print(f"\r  Step {t+1}/{total} | {step_time*1000:.1f} ms | elapsed {elapsed:.2f}s", end="", flush=True)
+        if t + 1 == total:
+            print()  # newline after last step
+    return cb
+
+
 def _run_filter(filter_obj, filter_name: str, observations: np.ndarray,
-                rng: np.random.Generator):
+                rng: np.random.Generator,
+                progress_callback: Optional[Callable] = None):
     """Dispatch filter.filter() with the correct signature."""
+    import inspect
+    sig = inspect.signature(filter_obj.filter)
+    has_cb = 'progress_callback' in sig.parameters
+
     if filter_name in ('ExactDaumHuangFlow', 'LocalExactDaumHuangFlow'):
+        if has_cb:
+            return filter_obj.filter(observations, random_state=rng,
+                                     progress_callback=progress_callback)
         return filter_obj.filter(observations, random_state=rng)
+
+    if has_cb:
+        return filter_obj.filter(observations, progress_callback=progress_callback)
     return filter_obj.filter(observations)
 
 
@@ -147,11 +173,20 @@ def run_filter_experiment(cfg: DictConfig) -> Dict[str, Any]:
     Returns:
         Dictionary with results, diagnostics, and metadata.
     """
+    # Allow config to override TF log level (must happen before TF import)
+    tf_log_level = str(cfg.get('tf_log_level', 2))
+    os.environ['TF_CPP_MIN_LOG_LEVEL'] = tf_log_level
+
     rng = np.random.default_rng(cfg.seed)
+
+    # Resolve dtype from config
+    import tensorflow as tf
+    _dtype_map = {'float32': tf.float32, 'float64': tf.float64}
+    dtype_tf = _dtype_map[cfg.get('dtype', 'float64')]
 
     # Instantiate model
     print(f"Creating model: {cfg.model._target_}")
-    model = hydra.utils.instantiate(cfg.model)
+    model = hydra.utils.instantiate(cfg.model, dtype=dtype_tf)
 
     # Generate data (standard convention: x_0 separate, states=[x_1..x_T])
     T = cfg.get('T', 100)
@@ -163,10 +198,16 @@ def run_filter_experiment(cfg: DictConfig) -> Dict[str, Any]:
     print(f"Creating filter: {filter_name}")
     filter_obj, initial_mean, initial_cov = _create_filter(cfg, model, initial_state, rng)
 
+    # Build progress callback if enabled
+    progress_cb = None
+    if cfg.get('show_progress', False):
+        progress_cb = _make_progress_callback(T)
+
     # Run filter with performance tracking
     print(f"Running {filter_name}...")
     with _PerfTracker() as perf:
-        result = _run_filter(filter_obj, filter_name, observations, rng)
+        result = _run_filter(filter_obj, filter_name, observations, rng,
+                             progress_callback=progress_cb)
 
     metadata = result.metadata
     metadata['performance'] = perf.as_dict(T)

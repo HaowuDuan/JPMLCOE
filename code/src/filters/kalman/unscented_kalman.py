@@ -2,7 +2,8 @@
 
 import tensorflow as tf
 import numpy as np
-from typing import Optional, Tuple
+import time
+from typing import Optional, Tuple, Callable
 from ...core.filter_base import Filter
 from ...core.types import FilterResult
 from ...core.model_base import StateSpaceModel
@@ -59,6 +60,7 @@ class UnscentedKalmanFilter(Filter):
             random_seed: Random seed for sampling initial mean (only used if sample_initial_mean=True)
         """
         self.model = model
+        self.dtype = getattr(model, 'dtype', tf.float64)
         self.state_dim = model.state_dim
         self.alpha = alpha
         self.beta = beta
@@ -75,8 +77,8 @@ class UnscentedKalmanFilter(Filter):
         weights_mean_np = np.concatenate([[W_m_0], np.full(2 * self.state_dim, W_i)])
         weights_cov_np = np.concatenate([[W_c_0], np.full(2 * self.state_dim, W_i)])
 
-        self.weights_mean = tf.constant(weights_mean_np, dtype=tf.float32)
-        self.weights_cov = tf.constant(weights_cov_np, dtype=tf.float32)
+        self.weights_mean = tf.constant(weights_mean_np, dtype=self.dtype)
+        self.weights_cov = tf.constant(weights_cov_np, dtype=self.dtype)
 
         # Store initial state
         if sample_initial_mean:
@@ -85,29 +87,29 @@ class UnscentedKalmanFilter(Filter):
                 raise ValueError("Model must have sample_initial_state method to use sample_initial_mean=True")
             seed = tf.constant([random_seed if random_seed is not None else 0, 0], dtype=tf.int32)
             mean_0_tf = self.model.sample_initial_state(seed)
-            self.mean_0 = tf.cast(mean_0_tf, tf.float32)
+            self.mean_0 = tf.cast(mean_0_tf, self.dtype)
         elif mean_0 is None:
             # Try to use model's initial_state_mean property
             if hasattr(self.model, 'initial_state_mean'):
                 mean_0_val = self.model.initial_state_mean
-                self.mean_0 = tf.cast(mean_0_val, tf.float32) if isinstance(mean_0_val, tf.Tensor) else tf.constant(mean_0_val, dtype=tf.float32)
+                self.mean_0 = tf.cast(mean_0_val, self.dtype) if isinstance(mean_0_val, tf.Tensor) else tf.constant(mean_0_val, dtype=self.dtype)
             else:
-                self.mean_0 = tf.zeros(self.state_dim, dtype=tf.float32)
+                self.mean_0 = tf.zeros(self.state_dim, dtype=self.dtype)
         else:
-            self.mean_0 = tf.constant(mean_0, dtype=tf.float32)
+            self.mean_0 = tf.constant(mean_0, dtype=self.dtype)
 
         if Sigma_0 is None:
             # Try to use model's initial_state_cov property
             if hasattr(self.model, 'initial_state_cov'):
                 Sigma_0_val = self.model.initial_state_cov
-                self.Sigma_0 = tf.cast(Sigma_0_val, tf.float32) if isinstance(Sigma_0_val, tf.Tensor) else tf.constant(Sigma_0_val, dtype=tf.float32)
+                self.Sigma_0 = tf.cast(Sigma_0_val, self.dtype) if isinstance(Sigma_0_val, tf.Tensor) else tf.constant(Sigma_0_val, dtype=self.dtype)
             # Otherwise use stationary covariance if available
             elif hasattr(self.model, 'stationary_var'):
-                self.Sigma_0 = tf.eye(self.state_dim, dtype=tf.float32) * self.model.stationary_var
+                self.Sigma_0 = tf.eye(self.state_dim, dtype=self.dtype) * self.model.stationary_var
             else:
-                self.Sigma_0 = tf.eye(self.state_dim, dtype=tf.float32)
+                self.Sigma_0 = tf.eye(self.state_dim, dtype=self.dtype)
         else:
-            self.Sigma_0 = tf.constant(Sigma_0, dtype=tf.float32)
+            self.Sigma_0 = tf.constant(Sigma_0, dtype=self.dtype)
 
         # Filter state
         self.mean = None
@@ -137,7 +139,7 @@ class UnscentedKalmanFilter(Filter):
         sqrt_cov = safe_cholesky((n + lambda_) * cov)
 
         # Initialize sigma points using TensorArray
-        sigma_points = tf.TensorArray(dtype=tf.float32, size=2 * n + 1)
+        sigma_points = tf.TensorArray(dtype=self.dtype, size=2 * n + 1)
 
         # First sigma point is the mean
         sigma_points = sigma_points.write(0, mean)
@@ -151,8 +153,8 @@ class UnscentedKalmanFilter(Filter):
 
     def reset(self):
         """Reset filter to initial state and clear history."""
-        self.mean = tf.Variable(self.mean_0, dtype=tf.float32)
-        self.cov = tf.Variable(self.Sigma_0, dtype=tf.float32)
+        self.mean = tf.Variable(self.mean_0, dtype=self.dtype)
+        self.cov = tf.Variable(self.Sigma_0, dtype=self.dtype)
         self.log_likelihoods = []
 
     @tf.function(reduce_retracing=True)
@@ -174,7 +176,7 @@ class UnscentedKalmanFilter(Filter):
         sigma_points_pred = tf.map_fn(
             lambda sp: self.model.state_transition_mean(sp),
             sigma_points,
-            dtype=tf.float32
+            dtype=self.dtype
         )
 
         # Predict mean: weighted sum of propagated sigma points
@@ -223,7 +225,7 @@ class UnscentedKalmanFilter(Filter):
         y_sigma = tf.map_fn(
             lambda sp: self.model.observation_mean(sp),
             sigma_points,
-            dtype=tf.float32
+            dtype=self.dtype
         )
 
         # Predicted observation mean
@@ -285,7 +287,7 @@ class UnscentedKalmanFilter(Filter):
         Args:
             observation: Observation vector
         """
-        obs_tf = tf.constant(observation, dtype=tf.float32)
+        obs_tf = tf.constant(observation, dtype=self.dtype)
 
         mean_updated, cov_updated, log_lik = self._update_step(
             self.mean.value(),
@@ -299,12 +301,14 @@ class UnscentedKalmanFilter(Filter):
         # Store log-likelihood as TF scalar (converted in filter())
         self.log_likelihoods.append(log_lik)
 
-    def filter(self, observations: np.ndarray) -> FilterResult:
+    def filter(self, observations: np.ndarray,
+               progress_callback: Optional[Callable[[int, int, float], None]] = None) -> FilterResult:
         """
         Run the filter on a sequence of observations.
 
         Args:
             observations: Array of shape (T, obs_dim) containing observations
+            progress_callback: Optional callback(t, T, step_time_sec) called after each step
 
         Returns:
             FilterResult with filtered means, covariances, and diagnostics
@@ -318,11 +322,14 @@ class UnscentedKalmanFilter(Filter):
         covs = []
 
         for t in range(T):
+            t0 = time.perf_counter()
             self.predict()
             self.update(observations[t])
             # Store TF tensors — convert once after loop
             means.append(self.mean.value())
             covs.append(self.cov.value())
+            if progress_callback is not None:
+                progress_callback(t, T, time.perf_counter() - t0)
 
         # Convert accumulated TF tensors to numpy once
         means_np = tf.stack(means).numpy()

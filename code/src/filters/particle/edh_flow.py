@@ -50,6 +50,8 @@ class ExactDaumHuangFlow(FlowFilterBase):
             debug_mode: If True, collect detailed diagnostics
         """
         super().__init__(model, n_particles, n_lambda_steps, integration_method, n_threads)
+        self.dtype = getattr(model, 'dtype', tf.float64)
+        self.np_dtype = np.float64 if self.dtype == tf.float64 else np.float32
         self.debug_mode = debug_mode
         self.predicted_cov = None  # P_{k|k-1} from EKF (TF tensor)
         self.eta_bar_0 = None      # η̄_0 (mean at λ=0, TF tensor)
@@ -115,8 +117,8 @@ class ExactDaumHuangFlow(FlowFilterBase):
             raise ValueError("Model must have mu_0 and Sigma_0 attributes")
 
         # Convert to TensorFlow for sampling
-        initial_mean_tf = tf.constant(initial_mean, dtype=tf.float32)
-        initial_cov_tf = tf.constant(initial_cov, dtype=tf.float32)
+        initial_mean_tf = tf.constant(initial_mean, dtype=self.dtype)
+        initial_cov_tf = tf.constant(initial_cov, dtype=self.dtype)
 
         # Sample initial particles using TensorFlow
         if random_state is not None:
@@ -130,10 +132,10 @@ class ExactDaumHuangFlow(FlowFilterBase):
         particles_tf = initial_mean_tf + tf.linalg.matmul(z, L, transpose_b=True)
 
         # Store as TensorFlow Variable
-        self.particles = tf.Variable(particles_tf, dtype=tf.float32)
+        self.particles = tf.Variable(particles_tf, dtype=self.dtype)
         self.weights = tf.Variable(
-            tf.ones(self.n_particles, dtype=tf.float32) / tf.cast(self.n_particles, tf.float32),
-            dtype=tf.float32
+            tf.ones(self.n_particles, dtype=self.dtype) / tf.cast(self.n_particles, self.dtype),
+            dtype=self.dtype
         )
 
         # Compute empirical mean and covariance (TF ops)
@@ -142,7 +144,7 @@ class ExactDaumHuangFlow(FlowFilterBase):
         if self.state_dim == 1:
             initial_cov_emp = tf.reshape(tf.math.reduce_variance(self.particles.value()), [1, 1])
         else:
-            initial_cov_emp = tf.matmul(diff, diff, transpose_a=True) / tf.cast(self.n_particles, tf.float32)
+            initial_cov_emp = tf.matmul(diff, diff, transpose_a=True) / tf.cast(self.n_particles, self.dtype)
 
         # Initialize global EKF for covariance guidance (constructor needs numpy)
         ensemble_mean_np = ensemble_mean.numpy()
@@ -164,7 +166,7 @@ class ExactDaumHuangFlow(FlowFilterBase):
         q = 1.2
         epsilon_1 = (1 - q) / (1 - q**self.n_lambda_steps)
         steps_np = epsilon_1 * q**np.arange(self.n_lambda_steps)
-        self.lambda_steps = tf.constant(steps_np, dtype=tf.float32)
+        self.lambda_steps = tf.constant(steps_np, dtype=self.dtype)
 
     @tf.function
     def _compute_drift(self, particles: tf.Tensor, A: tf.Tensor, b: tf.Tensor) -> tf.Tensor:
@@ -209,7 +211,7 @@ class ExactDaumHuangFlow(FlowFilterBase):
         """
         observation = y  # Already TF tensor from flow_base.filter()
         P_tf = self.predicted_cov  # Already TF tensor from predict()
-        R_tf = tf.constant(self.model.observation_noise_cov, dtype=tf.float32)
+        R_tf = tf.constant(self.model.observation_noise_cov, dtype=self.dtype)
         eta_bar_0_tf = self.eta_bar_0  # Already TF tensor from predict()
 
         # Compute R_inv (once per update)
@@ -217,7 +219,7 @@ class ExactDaumHuangFlow(FlowFilterBase):
 
         # Use exponential lambda schedule
         particles_flow = self.particles.value()
-        lambda_val = tf.constant(0.0, dtype=tf.float32)
+        lambda_val = tf.constant(0.0, dtype=self.dtype)
 
         # Debug: Store particles before flow
         if self.debug_mode:

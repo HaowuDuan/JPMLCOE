@@ -9,5 +9,6 @@ defaults:
 # Override settings
 T: 50
 seed: 42
+dtype: float32
 plot: true
 output_dir: outputs/acoustic_tracking/acoustic_tracking_ledh_invertible

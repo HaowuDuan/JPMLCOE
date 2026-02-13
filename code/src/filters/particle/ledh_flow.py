@@ -54,6 +54,8 @@ class LocalExactDaumHuangFlow(FlowFilterBase):
             debug_mode: If True, collect detailed diagnostics
         """
         super().__init__(model, n_particles, n_lambda_steps, integration_method, n_threads)
+        self.dtype = getattr(model, 'dtype', tf.float64)
+        self.np_dtype = np.float64 if self.dtype == tf.float64 else np.float32
         self.use_feedback = use_feedback
         self.regularization = regularization
         self.debug_mode = debug_mode
@@ -126,8 +128,8 @@ class LocalExactDaumHuangFlow(FlowFilterBase):
             raise ValueError("Model must have mu_0 and Sigma_0 attributes")
 
         # Convert to TensorFlow for sampling
-        initial_mean_tf = tf.constant(initial_mean, dtype=tf.float32)
-        initial_cov_tf = tf.constant(initial_cov, dtype=tf.float32)
+        initial_mean_tf = tf.constant(initial_mean, dtype=self.dtype)
+        initial_cov_tf = tf.constant(initial_cov, dtype=self.dtype)
 
         # Sample initial particles using TensorFlow
         if random_state is not None:
@@ -141,10 +143,10 @@ class LocalExactDaumHuangFlow(FlowFilterBase):
         particles_tf = initial_mean_tf + tf.linalg.matmul(z, L, transpose_b=True)
 
         # Store as TensorFlow Variable
-        self.particles = tf.Variable(particles_tf, dtype=tf.float32)
+        self.particles = tf.Variable(particles_tf, dtype=self.dtype)
         self.weights = tf.Variable(
-            tf.ones(self.n_particles, dtype=tf.float32) / tf.cast(self.n_particles, tf.float32),
-            dtype=tf.float32
+            tf.ones(self.n_particles, dtype=self.dtype) / tf.cast(self.n_particles, self.dtype),
+            dtype=self.dtype
         )
 
         # Compute empirical mean and covariance (TF ops)
@@ -153,7 +155,7 @@ class LocalExactDaumHuangFlow(FlowFilterBase):
         if self.state_dim == 1:
             initial_cov_emp = tf.reshape(tf.math.reduce_variance(self.particles.value()), [1, 1])
         else:
-            initial_cov_emp = tf.matmul(diff, diff, transpose_a=True) / tf.cast(self.n_particles, tf.float32)
+            initial_cov_emp = tf.matmul(diff, diff, transpose_a=True) / tf.cast(self.n_particles, self.dtype)
 
         # Initialize global EKF for covariance guidance (constructor needs numpy)
         ensemble_mean_np = ensemble_mean.numpy()
@@ -177,7 +179,7 @@ class LocalExactDaumHuangFlow(FlowFilterBase):
         q = 1.2
         epsilon_1 = (1 - q) / (1 - q**self.n_lambda_steps)
         steps_np = epsilon_1 * q**np.arange(self.n_lambda_steps)
-        self.lambda_steps = tf.constant(steps_np, dtype=tf.float32)
+        self.lambda_steps = tf.constant(steps_np, dtype=self.dtype)
         
 
     @tf.function
@@ -245,7 +247,7 @@ class LocalExactDaumHuangFlow(FlowFilterBase):
         Returns:
             Updated particles, shape (N, state_dim)
         """
-        regularization_tf = tf.constant(self.regularization, dtype=tf.float32)
+        regularization_tf = tf.constant(self.regularization, dtype=self.dtype)
 
         # Compute A, b for ALL particles in one batched call
         A_batch, b_batch = compute_flow_params_batch(
@@ -324,7 +326,7 @@ class LocalExactDaumHuangFlow(FlowFilterBase):
 
         # Use exponential lambda schedule
         particles_flow = self.particles.value()
-        lambda_val = tf.constant(0.0, dtype=tf.float32)
+        lambda_val = tf.constant(0.0, dtype=self.dtype)
 
         # Debug: Store particles before flow
         if self.debug_mode:
@@ -343,7 +345,7 @@ class LocalExactDaumHuangFlow(FlowFilterBase):
 
             # Debug: Capture flow step diagnostics (sample steps)
             if self.debug_mode and i % 10 == 0:
-                regularization_tf = tf.constant(self.regularization, dtype=tf.float32)
+                regularization_tf = tf.constant(self.regularization, dtype=self.dtype)
                 A, b = compute_flow_params(
                     self.model, particles_flow[0], lambda_val, observation,
                     P_tf, R_tf, R_inv_tf, eta_bar_0_tf, self.state_dim, regularization_tf

@@ -49,6 +49,9 @@ class ParticleFilterTF(ParticleFilterBase):
             raise ImportError("TensorFlow is required for ParticleFilterTF")
 
         super().__init__(model, n_particles, resample_threshold)
+        self.model = model
+        self.dtype = getattr(model, 'dtype', tf.float64)
+        self.np_dtype = np.float64 if self.dtype == tf.float64 else np.float32
         self.track_diagnostics = track_diagnostics
         
         # Handle resampling method configuration
@@ -109,8 +112,8 @@ class ParticleFilterTF(ParticleFilterBase):
             # Methods that only return particles (e.g., systematic_resample without _with_weights)
             resampled_particles = result
             N = tf.shape(particles)[0]
-            N_float = tf.cast(N, tf.float32)
-            new_weights = tf.ones(N, dtype=tf.float32) / N_float
+            N_float = tf.cast(N, self.dtype)
+            new_weights = tf.ones(N, dtype=self.dtype) / N_float
         
         return resampled_particles, new_weights
 
@@ -140,16 +143,16 @@ class ParticleFilterTF(ParticleFilterBase):
 
         # Initialize
         particles = self.model.sample_initial_state_batch(self.n_particles, seed)
-        weights = tf.ones(self.n_particles, dtype=tf.float32) / tf.cast(self.n_particles, tf.float32)
+        weights = tf.ones(self.n_particles, dtype=self.dtype) / tf.cast(self.n_particles, self.dtype)
 
         # Storage for results
-        means_list = tf.TensorArray(dtype=tf.float32, size=T, element_shape=[self.state_dim])
-        covs_list = tf.TensorArray(dtype=tf.float32, size=T, element_shape=[self.state_dim, self.state_dim])
-        log_liks_list = tf.TensorArray(dtype=tf.float32, size=T, element_shape=[])
+        means_list = tf.TensorArray(dtype=self.dtype, size=T, element_shape=[self.state_dim])
+        covs_list = tf.TensorArray(dtype=self.dtype, size=T, element_shape=[self.state_dim, self.state_dim])
+        log_liks_list = tf.TensorArray(dtype=self.dtype, size=T, element_shape=[])
 
         # Storage for diagnostics
-        ess_list = tf.TensorArray(dtype=tf.float32, size=T, element_shape=[])
-        weights_history_list = tf.TensorArray(dtype=tf.float32, size=T, element_shape=[self.n_particles])
+        ess_list = tf.TensorArray(dtype=self.dtype, size=T, element_shape=[])
+        weights_history_list = tf.TensorArray(dtype=self.dtype, size=T, element_shape=[self.n_particles])
         resampled_at_list = tf.TensorArray(dtype=tf.int32, size=0, dynamic_size=True, clear_after_read=False)
         n_unique_list = tf.TensorArray(dtype=tf.int32, size=0, dynamic_size=True, clear_after_read=False)
         resample_count = tf.constant(0, dtype=tf.int32)
@@ -194,7 +197,7 @@ class ParticleFilterTF(ParticleFilterBase):
             weights_history_list = weights_history_list.write(t, weights)
 
             # RESAMPLE if needed
-            should_resample = ess < self.resample_threshold * tf.cast(self.n_particles, tf.float32)
+            should_resample = ess < self.resample_threshold * tf.cast(self.n_particles, self.dtype)
 
             if should_resample:
                 particles, weights = self._resample(particles, weights, resample_seed)
@@ -240,7 +243,7 @@ class ParticleFilterTF(ParticleFilterBase):
         T = len(observations)
 
         # Convert to TensorFlow
-        observations_tf = tf.constant(observations, dtype=tf.float32)
+        observations_tf = tf.constant(observations, dtype=self.dtype)
         seed = tf.random.uniform([2], minval=0, maxval=2**31 - 1, dtype=tf.int32)
 
         # Run filter

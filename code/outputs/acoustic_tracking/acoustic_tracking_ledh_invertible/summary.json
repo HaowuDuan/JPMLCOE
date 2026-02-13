@@ -1,6 +1,6 @@
 {
-  "rmse": 14.160510455666337,
-  "log_likelihood": 1019.7377319335938,
+  "rmse": 16.68363197783708,
+  "log_likelihood": 1048.098876953125,
   "metadata": {
     "filter_type": "LEDHParticleFlowFilter",
     "n_particles": 500,
@@ -8,12 +8,12 @@
     "resampling_method": "systematic",
     "resampling_rate": 1.0,
     "performance": {
-      "wall_time_seconds": 93.57089158287272,
-      "time_per_timestep_ms": 1871.4178316574544,
-      "peak_memory_mb": 16.143699645996094,
-      "memory_increase_mb": 1892.953125,
-      "start_memory_mb": 931.53125,
-      "end_memory_mb": 2824.484375,
+      "wall_time_seconds": 91.04056279081851,
+      "time_per_timestep_ms": 1820.8112558163702,
+      "peak_memory_mb": 16.275699615478516,
+      "memory_increase_mb": 1721.171875,
+      "start_memory_mb": 930.078125,
+      "end_memory_mb": 2651.25,
       "num_timesteps": 50
     }
   },
@@ -35,10 +35,13 @@
       "resample_threshold": 0.5
     },
     "seed": 42,
+    "dtype": "float32",
     "T": 50,
     "output_dir": "outputs/acoustic_tracking/acoustic_tracking_ledh_invertible",
     "plot": true,
     "device": "auto",
-    "verbose": true
+    "tf_log_level": 2,
+    "verbose": true,
+    "show_progress": true
   }
 }

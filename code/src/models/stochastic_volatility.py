@@ -33,7 +33,7 @@ class StochasticVolatilityModel(StateSpaceModel):
     - Stationary variance: σ²/(1 - α²)
     """
 
-    def __init__(self, alpha: float = 0.91, sigma: float = 1.0, beta: float = 0.5):
+    def __init__(self, alpha: float = 0.91, sigma: float = 1.0, beta: float = 0.5, dtype=None):
         """
         Initialize Stochastic Volatility Model.
 
@@ -48,6 +48,12 @@ class StochasticVolatilityModel(StateSpaceModel):
             raise ValueError(f"sigma must be positive, got {sigma}")
         if beta <= 0:
             raise ValueError(f"beta must be positive, got {beta}")
+
+        import tensorflow as tf
+        if dtype is None:
+            dtype = tf.float32
+        self.dtype = dtype
+        self.np_dtype = np.float64 if dtype == tf.float64 else np.float32
 
         self.alpha = alpha
         self.sigma = sigma
@@ -203,7 +209,7 @@ class StochasticVolatilityModel(StateSpaceModel):
             w = tf.random.stateless_normal(input_shape, seed=seed)
 
             # State transition: x' = α·x + σ·w
-            return tf.constant(self.alpha, dtype=tf.float32) * x_tf + tf.constant(self.sigma, dtype=tf.float32) * w
+            return tf.constant(self.alpha, dtype=self.dtype) * x_tf + tf.constant(self.sigma, dtype=self.dtype) * w
 
         @tf.function
         def log_observation_prob_tf(self, y_tf: tf.Tensor, x_tf: tf.Tensor) -> tf.Tensor:
