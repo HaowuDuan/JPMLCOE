@@ -246,6 +246,23 @@ class LinearGaussianModel(StateSpaceModel):
         return -0.5 * (tf.cast(self.obs_dim, observation.dtype) * tf.math.log(2.0 * 3.14159265359) + logdet + mahalanobis)
 
     @tf.function
+    def observation_jacobian_batch(self, particles: tf.Tensor) -> tf.Tensor:
+        """H is constant — broadcast to (N, ny, nx)."""
+        N = tf.shape(particles)[0]
+        return tf.tile(tf.expand_dims(self.H, 0), [N, 1, 1])
+
+    @tf.function
+    def observation_function_batch(self, particles: tf.Tensor) -> tf.Tensor:
+        """h(x) = H @ x, vectorized: particles @ H^T -> (N, ny)."""
+        return particles @ tf.transpose(self.H)
+
+    @tf.function
+    def state_jacobian_batch(self, particles: tf.Tensor) -> tf.Tensor:
+        """F is constant — broadcast to (N, nx, nx)."""
+        N = tf.shape(particles)[0]
+        return tf.tile(tf.expand_dims(self.F, 0), [N, 1, 1])
+
+    @tf.function
     def sample_initial_state_batch(self, n: int, seed: tf.Tensor) -> tf.Tensor:
         """
         Sample n initial states using TensorFlow.

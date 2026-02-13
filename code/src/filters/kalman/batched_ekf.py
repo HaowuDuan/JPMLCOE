@@ -1,8 +1,8 @@
 """
 Batched EKF operations for per-particle filters.
 
-Provides single tf.function calls that process N (mean, cov) pairs at once,
-avoiding retracing when used in loops (e.g., LEDH invertible with N particles).
+Uses true batched linear algebra (matmul with batch dimensions) instead of
+tf.map_fn, for significant speedup when processing N (mean, cov) pairs.
 """
 
 import tensorflow as tf
@@ -17,10 +17,11 @@ def batched_ekf_predict(
     covs: tf.Tensor,
 ) -> Tuple[tf.Tensor, tf.Tensor]:
     """
-    Batched EKF prediction for N particles.
+    Batched EKF prediction for N particles using true batched matmul.
 
     Args:
-        model: StateSpaceModel with state_transition_mean, state_jacobian, state_transition_cov
+        model: StateSpaceModel with state_transition_mean_batch, state_jacobian_batch,
+               state_transition_cov_batch
         means: (N, state_dim)
         covs: (N, state_dim, state_dim)
 
@@ -28,32 +29,31 @@ def batched_ekf_predict(
         mean_pred: (N, state_dim)
         cov_pred: (N, state_dim, state_dim)
     """
-    def predict_single(i):
-        mean_i = means[i]
-        cov_i = covs[i]
-        mean_pred_i = model.state_transition_mean(mean_i)
-        F = model.state_jacobian(mean_i)
-        Q = model.state_transition_cov(mean_i)
-        cov_pred_i = F @ cov_i @ tf.transpose(F) + Q
-        cov_pred_i = symmetrize(cov_pred_i)
-        return mean_pred_i, cov_pred_i
+    # Batched predicted means: (N, sd)
+    mean_pred = model.state_transition_mean_batch(means)
 
-    state_dim = model.state_dim
-    n = tf.shape(means)[0]
+    # Batched Jacobians: (N, sd, sd)
+    F_batch = model.state_jacobian_batch(means)
 
-    def body(i):
-        return predict_single(i)
+    # Process noise covariance — typically constant: (sd, sd)
+    Q = model.state_transition_cov_batch(means)
 
-    results = tf.map_fn(
-        body,
-        tf.range(n),
-        fn_output_signature=(
-            tf.TensorSpec([state_dim], tf.float32),
-            tf.TensorSpec([state_dim, state_dim], tf.float32),
-        ),
-    )
-    mean_pred = results[0]
-    cov_pred = results[1]
+    # Batched covariance prediction: F @ cov @ F^T + Q
+    # F_batch @ covs: (N, sd, sd)
+    F_cov = tf.matmul(F_batch, covs)
+    # F_cov @ F^T: (N, sd, sd)
+    F_T = tf.linalg.matrix_transpose(F_batch)
+    cov_pred = tf.matmul(F_cov, F_T)
+
+    # Add Q (broadcast if Q is (sd, sd))
+    if len(Q.shape) == 2:
+        cov_pred = cov_pred + tf.expand_dims(Q, 0)
+    else:
+        cov_pred = cov_pred + Q
+
+    # Symmetrize for numerical stability
+    cov_pred = symmetrize(cov_pred)
+
     return mean_pred, cov_pred
 
 
@@ -65,10 +65,11 @@ def batched_ekf_update(
     observation: tf.Tensor,
 ) -> Tuple[tf.Tensor, tf.Tensor]:
     """
-    Batched EKF update for N particles.
+    Batched EKF update for N particles using true batched matmul.
 
     Args:
-        model: StateSpaceModel with observation_mean, observation_cov, observation_jacobian
+        model: StateSpaceModel with observation_function_batch, observation_cov,
+               observation_jacobian_batch
         means: (N, state_dim) predicted means
         covs: (N, state_dim, state_dim) predicted covariances
         observation: (obs_dim,) observation vector
@@ -77,45 +78,36 @@ def batched_ekf_update(
         mean_updated: (N, state_dim)
         cov_updated: (N, state_dim, state_dim)
     """
-    def update_single(i):
-        mean_i = means[i]
-        cov_i = covs[i]
-        y_pred = model.observation_mean(mean_i)
-        R = model.observation_cov(mean_i)
-        H = model.observation_jacobian(mean_i)
-        innovation = observation - y_pred
-        S = H @ cov_i @ tf.transpose(H) + R
-        H_norm = tf.reduce_max(tf.abs(H))
+    # Batched observation predictions: (N, od)
+    y_pred = model.observation_function_batch(means)
 
-        def do_update():
-            S_inv = tf.linalg.inv(S)
-            K = cov_i @ tf.transpose(H) @ S_inv
-            mean_updated = mean_i + tf.linalg.matvec(K, innovation)
-            I = tf.eye(model.state_dim, dtype=tf.float32)
-            cov_updated = (I - K @ H) @ cov_i
-            return mean_updated, symmetrize(cov_updated)
+    # Batched Jacobians: (N, od, sd)
+    H_batch = model.observation_jacobian_batch(means)
 
-        def no_update():
-            return mean_i, cov_i
+    # Observation noise covariance — typically constant: (od, od)
+    R = model.observation_cov(means[0])
 
-        mean_updated, cov_updated = tf.cond(
-            H_norm > 1e-10,
-            do_update,
-            no_update,
-        )
-        return mean_updated, cov_updated
+    # Innovation: (N, od)
+    innovation = tf.expand_dims(observation, 0) - y_pred
 
-    state_dim = model.state_dim
-    n = tf.shape(means)[0]
+    # S = H @ cov @ H^T + R: (N, od, od)
+    H_cov = tf.matmul(H_batch, covs)  # (N, od, sd)
+    H_T = tf.linalg.matrix_transpose(H_batch)  # (N, sd, od)
+    S = tf.matmul(H_cov, H_T) + tf.expand_dims(R, 0)
 
-    results = tf.map_fn(
-        lambda i: update_single(i),
-        tf.range(n),
-        fn_output_signature=(
-            tf.TensorSpec([state_dim], tf.float32),
-            tf.TensorSpec([state_dim, state_dim], tf.float32),
-        ),
-    )
-    mean_updated = results[0]
-    cov_updated = results[1]
+    # Kalman gain: K = cov @ H^T @ S^{-1}: (N, sd, od)
+    S_inv = tf.linalg.inv(S)  # (N, od, od)
+    cov_HT = tf.matmul(covs, H_T)  # (N, sd, od)
+    K = tf.matmul(cov_HT, S_inv)  # (N, sd, od)
+
+    # Update mean: mean + K @ innovation: (N, sd)
+    mean_updated = means + tf.einsum('nij,nj->ni', K, innovation)
+
+    # Update covariance: (I - K @ H) @ cov: (N, sd, sd)
+    I = tf.eye(model.state_dim, dtype=tf.float32)
+    KH = tf.matmul(K, H_batch)  # (N, sd, sd)
+    I_KH = tf.expand_dims(I, 0) - KH
+    cov_updated = tf.matmul(I_KH, covs)
+    cov_updated = symmetrize(cov_updated)
+
     return mean_updated, cov_updated

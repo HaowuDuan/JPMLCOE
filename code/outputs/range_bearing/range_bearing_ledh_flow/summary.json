@@ -1,0 +1,41 @@
+{
+  "rmse": 0.11353129161742799,
+  "log_likelihood": null,
+  "metadata": {
+    "filter_type": "LocalExactDaumHuangFlow",
+    "n_particles": 500,
+    "n_lambda_steps": 29,
+    "integration_method": "euler",
+    "performance": {
+      "wall_time_seconds": 455.3090840000659,
+      "time_per_timestep_ms": 910.6181680001318,
+      "peak_memory_mb": 533.142050743103,
+      "memory_increase_mb": 574.328125,
+      "start_memory_mb": 417.0625,
+      "end_memory_mb": 991.390625,
+      "num_timesteps": 500
+    }
+  },
+  "config": {
+    "model": {
+      "_target_": "src.models.range_bearing.RangeBearingModel",
+      "sigma_range": 0.1,
+      "sigma_bearing": 0.1
+    },
+    "filter": {
+      "_target_": "src.filters.particle.ledh_flow.LocalExactDaumHuangFlow",
+      "n_particles": 500,
+      "n_lambda_steps": 29,
+      "integration_method": "euler",
+      "use_feedback": true,
+      "regularization": 1e-05,
+      "n_threads": null
+    },
+    "seed": 42,
+    "T": 500,
+    "output_dir": "outputs/range_bearing/range_bearing_ledh_flow",
+    "plot": true,
+    "device": "auto",
+    "verbose": true
+  }
+}

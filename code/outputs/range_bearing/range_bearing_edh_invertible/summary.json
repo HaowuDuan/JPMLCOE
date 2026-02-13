@@ -1,0 +1,39 @@
+{
+  "rmse": 0.11993167232590475,
+  "log_likelihood": 82.850341796875,
+  "metadata": {
+    "filter_type": "EDHParticleFlowFilter",
+    "n_particles": 500,
+    "n_lambda_steps": 29,
+    "resampling_method": "systematic",
+    "resampling_rate": 0.88,
+    "performance": {
+      "wall_time_seconds": 48.38374741608277,
+      "time_per_timestep_ms": 967.6749483216554,
+      "peak_memory_mb": 53.81021690368652,
+      "memory_increase_mb": 646.65625,
+      "start_memory_mb": 416.53125,
+      "end_memory_mb": 1063.1875,
+      "num_timesteps": 50
+    }
+  },
+  "config": {
+    "model": {
+      "_target_": "src.models.range_bearing.RangeBearingModel",
+      "sigma_range": 0.1,
+      "sigma_bearing": 0.1
+    },
+    "filter": {
+      "_target_": "src.filters.particle.edh_invertible.EDHParticleFlowFilter",
+      "n_particles": 500,
+      "n_lambda_steps": 29,
+      "resample_threshold": 0.5
+    },
+    "seed": 42,
+    "T": 50,
+    "output_dir": "outputs/range_bearing/range_bearing_edh_invertible",
+    "plot": true,
+    "device": "auto",
+    "verbose": true
+  }
+}

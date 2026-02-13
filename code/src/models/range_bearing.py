@@ -249,6 +249,39 @@ class RangeBearingModel(StateSpaceModel):
     # Batch methods for optimized particle filtering
 
     @tf.function
+    def observation_jacobian_batch(self, particles: tf.Tensor) -> tf.Tensor:
+        """Vectorized Jacobian for range-bearing: (N, 2, 2)."""
+        dx = particles[:, 0] - self.sensor_pos[0]  # (N,)
+        dy = particles[:, 1] - self.sensor_pos[1]  # (N,)
+        range_val = tf.maximum(tf.sqrt(dx**2 + dy**2), 1e-10)  # (N,)
+        range_sq = range_val**2  # (N,)
+
+        # H[i] = [[dx/r, dy/r], [-dy/r^2, dx/r^2]]
+        H_00 = dx / range_val  # (N,)
+        H_01 = dy / range_val
+        H_10 = -dy / range_sq
+        H_11 = dx / range_sq
+
+        row0 = tf.stack([H_00, H_01], axis=1)  # (N, 2)
+        row1 = tf.stack([H_10, H_11], axis=1)  # (N, 2)
+        return tf.stack([row0, row1], axis=1)   # (N, 2, 2)
+
+    @tf.function
+    def observation_function_batch(self, particles: tf.Tensor) -> tf.Tensor:
+        """Vectorized h(x) = [range, bearing]: (N, 2)."""
+        dx = particles[:, 0] - self.sensor_pos[0]
+        dy = particles[:, 1] - self.sensor_pos[1]
+        range_vals = tf.sqrt(dx**2 + dy**2)
+        bearing_vals = tf.atan2(dy, dx)
+        return tf.stack([range_vals, bearing_vals], axis=1)  # (N, 2)
+
+    @tf.function
+    def state_jacobian_batch(self, particles: tf.Tensor) -> tf.Tensor:
+        """F is constant — broadcast to (N, 2, 2)."""
+        N = tf.shape(particles)[0]
+        return tf.tile(tf.expand_dims(self.F, 0), [N, 1, 1])
+
+    @tf.function
     def state_transition_mean_batch(self, particles: tf.Tensor) -> tf.Tensor:
         """Vectorized state transition mean: particles @ F.T."""
         return particles @ tf.transpose(self.F)

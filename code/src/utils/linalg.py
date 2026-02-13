@@ -38,6 +38,8 @@ def safe_cholesky(A: tf.Tensor, jitter: float = 1e-10, adaptive: bool = True) ->
     else:
         scaled_jitter = jitter
     
+    # Reshape for batch broadcasting: (...,) -> (..., 1, 1)
+    scaled_jitter = tf.reshape(scaled_jitter, tf.concat([tf.shape(scaled_jitter), [1, 1]], axis=0))
     A_reg = A + eye * scaled_jitter
     return tf.linalg.cholesky(A_reg)
 

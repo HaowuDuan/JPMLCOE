@@ -412,6 +412,63 @@ class AcousticTrackingFullModel(StateSpaceModel):
         return self.sample_state_transition_batch(particles, seed)
 
     @tf.function
+    def observation_jacobian_batch(self, particles: tf.Tensor) -> tf.Tensor:
+        """Vectorized Jacobian for acoustic tracking: (N, n_sensors, state_dim).
+
+        ∂z_s/∂x_i = -Ψ * (x_i - s_x) / (r * (r + d_0)^2)
+        ∂z_s/∂y_i = -Ψ * (y_i - s_y) / (r * (r + d_0)^2)
+        ∂z_s/∂vx_i = 0, ∂z_s/∂vy_i = 0
+        """
+        N = tf.shape(particles)[0]
+        # Initialize H as zeros: (N, n_sensors, state_dim)
+        H = tf.zeros([N, self.n_sensors, self.state_dim], dtype=tf.float32)
+
+        for c in range(self.n_targets):
+            # Extract target positions: (N,)
+            target_x = particles[:, c * 4]
+            target_y = particles[:, c * 4 + 1]
+
+            for s in range(self.n_sensors):
+                sensor_pos = self.sensor_positions[s]
+                dx = target_x - sensor_pos[0]  # (N,)
+                dy = target_y - sensor_pos[1]  # (N,)
+                r = tf.sqrt(dx**2 + dy**2 + 1e-10)  # (N,)
+                denom = r * (r + self.d0) ** 2  # (N,)
+
+                dh_dx = -self.psi * dx / denom  # (N,)
+                dh_dy = -self.psi * dy / denom  # (N,)
+
+                # Build indices for scatter update
+                idx_x = c * 4      # column for target x position
+                idx_y = c * 4 + 1  # column for target y position
+
+                # Create update tensors and add to H
+                update_x = tf.zeros([N, self.n_sensors, self.state_dim], dtype=tf.float32)
+                update_y = tf.zeros([N, self.n_sensors, self.state_dim], dtype=tf.float32)
+
+                # Use index assignment via one_hot masking
+                sensor_mask = tf.one_hot(s, self.n_sensors, dtype=tf.float32)  # (n_sensors,)
+                col_mask_x = tf.one_hot(idx_x, self.state_dim, dtype=tf.float32)  # (state_dim,)
+                col_mask_y = tf.one_hot(idx_y, self.state_dim, dtype=tf.float32)  # (state_dim,)
+
+                # (N,) * (n_sensors,) * (state_dim,) -> (N, n_sensors, state_dim)
+                H = H + dh_dx[:, tf.newaxis, tf.newaxis] * sensor_mask[tf.newaxis, :, tf.newaxis] * col_mask_x[tf.newaxis, tf.newaxis, :]
+                H = H + dh_dy[:, tf.newaxis, tf.newaxis] * sensor_mask[tf.newaxis, :, tf.newaxis] * col_mask_y[tf.newaxis, tf.newaxis, :]
+
+        return H
+
+    @tf.function
+    def observation_function_batch(self, particles: tf.Tensor) -> tf.Tensor:
+        """Vectorized h(x) for batch of states: (N, n_sensors)."""
+        return self._compute_amplitudes(particles)
+
+    @tf.function
+    def state_jacobian_batch(self, particles: tf.Tensor) -> tf.Tensor:
+        """F is constant — broadcast to (N, state_dim, state_dim)."""
+        N = tf.shape(particles)[0]
+        return tf.tile(tf.expand_dims(self.F, 0), [N, 1, 1])
+
+    @tf.function
     def log_observation_prob_batch(self, observation: tf.Tensor, particles: tf.Tensor) -> tf.Tensor:
         """Vectorized amplitude decay log-prob for all particles."""
         return self.log_observation_prob(observation, particles)

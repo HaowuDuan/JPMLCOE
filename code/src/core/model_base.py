@@ -143,6 +143,57 @@ class StateSpaceModel(ABC):
         """Compute log obs probs for batch. Default: loop."""
         return tf.stack([self.log_observation_prob(observation, x) for x in particles])
 
+    def observation_jacobian_batch(self, particles: tf.Tensor) -> tf.Tensor:
+        """Compute observation Jacobian for batch of states.
+
+        Args:
+            particles: (N, state_dim)
+
+        Returns:
+            H_batch: (N, obs_dim, state_dim)
+
+        Default: tf.map_fn over observation_jacobian. Override for efficiency.
+        """
+        return tf.map_fn(
+            self.observation_jacobian,
+            particles,
+            fn_output_signature=tf.TensorSpec([self.obs_dim, self.state_dim], tf.float32)
+        )
+
+    def observation_function_batch(self, particles: tf.Tensor) -> tf.Tensor:
+        """Compute observation function h(x) for batch of states.
+
+        Args:
+            particles: (N, state_dim)
+
+        Returns:
+            h_batch: (N, obs_dim)
+
+        Default: tf.map_fn over observation_function. Override for efficiency.
+        """
+        return tf.map_fn(
+            self.observation_function,
+            particles,
+            fn_output_signature=tf.TensorSpec([self.obs_dim], tf.float32)
+        )
+
+    def state_jacobian_batch(self, particles: tf.Tensor) -> tf.Tensor:
+        """Compute state transition Jacobian for batch of states.
+
+        Args:
+            particles: (N, state_dim)
+
+        Returns:
+            F_batch: (N, state_dim, state_dim)
+
+        Default: tf.map_fn over state_jacobian. Override for efficiency.
+        """
+        return tf.map_fn(
+            self.state_jacobian,
+            particles,
+            fn_output_signature=tf.TensorSpec([self.state_dim, self.state_dim], tf.float32)
+        )
+
     @property
     def has_state_dependent_noise(self) -> bool:
         """Whether process noise Q depends on state. Default: False."""

@@ -11,7 +11,7 @@ filter:
   regularization: 1.0e-05
   n_threads: null
 seed: 42
-T: 50
+T: 500
 output_dir: outputs/range_bearing/range_bearing_ledh_flow
 plot: true
 device: auto

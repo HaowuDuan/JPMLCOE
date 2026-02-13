@@ -6,7 +6,7 @@ from typing import Optional, Tuple, Callable, Dict, Any
 from concurrent.futures import ThreadPoolExecutor
 from .flow_base import FlowFilterBase
 from ..kalman.extended_kalman import ExtendedKalmanFilter
-from ...utils.flow_params import compute_flow_params
+from ...utils.flow_params import compute_flow_params, compute_flow_params_batch
 from ...utils.ode_solvers import euler_step
 from ...resampling import systematic_resample, soft_resample, ot_entropy_resample
 
@@ -228,7 +228,7 @@ class LocalExactDaumHuangFlow(FlowFilterBase):
         eta_bar_0: tf.Tensor
     ) -> tf.Tensor:
         """
-        Local flow step using Euler integration.
+        Local flow step using Euler integration with batched flow params.
 
         Each particle uses its own LOCAL linearization H_i and GLOBAL P_{k|k-1}.
 
@@ -237,7 +237,7 @@ class LocalExactDaumHuangFlow(FlowFilterBase):
             y: Observation, shape (obs_dim,)
             lambda_val: Current λ
             d_lambda: Step size
-            P: GLOBAL predictive covariance
+            P: GLOBAL predictive covariance (sd, sd) — broadcast inside batch fn
             R: Observation noise covariance
             R_inv: Inverse of R
             eta_bar_0: GLOBAL mean at λ=0
@@ -247,13 +247,19 @@ class LocalExactDaumHuangFlow(FlowFilterBase):
         """
         regularization_tf = tf.constant(self.regularization, dtype=tf.float32)
 
-        # Compute drift for each particle using tf.map_fn
-        def compute_drift_for_particle(particle):
-            return self._compute_drift_single(
-                particle, lambda_val, y, P, R, R_inv, eta_bar_0, regularization_tf
-            )
+        # Compute A, b for ALL particles in one batched call
+        A_batch, b_batch = compute_flow_params_batch(
+            self.model, particles, lambda_val, y, P, R, R_inv,
+            eta_bar_0, self.state_dim, regularization_tf
+        )
 
-        drift = tf.map_fn(compute_drift_for_particle, particles, dtype=tf.float32)
+        # Drift: A_i @ x_i + b_i for all particles: (N, sd)
+        drift = tf.einsum('nij,nj->ni', A_batch, particles) + b_batch
+
+        # Clip drift magnitude per-particle
+        drift_norms = tf.norm(drift, axis=1, keepdims=True)
+        scale = tf.minimum(1.0, 100.0 / (drift_norms + 1e-10))
+        drift = drift * scale
 
         # Euler step
         particles_new = particles + drift * d_lambda
@@ -308,11 +314,13 @@ class LocalExactDaumHuangFlow(FlowFilterBase):
         """
         observation = y  # Already TF tensor from flow_base.filter()
         P_tf = self.predicted_cov  # Already TF tensor from predict()
-        R_tf = tf.constant(self.model.observation_noise_cov, dtype=tf.float32)
+        R_tf = self.model.observation_noise_cov
         eta_bar_0_tf = self.eta_bar_0  # Already TF tensor from predict()
 
-        # Compute R_inv (once per update)
-        R_inv_tf = tf.linalg.inv(R_tf)
+        # Cache R_inv (constant across timesteps)
+        if self.R_inv_cache is None:
+            self.R_inv_cache = tf.linalg.inv(R_tf)
+        R_inv_tf = self.R_inv_cache
 
         # Use exponential lambda schedule
         particles_flow = self.particles.value()
