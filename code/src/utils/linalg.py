@@ -1,137 +1,119 @@
-"""Numerically stable linear algebra operations."""
+"""Numerically stable linear algebra operations - TensorFlow version."""
 
-import numpy as np
-from typing import Optional
+import tensorflow as tf
 
 
-def safe_cholesky(A: np.ndarray, jitter: float = 1e-6, max_tries: int = 5) -> np.ndarray:
+@tf.function
+def safe_cholesky(A: tf.Tensor, jitter: float = 1e-10, adaptive: bool = True) -> tf.Tensor:
     """
-    Compute Cholesky decomposition with automatic regularization.
-
+    Compute Cholesky decomposition with optional adaptive regularization.
+    
+    Adaptive mode scales jitter by the average diagonal magnitude of A,
+    matching MATLAB's philosophy of scale-dependent regularization.
+    
     Args:
-        A: Symmetric positive definite matrix of shape (n, n)
-        jitter: Initial regularization parameter
-        max_tries: Maximum number of attempts with increasing jitter
-
+        A: Symmetric positive semi-definite matrix (..., n, n)
+        jitter: Base regularization strength (default: 1e-10, matching MATLAB's 1e-14 with buffer)
+        adaptive: If True, scale jitter by matrix trace (default: True)
+    
     Returns:
-        L: Lower triangular Cholesky factor
-
-    Raises:
-        ValueError: If decomposition fails after max_tries attempts
+        L: Lower triangular Cholesky factor such that L @ L^T ≈ A
+    
+    Example:
+        >>> A = tf.constant([[100.0, 0.0], [0.0, 100.0]])
+        >>> L = safe_cholesky(A, jitter=1e-10, adaptive=True)
+        >>> # Effective jitter = 1e-10 * 100 = 1e-8
     """
-    current_jitter = jitter
-
-    for attempt in range(max_tries):
-        try:
-            if attempt == 0:
-                # First try without jitter
-                return np.linalg.cholesky(A)
-            else:
-                # Add jitter and retry
-                A_reg = A + np.eye(A.shape[0]) * current_jitter
-                return np.linalg.cholesky(A_reg)
-        except np.linalg.LinAlgError:
-            if attempt < max_tries - 1:
-                current_jitter *= 10.0
-            else:
-                # Last resort: use eigenvalue decomposition
-                eigvals, eigvecs = np.linalg.eigh(A)
-                eigvals = np.maximum(eigvals, jitter)
-                L = eigvecs @ np.diag(np.sqrt(eigvals))
-                return L
-
-    raise ValueError(f"Cholesky decomposition failed after {max_tries} attempts")
+    n = tf.shape(A)[-1]
+    eye = tf.eye(n, dtype=A.dtype)
+    
+    if adaptive:
+        # Scale jitter by average diagonal (trace / n)
+        trace_A = tf.linalg.trace(A)
+        n_float = tf.cast(n, A.dtype)
+        avg_diag = trace_A / n_float
+        
+        # Scale jitter, with minimum = base jitter
+        scaled_jitter = jitter * tf.maximum(avg_diag, 1.0)
+    else:
+        scaled_jitter = jitter
+    
+    A_reg = A + eye * scaled_jitter
+    return tf.linalg.cholesky(A_reg)
 
 
-def safe_solve(A: np.ndarray, b: np.ndarray, method: str = 'default') -> np.ndarray:
+@tf.function
+def safe_solve(A: tf.Tensor, b: tf.Tensor, method: str = 'default') -> tf.Tensor:
     """
     Solve linear system Ax = b with fallback strategies.
 
     Args:
-        A: Coefficient matrix of shape (n, n)
-        b: Right-hand side of shape (n,) or (n, k)
-        method: 'default' (uses np.linalg.solve), 'cholesky', or 'lstsq'
+        A: Coefficient matrix of shape (..., n, n)
+        b: Right-hand side of shape (..., n) or (..., n, k)
+        method: 'default', 'cholesky', or 'lstsq'
 
     Returns:
-        x: Solution of shape (n,) or (n, k)
+        x: Solution of same shape as b
     """
     if method == 'cholesky':
-        try:
-            L = safe_cholesky(A)
-            # Solve L L^T x = b
-            y = np.linalg.solve(L, b)
-            x = np.linalg.solve(L.T, y)
-            return x
-        except (np.linalg.LinAlgError, ValueError):
-            # Fallback to least squares
-            return np.linalg.lstsq(A, b, rcond=None)[0]
+        L = safe_cholesky(A)
+        return tf.linalg.cholesky_solve(L, b[..., tf.newaxis])[..., 0]
     elif method == 'lstsq':
-        return np.linalg.lstsq(A, b, rcond=None)[0]
+        return tf.linalg.lstsq(A, b[..., tf.newaxis], fast=False)[..., 0]
     else:
-        try:
-            return np.linalg.solve(A, b)
-        except np.linalg.LinAlgError:
-            # Fallback to least squares
-            return np.linalg.lstsq(A, b, rcond=None)[0]
+        # Default: use direct solve
+        return tf.linalg.solve(A, b[..., tf.newaxis])[..., 0]
 
 
-def log_det(A: np.ndarray, use_cholesky: bool = True) -> float:
+@tf.function
+def log_det(A: tf.Tensor) -> tf.Tensor:
     """
     Compute log determinant stably.
 
     Args:
-        A: Positive definite matrix of shape (n, n)
-        use_cholesky: If True, use Cholesky decomposition (faster and more stable)
+        A: Positive definite matrix of shape (..., n, n)
 
     Returns:
-        log|det(A)|
+        log|det(A)| of shape (...)
     """
-    if use_cholesky:
-        try:
-            L = safe_cholesky(A)
-            return 2.0 * np.sum(np.log(np.diag(L)))
-        except (np.linalg.LinAlgError, ValueError):
-            # Fallback to slogdet
-            sign, logdet = np.linalg.slogdet(A)
-            if sign <= 0:
-                raise ValueError("Matrix is not positive definite")
-            return logdet
-    else:
-        sign, logdet = np.linalg.slogdet(A)
-        if sign <= 0:
-            raise ValueError("Matrix is not positive definite")
-        return logdet
+    sign, logdet = tf.linalg.slogdet(A)
+    return logdet
 
 
-def symmetrize(A: np.ndarray) -> np.ndarray:
+@tf.function
+def symmetrize(A: tf.Tensor) -> tf.Tensor:
     """
     Force matrix to be symmetric: A_sym = (A + A^T) / 2
 
     Args:
-        A: Matrix of shape (n, n)
+        A: Matrix of shape (..., n, n)
 
     Returns:
-        Symmetric matrix of shape (n, n)
+        Symmetric matrix of shape (..., n, n)
     """
-    return 0.5 * (A + A.T)
+    return 0.5 * (A + tf.linalg.matrix_transpose(A))
 
 
-def matrix_sqrt(A: np.ndarray, method: str = 'cholesky') -> np.ndarray:
+@tf.function
+def matrix_sqrt(A: tf.Tensor, method: str = 'cholesky') -> tf.Tensor:
     """
     Compute matrix square root: sqrt(A) such that sqrt(A) @ sqrt(A)^T = A
 
     Args:
-        A: Positive definite matrix of shape (n, n)
+        A: Positive definite matrix of shape (..., n, n)
         method: 'cholesky' or 'eig' (eigenvalue decomposition)
 
     Returns:
-        Matrix square root of shape (n, n)
+        Matrix square root of shape (..., n, n)
     """
     if method == 'cholesky':
         return safe_cholesky(A)
     elif method == 'eig':
-        eigvals, eigvecs = np.linalg.eigh(A)
-        eigvals = np.maximum(eigvals, 1e-10)  # Ensure positive
-        return eigvecs @ np.diag(np.sqrt(eigvals)) @ eigvecs.T
+        # Eigenvalue decomposition
+        eigvals, eigvecs = tf.linalg.eigh(A)
+        eigvals = tf.maximum(eigvals, 1e-10)  # Ensure positive
+        sqrt_eigvals = tf.sqrt(eigvals)
+        # sqrt(A) = V @ diag(sqrt(λ)) @ V^T
+        return eigvecs @ tf.linalg.diag(sqrt_eigvals) @ tf.linalg.matrix_transpose(eigvecs)
     else:
         raise ValueError(f"Unknown method: {method}")

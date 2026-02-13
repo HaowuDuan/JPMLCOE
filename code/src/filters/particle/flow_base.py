@@ -1,8 +1,8 @@
 """Base class for particle flow filters."""
 
 import numpy as np
+import tensorflow as tf
 from typing import Tuple, Optional
-from concurrent.futures import ThreadPoolExecutor
 import os
 from ...core.types import FilterResult
 
@@ -42,11 +42,11 @@ class FlowFilterBase:
         else:
             self.n_threads = max(1, int(n_threads))
 
-        # State
+        # State (TF Variable, set in initialize())
         self.particles = None
         self.random_state = np.random.default_rng()
 
-        # Storage
+        # Storage (lists of TF tensors, converted in filter())
         self.means = []
         self.covs = []
 
@@ -54,87 +54,45 @@ class FlowFilterBase:
         self.ess_history = []
         self.weights_history = []
 
-    def _compute_observation_matrix(self, particles: np.ndarray) -> np.ndarray:
-        """
-        Evaluate observation function h(x) for all particles.
-
-        Args:
-            particles: Shape (N, state_dim)
-
-        Returns:
-            h_particles: Shape (N, obs_dim)
-        """
-        if self.n_threads > 1:
-            def compute_h(i):
-                return self.model.observation_function(particles[i])
-
-            with ThreadPoolExecutor(max_workers=self.n_threads) as executor:
-                h_particles = np.array(list(executor.map(compute_h, range(self.n_particles))))
-        else:
-            h_particles = np.array([
-                self.model.observation_function(particles[i])
-                for i in range(self.n_particles)
-            ])
-        return h_particles
-
-    def _estimate_mean_cov(self) -> Tuple[np.ndarray, np.ndarray]:
+    def _estimate_mean_cov(self) -> Tuple[tf.Tensor, tf.Tensor]:
         """
         Estimate mean and covariance from equally-weighted particles.
 
+        Returns TF tensors (no numpy conversion).
+
         Returns:
-            mean: Shape (state_dim,)
-            cov: Shape (state_dim, state_dim)
+            mean: TF Tensor, shape (state_dim,)
+            cov: TF Tensor, shape (state_dim, state_dim)
         """
-        mean = np.mean(self.particles, axis=0)
-        diff = self.particles - mean
-        cov = (diff.T @ diff) / self.n_particles
+        particles = self.particles.value() if isinstance(self.particles, tf.Variable) else self.particles
+        mean = tf.reduce_mean(particles, axis=0)
+        diff = particles - mean
+        cov = tf.matmul(diff, diff, transpose_a=True) / tf.cast(self.n_particles, tf.float32)
         return mean, cov
 
+    def _make_tf_seed(self) -> tf.Tensor:
+        """Create a TF-compatible seed from the numpy random state."""
+        return tf.constant(self.random_state.integers(0, 2**31, size=2), dtype=tf.int32)
+
     def predict(self):
-        """Prediction step: propagate particles through state transition."""
-        if self.n_threads > 1:
-            # Pre-generate seeds to avoid race conditions
-            seeds = self.random_state.integers(0, 2**32, size=self.n_particles)
+        """Prediction step: propagate particles through state transition using batch method."""
+        seed = self._make_tf_seed()
+        particles_predicted = self.model.state_transition_batch(self.particles.value(), seed)
+        self.particles.assign(particles_predicted)
 
-            def propagate_particle(args):
-                i, seed = args
-                thread_rng = np.random.default_rng(seed)
-                return self.model.sample_state_transition(self.particles[i], thread_rng)
-
-            with ThreadPoolExecutor(max_workers=self.n_threads) as executor:
-                self.particles = np.array(list(executor.map(propagate_particle,
-                                                           zip(range(self.n_particles), seeds))))
-        else:
-            self.particles = np.array([
-                self.model.sample_state_transition(self.particles[i], self.random_state)
-                for i in range(self.n_particles)
-            ])
-
-    def update(self, y: np.ndarray):
+    def update(self, y: tf.Tensor):
         """Update step - must be implemented by subclasses."""
         raise NotImplementedError("Subclasses must implement update()")
 
     def initialize(self, random_state: Optional[np.random.Generator] = None):
-        """Initialize particles from initial distribution."""
+        """Initialize particles from initial distribution as TF Variable."""
         if random_state is not None:
             self.random_state = random_state
 
-        if self.n_threads > 1:
-            # Pre-generate seeds
-            seeds = self.random_state.integers(0, 2**32, size=self.n_particles)
-
-            def sample_particle(args):
-                i, seed = args
-                thread_rng = np.random.default_rng(seed)
-                return self.model.sample_initial_state(thread_rng)
-
-            with ThreadPoolExecutor(max_workers=self.n_threads) as executor:
-                self.particles = np.array(list(executor.map(sample_particle, enumerate(seeds))))
-        else:
-            self.particles = np.array([
-                self.model.sample_initial_state(self.random_state)
-                for _ in range(self.n_particles)
-            ])
+        # Sample initial particles using model's batch method
+        seed = self._make_tf_seed()
+        particles_tf = self.model.sample_initial_state_batch(self.n_particles, seed)
+        self.particles = tf.Variable(particles_tf, dtype=tf.float32)
 
         # Reset storage
         self.means = []
@@ -157,30 +115,30 @@ class FlowFilterBase:
         self.initialize(random_state)
         T = len(observations)
 
+        # Pre-convert observations to TF once
+        obs_tf = tf.constant(observations, dtype=tf.float32)
+
         for t in range(T):
             self.predict()
-            self.update(observations[t])
+            self.update(obs_tf[t])
             mean, cov = self._estimate_mean_cov()
             self.means.append(mean)
             self.covs.append(cov)
 
-            # Track diagnostics: flow filters maintain equal weights
-            uniform_weights = np.ones(self.n_particles) / self.n_particles
-            self.weights_history.append(uniform_weights.copy())
-            # ESS is always N for equal weights
-            self.ess_history.append(float(self.n_particles))
+        # Convert accumulated TF tensors to numpy once
+        means_np = tf.stack(self.means).numpy()
+        covs_np = tf.stack(self.covs).numpy()
+
+        # Flow filters maintain equal weights — ESS is always N
+        ess_np = np.full(T, float(self.n_particles))
+        weights_np = np.ones((T, self.n_particles)) / self.n_particles
 
         return FilterResult(
-            means=np.array(self.means),
-            covs=np.array(self.covs),
-            # NOTE: Flow filters don't compute log-likelihood by default because they use
-            # deterministic flow with equal weights (1/N) throughout. The flow geometrically
-            # corrects particle positions without computing observation likelihoods.
-            # TODO: Could add approximate log-likelihood by evaluating p(y|x) at flowed particles
-            # using logsumexp(log_probs) - log(N). See invertible versions for exact computation.
+            means=means_np,
+            covs=covs_np,
             log_likelihood=None,
-            ess=np.array(self.ess_history),
-            weights_history=np.array(self.weights_history),
+            ess=ess_np,
+            weights_history=weights_np,
             metadata={
                 'filter_type': self.__class__.__name__,
                 'n_particles': self.n_particles,

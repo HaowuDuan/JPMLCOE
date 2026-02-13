@@ -40,7 +40,7 @@ class AcousticTrackingModel(StateSpaceModel):
 
     Parameters from Li & Coates paper:
         - State dim: 4
-        - Number of sensors: 4 (corner positions)
+        - Number of sensors:  25 
         - Measurement noise: sigma_w^2 = 0.01
         - Process noise: Q_filter (larger than ground truth)
     """
@@ -276,6 +276,44 @@ class AcousticTrackingModel(StateSpaceModel):
     def process_noise_cov(self) -> np.ndarray:
         """Process noise covariance Q for flow filters."""
         return self.Q
+
+    # Batch methods for optimized particle filtering
+
+    def state_transition_mean_batch(self, particles: np.ndarray) -> np.ndarray:
+        """Vectorized state transition mean: F @ particles.T → transpose."""
+        return (self.F @ particles.T).T
+
+    def state_transition_cov_batch(self, particles: np.ndarray) -> np.ndarray:
+        """Q is constant - return single matrix."""
+        return self.Q
+
+    def log_observation_prob_batch(self, observation: np.ndarray, particles: np.ndarray) -> np.ndarray:
+        """Vectorized amplitude decay log-prob for all particles."""
+        # Positions: (N, 2) - extract x, y from [x, y, vx, vy]
+        pos = particles[:, :2]  # (N, 2)
+
+        # Distances from all particles to all sensors
+        # pos: (N, 2), sensor_positions: (M, 2)
+        # Broadcasting: (N, 1, 2) - (1, M, 2) → (N, M, 2)
+        diff = pos[:, np.newaxis, :] - self.sensor_positions[np.newaxis, :, :]
+        r_squared = np.sum(diff**2, axis=2)  # (N, M)
+
+        # Amplitudes: (N, M)
+        amplitudes = self.source_intensity / (r_squared + self.regularization)
+
+        # diff from observation: (N, M)
+        obs_diff = observation - amplitudes
+
+        # Assuming R is diagonal: sigma^2 * I
+        variance = self.measurement_noise_std ** 2
+
+        # Mahalanobis: sum((diff/sigma)^2) → (N,)
+        mahalanobis = np.sum(obs_diff**2, axis=1) / variance
+
+        # Log determinant for diagonal R
+        logdet = self.n_sensors * np.log(2 * np.pi * variance)
+
+        return -0.5 * (logdet + mahalanobis)
 
     # TensorFlow methods for vectorized particle filter
 

@@ -7,6 +7,6 @@ _target_: src.models.range_bearing.RangeBearingModel
 
 # Noise parameters
 sigma_range: 0.1      # Range measurement noise std
-sigma_bearing: 0.01   # Bearing measurement noise std (radians)
+sigma_bearing: 0.1   # Bearing measurement noise std (radians)
 
 # Process and observation noise will use defaults in model

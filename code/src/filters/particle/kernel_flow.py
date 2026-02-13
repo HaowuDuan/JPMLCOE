@@ -1,6 +1,7 @@
 """Particle Flow Filter (Hu & van Leeuwen 2021)."""
 
 import numpy as np
+import tensorflow as tf
 from scipy import linalg
 from typing import Optional, Tuple, List
 import warnings
@@ -382,8 +383,10 @@ class KernelMappingPF:
         if rng is None:
             rng = np.random.default_rng()
         
+        def _make_seed():
+            return tf.constant(rng.integers(0, 2**31, size=2), dtype=tf.int32)
         self.particles = np.array([
-            self.model.sample_initial_state(rng) 
+            np.asarray(self.model.sample_initial_state(_make_seed()))
             for _ in range(self.n_particles)
         ])
         
@@ -403,9 +406,9 @@ class KernelMappingPF:
             rng = np.random.default_rng()
             
         for i in range(self.n_particles):
-            self.particles[i] = self.model.sample_state_transition(
-                self.particles[i], rng
-            )
+            seed = tf.constant(rng.integers(0, 2**31, size=2), dtype=tf.int32)
+            x = tf.constant(self.particles[i], dtype=tf.float32)
+            self.particles[i] = np.asarray(self.model.sample_state_transition(x, seed))
     
     def filter(self, observations: np.ndarray,
                initial_particles: Optional[np.ndarray] = None,
@@ -447,7 +450,8 @@ class KernelMappingPF:
         posterior_particles: List[np.ndarray] = []
         
         # Filter loop: predict first, then update
-        # Requires observe_initial=False in data generation
+        # Note: Despite predict-first loop, this filter uses observe_initial=True
+        # (standard alignment where observations[0] observes the initial state)
         for t in range(T):
             # Predict: propagate through dynamics
             for _ in range(n_integration_steps):

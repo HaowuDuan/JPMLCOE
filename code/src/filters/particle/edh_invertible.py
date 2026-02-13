@@ -1,20 +1,23 @@
 """Exact Daum-Huang (EDH) Invertible Particle Flow Filter
-
-Implements Algorithm 2 from Li & Coates paper exactly as specified.
 """
 
+import tensorflow as tf
 import numpy as np
-from typing import Tuple, Optional
+from typing import Tuple, Optional, Callable, Dict, Any
 from ...core.model_base import StateSpaceModel
 from ...core.types import FilterResult
 from ..kalman.extended_kalman import ExtendedKalmanFilter
-from ..kalman.unscented_kalman import UnscentedKalmanFilter
+from ...utils.flow_params import compute_flow_params
+from ...utils.distributions import compute_flow_weights
+from ...utils.ode_solvers import euler_step
+from ...resampling import systematic_resample, soft_resample, ot_entropy_resample
+from ...resampling.diagnosis import effective_sample_size as ess_tf
 
 
 class EDHParticleFlowFilter:
     """
     Exact Daum-Huang (EDH) Particle Flow Filter (Invertible Variant).
-    
+
     Implements Algorithm 2 from the paper with explicit Euler integration
     and the author's recommended exponential step sizes.
     """
@@ -24,27 +27,76 @@ class EDHParticleFlowFilter:
         model: StateSpaceModel,
         n_particles: int = 1000,
         n_lambda_steps: int = 29,  # Author's recommended value
-        filter_type: str = 'ekf',
         resample_threshold: float = 0.5,
+        resampling_method: Optional[Callable] = None,
+        resampling_config: Optional[Dict[str, Any]] = None,
         debug_mode: bool = False,
         **filter_kwargs
     ):
+        """
+        Args:
+            model: StateSpaceModel
+            n_particles: Number of particles
+            n_lambda_steps: Number of flow integration steps
+            resample_threshold: Resample when ESS/N < threshold
+            resampling_method: Resampling function. Options:
+                              - systematic_resample (default)
+                              - soft_resample
+                              - ot_entropy_resample
+                              - Any custom callable with signature (particles, weights, seed, **kwargs)
+            resampling_config: Dict of additional parameters for resampling method
+            debug_mode: If True, store detailed diagnostics
+        """
         self.model = model
         self.state_dim = model.state_dim
         self.obs_dim = model.obs_dim
         self.n_particles = n_particles
         self.n_lambda_steps = n_lambda_steps
-        self.filter_type = filter_type
         self.resample_threshold = resample_threshold
-        self.filter_kwargs = filter_kwargs
         self.debug_mode = debug_mode
 
-        # Particles and weights
+        # Handle resampling method configuration
+        if isinstance(resampling_method, str):
+            method_map = {
+                'systematic': systematic_resample,
+                'soft': soft_resample,
+                'ot_entropy': ot_entropy_resample,
+            }
+            self.resampling_method = method_map.get(resampling_method, systematic_resample)
+            self.resampling_method_name = resampling_method
+        elif resampling_method is not None:
+            self.resampling_method = resampling_method
+            self.resampling_method_name = getattr(resampling_method, '__name__', 'custom')
+        else:
+            # Default to systematic
+            self.resampling_method = systematic_resample
+            self.resampling_method_name = 'systematic'
+
+        # Convert resampling config values to Python scalars
+        self.resampling_config = {}
+        if resampling_config is not None:
+            for key, value in resampling_config.items():
+                if isinstance(value, (int, np.integer)):
+                    self.resampling_config[key] = int(value)
+                elif isinstance(value, (float, np.floating)):
+                    self.resampling_config[key] = float(value)
+                else:
+                    self.resampling_config[key] = value
+
+        # Particles and weights (TensorFlow variables)
         self.particles = None
         self.weights = None
+        self.particles_prev = None
+        self.eta_0 = None
 
         # Global filter for covariance estimation
         self.global_filter = None
+        self.predicted_cov = None  # P_{k|k-1} from EKF/UKF
+        self.eta_bar_0 = None      # η̄_0 (mean at λ=0)
+
+        # Cache R_inv if R is constant
+        self.R_inv_cache = None
+        self.L_cache = None
 
         # Storage
         self.means = []
@@ -54,6 +106,9 @@ class EDHParticleFlowFilter:
         self.weights_history = []
         self.resampled_at = []
         self.n_unique_particles = []
+
+        # Random seed counter
+        self.seed_counter = 0
 
         # Debug storage
         if self.debug_mode:
@@ -73,41 +128,47 @@ class EDHParticleFlowFilter:
         else:
             self.debug_info = None
 
-        # Random state
-        self.random_state = np.random.default_rng()
+    def _create_filter(self, initial_mean: tf.Tensor, initial_cov: tf.Tensor):
+        """Create EKF for global covariance guidance."""
+        initial_mean_np = initial_mean.numpy() if isinstance(initial_mean, tf.Tensor) else initial_mean
+        initial_cov_np = initial_cov.numpy() if isinstance(initial_cov, tf.Tensor) else initial_cov
 
-    def _create_filter(self, initial_mean: np.ndarray, initial_cov: np.ndarray):
-        if self.filter_type == 'ekf':
-            filt = ExtendedKalmanFilter(self.model, mean_0=initial_mean, Sigma_0=initial_cov)
-        elif self.filter_type == 'ukf':
-            ukf_kwargs = {k: v for k, v in self.filter_kwargs.items() if k != 'n_threads'}
-            filt = UnscentedKalmanFilter(self.model, mean_0=initial_mean, Sigma_0=initial_cov, **ukf_kwargs)
-        else:
-            raise ValueError(f"Unknown filter type: {self.filter_type}")
-        filt.mean = initial_mean.copy()
-        filt.cov = initial_cov.copy()
-        return filt
+        return ExtendedKalmanFilter(self.model, mean_0=initial_mean_np, Sigma_0=initial_cov_np,
+                                    sample_initial_mean=False)
 
     def initialize(self, initial_mean: Optional[np.ndarray] = None,
                    initial_cov: Optional[np.ndarray] = None,
-                   random_state: Optional[np.random.Generator] = None):
-        if random_state is not None:
-            self.random_state = random_state
+                   random_seed: Optional[int] = None):
+        """Initialize particles and global filter."""
+        if random_seed is not None:
+            self.seed_counter = random_seed
+
         if initial_mean is None:
-            # Sample from model's initial distribution instead of using zeros
-            initial_mean = self.model.sample_initial_state(self.random_state)
+            # Use model's initial mean directly (not a random sample)
+            initial_mean = np.asarray(self.model.mu_0, dtype=np.float32)
+
         if initial_cov is None:
-            # Use stationary variance if available, otherwise identity
-            if hasattr(self.model, 'stationary_var'):
+            if hasattr(self.model, 'Sigma_0'):
+                initial_cov = np.asarray(self.model.Sigma_0)
+            elif hasattr(self.model, 'stationary_var'):
                 initial_cov = np.eye(self.state_dim) * self.model.stationary_var
             else:
                 initial_cov = np.eye(self.state_dim)
 
-        self.particles = self.random_state.multivariate_normal(
-            initial_mean, initial_cov, size=self.n_particles
-        )
-        self.weights = np.ones(self.n_particles) / self.n_particles
-        self.global_filter = self._create_filter(initial_mean, initial_cov)
+        # Sample initial particles using TensorFlow
+        seed = tf.constant([self.seed_counter, 0], dtype=tf.int32)
+        self.seed_counter += 1
+        initial_mean_tf = tf.constant(initial_mean, dtype=tf.float32)
+        initial_cov_tf = tf.constant(initial_cov, dtype=tf.float32)
+
+        L = tf.linalg.cholesky(initial_cov_tf)
+        z = tf.random.stateless_normal([self.n_particles, self.state_dim], seed=seed, dtype=tf.float32)
+        particles_tf = initial_mean_tf + tf.linalg.matmul(z, L, transpose_b=True)
+
+        self.particles = tf.Variable(particles_tf, dtype=tf.float32)
+        self.weights = tf.Variable(tf.ones(self.n_particles, dtype=tf.float32) / self.n_particles)
+
+        self.global_filter = self._create_filter(initial_mean_tf, initial_cov_tf)
 
         self.means = []
         self.covs = []
@@ -117,335 +178,216 @@ class EDHParticleFlowFilter:
         self.resampled_at = []
         self.n_unique_particles = []
 
-    def _generate_step_sizes(self) -> np.ndarray:
-        """
-        Generate exponentially spaced step sizes (author's recommendation).
-        
-        ε_j = ε_1 * q^(j-1), where q = 1.2 and Σε_j = 1
-        """
+    def _generate_step_sizes(self) -> tf.Tensor:
+        """Generate exponentially spaced step sizes (author's recommendation)."""
         q = 1.2
         N = self.n_lambda_steps
         # ε_1 = (1-q)/(1-q^N) ensures sum = 1
         epsilon_1 = (1 - q) / (1 - q**N)
-        step_sizes = epsilon_1 * (q ** np.arange(N))
+        step_sizes = epsilon_1 * (q ** tf.range(N, dtype=tf.float32))
         return step_sizes
 
-    def _compute_A_b(self, eta_bar: np.ndarray, eta_bar_0: np.ndarray,
-                     P: np.ndarray, z: np.ndarray, lambda_val: float) -> Tuple[np.ndarray, np.ndarray]:
-        """
-        Compute flow parameters A(λ) and b(λ) per Equations (10) and (11).
-        
-        Args:
-            eta_bar: Current mean η̄ for linearization
-            eta_bar_0: Initial mean η̄_0 at λ=0 (used in b formula)
-            P: Predicted covariance P_{k|k-1}
-            z: Observation
-            lambda_val: Current pseudo-time λ
-        """
-        H = self.model.observation_jacobian(eta_bar)
-        R = self.model.observation_noise_cov
+    @tf.function
+    def _compute_drift(self, particles: tf.Tensor, A: tf.Tensor, b: tf.Tensor) -> tf.Tensor:
+        """Compute drift for EDH flow: dη/dλ = Aη + b."""
+        return tf.linalg.matvec(A, particles) + b
 
-        # A(λ) = -1/2 * P @ H^T @ (λ*H@P@H^T + R)^{-1} @ H
-        HPH = H @ P @ H.T
-        S = lambda_val * HPH + R
-        
-        try:
-            S_inv_H = np.linalg.solve(S, H)
-        except np.linalg.LinAlgError:
-            S_inv_H = np.linalg.lstsq(S, H, rcond=None)[0]
-        
-        A = -0.5 * P @ H.T @ S_inv_H
-
-        # e(λ) = h(η̄) - H @ η̄
-        h_eta_bar = self.model.observation_function(eta_bar)
-        e = h_eta_bar - H @ eta_bar
-
-        # b(λ) = (I + 2λA) @ [(I + λA) @ P @ H^T @ R^{-1} @ (z - e) + A @ η̄_0]
-        I = np.eye(self.state_dim)
-        
-        try:
-            R_inv = np.linalg.inv(R)
-        except np.linalg.LinAlgError:
-            R_inv = np.linalg.pinv(R)
-        
-        innovation = P @ H.T @ R_inv @ (z.ravel() - e.ravel())
-        inner = (I + lambda_val * A) @ innovation + A @ eta_bar_0
-        b = (I + 2 * lambda_val * A) @ inner
-
-        return A, b
+    @tf.function
+    def _compute_drift_batch(self, particles: tf.Tensor, A: tf.Tensor, b: tf.Tensor) -> tf.Tensor:
+        """Compute drift for batch of particles: dη/dλ = Aη + b (vectorized)."""
+        return particles @ tf.transpose(A) + b
 
     def predict(self):
-        """
-        Prediction step (Algorithm 2, lines 4-8).
-        """
+        """Prediction step (Algorithm 2, lines 4-8)."""
         # Store previous particles for weight calculation
-        self.particles_prev = self.particles.copy()
+        self.particles_prev = tf.Variable(self.particles.value(), dtype=tf.float32)
 
         # Line 4: EKF/UKF prediction to get P_{k|k-1}
-        # Feed back WEIGHTED ensemble mean to global filter
-        ensemble_mean_prev = np.sum(self.weights[:, np.newaxis] * self.particles_prev, axis=0)
-        self.global_filter.mean = ensemble_mean_prev
+        # Feed back WEIGHTED ensemble mean to global filter (all TF ops)
+        ensemble_mean_prev = tf.reduce_sum(
+            self.weights.value()[:, tf.newaxis] * self.particles.value(), axis=0
+        )
+
+        self.global_filter.mean.assign(ensemble_mean_prev)
         self.global_filter.predict()
-        
+        self.predicted_cov = self.global_filter.cov.value()  # TF tensor
+
         # Store the predicted mean BEFORE particles are propagated
-        # This is η̄_0 = g_k(x̂_{k-1}, 0) - the DETERMINISTIC prediction
-        self.eta_bar_0 = self.global_filter.mean.copy()
+        self.eta_bar_0 = self.global_filter.mean.value()  # TF tensor
 
-        # Lines 5-8: Propagate particles η_0^i = g_k(x_{k-1}^i, v_k) WITH noise
-        eta_0 = np.zeros_like(self.particles)
-        for i in range(self.n_particles):
-            eta_0[i] = self.model.sample_state_transition(
-                self.particles_prev[i], self.random_state
-            )
-        
-        self.particles = eta_0.copy()
-        self.eta_0 = eta_0.copy()  # Store for weight calculation
+        # Lines 5-8: Propagate particles using model's batch method
+        seed = tf.constant([self.seed_counter, 0], dtype=tf.int32)
+        self.seed_counter += 1
 
-    def update(self, y: np.ndarray):
-        """
-        Update step (Algorithm 2, lines 9-29).
-        
-        Exactly follows the pseudocode:
-        - Line 9: η̄ = η̄_0 (start from deterministic predicted mean)
-        - Line 10: λ = 0
-        - Lines 11-18: Flow loop with λ incremented BEFORE computing A,b
-        - Lines 19-25: Weight update
-        """
-        P = self.global_filter.cov
-        
-        # Line 9: Set η̄ = η̄_0 (the deterministic predicted mean from predict())
-        eta_bar = self.eta_bar_0.copy()
-        eta_bar_0 = self.eta_bar_0.copy()  # Keep reference for b(λ) formula
+        eta_0 = self.model.state_transition_batch(self.particles.value(), seed)
+
+        self.particles.assign(eta_0)
+        self.eta_0 = tf.Variable(eta_0, dtype=tf.float32)
+
+    def update(self, y: tf.Tensor):
+        """Update step (Algorithm 2, lines 9-29)."""
+        # Cache R_inv
+        R = self.model.observation_noise_cov
+        if self.R_inv_cache is None:
+            L = tf.linalg.cholesky(R)
+            self.R_inv_cache = tf.linalg.inv(tf.transpose(L)) @ tf.linalg.inv(L)
+            self.L_cache = L
+
+        # Line 9: Set η̄ = η̄_0
+        eta_bar = tf.Variable(self.eta_bar_0, dtype=tf.float32)
 
         # Line 10: λ = 0
-        lambda_val = 0.0
-        
-        # Generate step sizes (author's exponential schedule)
-        step_sizes = self._generate_step_sizes()
-        
-        # Debug: Store particles before flow
-        if self.debug_mode:
-            particles_before = self.particles.copy()
-            timestep_debug = {
-                'timestep': len(self.means),
-                'observation': y.copy(),
-                'particles_before': particles_before,
-                'flow_steps': []
-            }
+        lambda_val = tf.constant(0.0, dtype=tf.float32)
 
-        # Lines 11-18: Flow loop
-        for j in range(self.n_lambda_steps):
+        # Generate step sizes (TF tensor)
+        step_sizes = self._generate_step_sizes()
+
+        # Lines 11-18: Flow loop (all TF tensor operations)
+        for j in tf.range(self.n_lambda_steps):
             epsilon_j = step_sizes[j]
 
-            # Line 12: λ = λ + ε_j (INCREMENT FIRST per paper pseudocode)
+            # Line 12: λ = λ + ε_j
             lambda_val = lambda_val + epsilon_j
 
-            # Line 13: Compute A(λ), b(λ) at η̄ with NEW λ
-            A, b = self._compute_A_b(eta_bar, eta_bar_0, P, y, lambda_val)
-            
-            # Debug: Capture flow step diagnostics
-            if self.debug_mode:
-                H = self.model.observation_jacobian(eta_bar)
-                
-                # Compute eigenvalues and condition number of A
-                try:
-                    eigvals = np.linalg.eigvals(A)
-                    cond_A = np.linalg.cond(A)
-                except:
-                    eigvals = np.array([np.nan])
-                    cond_A = np.nan
-                
-                # For invertible filters, track det(I + epsilon * A)
-                I = np.eye(self.state_dim)
-                try:
-                    jacob_det = np.linalg.det(I + epsilon_j * A)
-                except:
-                    jacob_det = np.nan
-                
-                flow_step_debug = {
-                    'step': j,
-                    'lambda': lambda_val,
-                    'epsilon': epsilon_j,
-                    'A_matrix': A.copy(),
-                    'b_vector': b.copy(),
-                    'H_jacobian': H.copy(),
-                    'eigenvalues': eigvals,
-                    'condition_number': cond_A,
-                    'jacobian_det': jacob_det,
-                    'particle_mean': np.mean(self.particles, axis=0),
-                    'particle_std': np.std(self.particles, axis=0)
-                }
-                timestep_debug['flow_steps'].append(flow_step_debug)
-            
-            # Line 14: Migrate η̄
-            eta_bar = eta_bar + epsilon_j * (A @ eta_bar + b)
+            # Line 13: Compute A(λ), b(λ)
+            # EDH uses ensemble mean as linearization point, no regularization
+            A, b = compute_flow_params(
+                self.model,
+                eta_bar.value(),
+                lambda_val,
+                y,
+                self.predicted_cov,
+                R,
+                self.R_inv_cache,
+                self.eta_bar_0,
+                self.state_dim
+            )
 
-            # Lines 15-17: Migrate particles (vectorized)
-            drift = self.particles @ A.T + b
-            self.particles = self.particles + epsilon_j * drift
+            # Line 14: Migrate η̄ (epsilon_j is TF scalar, euler_step accepts it)
+            eta_bar.assign(euler_step(eta_bar.value(), self._compute_drift, epsilon_j, A, b))
 
-        # Lines 19-25: Weight update with improved numerical stability
-        eta_1 = self.particles
+            # Lines 15-17: Migrate particles
+            self.particles.assign(euler_step(self.particles.value(), self._compute_drift_batch, epsilon_j, A, b))
 
-        # A. Log-likelihood: log p(z_k | η_1^i)
-        log_likelihood = np.array([
-            self.model.log_observation_prob(y, eta_1[i])
-            for i in range(self.n_particles)
-        ])
+        # Lines 19-25: Weight update using shared utility
+        eta_1 = self.particles.value()
 
-        # B. Log transition ratio using Cholesky for stability
-        Q = self.model.process_noise_cov
+        # Compute weights using shared utility (already TensorFlow compatible)
+        weights_new = compute_flow_weights(
+            eta_1=eta_1,
+            eta_0=self.eta_0.value(),
+            particles_prev=self.particles_prev.value(),
+            observation=y,
+            model=self.model,
+            prev_weights=self.weights.value(),
+            jacobians=None,
+            clip_range=None  # No clipping - use max-normalization only (matches MATLAB)
+        )
+        self.weights.assign(weights_new)
 
-        try:
-            # Cholesky decomposition for numerical stability
-            L_Q = np.linalg.cholesky(Q)
-            
-            # Compute f(x_{k-1}^i) for each particle
-            f_prev = np.array([
-                self.model.state_transition_mean(p) for p in self.particles_prev
-            ])
-            
-            # Solve L_Q * z = diff to get normalized residuals
-            diff_0 = self.eta_0 - f_prev
-            diff_1 = eta_1 - f_prev
-            
-            z_0 = np.linalg.solve(L_Q, diff_0.T).T
-            z_1 = np.linalg.solve(L_Q, diff_1.T).T
-            
-            mahal_0 = np.sum(z_0 ** 2, axis=1)
-            mahal_1 = np.sum(z_1 ** 2, axis=1)
-            
-        except np.linalg.LinAlgError:
-            # Fallback to pseudo-inverse
-            Q_inv = np.linalg.pinv(Q)
-            f_prev = np.array([
-                self.model.state_transition_mean(p) for p in self.particles_prev
-            ])
-            diff_0 = self.eta_0 - f_prev
-            diff_1 = eta_1 - f_prev
-            mahal_0 = np.sum((diff_0 @ Q_inv) * diff_0, axis=1)
-            mahal_1 = np.sum((diff_1 @ Q_inv) * diff_1, axis=1)
+        # Store TF tensors — convert to numpy once in filter()
+        self.weights_history.append(self.weights.value())
 
-        # Log transition ratio (constants cancel in the ratio)
-        log_transition_ratio = -0.5 * (mahal_1 - mahal_0)
-
-        # C. Combined weight update with robust normalization
-        log_weights = (np.log(np.maximum(self.weights, 1e-300)) + 
-                       log_likelihood + 
-                       log_transition_ratio)
-
-        # Robust normalization
-        log_weights_max = np.max(log_weights)
-        log_weights_normalized = log_weights - log_weights_max
-
-        # Clip extreme values to prevent overflow/underflow
-        log_weights_normalized = np.clip(log_weights_normalized, -30, 30)
-
-        self.weights = np.exp(log_weights_normalized)
-        weight_sum = np.sum(self.weights)
-
-        if weight_sum < 1e-300 or not np.isfinite(weight_sum):
-            # Emergency: reset to uniform weights
-            print(f"Warning: Weight collapse at step. Resetting to uniform.")
-            self.weights = np.ones(self.n_particles) / self.n_particles
-        else:
-            self.weights /= weight_sum
-
-        self.weights_history.append(self.weights.copy())
+        # Log-likelihood using batch method
+        log_likelihood = self.model.log_observation_prob_batch(y, eta_1)
 
         # ESS and resampling
-        ess = self._effective_sample_size()
+        ess = ess_tf(self.weights.value())
         self.ess_history.append(ess)
 
         if ess < self.resample_threshold * self.n_particles:
-            self._systematic_resample()
+            self._resample()
             self.resampled_at.append(len(self.ess_history) - 1)
-            self.n_unique_particles.append(len(np.unique(self.particles, axis=0)))
+            # Count unique particles (numpy needed for np.unique)
+            particles_np = self.particles.numpy()
+            unique_particles = len(np.unique(particles_np, axis=0))
+            self.n_unique_particles.append(unique_particles)
 
         # Log-likelihood for model evidence
-        max_ll = np.max(log_likelihood)
-        log_lik = max_ll + np.log(np.mean(np.exp(log_likelihood - max_ll)))
+        max_ll = tf.reduce_max(log_likelihood)
+        log_lik = max_ll + tf.math.log(tf.reduce_mean(tf.exp(log_likelihood - max_ll)))
         self.log_likelihoods.append(log_lik)
-        
-        # Debug: Store after-flow diagnostics
-        if self.debug_mode:
-            timestep_debug['particles_after'] = self.particles.copy()
-            timestep_debug['weights'] = self.weights.copy()
-            timestep_debug['ess'] = ess
-            timestep_debug['weight_stats'] = {
-                'min': np.min(self.weights),
-                'max': np.max(self.weights),
-                'mean': np.mean(self.weights),
-                'std': np.std(self.weights)
-            }
-            timestep_debug['particle_stats_after'] = {
-                'mean': np.mean(self.particles, axis=0),
-                'cov': np.cov(self.particles.T),
-                'min': np.min(self.particles, axis=0),
-                'max': np.max(self.particles, axis=0)
-            }
-            self.debug_info['timesteps'].append(timestep_debug)
 
-        # Line 26: Update global filter
-        ensemble_mean = np.sum(self.weights[:, np.newaxis] * self.particles, axis=0)
-        self.global_filter.mean = ensemble_mean
-        self.global_filter.update(y)
+        # Line 26: Update global filter (EKF needs numpy)
+        self.global_filter.update(y.numpy() if isinstance(y, tf.Tensor) else y)
 
-    def _effective_sample_size(self) -> float:
-        return 1.0 / np.sum(self.weights ** 2)
+    def _resample(self):
+        """Resample particles using configured resampling method."""
+        seed = tf.constant([self.seed_counter, 0], dtype=tf.int32)
+        self.seed_counter += 1
 
-    def _systematic_resample(self):
-        n = self.n_particles
-        u = self.random_state.uniform(0, 1/n)
-        indices = np.zeros(n, dtype=int)
-        cumsum = np.cumsum(self.weights)
-        i = 0
-        for j in range(n):
-            u_j = u + j / n
-            while u_j > cumsum[i] and i < n - 1:
-                i += 1
-            indices[j] = i
-        self.particles = self.particles[indices].copy()
-        self.weights = np.ones(n) / n
+        result = self.resampling_method(
+            self.particles.value(),
+            self.weights.value(),
+            seed=seed,
+            **self.resampling_config
+        )
 
-    def _estimate_mean_cov(self) -> Tuple[np.ndarray, np.ndarray]:
-        mean = np.sum(self.weights[:, np.newaxis] * self.particles, axis=0)
-        diff = self.particles - mean
-        cov = np.sum(
-            self.weights[:, np.newaxis, np.newaxis] *
-            np.einsum('ij,ik->ijk', diff, diff),
+        # Handle different return types
+        if isinstance(result, tuple):
+            resampled_particles, new_weights = result
+        else:
+            resampled_particles = result
+            new_weights = tf.ones(self.n_particles, dtype=tf.float32) / tf.cast(self.n_particles, tf.float32)
+
+        self.particles.assign(resampled_particles)
+        self.weights.assign(new_weights)
+
+    def _estimate_mean_cov(self) -> Tuple[tf.Tensor, tf.Tensor]:
+        """Estimate weighted mean and covariance from particles (TF ops)."""
+        particles = self.particles.value()
+        weights = self.weights.value()
+
+        mean = tf.reduce_sum(weights[:, tf.newaxis] * particles, axis=0)
+        diff = particles - mean
+        cov = tf.reduce_sum(
+            weights[:, tf.newaxis, tf.newaxis] *
+            tf.einsum('ij,ik->ijk', diff, diff),
             axis=0
         )
         return mean, cov
 
     def filter(self, observations: np.ndarray,
                initial_mean: Optional[np.ndarray] = None,
-               initial_cov: Optional[np.ndarray] = None) -> FilterResult:
-        self.initialize(initial_mean, initial_cov)
+               initial_cov: Optional[np.ndarray] = None,
+               random_seed: Optional[int] = None) -> FilterResult:
+        """Run filter on sequence of observations."""
+        self.initialize(initial_mean, initial_cov, random_seed)
         T = len(observations)
+
+        # Pre-convert observations to TF once
+        obs_tf = tf.constant(observations, dtype=tf.float32)
 
         for t in range(T):
             self.predict()
-            self.update(observations[t])
+            self.update(obs_tf[t])
             mean, cov = self._estimate_mean_cov()
-            self.means.append(mean)
-            self.covs.append(cov)
+            self.means.append(mean)  # TF tensor
+            self.covs.append(cov)    # TF tensor
 
         resampling_rate = len(self.resampled_at) / T if T > 0 else 0.0
 
+        # Convert accumulated TF tensors to numpy once
+        means_np = tf.stack(self.means).numpy()
+        covs_np = tf.stack(self.covs).numpy()
+        log_liks_tf = tf.stack(self.log_likelihoods) if self.log_likelihoods else None
+        ess_np = tf.stack(self.ess_history).numpy()
+        weights_np = tf.stack(self.weights_history).numpy()
+
         return FilterResult(
-            means=np.array(self.means),
-            covs=np.array(self.covs),
-            log_likelihood=np.sum(self.log_likelihoods) if self.log_likelihoods else None,
-            log_likelihoods=np.array(self.log_likelihoods) if self.log_likelihoods else None,
-            ess=np.array(self.ess_history),
-            weights_history=np.array(self.weights_history),
+            means=means_np,
+            covs=covs_np,
+            log_likelihood=float(tf.reduce_sum(log_liks_tf).numpy()) if log_liks_tf is not None else None,
+            log_likelihoods=log_liks_tf.numpy() if log_liks_tf is not None else None,
+            ess=ess_np,
+            weights_history=weights_np,
             resampled_at=self.resampled_at,
             n_unique=np.array(self.n_unique_particles) if self.n_unique_particles else None,
             metadata={
                 'filter_type': 'EDHParticleFlowFilter',
                 'n_particles': self.n_particles,
                 'n_lambda_steps': self.n_lambda_steps,
+                'resampling_method': self.resampling_method_name,
                 'resampling_rate': resampling_rate
             }
         )

@@ -1,6 +1,6 @@
 # Bootstrap Particle Filter Configuration
 
-_target_: src.filters.particle.bootstrap_pf.ParticleFilter
+_target_: src.filters.particle.bootstrap_pf_tf.ParticleFilterTF
 
 # Model will be passed at runtime from experiment
 _recursive_: false

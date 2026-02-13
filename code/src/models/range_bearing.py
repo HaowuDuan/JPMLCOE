@@ -1,12 +1,8 @@
 """Range-Bearing tracking model."""
 
-import numpy as np
+import tensorflow as tf
 from typing import Optional
-try:
-    import tensorflow as tf
-    TF_AVAILABLE = True
-except ImportError:
-    TF_AVAILABLE = False
+import numpy as np
 
 from ..core.model_base import StateSpaceModel
 
@@ -72,43 +68,38 @@ class RangeBearingModel(StateSpaceModel):
             F = np.eye(2)
         if F.shape != (2, 2):
             raise ValueError(f"F must be (2, 2), got {F.shape}")
-        self.F = F
+        self.F = tf.constant(F, dtype=tf.float32)
 
         # Default process noise
         if Q is None:
             Q = 0.01 * np.eye(2)
         if Q.shape != (2, 2):
             raise ValueError(f"Q must be (2, 2), got {Q.shape}")
-        self.Q = Q
+        self.Q = tf.constant(Q, dtype=tf.float32)
 
         # Sensor position
         sensor_pos = np.asarray(sensor_pos)
         if sensor_pos.shape != (2,):
             raise ValueError(f"sensor_pos must be (2,), got {sensor_pos.shape}")
-        self.sensor_pos = sensor_pos
+        self.sensor_pos = tf.constant(sensor_pos, dtype=tf.float32)
 
         # Observation noise parameters
         self.sigma_range = sigma_range
         self.sigma_bearing = sigma_bearing
-        self.R = np.diag([sigma_range ** 2, sigma_bearing ** 2])
+        R = np.diag([sigma_range ** 2, sigma_bearing ** 2])
+        self.R = tf.constant(R, dtype=tf.float32)
 
         # Initial state distribution
-        self.mu_0 = mu_0 if mu_0 is not None else np.array([1.0, 1.0])
-        self.Sigma_0 = Sigma_0 if Sigma_0 is not None else np.eye(2)
+        mu_0_np = mu_0 if mu_0 is not None else np.array([1.0, 1.0])
+        Sigma_0_np = Sigma_0 if Sigma_0 is not None else np.eye(2)
 
-        if self.mu_0.shape != (2,):
-            raise ValueError(f"mu_0 must be (2,), got {self.mu_0.shape}")
-        if self.Sigma_0.shape != (2, 2):
-            raise ValueError(f"Sigma_0 must be (2, 2), got {self.Sigma_0.shape}")
+        if mu_0_np.shape != (2,):
+            raise ValueError(f"mu_0 must be (2,), got {mu_0_np.shape}")
+        if Sigma_0_np.shape != (2, 2):
+            raise ValueError(f"Sigma_0 must be (2, 2), got {Sigma_0_np.shape}")
 
-        # TensorFlow constants
-        if TF_AVAILABLE:
-            self.F_tf = tf.constant(self.F, dtype=tf.float32)
-            self.Q_tf = tf.constant(self.Q, dtype=tf.float32)
-            self.R_tf = tf.constant(self.R, dtype=tf.float32)
-            self.sensor_pos_tf = tf.constant(self.sensor_pos, dtype=tf.float32)
-            self.mu_0_tf = tf.constant(self.mu_0, dtype=tf.float32)
-            self.Sigma_0_tf = tf.constant(self.Sigma_0, dtype=tf.float32)
+        self.mu_0 = tf.constant(mu_0_np, dtype=tf.float32)
+        self.Sigma_0 = tf.constant(Sigma_0_np, dtype=tf.float32)
 
     @property
     def state_dim(self) -> int:
@@ -118,18 +109,23 @@ class RangeBearingModel(StateSpaceModel):
     def obs_dim(self) -> int:
         return 2
 
-    # NumPy methods
-
-    def sample_initial_state(self, rng: np.random.Generator) -> np.ndarray:
+    @tf.function
+    def sample_initial_state(self, seed: tf.Tensor) -> tf.Tensor:
         """Sample from initial state distribution: X_0 ~ N(mu_0, Sigma_0)."""
-        return rng.multivariate_normal(self.mu_0, self.Sigma_0)
+        L = tf.linalg.cholesky(self.Sigma_0)
+        z = tf.random.stateless_normal([2], seed=seed, dtype=tf.float32)
+        return self.mu_0 + tf.linalg.matvec(L, z)
 
-    def sample_state_transition(self, x: np.ndarray, rng: np.random.Generator) -> np.ndarray:
+    @tf.function
+    def sample_state_transition(self, x: tf.Tensor, seed: tf.Tensor) -> tf.Tensor:
         """Sample from state transition: x' = F·x + w, w ~ N(0, Q)."""
-        w = rng.multivariate_normal(np.zeros(2), self.Q)
-        return self.F @ x + w
+        L = tf.linalg.cholesky(self.Q)
+        z = tf.random.stateless_normal([2], seed=seed, dtype=tf.float32)
+        w = tf.linalg.matvec(L, z)
+        return tf.linalg.matvec(self.F, x) + w
 
-    def sample_observation(self, x: np.ndarray, rng: np.random.Generator) -> np.ndarray:
+    @tf.function
+    def sample_observation(self, x: tf.Tensor, seed: tf.Tensor) -> tf.Tensor:
         """
         Sample observation: [range, bearing] with additive noise.
 
@@ -141,28 +137,32 @@ class RangeBearingModel(StateSpaceModel):
         dy = x[1] - self.sensor_pos[1]
 
         # True range and bearing
-        range_true = np.sqrt(dx ** 2 + dy ** 2)
-        bearing_true = np.arctan2(dy, dx)
+        range_true = tf.sqrt(dx ** 2 + dy ** 2)
+        bearing_true = tf.atan2(dy, dx)
 
         # Add noise
-        v_range = rng.normal(0, self.sigma_range)
-        v_bearing = rng.normal(0, self.sigma_bearing)
+        noise = tf.random.stateless_normal([2], seed=seed, dtype=tf.float32)
+        noise = noise * tf.constant([self.sigma_range, self.sigma_bearing], dtype=tf.float32)
 
-        return np.array([range_true + v_range, bearing_true + v_bearing])
+        return tf.stack([range_true, bearing_true]) + noise
 
-    def state_transition_mean(self, x: np.ndarray) -> np.ndarray:
+    @tf.function
+    def state_transition_mean(self, x: tf.Tensor) -> tf.Tensor:
         """Mean of state transition: E[x' | x] = F·x."""
-        return self.F @ x
+        return tf.linalg.matvec(self.F, x)
 
-    def state_transition_cov(self, x: np.ndarray) -> np.ndarray:
+    @tf.function
+    def state_transition_cov(self, x: tf.Tensor) -> tf.Tensor:
         """Covariance of state transition: Cov[x' | x] = Q."""
         return self.Q
 
-    def state_jacobian(self, x: np.ndarray) -> np.ndarray:
+    @tf.function
+    def state_jacobian(self, x: tf.Tensor) -> tf.Tensor:
         """Jacobian of state transition: ∂(F·x)/∂x = F."""
         return self.F
 
-    def observation_mean(self, x: np.ndarray) -> np.ndarray:
+    @tf.function
+    def observation_mean(self, x: tf.Tensor) -> tf.Tensor:
         """
         Mean of observation: E[y | x] = [range, bearing].
 
@@ -171,15 +171,17 @@ class RangeBearingModel(StateSpaceModel):
         """
         dx = x[0] - self.sensor_pos[0]
         dy = x[1] - self.sensor_pos[1]
-        range_val = np.sqrt(dx ** 2 + dy ** 2)
-        bearing_val = np.arctan2(dy, dx)
-        return np.array([range_val, bearing_val])
+        range_val = tf.sqrt(dx ** 2 + dy ** 2)
+        bearing_val = tf.atan2(dy, dx)
+        return tf.stack([range_val, bearing_val])
 
-    def observation_cov(self, x: np.ndarray) -> np.ndarray:
+    @tf.function
+    def observation_cov(self, x: tf.Tensor) -> tf.Tensor:
         """Covariance of observation: Cov[y | x] = R (constant)."""
         return self.R
 
-    def observation_jacobian(self, x: np.ndarray) -> np.ndarray:
+    @tf.function
+    def observation_jacobian(self, x: tf.Tensor) -> tf.Tensor:
         """
         Jacobian of observation: ∂h/∂x.
 
@@ -192,139 +194,138 @@ class RangeBearingModel(StateSpaceModel):
         """
         dx = x[0] - self.sensor_pos[0]
         dy = x[1] - self.sensor_pos[1]
-        range_val = np.sqrt(dx ** 2 + dy ** 2)
+        range_val = tf.sqrt(dx ** 2 + dy ** 2)
 
         # Avoid division by zero
-        if range_val < 1e-10:
-            # At sensor position, use unit vector direction
-            return np.array([[1.0, 0.0], [0.0, 1.0]])
+        range_val = tf.maximum(range_val, 1e-10)
 
         # Jacobian matrix
-        H = np.array([
+        H = tf.stack([
             [dx / range_val, dy / range_val],
             [-dy / (range_val ** 2), dx / (range_val ** 2)]
         ])
         return H
 
-    def log_observation_prob(self, y: np.ndarray, x: np.ndarray) -> float:
+    @tf.function
+    def log_observation_prob(self, y: tf.Tensor, x: tf.Tensor) -> tf.Tensor:
         """
         Log probability of observation: log p(y | x).
 
         p(y | x) = N(y | h(x), R)
         where h(x) = [range, bearing]
         """
-        from ..utils.distributions import log_gaussian_prob
         mean = self.observation_mean(x)
-        return log_gaussian_prob(y, mean, self.R)
+        diff = y - mean
 
-    def observation_function(self, x: np.ndarray) -> np.ndarray:
+        # Compute log determinant
+        sign, logdet = tf.linalg.slogdet(2.0 * np.pi * self.R)
+
+        # Compute Mahalanobis distance
+        diff_col = tf.reshape(diff, [-1, 1])
+        mahalanobis = tf.reduce_sum(diff * tf.squeeze(tf.linalg.solve(self.R, diff_col), axis=-1))
+
+        return -0.5 * (logdet + mahalanobis)
+
+    @tf.function
+    def observation_function(self, x: tf.Tensor) -> tf.Tensor:
         """Observation function h(x) for flow filters: returns [range, bearing]."""
         return self.observation_mean(x)
 
-    def observe(self, x: np.ndarray) -> np.ndarray:
+    @tf.function
+    def observe(self, x: tf.Tensor) -> tf.Tensor:
         """Observation function for kernel flow filters: returns [range, bearing]."""
         return self.observation_mean(x)
 
     @property
-    def observation_noise_cov(self) -> np.ndarray:
+    def observation_noise_cov(self) -> tf.Tensor:
         """Observation noise covariance R for flow filters."""
         return self.R
 
     @property
-    def process_noise_cov(self) -> np.ndarray:
+    def process_noise_cov(self) -> tf.Tensor:
         """Process noise covariance Q for flow filters."""
         return self.Q
 
-    # TensorFlow methods
+    # Batch methods for optimized particle filtering
 
-    if TF_AVAILABLE:
-        @tf.function
-        def sample_state_transition_tf(self, x_tf: tf.Tensor, seed: tf.Tensor) -> tf.Tensor:
-            """
-            TensorFlow version of state transition sampling (vectorized).
+    @tf.function
+    def state_transition_mean_batch(self, particles: tf.Tensor) -> tf.Tensor:
+        """Vectorized state transition mean: particles @ F.T."""
+        return particles @ tf.transpose(self.F)
 
-            Args:
-                x_tf: Current state (2,) or (N, 2) - single or batch
-                seed: Random seed
+    @tf.function
+    def state_transition_cov_batch(self, particles: tf.Tensor) -> tf.Tensor:
+        """Q is constant - return single matrix."""
+        return self.Q
 
-            Returns:
-                Next state (2,) or (N, 2) - same shape as input
-            """
-            # Determine input shape for noise generation
-            input_shape = tf.shape(x_tf)
-            
-            # Sample noise: w ~ N(0, Q)
-            L = tf.linalg.cholesky(self.Q_tf)
-            z = tf.random.stateless_normal(input_shape, seed=seed)
-            
-            # Apply Cholesky factor to get correlated noise
-            if len(x_tf.shape) == 1:
-                # Single state (2,)
-                w = tf.linalg.matvec(L, z)
-                return tf.linalg.matvec(self.F_tf, x_tf) + w
-            else:
-                # Batch of states (N, 2)
-                w = tf.linalg.matvec(L, z)
-                return tf.linalg.matvec(self.F_tf, x_tf) + w
+    @tf.function
+    def log_observation_prob_batch(self, observation: tf.Tensor, particles: tf.Tensor) -> tf.Tensor:
+        """Vectorized range-bearing log-prob for all particles."""
+        # Relative positions
+        dx = particles[:, 0] - self.sensor_pos[0]  # (N,)
+        dy = particles[:, 1] - self.sensor_pos[1]  # (N,)
 
-        @tf.function
-        def log_observation_prob_tf(self, y_tf: tf.Tensor, x_tf: tf.Tensor) -> tf.Tensor:
-            """
-            TensorFlow version of observation log-probability.
+        # Range and bearing
+        range_vals = tf.sqrt(dx**2 + dy**2)  # (N,)
+        bearing_vals = tf.atan2(dy, dx)  # (N,)
 
-            Args:
-                y_tf: Observation (2,) - [range, bearing]
-                x_tf: State (2,) or (N, 2) - [x, y] (single or batch)
+        # Means: (N, 2)
+        means = tf.stack([range_vals, bearing_vals], axis=1)
 
-            Returns:
-                Log probability (scalar or (N,))
-            """
-            if len(x_tf.shape) == 1:
-                # Single state (2,)
-                dx = x_tf[0] - self.sensor_pos_tf[0]
-                dy = x_tf[1] - self.sensor_pos_tf[1]
-                range_val = tf.sqrt(dx ** 2 + dy ** 2)
-                bearing_val = tf.atan2(dy, dx)
-                mean = tf.stack([range_val, bearing_val])
+        # diff: (N, 2)
+        diff = observation - means
 
-                diff = y_tf - mean
+        # Cholesky of R (2x2 diagonal)
+        L_R = tf.linalg.cholesky(self.R)
 
-                sign, logdet = tf.linalg.slogdet(2.0 * np.pi * self.R_tf)
-                mahalanobis = tf.reduce_sum(diff * tf.linalg.solve(self.R_tf, diff))
+        # Solve: y = L_R^{-1} @ diff.T → (2, N)
+        y = tf.linalg.triangular_solve(L_R, tf.transpose(diff), lower=True)
 
-                return -0.5 * (logdet + mahalanobis)
-            else:
-                # Batch of states (N, 2)
-                dx = x_tf[:, 0] - self.sensor_pos_tf[0]
-                dy = x_tf[:, 1] - self.sensor_pos_tf[1]
-                range_val = tf.sqrt(dx ** 2 + dy ** 2)
-                bearing_val = tf.atan2(dy, dx)
-                mean = tf.stack([range_val, bearing_val], axis=1)  # (N, 2)
-                
-                diff = y_tf - mean  # (N, 2)
-                
-                sign, logdet = tf.linalg.slogdet(2.0 * np.pi * self.R_tf)
-                mahalanobis = tf.reduce_sum(
-                    diff * tf.linalg.matvec(tf.linalg.inv(self.R_tf), diff),
-                    axis=1
-                )
-                
-                return -0.5 * (logdet + mahalanobis)  # (N,)
+        # Mahalanobis: (N,)
+        mahalanobis = tf.reduce_sum(y**2, axis=0)
 
-        @tf.function
-        def sample_initial_state_batch_tf(self, n: int, seed: tf.Tensor) -> tf.Tensor:
-            """
-            Sample n initial states using TensorFlow.
+        logdet = 2.0 * tf.reduce_sum(tf.math.log(tf.linalg.diag_part(L_R)))
 
-            Args:
-                n: Number of samples
-                seed: Random seed
+        return -0.5 * (2.0 * tf.math.log(2.0 * np.pi) + logdet + mahalanobis)
 
-            Returns:
-                Initial states (n, 2)
-            """
-            # Sample from N(mu_0, Sigma_0)
-            L = tf.linalg.cholesky(self.Sigma_0_tf)
-            z = tf.random.stateless_normal([n, 2], seed=seed)
+    @tf.function
+    def sample_state_transition_batch(self, particles: tf.Tensor, seed: tf.Tensor) -> tf.Tensor:
+        """
+        Vectorized state transition sampling.
 
-            return self.mu_0_tf + tf.linalg.matvec(L, z, transpose_a=True)
+        Args:
+            particles: Current states (N, 2)
+            seed: Random seed
+
+        Returns:
+            Next states (N, 2)
+        """
+        # Sample noise: w ~ N(0, Q)
+        N = tf.shape(particles)[0]
+        L = tf.linalg.cholesky(self.Q)
+        z = tf.random.stateless_normal([N, 2], seed=seed, dtype=tf.float32)
+
+        # Apply Cholesky factor: w = L @ z.T → (2, N), then transpose
+        w = tf.linalg.matmul(z, L, transpose_b=True)  # (N, 2)
+
+        # Apply state transition: F @ particles.T → transpose
+        return particles @ tf.transpose(self.F) + w
+
+    @tf.function
+    def sample_initial_state_batch(self, n: int, seed: tf.Tensor) -> tf.Tensor:
+        """
+        Sample n initial states.
+
+        Args:
+            n: Number of samples
+            seed: Random seed
+
+        Returns:
+            Initial states (n, 2)
+        """
+        # Sample from N(mu_0, Sigma_0)
+        L = tf.linalg.cholesky(self.Sigma_0)
+        z = tf.random.stateless_normal([n, 2], seed=seed, dtype=tf.float32)
+
+        # Broadcast mu_0 and apply transformation
+        return self.mu_0 + tf.linalg.matmul(z, L, transpose_b=True)

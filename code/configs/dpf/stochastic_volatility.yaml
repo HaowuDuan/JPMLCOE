@@ -1,0 +1,68 @@
+# Differentiable Filter Parameter Inference Configuration
+# Example: Stochastic Volatility Model
+
+# Base model configuration (initial parameter guesses)
+model:
+  _target_: src.models.stochastic_volatility.StochasticVolatilityModel
+  alpha: 0.85  # Initial guess
+  sigma: 0.8   # Initial guess
+  beta: 0.5    # Initial guess (or fixed if not in trainable_params)
+
+# Filter configuration (any filter that returns FilterResult)
+filter:
+  _target_: src.filters.particle.edh_flow.ExactDaumHuangFlow
+  n_particles: 100
+  n_lambda_steps: 50
+  integration_method: euler
+  filter_type: ekf
+  resampling_method: null
+  debug_mode: false
+
+# DPF configuration
+dpf:
+  # Parameters to infer (must match model attributes)
+  trainable_params:
+    alpha:
+      init_value: 0.85
+      constraint: [0, 1]  # (0, 1) for unit interval
+      prior:
+        _target_: tensorflow_probability.distributions.Beta
+        concentration1: 9.0
+        concentration0: 1.0
+    
+    sigma:
+      init_value: 0.8
+      constraint: positive  # 'positive' for (0, ∞)
+      prior:
+        _target_: tensorflow_probability.distributions.LogNormal
+        loc: 0.0
+        scale: 0.5
+  
+  # HMC configuration
+  hmc:
+    num_samples: 1000
+    num_burnin: 500
+    step_size: 0.01
+    num_leapfrog_steps: 10
+    adaptation_rate: 0.8
+    target_accept_prob: 0.75
+    seed: 42
+
+# Data generation (for synthetic experiments)
+data:
+  T: 100  # Number of timesteps
+  seed: 42
+  # True parameters (for validation only)
+  true_params:
+    alpha: 0.91
+    sigma: 1.0
+    beta: 0.5
+
+# Output configuration
+output:
+  save_samples: true
+  save_diagnostics: true
+  plot_traces: true
+  plot_posteriors: true
+
+

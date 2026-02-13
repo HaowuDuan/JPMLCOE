@@ -1,23 +1,20 @@
-# Multi-Target Acoustic Tracking Model Configuration (Paper Reproduction)
-# Li & Coates (2017) Section V
+# Multi-Target Acoustic Tracking Model Configuration (Li & Coates Paper)
 
 _target_: src.models.acoustic_tracking_full.AcousticTrackingFullModel
 
-# 4 targets, 25 sensors
+# 4 targets, 16-dimensional state, 25 sensors
 n_targets: 4
-sensor_grid_size: 5  # 5×5 grid = 25 sensors
+sensor_grid_size: 5
 
-# Paper parameters from Section V
-source_intensity: 10.0        # Ψ = 10 in paper
-regularization: 0.1           # d_0 = 0.1 in paper
+# Source parameters (from Li & Coates paper Section V)
+source_intensity: 10.0        # Psi = 10
+regularization: 0.1           # d_0 = 0.1
 
-# Measurement noise (sigma_w^2 = 0.01 in paper)
-measurement_noise_std: 0.1  # sqrt(0.01) = 0.1
+# Measurement noise (sigma_w^2 = 0.01)
+measurement_noise_std: 0.1
 
-# Use V_filter for filtering algorithms (NOT V_true)
-# V_true is used for data generation, V_filter for algorithms
+# Use filter process noise (V_filter) by default
+# Set to true to use V_true for data generation
 use_true_process_noise: false
 
-# Time step
 dt: 1.0
-

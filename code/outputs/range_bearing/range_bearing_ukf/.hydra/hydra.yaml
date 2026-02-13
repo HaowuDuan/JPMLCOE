@@ -112,11 +112,11 @@ hydra:
     hydra:
     - hydra.mode=RUN
     task:
-    - +experiment=range_bearing/range_bearing_ukf
+    - experiment=range_bearing/range_bearing_ukf
   job:
     name: run_experiment
     chdir: null
-    override_dirname: +experiment=range_bearing/range_bearing_ukf
+    override_dirname: experiment=range_bearing/range_bearing_ukf
     id: ???
     num: ???
     config_name: config

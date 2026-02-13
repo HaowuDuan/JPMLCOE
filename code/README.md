@@ -224,16 +224,24 @@ code/
 
 ## GPU Acceleration
 
-Particle filters automatically use GPU if available:
+The experiment runner automatically detects and configures the best available device:
+- **CUDA** (NVIDIA GPU) on Linux/Windows
+- **MPS** (Apple Silicon) on macOS with `tensorflow-metal`
+- **CPU** fallback when no GPU is available
+
+Device setup runs at experiment start via `src.utils.device.setup_tensorflow_device()`.
+GPU memory growth is enabled by default to avoid OOM.
 
 ```python
-import tensorflow as tf
-print("GPUs available:", tf.config.list_physical_devices('GPU'))
+from src.utils.device import setup_tensorflow_device, get_device_info
 
-# Enable memory growth (recommended)
-gpus = tf.config.list_physical_devices('GPU')
-for gpu in gpus:
-    tf.config.experimental.set_memory_growth(gpu, True)
+# Configure device (CUDA > MPS > CPU)
+device = setup_tensorflow_device()
+print(f"Using: {device}")
+
+# Or force CPU for debugging
+from src.utils.device import force_cpu
+force_cpu()
 ```
 
 Expected speedups with GPU:

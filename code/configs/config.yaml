@@ -1,9 +1,10 @@
 # Main Hydra configuration
 
 defaults:
-  - model: linear_gaussian
+  - model: 1d_linear_gaussian
   - filter: kalman
   - _self_
+  - optional experiment: null
   - override hydra/job_logging: default
   - override hydra/hydra_logging: default
 
@@ -12,6 +13,9 @@ seed: 42
 T: 100  # Number of timesteps
 output_dir: outputs
 plot: false  # Generate plots by default
+
+# TensorFlow device: auto (CUDA > MPS > CPU) | cpu (force CPU) | gpu (prefer GPU)
+device: auto
 
 # Logging
 verbose: true
