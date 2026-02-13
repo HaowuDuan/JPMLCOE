@@ -153,7 +153,7 @@ def sinkhorn_iteration(
         - n_iterations: Number of iterations performed
     """
     N = tf.shape(cost_matrix)[-1]
-    float_N = tf.cast(N, tf.float32)
+    float_N = tf.cast(N, cost_matrix.dtype)
     log_N = tf.math.log(float_N)
 
     # Uniform target for resampling
@@ -245,13 +245,13 @@ def sinkhorn_with_epsilon_scaling(
     
     # Convert epsilon to tensor if needed (handle both scalar and tensor inputs)
     if isinstance(epsilon, tf.Tensor):
-        epsilon_tensor = tf.cast(epsilon, tf.float32)
+        epsilon_tensor = tf.cast(epsilon, particles.dtype)
     else:
-        epsilon_tensor = tf.constant(epsilon, dtype=tf.float32)
+        epsilon_tensor = tf.constant(epsilon, dtype=particles.dtype)
 
     # Initialize potentials with large epsilon
     N = tf.shape(particles)[-2]
-    float_N = tf.cast(N, tf.float32)
+    float_N = tf.cast(N, particles.dtype)
     log_N = tf.math.log(float_N)
     uniform_log = -log_N * tf.ones_like(log_weights)
 
@@ -262,7 +262,7 @@ def sinkhorn_with_epsilon_scaling(
     # Epsilon-scaling: gradually reduce epsilon
     # Convert scaling to tensor if needed
     if isinstance(scaling, tf.Tensor):
-        scaling_factor = tf.cast(scaling, tf.float32) ** 2
+        scaling_factor = tf.cast(scaling, particles.dtype) ** 2
     else:
         scaling_factor = float(scaling) ** 2
 
@@ -347,7 +347,7 @@ def compute_transport_matrix_from_potentials(
 
     # Normalize columns to sum to 1/N (for uniform resampling)
     N = tf.shape(particles)[-2]
-    float_N = tf.cast(N, tf.float32)
+    float_N = tf.cast(N, particles.dtype)
     log_N = tf.math.log(float_N)
 
     log_T_normalized = log_T - tf.reduce_logsumexp(log_T, axis=-2, keepdims=True) + log_N
@@ -395,7 +395,7 @@ def compute_transport_matrix_with_gradient(
     centered = particles - tf.stop_gradient(mean)
 
     std = tf.math.reduce_std(particles)
-    dimension = tf.cast(tf.shape(particles)[-1], tf.float32)
+    dimension = tf.cast(tf.shape(particles)[-1], particles.dtype)
     scale_factor = tf.stop_gradient(std * tf.sqrt(dimension) + 1e-8)
     scaled = centered / scale_factor
 
@@ -499,7 +499,7 @@ def ot_entropy_resample(
 
     # Return uniform weights
     N = tf.shape(particles)[0]
-    N_float = tf.cast(N, tf.float32)
-    uniform_weights = tf.ones(N, dtype=tf.float32) / N_float
+    N_float = tf.cast(N, particles.dtype)
+    uniform_weights = tf.ones(N, dtype=particles.dtype) / N_float
 
     return resampled_particles, uniform_weights

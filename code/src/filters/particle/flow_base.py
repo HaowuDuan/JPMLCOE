@@ -2,7 +2,8 @@
 
 import numpy as np
 import tensorflow as tf
-from typing import Tuple, Optional
+import time
+from typing import Tuple, Optional, Callable
 import os
 from ...core.types import FilterResult
 
@@ -30,6 +31,7 @@ class FlowFilterBase:
             n_threads: Number of threads (None = use CPU count)
         """
         self.model = model
+        self.dtype = getattr(model, 'dtype', tf.float64)
         self.state_dim = model.state_dim
         self.obs_dim = model.obs_dim
         self.n_particles = n_particles
@@ -67,7 +69,7 @@ class FlowFilterBase:
         particles = self.particles.value() if isinstance(self.particles, tf.Variable) else self.particles
         mean = tf.reduce_mean(particles, axis=0)
         diff = particles - mean
-        cov = tf.matmul(diff, diff, transpose_a=True) / tf.cast(self.n_particles, tf.float32)
+        cov = tf.matmul(diff, diff, transpose_a=True) / tf.cast(self.n_particles, self.dtype)
         return mean, cov
 
     def _make_tf_seed(self) -> tf.Tensor:
@@ -92,7 +94,7 @@ class FlowFilterBase:
         # Sample initial particles using model's batch method
         seed = self._make_tf_seed()
         particles_tf = self.model.sample_initial_state_batch(self.n_particles, seed)
-        self.particles = tf.Variable(particles_tf, dtype=tf.float32)
+        self.particles = tf.Variable(particles_tf, dtype=self.dtype)
 
         # Reset storage
         self.means = []
@@ -101,13 +103,15 @@ class FlowFilterBase:
         self.weights_history = []
 
     def filter(self, observations: np.ndarray,
-               random_state: Optional[np.random.Generator] = None) -> FilterResult:
+               random_state: Optional[np.random.Generator] = None,
+               progress_callback: Optional[Callable[[int, int, float], None]] = None) -> FilterResult:
         """
         Run the filter on a sequence of observations.
 
         Args:
             observations: Shape (T, obs_dim)
             random_state: Optional random generator
+            progress_callback: Optional callback(t, T, step_time_sec) called after each step
 
         Returns:
             FilterResult with means, covariances, and diagnostics
@@ -116,14 +120,17 @@ class FlowFilterBase:
         T = len(observations)
 
         # Pre-convert observations to TF once
-        obs_tf = tf.constant(observations, dtype=tf.float32)
+        obs_tf = tf.constant(observations, dtype=self.dtype)
 
         for t in range(T):
+            t0 = time.perf_counter()
             self.predict()
             self.update(obs_tf[t])
             mean, cov = self._estimate_mean_cov()
             self.means.append(mean)
             self.covs.append(cov)
+            if progress_callback is not None:
+                progress_callback(t, T, time.perf_counter() - t0)
 
         # Convert accumulated TF tensors to numpy once
         means_np = tf.stack(self.means).numpy()

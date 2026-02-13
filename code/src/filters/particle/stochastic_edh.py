@@ -9,6 +9,7 @@ With optional stiffness-mitigating schedule from:
   Dai & Daum (2021), "Stiffness Mitigation in Stochastic Particle Flow Filters"
   (arXiv:2107.04672)
 """
+import numpy as np
 import tensorflow as tf
 from .edh_flow import ExactDaumHuangFlow
 from ...utils.flow_params import compute_flow_params
@@ -49,6 +50,8 @@ class StochasticEDHFlow(ExactDaumHuangFlow):
             **kwargs: Passed to ExactDaumHuangFlow.
         """
         super().__init__(model, **kwargs)
+        self.dtype = getattr(model, 'dtype', tf.float64)
+        self.np_dtype = np.float64 if self.dtype == tf.float64 else np.float32
         self.diffusion_scale = diffusion_scale
         self.schedule_mu = schedule_mu
         self.seed_counter = 0
@@ -85,8 +88,8 @@ class StochasticEDHFlow(ExactDaumHuangFlow):
     def _shoot(self, u0: float, J_prior: tf.Tensor,
                J_meas: tf.Tensor, n_steps: int = 500) -> float:
         """Integrate schedule ODE from λ=0 to λ=1, return β(1)."""
-        state = tf.constant([0.0, u0], dtype=tf.float32)
-        dlam = tf.constant(1.0 / n_steps, dtype=tf.float32)
+        state = tf.constant([0.0, u0], dtype=self.dtype)
+        dlam = tf.constant(1.0 / n_steps, dtype=self.dtype)
         for _ in range(n_steps):
             state = euler_step(state, self._schedule_drift,
                                dlam, J_prior, J_meas)
@@ -140,7 +143,7 @@ class StochasticEDHFlow(ExactDaumHuangFlow):
         optimal_u0 = (u_lo + u_hi) / 2.0
 
         # --- Record β at each cumulative λ step point ---
-        state = tf.constant([0.0, optimal_u0], dtype=tf.float32)
+        state = tf.constant([0.0, optimal_u0], dtype=self.dtype)
         beta_values = []
 
         for i in range(self.n_lambda_steps):
@@ -170,7 +173,7 @@ class StochasticEDHFlow(ExactDaumHuangFlow):
         # --- Setup (all TF tensors, no numpy conversions) ---
         observation = y  # Already TF tensor from flow_base.filter()
         P = self.predicted_cov  # Already TF tensor from predict()
-        R = tf.constant(self.model.observation_noise_cov, dtype=tf.float32)
+        R = tf.constant(self.model.observation_noise_cov, dtype=self.dtype)
         eta_bar_0 = self.eta_bar_0  # Already TF tensor from predict()
         R_inv = tf.linalg.inv(R)
         particles_flow = self.particles.value()
@@ -195,7 +198,7 @@ class StochasticEDHFlow(ExactDaumHuangFlow):
             beta_vals, dbeta_vals = self._compute_optimal_schedule(P, R_inv)
 
         # --- Flow loop (all TF tensor operations) ---
-        lambda_val = tf.constant(0.0, dtype=tf.float32)
+        lambda_val = tf.constant(0.0, dtype=self.dtype)
         for i in range(self.n_lambda_steps):
             d_lambda = self.lambda_steps[i]
             lambda_val = lambda_val + d_lambda

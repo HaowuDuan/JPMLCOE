@@ -157,7 +157,7 @@ class StateSpaceModel(ABC):
         return tf.map_fn(
             self.observation_jacobian,
             particles,
-            fn_output_signature=tf.TensorSpec([self.obs_dim, self.state_dim], tf.float32)
+            fn_output_signature=tf.TensorSpec([self.obs_dim, self.state_dim], particles.dtype)
         )
 
     def observation_function_batch(self, particles: tf.Tensor) -> tf.Tensor:
@@ -174,7 +174,7 @@ class StateSpaceModel(ABC):
         return tf.map_fn(
             self.observation_function,
             particles,
-            fn_output_signature=tf.TensorSpec([self.obs_dim], tf.float32)
+            fn_output_signature=tf.TensorSpec([self.obs_dim], particles.dtype)
         )
 
     def state_jacobian_batch(self, particles: tf.Tensor) -> tf.Tensor:
@@ -191,7 +191,7 @@ class StateSpaceModel(ABC):
         return tf.map_fn(
             self.state_jacobian,
             particles,
-            fn_output_signature=tf.TensorSpec([self.state_dim, self.state_dim], tf.float32)
+            fn_output_signature=tf.TensorSpec([self.state_dim, self.state_dim], particles.dtype)
         )
 
     @property

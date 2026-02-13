@@ -2,7 +2,8 @@
 
 import tensorflow as tf
 import numpy as np
-from typing import Tuple, Union, List, Optional
+import time
+from typing import Tuple, Union, List, Optional, Callable
 from ...core.filter_base import Filter
 from ...core.types import FilterResult
 from ...utils.linalg import symmetrize
@@ -35,7 +36,8 @@ class KalmanFilter(Filter):
         D: Union[np.ndarray, List],
         mean_0: Optional[Union[np.ndarray, List]] = None,
         Sigma_0: Optional[Union[np.ndarray, List]] = None,
-        use_joseph_form: bool = True
+        use_joseph_form: bool = True,
+        dtype=tf.float32
     ):
         """
         Initialize the Kalman Filter.
@@ -49,11 +51,14 @@ class KalmanFilter(Filter):
             Sigma_0: Initial covariance matrix (nx, nx). If None, defaults to identity.
             use_joseph_form: If True, use Joseph stabilized covariance update
         """
+        self.dtype = dtype
+        self.np_dtype = np.float64 if dtype == tf.float64 else np.float32
+
         # Convert to numpy arrays first (handles both arrays and Hydra ListConfig)
-        F_np = np.array(F, dtype=np.float32)
-        B_np = np.array(B, dtype=np.float32)
-        H_np = np.array(H, dtype=np.float32)
-        D_np = np.array(D, dtype=np.float32)
+        F_np = np.array(F, dtype=self.np_dtype)
+        B_np = np.array(B, dtype=self.np_dtype)
+        H_np = np.array(H, dtype=self.np_dtype)
+        D_np = np.array(D, dtype=self.np_dtype)
 
         # Store dimensions
         self.nx = int(F_np.shape[0])
@@ -62,10 +67,10 @@ class KalmanFilter(Filter):
         self.nw = int(D_np.shape[1])
 
         # Convert to TensorFlow constants
-        self.F = tf.constant(F_np, dtype=tf.float32)
-        self.B = tf.constant(B_np, dtype=tf.float32)
-        self.H = tf.constant(H_np, dtype=tf.float32)
-        self.D = tf.constant(D_np, dtype=tf.float32)
+        self.F = tf.constant(F_np, dtype=self.dtype)
+        self.B = tf.constant(B_np, dtype=self.dtype)
+        self.H = tf.constant(H_np, dtype=self.dtype)
+        self.D = tf.constant(D_np, dtype=self.dtype)
 
         # Compute covariances
         self.Q = tf.linalg.matmul(self.B, self.B, transpose_b=True)
@@ -73,17 +78,17 @@ class KalmanFilter(Filter):
 
         # Store initial state
         if mean_0 is None:
-            mean_0_np = np.zeros(self.nx, dtype=np.float32)
+            mean_0_np = np.zeros(self.nx, dtype=self.np_dtype)
         else:
-            mean_0_np = np.array(mean_0, dtype=np.float32)
+            mean_0_np = np.array(mean_0, dtype=self.np_dtype)
 
         if Sigma_0 is None:
-            Sigma_0_np = np.eye(self.nx, dtype=np.float32)
+            Sigma_0_np = np.eye(self.nx, dtype=self.np_dtype)
         else:
-            Sigma_0_np = np.array(Sigma_0, dtype=np.float32)
+            Sigma_0_np = np.array(Sigma_0, dtype=self.np_dtype)
 
-        self.mean_0 = tf.constant(mean_0_np, dtype=tf.float32)
-        self.Sigma_0 = tf.constant(Sigma_0_np, dtype=tf.float32)
+        self.mean_0 = tf.constant(mean_0_np, dtype=self.dtype)
+        self.Sigma_0 = tf.constant(Sigma_0_np, dtype=self.dtype)
 
         self.use_joseph_form = use_joseph_form
 
@@ -107,8 +112,8 @@ class KalmanFilter(Filter):
 
     def reset(self):
         """Reset filter to initial state and clear history."""
-        self.mean = tf.Variable(self.mean_0, dtype=tf.float32)
-        self.cov = tf.Variable(self.Sigma_0, dtype=tf.float32)
+        self.mean = tf.Variable(self.mean_0, dtype=self.dtype)
+        self.cov = tf.Variable(self.Sigma_0, dtype=self.dtype)
 
         # Clear history
         for key in self.history:
@@ -161,7 +166,7 @@ class KalmanFilter(Filter):
         mean_updated = mean + tf.linalg.matvec(kalman_gain, innovation)
 
         # Update covariance
-        I = tf.eye(self.nx, dtype=tf.float32)
+        I = tf.eye(self.nx, dtype=self.dtype)
         if self.use_joseph_form:
             # Joseph form: P = (I - KH)P(I - KH)^T + KRK^T
             I_minus_KH = I - kalman_gain @ self.H
@@ -208,7 +213,7 @@ class KalmanFilter(Filter):
         Returns:
             Tuple of (updated_mean, updated_cov, kalman_gain)
         """
-        obs_tf = tf.constant(observation, dtype=tf.float32)
+        obs_tf = tf.constant(observation, dtype=self.dtype)
 
         mean_updated, cov_updated, kalman_gain, innovation, log_lik = self._update_step(
             self.mean.value(),
@@ -229,12 +234,14 @@ class KalmanFilter(Filter):
 
         return mean_updated.numpy(), cov_updated.numpy(), kalman_gain.numpy()
 
-    def filter(self, observations: np.ndarray) -> FilterResult:
+    def filter(self, observations: np.ndarray,
+               progress_callback: Optional[Callable[[int, int, float], None]] = None) -> FilterResult:
         """
         Run the filter on a sequence of observations.
 
         Args:
             observations: Array of shape (T, ny) containing observations
+            progress_callback: Optional callback(t, T, step_time_sec) called after each step
 
         Returns:
             FilterResult with filtered means, covariances, and diagnostics
@@ -248,11 +255,14 @@ class KalmanFilter(Filter):
         covariances = []
 
         for t in range(T):
+            t0 = time.perf_counter()
             self.predict()
             self.update(observations[t])
 
             means.append(self.mean.numpy().copy())
             covariances.append(self.cov.numpy().copy())
+            if progress_callback is not None:
+                progress_callback(t, T, time.perf_counter() - t0)
 
         # Compute total log-likelihood
         total_log_likelihood = sum(self.history['log_likelihoods'])

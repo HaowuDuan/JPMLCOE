@@ -55,6 +55,7 @@ def generate_data(
         if use_true_process_noise and hasattr(model, 'V_true'):
             model.Q = model.V_true
 
+    np_dtype = getattr(model, 'np_dtype', np.float64)
     true_states = np.zeros((T, model.state_dim))
     observations = np.zeros((T, model.obs_dim))
 
@@ -62,14 +63,14 @@ def generate_data(
     if use_fixed_initial_state:
         if not hasattr(model, 'mu_0'):
             raise ValueError("Model must have mu_0 attribute for fixed initial state")
-        initial_state = np.asarray(model.mu_0, dtype=np.float64)
+        initial_state = np.asarray(model.mu_0, dtype=np_dtype)
     else:
         initial_state = np.asarray(
-            model.sample_initial_state(_make_seed(rng)), dtype=np.float64
+            model.sample_initial_state(_make_seed(rng)), dtype=np_dtype
         )
 
     # Generate x_1, ..., x_T and y_1, ..., y_T
-    current_state = tf.constant(initial_state, dtype=tf.float32)
+    current_state = tf.constant(initial_state, dtype=model.dtype)
 
     for t in range(T):
         current_state = model.sample_state_transition(current_state, _make_seed(rng))

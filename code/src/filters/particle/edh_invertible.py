@@ -3,6 +3,7 @@
 
 import tensorflow as tf
 import numpy as np
+import time
 from typing import Tuple, Optional, Callable, Dict, Any
 from ...core.model_base import StateSpaceModel
 from ...core.types import FilterResult
@@ -48,6 +49,8 @@ class EDHParticleFlowFilter:
             debug_mode: If True, store detailed diagnostics
         """
         self.model = model
+        self.dtype = getattr(model, 'dtype', tf.float64)
+        self.np_dtype = np.float64 if self.dtype == tf.float64 else np.float32
         self.state_dim = model.state_dim
         self.obs_dim = model.obs_dim
         self.n_particles = n_particles
@@ -148,7 +151,7 @@ class EDHParticleFlowFilter:
 
         if initial_mean is None:
             # Use model's initial mean directly (not a random sample)
-            initial_mean = np.asarray(self.model.mu_0, dtype=np.float32)
+            initial_mean = np.asarray(self.model.mu_0, dtype=self.np_dtype)
 
         if initial_cov is None:
             if hasattr(self.model, 'Sigma_0'):
@@ -161,21 +164,21 @@ class EDHParticleFlowFilter:
         # Sample initial particles using TensorFlow
         seed = tf.constant([self.seed_counter, 0], dtype=tf.int32)
         self.seed_counter += 1
-        initial_mean_tf = tf.constant(initial_mean, dtype=tf.float32)
-        initial_cov_tf = tf.constant(initial_cov, dtype=tf.float32)
+        initial_mean_tf = tf.constant(initial_mean, dtype=self.dtype)
+        initial_cov_tf = tf.constant(initial_cov, dtype=self.dtype)
 
         L = tf.linalg.cholesky(initial_cov_tf)
-        z = tf.random.stateless_normal([self.n_particles, self.state_dim], seed=seed, dtype=tf.float32)
+        z = tf.random.stateless_normal([self.n_particles, self.state_dim], seed=seed, dtype=self.dtype)
         particles_tf = initial_mean_tf + tf.linalg.matmul(z, L, transpose_b=True)
 
-        self.particles = tf.Variable(particles_tf, dtype=tf.float32)
-        self.weights = tf.Variable(tf.ones(self.n_particles, dtype=tf.float32) / self.n_particles)
+        self.particles = tf.Variable(particles_tf, dtype=self.dtype)
+        self.weights = tf.Variable(tf.ones(self.n_particles, dtype=self.dtype) / self.n_particles)
 
         self.global_filter = self._create_filter(initial_mean_tf, initial_cov_tf)
 
         # Pre-allocate Variables used in predict() to avoid per-timestep allocation
-        self.particles_prev = tf.Variable(tf.zeros_like(particles_tf), dtype=tf.float32)
-        self.eta_0 = tf.Variable(tf.zeros([self.n_particles, self.state_dim], dtype=tf.float32))
+        self.particles_prev = tf.Variable(tf.zeros_like(particles_tf), dtype=self.dtype)
+        self.eta_0 = tf.Variable(tf.zeros([self.n_particles, self.state_dim], dtype=self.dtype))
 
         self.means = []
         self.covs = []
@@ -190,7 +193,7 @@ class EDHParticleFlowFilter:
         q = 1.2
         epsilon_1 = (1 - q) / (1 - q**self.n_lambda_steps)
         lambda_steps_np = epsilon_1 * q**np.arange(self.n_lambda_steps)
-        self.lambda_steps = tf.constant(lambda_steps_np, dtype=tf.float32)
+        self.lambda_steps = tf.constant(lambda_steps_np, dtype=self.dtype)
 
     @tf.function
     def _compute_drift(self, particles: tf.Tensor, A: tf.Tensor, b: tf.Tensor) -> tf.Tensor:
@@ -242,7 +245,7 @@ class EDHParticleFlowFilter:
         eta_bar = self.eta_bar_0
 
         # Line 10: λ = 0
-        lambda_val = tf.constant(0.0, dtype=tf.float32)
+        lambda_val = tf.constant(0.0, dtype=self.dtype)
 
         # Lines 11-18: Flow loop (all TF tensor operations)
         for j in tf.range(self.n_lambda_steps):
@@ -330,7 +333,7 @@ class EDHParticleFlowFilter:
             resampled_particles, new_weights = result
         else:
             resampled_particles = result
-            new_weights = tf.ones(self.n_particles, dtype=tf.float32) / tf.cast(self.n_particles, tf.float32)
+            new_weights = tf.ones(self.n_particles, dtype=self.dtype) / tf.cast(self.n_particles, self.dtype)
 
         self.particles.assign(resampled_particles)
         self.weights.assign(new_weights)
@@ -352,20 +355,24 @@ class EDHParticleFlowFilter:
     def filter(self, observations: np.ndarray,
                initial_mean: Optional[np.ndarray] = None,
                initial_cov: Optional[np.ndarray] = None,
-               random_seed: Optional[int] = None) -> FilterResult:
+               random_seed: Optional[int] = None,
+               progress_callback: Optional[Callable[[int, int, float], None]] = None) -> FilterResult:
         """Run filter on sequence of observations."""
         self.initialize(initial_mean, initial_cov, random_seed)
         T = len(observations)
 
         # Pre-convert observations to TF once
-        obs_tf = tf.constant(observations, dtype=tf.float32)
+        obs_tf = tf.constant(observations, dtype=self.dtype)
 
         for t in range(T):
+            t0 = time.perf_counter()
             self.predict()
             self.update(obs_tf[t])
             mean, cov = self._estimate_mean_cov()
             self.means.append(mean)  # TF tensor
             self.covs.append(cov)    # TF tensor
+            if progress_callback is not None:
+                progress_callback(t, T, time.perf_counter() - t0)
 
         resampling_rate = len(self.resampled_at) / T if T > 0 else 0.0
 

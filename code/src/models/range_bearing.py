@@ -44,7 +44,8 @@ class RangeBearingModel(StateSpaceModel):
         sigma_range: float = 0.1,
         sigma_bearing: float = 0.01,
         mu_0: Optional[np.ndarray] = None,
-        Sigma_0: Optional[np.ndarray] = None
+        Sigma_0: Optional[np.ndarray] = None,
+        dtype=tf.float32
     ):
         """
         Initialize Range-Bearing Model.
@@ -58,6 +59,9 @@ class RangeBearingModel(StateSpaceModel):
             mu_0: Initial state mean [x_0, y_0]. If None, uses [1.0, 1.0].
             Sigma_0: Initial state covariance (2, 2). If None, uses I.
         """
+        self.dtype = dtype
+        self.np_dtype = np.float64 if dtype == tf.float64 else np.float32
+
         if sigma_range <= 0:
             raise ValueError(f"sigma_range must be positive, got {sigma_range}")
         if sigma_bearing <= 0:
@@ -68,26 +72,26 @@ class RangeBearingModel(StateSpaceModel):
             F = np.eye(2)
         if F.shape != (2, 2):
             raise ValueError(f"F must be (2, 2), got {F.shape}")
-        self.F = tf.constant(F, dtype=tf.float32)
+        self.F = tf.constant(F, dtype=self.dtype)
 
         # Default process noise
         if Q is None:
             Q = 0.01 * np.eye(2)
         if Q.shape != (2, 2):
             raise ValueError(f"Q must be (2, 2), got {Q.shape}")
-        self.Q = tf.constant(Q, dtype=tf.float32)
+        self.Q = tf.constant(Q, dtype=self.dtype)
 
         # Sensor position
         sensor_pos = np.asarray(sensor_pos)
         if sensor_pos.shape != (2,):
             raise ValueError(f"sensor_pos must be (2,), got {sensor_pos.shape}")
-        self.sensor_pos = tf.constant(sensor_pos, dtype=tf.float32)
+        self.sensor_pos = tf.constant(sensor_pos, dtype=self.dtype)
 
         # Observation noise parameters
         self.sigma_range = sigma_range
         self.sigma_bearing = sigma_bearing
         R = np.diag([sigma_range ** 2, sigma_bearing ** 2])
-        self.R = tf.constant(R, dtype=tf.float32)
+        self.R = tf.constant(R, dtype=self.dtype)
 
         # Initial state distribution
         mu_0_np = mu_0 if mu_0 is not None else np.array([1.0, 1.0])
@@ -98,8 +102,8 @@ class RangeBearingModel(StateSpaceModel):
         if Sigma_0_np.shape != (2, 2):
             raise ValueError(f"Sigma_0 must be (2, 2), got {Sigma_0_np.shape}")
 
-        self.mu_0 = tf.constant(mu_0_np, dtype=tf.float32)
-        self.Sigma_0 = tf.constant(Sigma_0_np, dtype=tf.float32)
+        self.mu_0 = tf.constant(mu_0_np, dtype=self.dtype)
+        self.Sigma_0 = tf.constant(Sigma_0_np, dtype=self.dtype)
 
     @property
     def state_dim(self) -> int:
@@ -113,14 +117,14 @@ class RangeBearingModel(StateSpaceModel):
     def sample_initial_state(self, seed: tf.Tensor) -> tf.Tensor:
         """Sample from initial state distribution: X_0 ~ N(mu_0, Sigma_0)."""
         L = tf.linalg.cholesky(self.Sigma_0)
-        z = tf.random.stateless_normal([2], seed=seed, dtype=tf.float32)
+        z = tf.random.stateless_normal([2], seed=seed, dtype=self.dtype)
         return self.mu_0 + tf.linalg.matvec(L, z)
 
     @tf.function
     def sample_state_transition(self, x: tf.Tensor, seed: tf.Tensor) -> tf.Tensor:
         """Sample from state transition: x' = F·x + w, w ~ N(0, Q)."""
         L = tf.linalg.cholesky(self.Q)
-        z = tf.random.stateless_normal([2], seed=seed, dtype=tf.float32)
+        z = tf.random.stateless_normal([2], seed=seed, dtype=self.dtype)
         w = tf.linalg.matvec(L, z)
         return tf.linalg.matvec(self.F, x) + w
 
@@ -141,8 +145,8 @@ class RangeBearingModel(StateSpaceModel):
         bearing_true = tf.atan2(dy, dx)
 
         # Add noise
-        noise = tf.random.stateless_normal([2], seed=seed, dtype=tf.float32)
-        noise = noise * tf.constant([self.sigma_range, self.sigma_bearing], dtype=tf.float32)
+        noise = tf.random.stateless_normal([2], seed=seed, dtype=self.dtype)
+        noise = noise * tf.constant([self.sigma_range, self.sigma_bearing], dtype=self.dtype)
 
         return tf.stack([range_true, bearing_true]) + noise
 
@@ -336,7 +340,7 @@ class RangeBearingModel(StateSpaceModel):
         # Sample noise: w ~ N(0, Q)
         N = tf.shape(particles)[0]
         L = tf.linalg.cholesky(self.Q)
-        z = tf.random.stateless_normal([N, 2], seed=seed, dtype=tf.float32)
+        z = tf.random.stateless_normal([N, 2], seed=seed, dtype=self.dtype)
 
         # Apply Cholesky factor: w = L @ z.T → (2, N), then transpose
         w = tf.linalg.matmul(z, L, transpose_b=True)  # (N, 2)
@@ -358,7 +362,7 @@ class RangeBearingModel(StateSpaceModel):
         """
         # Sample from N(mu_0, Sigma_0)
         L = tf.linalg.cholesky(self.Sigma_0)
-        z = tf.random.stateless_normal([n, 2], seed=seed, dtype=tf.float32)
+        z = tf.random.stateless_normal([n, 2], seed=seed, dtype=self.dtype)
 
         # Broadcast mu_0 and apply transformation
         return self.mu_0 + tf.linalg.matmul(z, L, transpose_b=True)

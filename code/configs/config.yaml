@@ -10,6 +10,7 @@ defaults:
 
 # Experiment settings
 seed: 42
+dtype: float64  # float32 or float64 — propagated to all models and filters
 T: 100  # Number of timesteps
 output_dir: outputs
 plot: false  # Generate plots by default
@@ -17,8 +18,14 @@ plot: false  # Generate plots by default
 # TensorFlow device: auto (CUDA > MPS > CPU) | cpu (force CPU) | gpu (prefer GPU)
 device: auto
 
+# TF C++ log level: 0=all, 1=no DEBUG, 2=no INFO (default), 3=ERROR only
+tf_log_level: 2
+
 # Logging
 verbose: true
+
+# Progress tracking: print step-by-step progress during filter run
+show_progress: true
 
 # Hydra configuration - use custom output_dir instead of timestamped dirs
 hydra:

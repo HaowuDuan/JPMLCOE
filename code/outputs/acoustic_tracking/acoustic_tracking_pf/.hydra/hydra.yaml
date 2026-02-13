@@ -113,11 +113,11 @@ hydra:
     - hydra.mode=RUN
     task:
     - device=auto
-    - experiment=acoustic_tracking/acoustic_tracking_pf_1e4
+    - experiment=acoustic_tracking/acoustic_tracking_pf
   job:
     name: run_experiment
     chdir: null
-    override_dirname: device=auto,experiment=acoustic_tracking/acoustic_tracking_pf_1e4
+    override_dirname: device=auto,experiment=acoustic_tracking/acoustic_tracking_pf
     id: ???
     num: ???
     config_name: config
@@ -144,7 +144,7 @@ hydra:
       provider: schema
     output_dir: /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/outputs/acoustic_tracking/acoustic_tracking_pf
     choices:
-      experiment: acoustic_tracking/acoustic_tracking_pf_1e4
+      experiment: acoustic_tracking/acoustic_tracking_pf
       filter: particle
       model: acoustic_tracking_full
       hydra/env: default

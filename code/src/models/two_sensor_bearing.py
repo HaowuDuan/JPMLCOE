@@ -58,7 +58,8 @@ class TwoSensorBearingOnlyModel(StateSpaceModel):
         mu_0: Optional[np.ndarray] = None,
         Sigma_0: Optional[np.ndarray] = None,
         sensor_positions: Optional[np.ndarray] = None,
-        sigma_bearing: float = 0.2
+        sigma_bearing: float = 0.2,
+        dtype=tf.float32
     ):
         """
         Initialize Two-Sensor Bearing-Only Model.
@@ -70,6 +71,9 @@ class TwoSensorBearingOnlyModel(StateSpaceModel):
                             Default: [[3.5, 0.0], [-3.5, 0.0]]
             sigma_bearing: Bearing measurement noise std (radians). Default: 0.2
         """
+        self.dtype = dtype
+        self.np_dtype = np.float64 if dtype == tf.float64 else np.float32
+
         if sigma_bearing <= 0:
             raise ValueError(f"sigma_bearing must be positive, got {sigma_bearing}")
 
@@ -97,21 +101,21 @@ class TwoSensorBearingOnlyModel(StateSpaceModel):
             raise ValueError(f"sensor_positions must be (2, 2), got {sensor_positions_np.shape}")
 
         # Convert to TensorFlow
-        self.mu_0 = tf.constant(mu_0_np, dtype=tf.float32)
-        self.Sigma_0 = tf.constant(Sigma_0_np, dtype=tf.float32)
-        self.sensor_positions = tf.constant(sensor_positions_np, dtype=tf.float32)
+        self.mu_0 = tf.constant(mu_0_np, dtype=self.dtype)
+        self.Sigma_0 = tf.constant(Sigma_0_np, dtype=self.dtype)
+        self.sensor_positions = tf.constant(sensor_positions_np, dtype=self.dtype)
 
         # Observation noise parameters
         self.sigma_bearing = sigma_bearing
         R_np = np.diag([sigma_bearing ** 2, sigma_bearing ** 2])
-        self.R = tf.constant(R_np, dtype=tf.float32)
+        self.R = tf.constant(R_np, dtype=self.dtype)
 
         # State transition is identity (static target)
         F_np = np.eye(2)
-        self.F = tf.constant(F_np, dtype=tf.float32)
+        self.F = tf.constant(F_np, dtype=self.dtype)
 
         Q_np = np.zeros((2, 2))  # No process noise (static)
-        self.Q = tf.constant(Q_np, dtype=tf.float32)
+        self.Q = tf.constant(Q_np, dtype=self.dtype)
 
     @property
     def state_dim(self) -> int:
@@ -125,7 +129,7 @@ class TwoSensorBearingOnlyModel(StateSpaceModel):
     def sample_initial_state(self, seed: tf.Tensor) -> tf.Tensor:
         """Sample from initial state distribution: X_0 ~ N(mu_0, Sigma_0)."""
         L = tf.linalg.cholesky(self.Sigma_0)
-        z = tf.random.stateless_normal([2], seed=seed, dtype=tf.float32)
+        z = tf.random.stateless_normal([2], seed=seed, dtype=self.dtype)
         return self.mu_0 + tf.linalg.matvec(L, z)
 
     @tf.function
@@ -141,7 +145,7 @@ class TwoSensorBearingOnlyModel(StateSpaceModel):
         bearing_i = arctan2(y - y_{s,i}, x - x_{s,i}) + v_i
         where v_i ~ N(0, sigma_bearing^2)
         """
-        bearings = tf.TensorArray(dtype=tf.float32, size=2)
+        bearings = tf.TensorArray(dtype=self.dtype, size=2)
 
         for i in tf.range(2):
             # Relative position to sensor i
@@ -156,7 +160,7 @@ class TwoSensorBearingOnlyModel(StateSpaceModel):
         bearings_stack = bearings.stack()
 
         # Add noise
-        noise = tf.random.stateless_normal([2], seed=seed, dtype=tf.float32)
+        noise = tf.random.stateless_normal([2], seed=seed, dtype=self.dtype)
         noise = noise * self.sigma_bearing
 
         return bearings_stack + noise
@@ -183,7 +187,7 @@ class TwoSensorBearingOnlyModel(StateSpaceModel):
 
         bearing_i = arctan2(y - y_{s,i}, x - x_{s,i})
         """
-        bearings = tf.TensorArray(dtype=tf.float32, size=2)
+        bearings = tf.TensorArray(dtype=self.dtype, size=2)
 
         for i in tf.range(2):
             dx = x[0] - self.sensor_positions[i, 0]
@@ -214,7 +218,7 @@ class TwoSensorBearingOnlyModel(StateSpaceModel):
                 [[∂bearing_1/∂x, ∂bearing_1/∂y],
                  [∂bearing_2/∂x, ∂bearing_2/∂y]]
         """
-        H = tf.TensorArray(dtype=tf.float32, size=2)
+        H = tf.TensorArray(dtype=self.dtype, size=2)
 
         for i in tf.range(2):
             dx = x[0] - self.sensor_positions[i, 0]
@@ -378,6 +382,6 @@ class TwoSensorBearingOnlyModel(StateSpaceModel):
         """
         # Sample from N(mu_0, Sigma_0)
         L = tf.linalg.cholesky(self.Sigma_0)
-        z = tf.random.stateless_normal([n, 2], seed=seed, dtype=tf.float32)
+        z = tf.random.stateless_normal([n, 2], seed=seed, dtype=self.dtype)
 
         return self.mu_0 + tf.linalg.matmul(z, L, transpose_b=True)
