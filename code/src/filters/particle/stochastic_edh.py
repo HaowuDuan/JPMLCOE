@@ -1,500 +1,247 @@
 """
 Stochastic Exact Daum-Huang (EDH) particle flow filter.
 
-Implements the General Linear Log-Homotopy flow from:
-Dai, L., & Daum, F. E. (2021). Stiffness Mitigation in Stochastic Particle Flow Filters.
+Implements the stochastic particle flow from:
+  Dai & Daum (2021), "A New Parameterized Family of Stochastic Particle Flow Filters"
+  (arXiv:2103.09676)
+
+With optional stiffness-mitigating schedule from:
+  Dai & Daum (2021), "Stiffness Mitigation in Stochastic Particle Flow Filters"
+  (arXiv:2107.04672)
 """
-
-import numpy as np
-from typing import Tuple, Optional, Callable, List
-from scipy.linalg import sqrtm
-from .flow_base import FlowFilterBase
-from ..kalman.extended_kalman import ExtendedKalmanFilter
-from ..kalman.unscented_kalman import UnscentedKalmanFilter
-from scipy.integrate import solve_ivp
-from scipy.optimize import root_scalar
-from scipy.interpolate import CubicSpline
+import tensorflow as tf
+from .edh_flow import ExactDaumHuangFlow
+from ...utils.flow_params import compute_flow_params
+from ...utils.ode_solvers import euler_step
 
 
-
-class StochasticEDHFlow(FlowFilterBase):
+class StochasticEDHFlow(ExactDaumHuangFlow):
     """
-    Stochastic Particle Flow Filter using General Homotopy.
+    Stochastic EDH particle flow filter (TensorFlow).
 
-    Flow Equation:
-        dx = f(x, λ)dλ + √Q dw
-    
-    Drift f(x, λ) is derived from Theorem 2.1:
-        f(x) = K₁(λ) ∇log p₀(x) + K₂(λ) ∇log h(x)
+    Extends the deterministic Exact Flow with isotropic diffusion:
+        dx = [A(λ)x + b(λ)]dλ + √(q·I) dW_λ
 
-    Where:
-        K₁ = 0.5*Q - 0.5*β̇*P*Hᵀ*R⁻¹*H*P
-        K₂ = β̇*P
+    The drift includes a score correction (Corollary 2.1, Eq. 8):
+        f_stoch = f_det + (q/2)·∇log p(x,λ)
+    so A(λ) = A_det(λ) - (q/2)·Σ(λ)⁻¹ and b(λ) = b_det(λ) + (q/2)·Σ(λ)⁻¹·m(λ).
+    The posterior is identical for all Q (Theorem 3.1).
 
-    This class supports:
-    1. Phase 1: Linear Schedule (β(λ)=λ, β̇=1).
-    2. Phase 2: Optimal Stiffness-Mitigating Schedule (β(λ) from BVP).
+    Uses re-linearization at the flowing mean (same as edh_flow)
+    for stability with nonlinear observation models.
+
+    Optional stiffness mitigation (schedule_mu > 0): solves for an
+    optimal schedule β(λ) that minimizes the condition number of
+    M(β) = P₀⁻¹ + β·H^TR⁻¹H via a BVP shooting method
+    (arXiv:2107.04672, Section 3, Theorem 3.1).
     """
 
-    def __init__(
-        self,
-        model,
-        n_particles: int = 1000,
-        n_lambda_steps: int = 100,
-        diffusion_scale: float = 0.0,
-        schedule_func: Optional[Callable[[float], Tuple[float, float]]] = None,
-        filter_type: str = 'ekf',
-        use_ekf_covariance: bool = True,
-        use_optimal_schedule: bool = False,
-        n_threads: Optional[int] = None,
-        **kwargs
-    ):
+    def __init__(self, model, diffusion_scale: float = 0.001,
+                 schedule_mu: float = 0.0, **kwargs):
         """
         Args:
-            model: StateSpaceModel.
-            n_particles: Number of particles.
-            n_lambda_steps: Integration steps.
-            diffusion_scale: Scalar q for Q = q*I.
-            schedule_func: Function f(λ) -> (β, β_dot). 
-                           If None, defaults to linear: (λ, 1.0).
-            filter_type: 'ekf' or 'ukf' for global covariance guidance.
-            use_ekf_covariance: If True, use EKF/UKF predicted covariance instead of empirical.
-            use_optimal_schedule: If True, compute optimal stiffness-mitigating schedule.
+            model: State-space model.
+            diffusion_scale: Scalar q for isotropic diffusion Q = q·I.
+                0.0 = deterministic flow (equivalent to parent).
+            schedule_mu: Weight μ for stiffness mitigation optimal control.
+                0.0 = linear schedule β=λ (Remark 3.1).
+                >0  = solve BVP for optimal β(λ) (Theorem 3.1).
+            **kwargs: Passed to ExactDaumHuangFlow.
         """
-        super().__init__(model, n_particles, n_lambda_steps, integration_method='euler', n_threads=n_threads)
+        super().__init__(model, **kwargs)
         self.diffusion_scale = diffusion_scale
-        self.schedule_func = schedule_func
-        self.filter_type = filter_type
-        self.use_ekf_covariance = use_ekf_covariance
-        self.use_optimal_schedule = use_optimal_schedule
-        self.Q = None
-        self.global_filter = None
-        self.predicted_cov = None
-        self.eta_bar_0 = None 
+        self.schedule_mu = schedule_mu
+        self.seed_counter = 0
 
-    def initialize(self, random_state: Optional[np.random.Generator] = None):
-        """Initialize particles and global EKF/UKF for covariance guidance."""
-        super().initialize(random_state)
-        
-        # Compute empirical mean and covariance from particles
-        ensemble_mean = np.mean(self.particles, axis=0)
-        
-        if self.state_dim == 1:
-            initial_cov = np.var(self.particles).reshape(1, 1)
-        else:
-            initial_cov = np.cov(self.particles.T)
-        
-        # Initialize global filter for covariance guidance
-        if self.filter_type == 'ekf':
-            self.global_filter = ExtendedKalmanFilter(
-                self.model, mean_0=ensemble_mean, Sigma_0=initial_cov
-            )
-        elif self.filter_type == 'ukf':
-            self.global_filter = UnscentedKalmanFilter(
-                self.model, mean_0=ensemble_mean, Sigma_0=initial_cov
-            )
-        else:
-            raise ValueError(f"Unknown filter type: {self.filter_type}")
-        
-        self.global_filter.mean = ensemble_mean.copy()
-        self.global_filter.cov = initial_cov.copy()
-        self.predicted_cov = initial_cov.copy()
+    # ------------------------------------------------------------------
+    # Stiffness mitigation solver (arXiv:2107.04672, Section 3)
+    # ------------------------------------------------------------------
 
-    def predict(self):
+    def _schedule_drift(self, state: tf.Tensor,
+                        J_prior: tf.Tensor,
+                        J_meas: tf.Tensor) -> tf.Tensor:
         """
-        Prediction step with EKF/UKF covariance guidance.
-        
-        Updates global filter from particle ensemble, runs global filter prediction,
-        then propagates particles through state transition.
+        Drift for the schedule ODE system [β, β̇].
+
+        ODE (Eq. 26): β̈ = μ · ∂κ/∂β
+        State: [β, β̇]  →  drift: [β̇, μ · ∂κ/∂β]
+
+        ∂κ/∂β for nuclear norm κ(M) = tr(M)·tr(M⁻¹), M = J_prior + β·J_meas.
+        Correct calculus via Lemma A.1 (Remark 3.2):
+            ∂κ/∂β = tr(M')·tr(M⁻¹) - tr(M)·tr(M⁻¹ M' M⁻¹)
+        Note: Eq. 28 in the paper has a sign typo (+ instead of -).
         """
-        # Feedback: Update global filter mean from ensemble
-        ensemble_mean = np.mean(self.particles, axis=0)
-        self.global_filter.mean = ensemble_mean.copy()
-        
-        # Optionally update covariance to match ensemble (with blending)
-        if self.state_dim == 1:
-            ensemble_cov = np.var(self.particles).reshape(1, 1)
-        else:
-            ensemble_cov = np.cov(self.particles.T)
-        
-        alpha = 0.5  # Blend factor
-        self.global_filter.cov = alpha * ensemble_cov + (1 - alpha) * self.global_filter.cov
-        
-        # Run global filter prediction to get P_{k|k-1}
-        self.global_filter.predict()
-        self.predicted_cov = self.global_filter.cov.copy()
-        
-        # Propagate particles through state transition (from base class)
-        super().predict()
+        beta = state[0]
+        beta_dot = state[1]
 
-    def _get_schedule_values(self, lambda_val: float) -> Tuple[float, float]:
-        """Returns β(λ) and β̇(λ)."""
-        if self.schedule_func is None:
-            # Linear schedule: beta = lambda, beta_dot = 1
-            return lambda_val, 1.0
-        return self.schedule_func(lambda_val)
+        M = J_prior + beta * J_meas
+        M_inv = tf.linalg.inv(M)
+        dkappa = (tf.linalg.trace(J_meas) * tf.linalg.trace(M_inv)
+                  - tf.linalg.trace(M) * tf.linalg.trace(
+                      M_inv @ J_meas @ M_inv))
 
-    def _compute_jacobian(self, x: np.ndarray) -> np.ndarray:
-        """Compute Jacobian H = ∂h/∂x using model's analytical Jacobian."""
-        return self.model.observation_jacobian(x)
+        return tf.stack([beta_dot, self.schedule_mu * dkappa])
 
-    def _compute_covariance(self, particles: np.ndarray) -> np.ndarray:
-        """Compute empirical covariance P from given particles."""
-        mean = np.mean(particles, axis=0)
-        diff = particles - mean
-        P = (diff.T @ diff) / (self.n_particles - 1)
-        # Regularization for numerical stability
-        return P + np.eye(self.state_dim) * 1e-9
+    def _shoot(self, u0: float, J_prior: tf.Tensor,
+               J_meas: tf.Tensor, n_steps: int = 500) -> float:
+        """Integrate schedule ODE from λ=0 to λ=1, return β(1)."""
+        state = tf.constant([0.0, u0], dtype=tf.float32)
+        dlam = tf.constant(1.0 / n_steps, dtype=tf.float32)
+        for _ in range(n_steps):
+            state = euler_step(state, self._schedule_drift,
+                               dlam, J_prior, J_meas)
+        return float(state[0])
 
-    def _compute_drift_coefficients(
-        self,
-        eta_bar: np.ndarray,
-        P: np.ndarray,
-        observation: np.ndarray,
-        lambda_val: float
-    ) -> Tuple[np.ndarray, np.ndarray]:
+    def _compute_optimal_schedule(self, P: tf.Tensor,
+                                  R_inv: tf.Tensor
+                                  ) -> tuple[tf.Tensor, tf.Tensor]:
         """
-        Compute drift A(λ) and b(λ) using FULL Hessians from Theorem 2.1.
-        
-        Paper formulas (for linear schedule β=λ):
-        K₁ = 0.5Q + 0.5(∇²log p)⁻¹(∇²log h)(∇²log p)⁻¹
-        K₂ = -(∇²log p)⁻¹
-        
-        Full ∇²log h includes observation Hessian term when available.
-        """
-        # 1. Schedule Parameters
-        beta, beta_dot = self._get_schedule_values(lambda_val)
-        
-        # 2. Matrices & Inverses
-        H = self._compute_jacobian(eta_bar)
-        R = self.model.observation_noise_cov
-        Q = np.eye(self.state_dim) * self.diffusion_scale
-        
-        try:
-            P_inv = np.linalg.inv(P)
-            R_inv = np.linalg.inv(R)
-        except np.linalg.LinAlgError:
-            P_inv = np.linalg.pinv(P)
-            R_inv = np.linalg.pinv(R)
+        Solve BVP β̈ = μ·∂κ/∂β, β(0)=0, β(1)=1 (Eqs. 26-27).
 
-        # 3. Compute FULL Hessian of log h
-        # ∇²log h = -HᵀR⁻¹H + Σᵢ [R⁻¹(y - h(x))]ᵢ · (∂²hᵢ/∂x²)
-        h_bar = self.model.observation_function(eta_bar)
-        innovation = observation - h_bar
-        weighted_innovation = R_inv @ innovation  # R⁻¹(y - h(x))
-        
-        # First term: -HᵀR⁻¹H (standard linearization)
-        hess_log_h = -H.T @ R_inv @ H
-        
-        # Second term: observation Hessian contribution (if available)
-        if hasattr(self.model, 'observation_hessian'):
-            # obs_hessian shape: (obs_dim, state_dim, state_dim)
-            obs_hessian = self.model.observation_hessian(eta_bar)
-            for i in range(self.obs_dim):
-                hess_log_h += weighted_innovation[i] * obs_hessian[i]
-        
-        # 4. Hessian of log p (Gaussian approximation - no analytical prior)
-        hess_log_p = -P_inv
-        
-        # 5. Compute K1 and K2 using paper formulas
-        # (∇²log p)⁻¹ = (-P⁻¹)⁻¹ = -P
-        inv_hess_log_p = -P
-        
-        # K₁ = 0.5Q + 0.5(∇²log p)⁻¹(∇²log h)(∇²log p)⁻¹
-        K1 = 0.5 * Q + 0.5 * (inv_hess_log_p @ hess_log_h @ inv_hess_log_p)
-        
-        # K₂ = -(∇²log p)⁻¹ = P
-        K2 = -inv_hess_log_p  # = P
-        
-        # 6. Linearize Drift f(x) = K₁∇log p + K₂∇log h
-        # A = K₁(∇²log p) + K₂(∇²log h)
-        A = K1 @ hess_log_p + K2 @ hess_log_h
+        Uses bisection shooting (Section 4) to find β̇(0) = u₀,
+        then integrates to record β at each cumulative λ step point.
 
-        # b = f(x̄) - Ax̄
-        # ∇log p(x̄) = -P⁻¹(x̄ - μ₀) where μ₀ is predicted mean (Gaussian prior)
-        grad_log_p = -P_inv @ (eta_bar - self.eta_bar_0)
-        # ∇log h(x̄) = H^T R^{-1}(y - h(x̄))
-        grad_log_h = H.T @ R_inv @ innovation
+        With the optimal schedule, the flow uses β as the homotopy
+        parameter and dβ as the Euler step size. This is equivalent
+        to the reparameterization: f_opt(λ) = β̇(λ)·f_exact(β(λ)),
+        so dx = f_exact(β)·dβ + √q·dW_λ.
 
-        drift_at_mean = K1 @ grad_log_p + K2 @ grad_log_h
-        b = drift_at_mean - A @ eta_bar
-
-        return A, b
-
-    def update(self, y: np.ndarray):
-        """
-        Execute the particle flow from λ=0 to λ=1.
-
-        Uses EKF/UKF predicted covariance for flow guidance when use_ekf_covariance=True.
-        Computes optimal stiffness-mitigating schedule when use_optimal_schedule=True.
-        """
-        lambdas = np.linspace(0, 1, self.n_lambda_steps + 1)
-        d_lambda = 1.0 / self.n_lambda_steps
-
-        particles_flow = self.particles.copy()
-
-        # Store predicted mean for Gaussian prior reference
-        self.eta_bar_0 = np.mean(particles_flow, axis=0)
-
-        # Initialize Diffusion for integration
-        self.Q = np.eye(self.state_dim) * self.diffusion_scale
-        
-        # Compute optimal schedule if requested
-        optimal_schedule_func = None
-        if self.use_optimal_schedule:
-            eta_bar_init = np.mean(particles_flow, axis=0)
-            if self.use_ekf_covariance and self.predicted_cov is not None:
-                P_init = self.predicted_cov
-            else:
-                P_init = self._compute_covariance(particles_flow)
-            
-            H_init = self._compute_jacobian(eta_bar_init)
-            R = self.model.observation_noise_cov
-            
-            # Use StiffnessMitigationSolver to compute optimal schedule
-            solver = StiffnessMitigationSolver(P_init, H_init, R)
-            optimal_schedule_func = solver.solve(mu=1.0)  # Default stiffness weight
-
-        for k in range(self.n_lambda_steps):
-            lambda_curr = lambdas[k]
-            
-            # 1. Update Particle Statistics from FLOWING particles
-            eta_bar = np.mean(particles_flow, axis=0)
-            
-            # Use EKF covariance (stable over time) or empirical covariance
-            if self.use_ekf_covariance and self.predicted_cov is not None:
-                P = self.predicted_cov
-            else:
-                P = self._compute_covariance(particles_flow)
-            
-            # 2. Compute Drift A(λ), b(λ) with appropriate schedule
-            if optimal_schedule_func is not None:
-                # Temporarily set schedule for this update
-                old_schedule = self.schedule_func
-                self.schedule_func = optimal_schedule_func
-                A, b = self._compute_drift_coefficients(eta_bar, P, y, lambda_curr)
-                self.schedule_func = old_schedule
-            else:
-                A, b = self._compute_drift_coefficients(eta_bar, P, y, lambda_curr)
-            
-            # 3. Euler-Maruyama Integration
-            # dx = (Ax + b)dλ + √Q dw
-            
-            drift = particles_flow @ A.T + b
-            
-            if self.diffusion_scale > 0:
-                noise = np.random.normal(0, np.sqrt(d_lambda), size=particles_flow.shape)
-                # Assuming isotropic Q = qI, sqrt(Q) = sqrt(q)I
-                diffusion = noise * np.sqrt(self.diffusion_scale)
-            else:
-                diffusion = 0.0
-            
-            particles_flow += drift * d_lambda + diffusion
-
-        self.particles = particles_flow
-        
-        # Feedback: Update global filter mean from ensemble and run update
-        ensemble_mean = np.mean(self.particles, axis=0)
-        self.global_filter.mean = ensemble_mean.copy()
-        self.global_filter.update(y)
-
-
-"""
-Optimal Schedule Solver for Stiffness Mitigation.
-
-Implements Section 3 of:
-Dai, L., & Daum, F. E. (2021). Stiffness Mitigation in Stochastic Particle Flow Filters.
-arXiv:2107.04672
-"""
-
-
-class StiffnessMitigationSolver:
-    """
-    Solves for the optimal stiffness-mitigating schedule β(λ) for Particle Flow Filters.
-    
-    The problem minimizes the cost functional:
-        J = ∫[0,1] [0.5 * u² + μ * κ(M)] dλ
-    
-    Leading to the Euler-Lagrange equation:
-        d²β/dλ² = μ * ∂κ(M)/∂β
-        
-    Where M is defined (with α + β = 1 normalization):
-        M(β) = P₀⁻¹ + β * (H^T R⁻¹ H)
-    """
-
-    def __init__(self, P_prior: np.ndarray, H: np.ndarray, R: np.ndarray):
-        """
-        Initialize with system matrices.
-        
-        Args:
-            P_prior: Prior covariance P₀.
-            H: Observation Jacobian (linearized at prior mean).
-            R: Observation noise covariance.
-        """
-        self.dim = P_prior.shape[0]
-        
-        # Precompute Information Matrices
-        # J_prior = -∇²log p₀ = P₀⁻¹
-        try:
-            self.J_prior = np.linalg.inv(P_prior)
-            R_inv = np.linalg.inv(R)
-        except np.linalg.LinAlgError:
-            # Fallback to pseudo-inverse for singular matrices
-            self.J_prior = np.linalg.pinv(P_prior)
-            R_inv = np.linalg.pinv(R)
-            
-        # J_meas = -∇²log h = H^T R⁻¹ H
-        self.J_meas = H.T @ R_inv @ H
-        
-        # Cache for derivative computations to speed up ODE solver
-        self._cache = {}
-
-    def _compute_M(self, beta: float) -> np.ndarray:
-        """
-        Compute M(β) = J_prior + β * J_meas.
-        """
-        return self.J_prior + beta * self.J_meas
-
-    def _condition_number_derivative_nuclear(self, beta: float) -> float:
-        """
-        Computes ∂κ/∂β for the Nuclear Norm (Trace Norm) condition number.
-        
-        Math Derivation:
-            κ(M) = tr(M) * tr(M⁻¹)
-            ∂κ/∂β = tr(M')tr(M⁻¹) + tr(M)tr((M⁻¹)')
-            
-        Using identity ∂(M⁻¹)/∂β = -M⁻¹ M' M⁻¹:
-            ∂κ/∂β = tr(M')tr(M⁻¹) - tr(M)tr(M⁻¹ M' M⁻¹)
-        
-        NOTE: This derivation yields a MINUS sign between terms. Equation (28) in the 
-        paper implies a PLUS sign, which appears to be a typo resulting from dropping 
-        the negative sign in the inverse derivative. We use the correct calculus here.
-        
-        Args:
-            beta: Homotopy parameter β ∈ [0,1]
-            
         Returns:
-            Derivative ∂κ/∂β
+            beta_values:  TF tensor, shape (n_lambda_steps,), β at each cumulative λ
+            dbeta_values: TF tensor, shape (n_lambda_steps,), dβ per step
         """
-        # Clip beta to ensure stability during intermediate solver steps
-        beta = np.clip(beta, 0.0, 1.0)
-        
-        if beta in self._cache:
-            return self._cache[beta]
+        H_tf = self.model.observation_jacobian(self.eta_bar_0)
+        J_prior = tf.linalg.inv(P)
+        J_meas = tf.transpose(H_tf) @ R_inv @ H_tf
 
-        M = self._compute_M(beta)
-        
-        try:
-            M_inv = np.linalg.inv(M)
-        except np.linalg.LinAlgError:
-            M_inv = np.linalg.pinv(M)
+        # --- Bisection to find u₀ (Section 4) ---
+        u_lo, u_hi = 0.1, 20.0
 
-        # ∂M/∂β = J_meas
-        dM_dbeta = self.J_meas
-        
-        # Compute scalar traces
-        tr_M = np.trace(M)
-        tr_M_inv = np.trace(M_inv)
-        tr_dM = np.trace(dM_dbeta)
-        
-        # tr(M⁻¹ * dM * M⁻¹) = tr(M⁻² * dM)
-        term_quad = np.trace(M_inv @ dM_dbeta @ M_inv)
-        
-        # Correct calculus: tr(M')tr(M⁻¹) - tr(M)tr(M⁻² M')
-        dkappa_dbeta = tr_dM * tr_M_inv - tr_M * term_quad
-        
-        self._cache[beta] = dkappa_dbeta
-        return dkappa_dbeta
+        # Widen bracket if needed
+        if self._shoot(u_lo, J_prior, J_meas) > 1.0:
+            u_lo = 0.01
+        if self._shoot(u_hi, J_prior, J_meas) < 1.0:
+            u_hi = 50.0
 
-    def _ode_dynamics(self, lam, y, mu):
+        # Verify bracket contains root
+        err_lo = self._shoot(u_lo, J_prior, J_meas) - 1.0
+        err_hi = self._shoot(u_hi, J_prior, J_meas) - 1.0
+        if err_lo * err_hi > 0:
+            # Bracket invalid — fall back to linear schedule β = λ
+            return tf.cumsum(self.lambda_steps), self.lambda_steps
+
+        for _ in range(40):
+            u_mid = (u_lo + u_hi) / 2.0
+            if self._shoot(u_mid, J_prior, J_meas) < 1.0:
+                u_lo = u_mid
+            else:
+                u_hi = u_mid
+
+        optimal_u0 = (u_lo + u_hi) / 2.0
+
+        # --- Record β at each cumulative λ step point ---
+        state = tf.constant([0.0, optimal_u0], dtype=tf.float32)
+        beta_values = []
+
+        for i in range(self.n_lambda_steps):
+            state = euler_step(state, self._schedule_drift,
+                               self.lambda_steps[i], J_prior, J_meas)
+            beta_values.append(state[0])
+
+        beta_tf = tf.stack(beta_values)
+        dbeta_tf = beta_tf - tf.concat([[0.0], beta_tf[:-1]], axis=0)
+        return beta_tf, dbeta_tf
+
+    # ------------------------------------------------------------------
+    # Main filter update
+    # ------------------------------------------------------------------
+
+    def update(self, y: tf.Tensor):
         """
-        System dynamics for the BVP.
-        State: y = [β, β']
-        Returns: [β', β''] = [β', μ * ∂κ/∂β]
-        """
-        beta, beta_dot = y
-        beta_double_dot = mu * self._condition_number_derivative_nuclear(beta)
-        return [beta_dot, beta_double_dot]
+        Stochastic flow from λ=0 to λ=1.
 
-    def solve(self, mu: float = 0.2, n_steps: int = 100) -> Callable[[float], Tuple[float, float]]:
+        Same as ExactDaumHuangFlow.update() except:
+        1. H is fixed at η̄_0 (no re-linearization)
+        2. Drift includes score correction: f = f_det + (q/2)∇log p
+           (Theorem 2.1, Corollary 2.1, arXiv:2103.09676)
+        3. Euler-Maruyama integration (adds √q·dW noise)
+        4. Optional optimal schedule β(λ) for stiffness mitigation
         """
-        Solve the Two-Point Boundary Value Problem (TPBVP) using the Shooting Method.
-        
-        Boundary conditions:
-            β(0) = 0
-            β(1) = 1
-            
-        Args:
-            mu: Weight parameter μ ≥ 0.
-            n_steps: Number of points for the output spline.
-            
-        Returns:
-            schedule_func: A function that takes λ and returns (β, dβ/dλ)
-        """
-        # Remark 3.1: If μ ≈ 0, optimal solution is straight line β = λ
-        if mu <= 1e-8:
-            return lambda lam: (lam, 1.0)
+        # --- Setup (all TF tensors, no numpy conversions) ---
+        observation = y  # Already TF tensor from flow_base.filter()
+        P = self.predicted_cov  # Already TF tensor from predict()
+        R = tf.constant(self.model.observation_noise_cov, dtype=tf.float32)
+        eta_bar_0 = self.eta_bar_0  # Already TF tensor from predict()
+        R_inv = tf.linalg.inv(R)
+        particles_flow = self.particles.value()
 
-        # Reset cache for new solve
-        self._cache = {}
+        # --- Precompute score correction quantities (constant over λ) ---
+        # Score correction (Corollary 2.1, Eq. 8):
+        #   A = A_det - (q/2)·Σ(λ)⁻¹
+        #   b = b_det + (q/2)·Σ(λ)⁻¹·m(λ)
+        # where Σ(λ)⁻¹ = P⁻¹ + λ·Hᵀ R⁻¹ H  (precision)
+        # and   Σ(λ)⁻¹·m(λ) = P⁻¹·η̄₀ + λ·Hᵀ R⁻¹·y  (info vector)
+        q = self.diffusion_scale
+        if q > 0:
+            H_tf = self.model.observation_jacobian(eta_bar_0)
+            P_inv = tf.linalg.inv(P)
+            H_T_R_inv_H = tf.transpose(H_tf) @ R_inv @ H_tf
+            P_inv_eta = tf.linalg.matvec(P_inv, eta_bar_0)
+            H_T_R_inv_y = tf.linalg.matvec(
+                tf.transpose(H_tf) @ R_inv, observation)
 
-        def boundary_error(u0: float) -> float:
-            """
-            Shooting function: Returns error (β(1) - 1) for initial velocity u₀.
-            """
-            y0 = [0.0, u0]  # β(0)=0, β'(0)=u0
-            
-            sol = solve_ivp(
-                fun=lambda t, y: self._ode_dynamics(t, y, mu),
-                t_span=(0, 1),
-                y0=y0,
-                method='RK45',
-                rtol=1e-6,
-                atol=1e-8
+        # --- Compute optimal schedule if μ > 0 ---
+        if self.schedule_mu > 0:
+            beta_vals, dbeta_vals = self._compute_optimal_schedule(P, R_inv)
+
+        # --- Flow loop (all TF tensor operations) ---
+        lambda_val = tf.constant(0.0, dtype=tf.float32)
+        for i in range(self.n_lambda_steps):
+            d_lambda = self.lambda_steps[i]
+            lambda_val = lambda_val + d_lambda
+
+            # Schedule: β(λ) and effective step size dβ
+            if self.schedule_mu > 0:
+                homotopy_param = beta_vals[i]  # TF scalar from _compute_optimal_schedule
+                step_size = dbeta_vals[i]
+            else:
+                # Linear schedule: β = λ, dβ = dλ
+                homotopy_param = lambda_val
+                step_size = d_lambda
+
+            # Compute A_det(β), b_det(β) using Exact Flow formulas
+            # KEY: linearize at eta_bar_0 (fixed), NOT at flowing mean
+            A, b = compute_flow_params(
+                self.model, eta_bar_0, homotopy_param,
+                observation, P, R, R_inv, eta_bar_0, self.state_dim
             )
-            
-            # Return error at final time
-            return sol.y[0, -1] - 1.0
 
-        # Find optimal initial slope u₀
-        # We search in a reasonable bracket. If μ is large, u₀ might need to be higher.
-        try:
-            root_res = root_scalar(
-                boundary_error,
-                bracket=[0.1, 20.0],
-                method='brentq',
-                xtol=1e-5
-            )
-            optimal_u0 = root_res.root
-        except ValueError:
-            # Fallback if bracket is invalid (e.g. solution is outside [0.1, 20])
-            root_res = root_scalar(
-                boundary_error,
-                x0=1.0,
-                x1=1.5,
-                method='secant',
-                xtol=1e-5
-            )
-            optimal_u0 = root_res.root
+            # Score correction: compensate drift for diffusion
+            # (Theorem 2.1, Eq. 6; Corollary 2.1, Eq. 8)
+            if q > 0:
+                correction_A = P_inv + homotopy_param * H_T_R_inv_H
+                correction_b = P_inv_eta + homotopy_param * H_T_R_inv_y
+                A = A - (q / 2) * correction_A
+                b = b + (q / 2) * correction_b
 
-        # Generate final trajectory with optimal u₀
-        sol = solve_ivp(
-            fun=lambda t, y: self._ode_dynamics(t, y, mu),
-            t_span=(0, 1),
-            y0=[0.0, optimal_u0],
-            t_eval=np.linspace(0, 1, n_steps),
-            method='RK45'
-        )
-        
-        # Create spline for smooth interpolation
-        beta_spline = CubicSpline(sol.t, sol.y[0])
-        beta_dot_spline = beta_spline.derivative()
-        
-        def optimal_schedule(lam: float) -> Tuple[float, float]:
-            """
-            Returns (β, dβ/dλ) at given λ.
-            """
-            lam_cl = np.clip(lam, 0, 1)
-            return float(beta_spline(lam_cl)), float(beta_dot_spline(lam_cl))
-            
-        return optimal_schedule
+            # Euler step with effective step size dβ
+            particles_flow = euler_step(
+                particles_flow, self._compute_drift,
+                step_size, A, b
+            )
+
+            # SDE noise: √(q · dλ) · dW — uses dλ (not dβ), since
+            # Brownian motion is parameterized by λ
+            if q > 0:
+                seed = tf.constant([self.seed_counter, i], dtype=tf.int32)
+                noise = tf.random.stateless_normal(
+                    tf.shape(particles_flow), seed=seed,
+                    dtype=particles_flow.dtype
+                )
+                particles_flow = particles_flow + noise * tf.sqrt(q * d_lambda)
+
+        self.seed_counter += 1
+
+        # --- Finalize ---
+        self.particles.assign(particles_flow)
+        self.global_filter.update(y.numpy() if isinstance(y, tf.Tensor) else y)

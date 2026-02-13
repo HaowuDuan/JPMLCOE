@@ -28,13 +28,9 @@ Default Parameters (from paper):
     - Measurement noise: R = [[0.04, 0], [0, 0.04]]  (sigma = 0.2 rad)
 """
 
+import tensorflow as tf
 import numpy as np
 from typing import Optional
-try:
-    import tensorflow as tf
-    TF_AVAILABLE = True
-except ImportError:
-    TF_AVAILABLE = False
 
 from ..core.model_base import StateSpaceModel
 
@@ -78,44 +74,44 @@ class TwoSensorBearingOnlyModel(StateSpaceModel):
             raise ValueError(f"sigma_bearing must be positive, got {sigma_bearing}")
 
         # Default initial state (from paper)
-        self.mu_0 = mu_0 if mu_0 is not None else np.array([3.0, 5.0])
+        mu_0_np = mu_0 if mu_0 is not None else np.array([3.0, 5.0])
 
         # Default initial covariance (highly anisotropic - this creates stiffness!)
-        self.Sigma_0 = Sigma_0 if Sigma_0 is not None else np.array([
+        Sigma_0_np = Sigma_0 if Sigma_0 is not None else np.array([
             [1000.0, 0.0],
             [0.0, 2.0]
         ])
 
         # Default sensor positions (on x-axis, symmetric)
-        self.sensor_positions = sensor_positions if sensor_positions is not None else np.array([
+        sensor_positions_np = sensor_positions if sensor_positions is not None else np.array([
             [3.5, 0.0],   # Sensor 1
             [-3.5, 0.0]   # Sensor 2
         ])
 
         # Validate shapes
-        if self.mu_0.shape != (2,):
-            raise ValueError(f"mu_0 must be (2,), got {self.mu_0.shape}")
-        if self.Sigma_0.shape != (2, 2):
-            raise ValueError(f"Sigma_0 must be (2, 2), got {self.Sigma_0.shape}")
-        if self.sensor_positions.shape != (2, 2):
-            raise ValueError(f"sensor_positions must be (2, 2), got {self.sensor_positions.shape}")
+        if mu_0_np.shape != (2,):
+            raise ValueError(f"mu_0 must be (2,), got {mu_0_np.shape}")
+        if Sigma_0_np.shape != (2, 2):
+            raise ValueError(f"Sigma_0 must be (2, 2), got {Sigma_0_np.shape}")
+        if sensor_positions_np.shape != (2, 2):
+            raise ValueError(f"sensor_positions must be (2, 2), got {sensor_positions_np.shape}")
+
+        # Convert to TensorFlow
+        self.mu_0 = tf.constant(mu_0_np, dtype=tf.float32)
+        self.Sigma_0 = tf.constant(Sigma_0_np, dtype=tf.float32)
+        self.sensor_positions = tf.constant(sensor_positions_np, dtype=tf.float32)
 
         # Observation noise parameters
         self.sigma_bearing = sigma_bearing
-        self.R = np.diag([sigma_bearing ** 2, sigma_bearing ** 2])
+        R_np = np.diag([sigma_bearing ** 2, sigma_bearing ** 2])
+        self.R = tf.constant(R_np, dtype=tf.float32)
 
         # State transition is identity (static target)
-        self.F = np.eye(2)
-        self.Q = np.zeros((2, 2))  # No process noise (static)
+        F_np = np.eye(2)
+        self.F = tf.constant(F_np, dtype=tf.float32)
 
-        # TensorFlow constants
-        if TF_AVAILABLE:
-            self.mu_0_tf = tf.constant(self.mu_0, dtype=tf.float32)
-            self.Sigma_0_tf = tf.constant(self.Sigma_0, dtype=tf.float32)
-            self.sensor_positions_tf = tf.constant(self.sensor_positions, dtype=tf.float32)
-            self.R_tf = tf.constant(self.R, dtype=tf.float32)
-            self.F_tf = tf.constant(self.F, dtype=tf.float32)
-            self.Q_tf = tf.constant(self.Q, dtype=tf.float32)
+        Q_np = np.zeros((2, 2))  # No process noise (static)
+        self.Q = tf.constant(Q_np, dtype=tf.float32)
 
     @property
     def state_dim(self) -> int:
@@ -125,75 +121,85 @@ class TwoSensorBearingOnlyModel(StateSpaceModel):
     def obs_dim(self) -> int:
         return 2
 
-    # NumPy methods
-
-    def sample_initial_state(self, rng: np.random.Generator) -> np.ndarray:
+    @tf.function
+    def sample_initial_state(self, seed: tf.Tensor) -> tf.Tensor:
         """Sample from initial state distribution: X_0 ~ N(mu_0, Sigma_0)."""
-        return rng.multivariate_normal(self.mu_0, self.Sigma_0)
+        L = tf.linalg.cholesky(self.Sigma_0)
+        z = tf.random.stateless_normal([2], seed=seed, dtype=tf.float32)
+        return self.mu_0 + tf.linalg.matvec(L, z)
 
-    def sample_state_transition(self, x: np.ndarray, rng: np.random.Generator) -> np.ndarray:
-        """
-        Sample from state transition (static target).
+    @tf.function
+    def sample_state_transition(self, x: tf.Tensor, seed: tf.Tensor) -> tf.Tensor:
+        """Sample from state transition (static target): x' = x."""
+        return tf.identity(x)
 
-        For static estimation: x' = x (no dynamics, no noise)
-        """
-        return x.copy()
-
-    def sample_observation(self, x: np.ndarray, rng: np.random.Generator) -> np.ndarray:
+    @tf.function
+    def sample_observation(self, x: tf.Tensor, seed: tf.Tensor) -> tf.Tensor:
         """
         Sample observation: [bearing_1, bearing_2] with additive noise.
 
         bearing_i = arctan2(y - y_{s,i}, x - x_{s,i}) + v_i
         where v_i ~ N(0, sigma_bearing^2)
         """
-        bearings = np.zeros(2)
+        bearings = tf.TensorArray(dtype=tf.float32, size=2)
 
-        for i in range(2):
+        for i in tf.range(2):
             # Relative position to sensor i
             dx = x[0] - self.sensor_positions[i, 0]
             dy = x[1] - self.sensor_positions[i, 1]
 
             # True bearing
-            bearing_true = np.arctan2(dy, dx)
+            bearing_true = tf.atan2(dy, dx)
 
-            # Add noise
-            v_i = rng.normal(0, self.sigma_bearing)
-            bearings[i] = bearing_true + v_i
+            bearings = bearings.write(i, bearing_true)
 
-        return bearings
+        bearings_stack = bearings.stack()
 
-    def state_transition_mean(self, x: np.ndarray) -> np.ndarray:
+        # Add noise
+        noise = tf.random.stateless_normal([2], seed=seed, dtype=tf.float32)
+        noise = noise * self.sigma_bearing
+
+        return bearings_stack + noise
+
+    @tf.function
+    def state_transition_mean(self, x: tf.Tensor) -> tf.Tensor:
         """Mean of state transition: E[x' | x] = x (static)."""
-        return x.copy()
+        return tf.identity(x)
 
-    def state_transition_cov(self, x: np.ndarray) -> np.ndarray:
+    @tf.function
+    def state_transition_cov(self, x: tf.Tensor) -> tf.Tensor:
         """Covariance of state transition: Cov[x' | x] = 0 (no noise, static)."""
         return self.Q
 
-    def state_jacobian(self, x: np.ndarray) -> np.ndarray:
+    @tf.function
+    def state_jacobian(self, x: tf.Tensor) -> tf.Tensor:
         """Jacobian of state transition: ∂f/∂x = I (identity)."""
         return self.F
 
-    def observation_mean(self, x: np.ndarray) -> np.ndarray:
+    @tf.function
+    def observation_mean(self, x: tf.Tensor) -> tf.Tensor:
         """
         Mean of observation: E[y | x] = [bearing_1, bearing_2].
 
         bearing_i = arctan2(y - y_{s,i}, x - x_{s,i})
         """
-        bearings = np.zeros(2)
+        bearings = tf.TensorArray(dtype=tf.float32, size=2)
 
-        for i in range(2):
+        for i in tf.range(2):
             dx = x[0] - self.sensor_positions[i, 0]
             dy = x[1] - self.sensor_positions[i, 1]
-            bearings[i] = np.arctan2(dy, dx)
+            bearing = tf.atan2(dy, dx)
+            bearings = bearings.write(i, bearing)
 
-        return bearings
+        return bearings.stack()
 
-    def observation_cov(self, x: np.ndarray) -> np.ndarray:
+    @tf.function
+    def observation_cov(self, x: tf.Tensor) -> tf.Tensor:
         """Covariance of observation: Cov[y | x] = R (constant)."""
         return self.R
 
-    def observation_jacobian(self, x: np.ndarray) -> np.ndarray:
+    @tf.function
+    def observation_jacobian(self, x: tf.Tensor) -> tf.Tensor:
         """
         Jacobian of observation: ∂h/∂x where h(x) = [bearing_1, bearing_2].
 
@@ -208,148 +214,135 @@ class TwoSensorBearingOnlyModel(StateSpaceModel):
                 [[∂bearing_1/∂x, ∂bearing_1/∂y],
                  [∂bearing_2/∂x, ∂bearing_2/∂y]]
         """
-        H = np.zeros((2, 2))
+        H = tf.TensorArray(dtype=tf.float32, size=2)
 
-        for i in range(2):
+        for i in tf.range(2):
             dx = x[0] - self.sensor_positions[i, 0]
             dy = x[1] - self.sensor_positions[i, 1]
             r_squared = dx ** 2 + dy ** 2
 
             # Avoid division by zero
-            if r_squared < 1e-10:
-                # At sensor position, use unit direction
-                H[i, 0] = 0.0
-                H[i, 1] = 1.0
-            else:
-                H[i, 0] = -dy / r_squared  # ∂bearing_i/∂x
-                H[i, 1] = dx / r_squared   # ∂bearing_i/∂y
+            r_squared = tf.maximum(r_squared, 1e-10)
 
-        return H
+            row = tf.stack([
+                -dy / r_squared,  # ∂bearing_i/∂x
+                dx / r_squared    # ∂bearing_i/∂y
+            ])
+            H = H.write(i, row)
 
-    def log_observation_prob(self, y: np.ndarray, x: np.ndarray) -> float:
+        return H.stack()
+
+    @tf.function
+    def log_observation_prob(self, y: tf.Tensor, x: tf.Tensor) -> tf.Tensor:
         """
         Log probability of observation: log p(y | x).
 
         p(y | x) = N(y | h(x), R)
         where h(x) = [bearing_1, bearing_2]
         """
-        from ..utils.distributions import log_gaussian_prob
         mean = self.observation_mean(x)
 
         # Handle bearing wrapping for angular differences
         diff = y - mean
         # Wrap to [-π, π]
-        diff = np.arctan2(np.sin(diff), np.cos(diff))
+        diff = tf.atan2(tf.sin(diff), tf.cos(diff))
 
-        # Manual computation with wrapped differences
-        log_det = np.log(np.linalg.det(2 * np.pi * self.R))
-        R_inv = np.linalg.inv(self.R)
-        mahalanobis = diff.T @ R_inv @ diff
+        # Log probability computation
+        sign, logdet = tf.linalg.slogdet(2.0 * np.pi * self.R)
+        diff_col = tf.reshape(diff, [-1, 1])
+        mahalanobis = tf.reduce_sum(diff * tf.squeeze(tf.linalg.solve(self.R, diff_col), axis=-1))
 
-        return -0.5 * (log_det + mahalanobis)
+        return -0.5 * (logdet + mahalanobis)
 
-    def observation_function(self, x: np.ndarray) -> np.ndarray:
+    @tf.function
+    def observation_function(self, x: tf.Tensor) -> tf.Tensor:
         """Observation function h(x) for flow filters: returns [bearing_1, bearing_2]."""
         return self.observation_mean(x)
 
     @property
-    def observation_noise_cov(self) -> np.ndarray:
+    def observation_noise_cov(self) -> tf.Tensor:
         """Observation noise covariance R for flow filters."""
         return self.R
 
     @property
-    def process_noise_cov(self) -> np.ndarray:
+    def process_noise_cov(self) -> tf.Tensor:
         """Process noise covariance Q for flow filters (zero for static)."""
         return self.Q
 
-    # TensorFlow methods
+    # Batch methods for optimized particle filtering
 
-    if TF_AVAILABLE:
-        @tf.function
-        def sample_state_transition_tf(self, x_tf: tf.Tensor, seed: tf.Tensor) -> tf.Tensor:
-            """
-            TensorFlow version of state transition sampling (static).
+    @tf.function
+    def state_transition_mean_batch(self, particles: tf.Tensor) -> tf.Tensor:
+        """Vectorized state transition mean: identity for static target."""
+        return tf.identity(particles)
 
-            Args:
-                x_tf: Current state (2,) or (N, 2)
-                seed: Random seed (unused for static model)
+    @tf.function
+    def state_transition_cov_batch(self, particles: tf.Tensor) -> tf.Tensor:
+        """Q is constant - return single matrix."""
+        return self.Q
 
-            Returns:
-                Next state (same as current, static target)
-            """
-            return tf.identity(x_tf)
+    @tf.function
+    def log_observation_prob_batch(self, observation: tf.Tensor, particles: tf.Tensor) -> tf.Tensor:
+        """Vectorized two-sensor bearing log-prob for all particles."""
+        # Relative positions to sensor 1
+        dx1 = particles[:, 0] - self.sensor_positions[0, 0]  # (N,)
+        dy1 = particles[:, 1] - self.sensor_positions[0, 1]  # (N,)
 
-        @tf.function
-        def log_observation_prob_tf(self, y_tf: tf.Tensor, x_tf: tf.Tensor) -> tf.Tensor:
-            """
-            TensorFlow version of observation log-probability.
+        # Relative positions to sensor 2
+        dx2 = particles[:, 0] - self.sensor_positions[1, 0]  # (N,)
+        dy2 = particles[:, 1] - self.sensor_positions[1, 1]  # (N,)
 
-            Args:
-                y_tf: Observation (2,) - [bearing_1, bearing_2]
-                x_tf: State (2,) or (N, 2) - [x, y]
+        # Bearings from both sensors
+        bearing1 = tf.atan2(dy1, dx1)  # (N,)
+        bearing2 = tf.atan2(dy2, dx2)  # (N,)
 
-            Returns:
-                Log probability (scalar or (N,))
-            """
-            if len(x_tf.shape) == 1:
-                # Single state
-                bearings = []
-                for i in range(2):
-                    dx = x_tf[0] - self.sensor_positions_tf[i, 0]
-                    dy = x_tf[1] - self.sensor_positions_tf[i, 1]
-                    bearing = tf.atan2(dy, dx)
-                    bearings.append(bearing)
-                h_x = tf.stack(bearings)
+        # Means: (N, 2)
+        means = tf.stack([bearing1, bearing2], axis=1)
 
-                # Wrapped difference
-                diff = y_tf - h_x
-                diff = tf.atan2(tf.sin(diff), tf.cos(diff))
+        # diff: (N, 2)
+        diff = observation - means
 
-                # Log probability
-                sign, logdet = tf.linalg.slogdet(2.0 * np.pi * self.R_tf)
-                mahalanobis = tf.reduce_sum(diff * tf.linalg.solve(self.R_tf, diff))
+        # Cholesky of R (2x2 diagonal)
+        L_R = tf.linalg.cholesky(self.R)
 
-                return -0.5 * (logdet + mahalanobis)
-            else:
-                # Batch of states (N, 2)
-                N = tf.shape(x_tf)[0]
-                bearings1 = tf.atan2(
-                    x_tf[:, 1] - self.sensor_positions_tf[0, 1],
-                    x_tf[:, 0] - self.sensor_positions_tf[0, 0]
-                )
-                bearings2 = tf.atan2(
-                    x_tf[:, 1] - self.sensor_positions_tf[1, 1],
-                    x_tf[:, 0] - self.sensor_positions_tf[1, 0]
-                )
-                h_x = tf.stack([bearings1, bearings2], axis=1)  # (N, 2)
+        # Solve: y = L_R^{-1} @ diff.T → (2, N)
+        y = tf.linalg.triangular_solve(L_R, tf.transpose(diff), lower=True)
 
-                # Wrapped difference
-                diff = y_tf - h_x
-                diff = tf.atan2(tf.sin(diff), tf.cos(diff))
+        # Mahalanobis: (N,)
+        mahalanobis = tf.reduce_sum(y**2, axis=0)
 
-                # Log probability
-                sign, logdet = tf.linalg.slogdet(2.0 * np.pi * self.R_tf)
-                mahalanobis = tf.reduce_sum(
-                    diff * tf.linalg.matvec(tf.linalg.inv(self.R_tf), diff),
-                    axis=1
-                )
+        logdet = 2.0 * tf.reduce_sum(tf.math.log(tf.linalg.diag_part(L_R)))
 
-                return -0.5 * (logdet + mahalanobis)
+        return -0.5 * (2.0 * tf.math.log(2.0 * np.pi) + logdet + mahalanobis)
 
-        @tf.function
-        def sample_initial_state_batch_tf(self, n: int, seed: tf.Tensor) -> tf.Tensor:
-            """
-            Sample n initial states using TensorFlow.
+    @tf.function
+    def sample_state_transition_batch(self, particles: tf.Tensor, seed: tf.Tensor) -> tf.Tensor:
+        """
+        Vectorized state transition sampling (static).
 
-            Args:
-                n: Number of samples
-                seed: Random seed
+        Args:
+            particles: Current states (N, 2)
+            seed: Random seed (unused for static model)
 
-            Returns:
-                Initial states (n, 2)
-            """
-            # Sample from N(mu_0, Sigma_0)
-            L = tf.linalg.cholesky(self.Sigma_0_tf)
-            z = tf.random.stateless_normal([n, 2], seed=seed)
+        Returns:
+            Next states (N, 2) - same as input for static target
+        """
+        return tf.identity(particles)
 
-            return self.mu_0_tf + tf.linalg.matvec(L, z, transpose_a=True)
+    @tf.function
+    def sample_initial_state_batch(self, n: int, seed: tf.Tensor) -> tf.Tensor:
+        """
+        Sample n initial states.
+
+        Args:
+            n: Number of samples
+            seed: Random seed
+
+        Returns:
+            Initial states (n, 2)
+        """
+        # Sample from N(mu_0, Sigma_0)
+        L = tf.linalg.cholesky(self.Sigma_0)
+        z = tf.random.stateless_normal([n, 2], seed=seed, dtype=tf.float32)
+
+        return self.mu_0 + tf.linalg.matmul(z, L, transpose_b=True)

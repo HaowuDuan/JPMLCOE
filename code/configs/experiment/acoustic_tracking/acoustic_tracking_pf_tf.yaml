@@ -3,7 +3,7 @@
 # Experiment: Bootstrap Particle Filter (TensorFlow) on Acoustic Tracking Model
 
 defaults:
-  - override /model: acoustic_tracking
+  - override /model: acoustic_tracking_full
   - override /filter: particle_tf
 
 # Override settings

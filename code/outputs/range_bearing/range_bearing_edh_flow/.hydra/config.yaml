@@ -1,16 +1,16 @@
 model:
   _target_: src.models.range_bearing.RangeBearingModel
   sigma_range: 0.1
-  sigma_bearing: 0.01
+  sigma_bearing: 0.1
 filter:
   _target_: src.filters.particle.edh_flow.ExactDaumHuangFlow
   n_particles: 500
   n_lambda_steps: 29
   integration_method: euler
-  filter_type: ekf
   n_threads: null
 seed: 42
-T: 100
+T: 10
 output_dir: outputs/range_bearing/range_bearing_edh_flow
 plot: true
+device: auto
 verbose: true

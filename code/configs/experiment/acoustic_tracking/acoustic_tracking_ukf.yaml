@@ -3,7 +3,7 @@
 # Experiment: Unscented Kalman Filter on Acoustic Tracking Model
 
 defaults:
-  - override /model: acoustic_tracking
+  - override /model: acoustic_tracking_full
   - override /filter: ukf
 
 # Override settings

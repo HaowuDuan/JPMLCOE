@@ -8,5 +8,4 @@ n_threads: null  # null = use CPU count
 
 # Stiffness mitigation via optimal schedule (Dai & Daum 2021)
 use_optimal_schedule: true  # Compute optimal stiffness-mitigating schedule
-filter_type: 'ekf'  # Use EKF for covariance prediction
 use_ekf_covariance: true  # Use EKF covariance instead of empirical

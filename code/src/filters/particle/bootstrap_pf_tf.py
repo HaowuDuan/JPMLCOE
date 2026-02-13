@@ -139,7 +139,7 @@ class ParticleFilterTF(ParticleFilterBase):
         T = tf.shape(observations)[0]
 
         # Initialize
-        particles = self.model.sample_initial_state_batch_tf(self.n_particles, seed)
+        particles = self.model.sample_initial_state_batch(self.n_particles, seed)
         weights = tf.ones(self.n_particles, dtype=tf.float32) / tf.cast(self.n_particles, tf.float32)
 
         # Storage for results
@@ -162,10 +162,10 @@ class ParticleFilterTF(ParticleFilterBase):
             )
 
             # PREDICT: Propagate particles
-            particles = self.model.sample_state_transition_tf(particles, trans_seed)
+            particles = self.model.state_transition_batch(particles, trans_seed)
 
             # UPDATE: Compute weights
-            log_obs_probs = self.model.log_observation_prob_tf(observations[t], particles)
+            log_obs_probs = self.model.log_observation_prob_batch(observations[t], particles)
             log_weights = tf.math.log(weights + 1e-30) + log_obs_probs
 
             # Log-likelihood

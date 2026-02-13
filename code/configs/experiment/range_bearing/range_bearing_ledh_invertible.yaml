@@ -8,8 +8,16 @@ defaults:
   - override /filter: ledh_invertible
 
 # Override settings
-T: 100
+T: 10
 seed: 42
 plot: true
 output_dir: outputs/range_bearing/range_bearing_ledh_invertible
+
+
+
+
+
+
+
+
 

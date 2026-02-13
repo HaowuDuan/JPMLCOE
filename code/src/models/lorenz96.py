@@ -4,6 +4,7 @@ import numpy as np
 from typing import Optional
 
 from ..core.model_base import StateSpaceModel
+from ..utils.ode_solvers import rk4_step
 
 
 class Lorenz96Model(StateSpaceModel):
@@ -104,17 +105,6 @@ class Lorenz96Model(StateSpaceModel):
         # roll(-1) shifts left: x[i+1], roll(1) shifts right: x[i-1], roll(2): x[i-2]
         return (np.roll(x, -1) - np.roll(x, 2)) * np.roll(x, 1) - x + self.forcing
     
-    def _rk4_step(self, x: np.ndarray) -> np.ndarray:
-        """
-        4th-order Runge-Kutta integration step.
-        """
-        k1 = self._lorenz96_tendency(x)
-        k2 = self._lorenz96_tendency(x + 0.5 * self.dt * k1)
-        k3 = self._lorenz96_tendency(x + 0.5 * self.dt * k2)
-        k4 = self._lorenz96_tendency(x + self.dt * k3)
-        
-        return x + (self.dt / 6.0) * (k1 + 2*k2 + 2*k3 + k4)
-    
     def _get_spinup_state(self, rng: np.random.Generator) -> np.ndarray:
         """Get a state on the attractor via spinup."""
         if self._spinup_state is None:
@@ -122,7 +112,7 @@ class Lorenz96Model(StateSpaceModel):
             x = self.climatological_mean + rng.normal(0, 0.01, self._state_dim)
             # Integrate to reach attractor
             for _ in range(self.spinup_steps):
-                x = self._rk4_step(x)
+                x = rk4_step(x, self._lorenz96_tendency, self.dt)
             self._spinup_state = x
         return self._spinup_state.copy()
     
@@ -143,7 +133,7 @@ class Lorenz96Model(StateSpaceModel):
         """
         x_next = x.copy()
         for _ in range(self.obs_interval):
-            x_next = self._rk4_step(x_next)
+            x_next = rk4_step(x_next, self._lorenz96_tendency, self.dt)
             if self.process_noise_std > 0:
                 x_next += rng.normal(0, self.process_noise_std, self._state_dim)
             
@@ -163,7 +153,7 @@ class Lorenz96Model(StateSpaceModel):
         """Deterministic state transition: E[x' | x] = obs_interval RK4 steps."""
         x_next = x.copy()
         for _ in range(self.obs_interval):
-            x_next = self._rk4_step(x_next)
+            x_next = rk4_step(x_next, self._lorenz96_tendency, self.dt)
         return x_next
     
     def state_transition_cov(self, x: np.ndarray) -> np.ndarray:
@@ -178,13 +168,13 @@ class Lorenz96Model(StateSpaceModel):
         """
         eps = 1e-7
         n = self._state_dim
-        f0 = self._rk4_step(x)
+        f0 = rk4_step(x, self._lorenz96_tendency, self.dt)
         J = np.zeros((n, n))
         
         for j in range(n):
             x_pert = x.copy()
             x_pert[j] += eps
-            f_pert = self._rk4_step(x_pert)
+            f_pert = rk4_step(x_pert, self._lorenz96_tendency, self.dt)
             J[:, j] = (f_pert - f0) / eps
             
         return J
@@ -234,7 +224,37 @@ class Lorenz96Model(StateSpaceModel):
     def process_noise_cov(self) -> np.ndarray:
         """Process noise covariance Q for flow filters."""
         return self.Q
-    
+
+    # Batch methods for optimized particle filtering
+
+    def state_transition_mean_batch(self, particles: np.ndarray) -> np.ndarray:
+        """Vectorized state transition mean using RK4 integration."""
+        # Apply RK4 to each particle
+        return np.array([rk4_step(x, self._lorenz96_tendency, self.dt) for x in particles])
+
+    def state_transition_cov_batch(self, particles: np.ndarray) -> np.ndarray:
+        """Q is constant - return single matrix."""
+        return self.Q
+
+    def log_observation_prob_batch(self, observation: np.ndarray, particles: np.ndarray) -> np.ndarray:
+        """Vectorized observation log-prob for all particles."""
+        # Observed states: particles[:, self.observed_dims]
+        observed_states = particles[:, self.observed_dims]  # (N, obs_dim)
+
+        # diff: (N, obs_dim)
+        diff = observation - observed_states
+
+        # R is diagonal: sigma^2 * I
+        variance = self.observation_noise_std ** 2
+
+        # Mahalanobis: sum((diff/sigma)^2) → (N,)
+        mahalanobis = np.sum(diff**2, axis=1) / variance
+
+        # Log determinant for diagonal R
+        logdet = self.obs_dim * np.log(2 * np.pi * variance)
+
+        return -0.5 * (logdet + mahalanobis)
+
     def integrate_steps(self, x: np.ndarray, n_steps: int, rng: Optional[np.random.Generator] = None) -> np.ndarray:
         """
         Integrate multiple RK4 steps.
@@ -250,7 +270,7 @@ class Lorenz96Model(StateSpaceModel):
             State after n_steps integrations
         """
         for _ in range(n_steps):
-            x = self._rk4_step(x)
+            x = rk4_step(x, self._lorenz96_tendency, self.dt)
             if self.process_noise_std > 0 and rng is not None:
                 x += rng.normal(0, self.process_noise_std, self._state_dim)
         return x
@@ -274,7 +294,7 @@ class Lorenz96Model(StateSpaceModel):
         
         # Integrate to reach attractor
         for _ in range(n_steps):
-            x = self._rk4_step(x)
+            x = rk4_step(x, self._lorenz96_tendency, self.dt)
             
         return x
 

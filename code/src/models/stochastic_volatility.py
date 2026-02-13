@@ -151,6 +151,36 @@ class StochasticVolatilityModel(StateSpaceModel):
         """Process noise covariance Q for flow filters."""
         return np.array([[self.sigma ** 2]])
 
+    # Batch methods for optimized particle filtering
+
+    def state_transition_mean_batch(self, particles: np.ndarray) -> np.ndarray:
+        """Vectorized state transition mean: α·x."""
+        return self.alpha * particles
+
+    def state_transition_cov_batch(self, particles: np.ndarray) -> np.ndarray:
+        """Q is constant - return single matrix."""
+        return np.array([[self.sigma ** 2]])
+
+    def log_observation_prob_batch(self, observation: np.ndarray, particles: np.ndarray) -> np.ndarray:
+        """Vectorized observation log-prob for all particles."""
+        # For stochastic volatility: y ~ N(0, β²·exp(x))
+        # This is state-dependent R, so we need per-particle computation
+        # However, we can still vectorize the operations
+
+        # Observation covariances for each particle: β²·exp(x)
+        obs_vars = (self.beta ** 2) * np.exp(particles[:, 0])  # (N,)
+
+        # y - 0 = y (observation mean is 0)
+        diff_squared = observation[0] ** 2  # scalar
+
+        # Mahalanobis: (y - 0)² / σ²(x) for each particle
+        mahalanobis = diff_squared / obs_vars  # (N,)
+
+        # Log determinant: log(2π·σ²(x))
+        logdet = np.log(2 * np.pi * obs_vars)  # (N,)
+
+        return -0.5 * (logdet + mahalanobis)
+
     # TensorFlow methods
 
     if TF_AVAILABLE:

@@ -1,41 +1,54 @@
 """Utilities for data generation and model testing."""
 
 import numpy as np
+import tensorflow as tf
 from typing import Tuple, Optional
 from ..core.model_base import StateSpaceModel
+
+
+def _make_seed(rng: np.random.Generator) -> tf.Tensor:
+    """Create a TF stateless random seed from a numpy rng."""
+    return tf.constant(rng.integers(0, 2**31, size=2), dtype=tf.int32)
 
 
 def generate_data(
     model: StateSpaceModel,
     T: int = 500,
     rng: Optional[np.random.Generator] = None,
-    observe_initial: bool = True,
-    use_true_process_noise: bool = True
-) -> Tuple[np.ndarray, np.ndarray]:
+    use_true_process_noise: bool = True,
+    use_fixed_initial_state: bool = False
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Generate synthetic data from a state-space model.
 
+    Uses the standard filtering convention:
+        x_0 ~ p(x_0)                                   (initial state)
+        x_t = f(x_{t-1}) + process_noise,  t = 1..T    (state transitions)
+        y_t = h(x_t) + obs_noise,          t = 1..T    (observations)
+
+    All filters in this codebase follow predict-then-update, so observations
+    must correspond to states after the first transition (not the initial state).
+
     Args:
-        model: State-space model instance
-        T: Number of time steps
+        model: State-space model instance (TensorFlow-based)
+        T: Number of time steps (produces T transitions and T observations)
         rng: Optional numpy random generator for reproducibility
-        observe_initial: If True (default), observations[0] is at initial state.
-                        If False, observations[0] is after first transition.
-                        Use False for predict-then-update filters (e.g., kernel flow).
-        use_true_process_noise: If True and model has V_true, use V_true for data generation.
-                               This is important for paper reproduction where filters use
-                               larger process noise (V_filter) than the true data generation (V_true).
+        use_true_process_noise: If True and model has V_true, use V_true for
+            data generation. Important for paper reproduction where filters
+            use larger process noise (V_filter) than true generation (V_true).
+        use_fixed_initial_state: If True, use model.mu_0 as fixed initial state.
+            If False (default), sample from initial distribution.
 
     Returns:
-        Tuple of (true_states, observations) where:
-        - true_states: Array of shape (T, state_dim)
-        - observations: Array of shape (T, obs_dim)
+        Tuple of (initial_state, true_states, observations) where:
+        - initial_state: Array of shape (state_dim,) — x_0
+        - true_states: Array of shape (T, state_dim) — [x_1, ..., x_T]
+        - observations: Array of shape (T, obs_dim) — [y_1, ..., y_T]
     """
     if rng is None:
         rng = np.random.default_rng()
 
     # If model has V_true, temporarily switch Q for data generation
-    # Only do this if model has Q attribute (some models like StochasticVolatilityModel don't)
     original_Q = None
     if hasattr(model, 'Q'):
         original_Q = model.Q
@@ -45,26 +58,28 @@ def generate_data(
     true_states = np.zeros((T, model.state_dim))
     observations = np.zeros((T, model.obs_dim))
 
-    if observe_initial:
-        # Original behavior: observations[0] at initial state
-        true_states[0] = model.sample_initial_state(rng)
-        observations[0] = model.sample_observation(true_states[0], rng)
-
-        for t in range(1, T):
-            true_states[t] = model.sample_state_transition(true_states[t-1], rng)
-            observations[t] = model.sample_observation(true_states[t], rng)
+    # Get initial state x_0 (fixed or sampled)
+    if use_fixed_initial_state:
+        if not hasattr(model, 'mu_0'):
+            raise ValueError("Model must have mu_0 attribute for fixed initial state")
+        initial_state = np.asarray(model.mu_0, dtype=np.float64)
     else:
-        # New behavior: observations[0] after first transition
-        # For predict-then-update filters
-        current_state = model.sample_initial_state(rng)
+        initial_state = np.asarray(
+            model.sample_initial_state(_make_seed(rng)), dtype=np.float64
+        )
 
-        for t in range(T):
-            current_state = model.sample_state_transition(current_state, rng)
-            true_states[t] = current_state
-            observations[t] = model.sample_observation(current_state, rng)
+    # Generate x_1, ..., x_T and y_1, ..., y_T
+    current_state = tf.constant(initial_state, dtype=tf.float32)
+
+    for t in range(T):
+        current_state = model.sample_state_transition(current_state, _make_seed(rng))
+        true_states[t] = np.asarray(current_state)
+        observations[t] = np.asarray(
+            model.sample_observation(current_state, _make_seed(rng))
+        )
 
     # Restore original Q
     if original_Q is not None and hasattr(model, 'V_true'):
         model.Q = original_Q
 
-    return true_states, observations
+    return initial_state, true_states, observations

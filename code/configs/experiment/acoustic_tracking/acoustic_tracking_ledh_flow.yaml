@@ -3,7 +3,7 @@
 # Experiment: Local Exact Daum-Huang Flow on Acoustic Tracking Model
 
 defaults:
-  - override /model: acoustic_tracking
+  - override /model: acoustic_tracking_full
   - override /filter: ledh_flow
 
 # Override settings

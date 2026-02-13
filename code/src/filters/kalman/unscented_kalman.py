@@ -1,7 +1,8 @@
 """Unscented Kalman Filter for nonlinear systems."""
 
+import tensorflow as tf
 import numpy as np
-from typing import Optional
+from typing import Optional, Tuple
 from ...core.filter_base import Filter
 from ...core.types import FilterResult
 from ...core.model_base import StateSpaceModel
@@ -30,10 +31,17 @@ class UnscentedKalmanFilter(Filter):
     - κ: secondary scaling parameter (default 0.0)
     """
 
-    def __init__(self, model: StateSpaceModel, mean_0: np.ndarray = None,
-                 Sigma_0: np.ndarray = None, alpha: float = 1e-3,
-                 beta: float = 2.0, kappa: float = 0.0,
-                 sample_initial_mean: bool = True, random_seed: Optional[int] = None):
+    def __init__(
+        self,
+        model: StateSpaceModel,
+        mean_0: np.ndarray = None,
+        Sigma_0: np.ndarray = None,
+        alpha: float = 1e-3,
+        beta: float = 2.0,
+        kappa: float = 0.0,
+        sample_initial_mean: bool = True,
+        random_seed: Optional[int] = None
+    ):
         """
         Initialize the Unscented Kalman Filter.
 
@@ -64,36 +72,42 @@ class UnscentedKalmanFilter(Filter):
         W_c_0 = W_m_0 + (1 - alpha**2 + beta)
         W_i = 1.0 / (2 * (self.state_dim + self.lambda_))
 
-        self.weights_mean = np.concatenate([[W_m_0], np.full(2 * self.state_dim, W_i)])
-        self.weights_cov = np.concatenate([[W_c_0], np.full(2 * self.state_dim, W_i)])
+        weights_mean_np = np.concatenate([[W_m_0], np.full(2 * self.state_dim, W_i)])
+        weights_cov_np = np.concatenate([[W_c_0], np.full(2 * self.state_dim, W_i)])
+
+        self.weights_mean = tf.constant(weights_mean_np, dtype=tf.float32)
+        self.weights_cov = tf.constant(weights_cov_np, dtype=tf.float32)
 
         # Store initial state
         if sample_initial_mean:
             # Sample initial mean from model's distribution
             if not hasattr(self.model, 'sample_initial_state'):
                 raise ValueError("Model must have sample_initial_state method to use sample_initial_mean=True")
-            rng = np.random.default_rng(random_seed)
-            self.mean_0 = self.model.sample_initial_state(rng)
+            seed = tf.constant([random_seed if random_seed is not None else 0, 0], dtype=tf.int32)
+            mean_0_tf = self.model.sample_initial_state(seed)
+            self.mean_0 = tf.cast(mean_0_tf, tf.float32)
         elif mean_0 is None:
             # Try to use model's initial_state_mean property
             if hasattr(self.model, 'initial_state_mean'):
-                self.mean_0 = self.model.initial_state_mean.copy()
+                mean_0_val = self.model.initial_state_mean
+                self.mean_0 = tf.cast(mean_0_val, tf.float32) if isinstance(mean_0_val, tf.Tensor) else tf.constant(mean_0_val, dtype=tf.float32)
             else:
-                self.mean_0 = np.zeros(self.state_dim)
+                self.mean_0 = tf.zeros(self.state_dim, dtype=tf.float32)
         else:
-            self.mean_0 = mean_0.copy()
+            self.mean_0 = tf.constant(mean_0, dtype=tf.float32)
 
         if Sigma_0 is None:
             # Try to use model's initial_state_cov property
             if hasattr(self.model, 'initial_state_cov'):
-                self.Sigma_0 = self.model.initial_state_cov.copy()
+                Sigma_0_val = self.model.initial_state_cov
+                self.Sigma_0 = tf.cast(Sigma_0_val, tf.float32) if isinstance(Sigma_0_val, tf.Tensor) else tf.constant(Sigma_0_val, dtype=tf.float32)
             # Otherwise use stationary covariance if available
             elif hasattr(self.model, 'stationary_var'):
-                self.Sigma_0 = np.eye(self.state_dim) * self.model.stationary_var
+                self.Sigma_0 = tf.eye(self.state_dim, dtype=tf.float32) * self.model.stationary_var
             else:
-                self.Sigma_0 = np.eye(self.state_dim)
+                self.Sigma_0 = tf.eye(self.state_dim, dtype=tf.float32)
         else:
-            self.Sigma_0 = Sigma_0.copy()
+            self.Sigma_0 = tf.constant(Sigma_0, dtype=tf.float32)
 
         # Filter state
         self.mean = None
@@ -101,10 +115,11 @@ class UnscentedKalmanFilter(Filter):
 
         # Storage
         self.log_likelihoods = []
-        
+
         self.reset()
 
-    def _compute_sigma_points(self, mean: np.ndarray, cov: np.ndarray) -> np.ndarray:
+    @tf.function(reduce_retracing=True)
+    def _compute_sigma_points(self, mean: tf.Tensor, cov: tf.Tensor) -> tf.Tensor:
         """
         Compute sigma points using the unscented transform.
 
@@ -113,106 +128,175 @@ class UnscentedKalmanFilter(Filter):
             cov: State covariance, shape (state_dim, state_dim)
 
         Returns:
-            Array of shape (2*state_dim + 1, state_dim) containing sigma points
+            Tensor of shape (2*state_dim + 1, state_dim) containing sigma points
         """
         n = self.state_dim
         lambda_ = self.lambda_
 
         # Compute matrix square root: sqrt((n + λ)·P)
-        # Use safe_cholesky which handles regularization
         sqrt_cov = safe_cholesky((n + lambda_) * cov)
 
-        # Initialize sigma points
-        sigma_points = np.zeros((2 * n + 1, n))
-        sigma_points[0] = mean
+        # Initialize sigma points using TensorArray
+        sigma_points = tf.TensorArray(dtype=tf.float32, size=2 * n + 1)
 
-        # Generate sigma points
-        for i in range(n):
-            sigma_points[i + 1] = mean + sqrt_cov[:, i]
-            sigma_points[i + n + 1] = mean - sqrt_cov[:, i]
+        # First sigma point is the mean
+        sigma_points = sigma_points.write(0, mean)
 
-        return sigma_points
+        # Generate positive and negative sigma points
+        for i in tf.range(n):
+            sigma_points = sigma_points.write(i + 1, mean + sqrt_cov[:, i])
+            sigma_points = sigma_points.write(i + n + 1, mean - sqrt_cov[:, i])
+
+        return sigma_points.stack()
 
     def reset(self):
         """Reset filter to initial state and clear history."""
-        self.mean = self.mean_0.copy()
-        self.cov = self.Sigma_0.copy()
+        self.mean = tf.Variable(self.mean_0, dtype=tf.float32)
+        self.cov = tf.Variable(self.Sigma_0, dtype=tf.float32)
         self.log_likelihoods = []
 
-    def predict(self):
-        """Prediction step using unscented transform."""
-        # Generate sigma points
-        sigma_points = self._compute_sigma_points(self.mean, self.cov)
+    @tf.function(reduce_retracing=True)
+    def _predict_step(self, mean: tf.Tensor, cov: tf.Tensor) -> Tuple[tf.Tensor, tf.Tensor]:
+        """
+        Prediction step using unscented transform.
 
-        # Propagate through state transition (deterministic part only)
-        # The noise will be added to the covariance separately
-        sigma_points_pred = np.array([
-            self.model.state_transition_mean(sp) for sp in sigma_points
-        ])
+        Args:
+            mean: Current mean estimate
+            cov: Current covariance estimate
+
+        Returns:
+            Tuple of (predicted_mean, predicted_cov)
+        """
+        # Generate sigma points
+        sigma_points = self._compute_sigma_points(mean, cov)
+
+        # Propagate through state transition
+        sigma_points_pred = tf.map_fn(
+            lambda sp: self.model.state_transition_mean(sp),
+            sigma_points,
+            dtype=tf.float32
+        )
 
         # Predict mean: weighted sum of propagated sigma points
-        self.mean = np.sum(self.weights_mean[:, np.newaxis] * sigma_points_pred, axis=0)
+        mean_pred = tf.reduce_sum(
+            tf.expand_dims(self.weights_mean, -1) * sigma_points_pred,
+            axis=0
+        )
 
         # Predict covariance: weighted sum of outer products
-        diff = sigma_points_pred - self.mean
-        self.cov = np.sum(
-            self.weights_cov[:, np.newaxis, np.newaxis] *
-            np.einsum('ij,ik->ijk', diff, diff),
+        diff = sigma_points_pred - mean_pred
+        cov_pred = tf.reduce_sum(
+            tf.expand_dims(tf.expand_dims(self.weights_cov, -1), -1) *
+            tf.einsum('ij,ik->ijk', diff, diff),
             axis=0
         )
 
         # Add process noise
-        Q = self.model.state_transition_cov(self.mean)
-        self.cov = self.cov + Q
-        self.cov = symmetrize(self.cov)
+        Q = self.model.state_transition_cov(mean_pred)
+        cov_pred = cov_pred + Q
+        cov_pred = symmetrize(cov_pred)
 
-    def update(self, observation: np.ndarray):
-        """Update step using unscented transform."""
+        return mean_pred, cov_pred
+
+    @tf.function(reduce_retracing=True)
+    def _update_step(
+        self,
+        mean: tf.Tensor,
+        cov: tf.Tensor,
+        observation: tf.Tensor
+    ) -> Tuple[tf.Tensor, tf.Tensor, tf.Tensor]:
+        """
+        Update step using unscented transform.
+
+        Args:
+            mean: Predicted mean
+            cov: Predicted covariance
+            observation: Observation vector
+
+        Returns:
+            Tuple of (updated_mean, updated_cov, log_likelihood)
+        """
         # Generate sigma points
-        sigma_points = self._compute_sigma_points(self.mean, self.cov)
+        sigma_points = self._compute_sigma_points(mean, cov)
 
         # Propagate through observation model
-        y_sigma = np.array([
-            self.model.observation_mean(sp) for sp in sigma_points
-        ])
+        y_sigma = tf.map_fn(
+            lambda sp: self.model.observation_mean(sp),
+            sigma_points,
+            dtype=tf.float32
+        )
 
         # Predicted observation mean
-        y_pred = np.sum(self.weights_mean[:, np.newaxis] * y_sigma, axis=0)
+        y_pred = tf.reduce_sum(
+            tf.expand_dims(self.weights_mean, -1) * y_sigma,
+            axis=0
+        )
 
         # Innovation covariance
         diff_y = y_sigma - y_pred
-        S = np.sum(
-            self.weights_cov[:, np.newaxis, np.newaxis] *
-            np.einsum('ij,ik->ijk', diff_y, diff_y),
+        S = tf.reduce_sum(
+            tf.expand_dims(tf.expand_dims(self.weights_cov, -1), -1) *
+            tf.einsum('ij,ik->ijk', diff_y, diff_y),
             axis=0
         )
 
         # Add observation noise
-        R = self.model.observation_cov(self.mean)
+        R = self.model.observation_cov(mean)
         S = S + R
 
         # Cross-covariance between state and observation
-        diff_x = sigma_points - self.mean
-        P_xy = np.sum(
-            self.weights_cov[:, np.newaxis, np.newaxis] *
-            np.einsum('ij,ik->ijk', diff_x, diff_y),
+        diff_x = sigma_points - mean
+        P_xy = tf.reduce_sum(
+            tf.expand_dims(tf.expand_dims(self.weights_cov, -1), -1) *
+            tf.einsum('ij,ik->ijk', diff_x, diff_y),
             axis=0
         )
 
         # Kalman gain
-        K = P_xy @ np.linalg.inv(S)
+        K = P_xy @ tf.linalg.inv(S)
 
         # Innovation
         innovation = observation - y_pred
 
         # Update mean and covariance
-        self.mean = self.mean + K @ innovation
-        self.cov = self.cov - K @ S @ K.T
-        self.cov = symmetrize(self.cov)
+        mean_updated = mean + tf.linalg.matvec(K, innovation)
+        cov_updated = cov - K @ S @ tf.transpose(K)
+        cov_updated = symmetrize(cov_updated)
 
         # Log-likelihood
-        log_lik = -0.5 * (innovation.T @ np.linalg.solve(S, innovation) +
-                          np.linalg.slogdet(2 * np.pi * S)[1])
+        sign, logdet = tf.linalg.slogdet(2.0 * np.pi * S)
+        innovation_col = tf.reshape(innovation, [-1, 1])
+        mahalanobis = tf.reduce_sum(innovation * tf.squeeze(tf.linalg.solve(S, innovation_col), axis=-1))
+        log_lik = -0.5 * (logdet + mahalanobis)
+
+        return mean_updated, cov_updated, log_lik
+
+    def predict(self):
+        """Prediction step using unscented transform."""
+        mean_pred, cov_pred = self._predict_step(self.mean.value(), self.cov.value())
+
+        self.mean.assign(mean_pred)
+        self.cov.assign(cov_pred)
+
+    def update(self, observation: np.ndarray):
+        """
+        Update step using unscented transform.
+
+        Args:
+            observation: Observation vector
+        """
+        obs_tf = tf.constant(observation, dtype=tf.float32)
+
+        mean_updated, cov_updated, log_lik = self._update_step(
+            self.mean.value(),
+            self.cov.value(),
+            obs_tf
+        )
+
+        self.mean.assign(mean_updated)
+        self.cov.assign(cov_updated)
+
+        # Store log-likelihood as TF scalar (converted in filter())
         self.log_likelihoods.append(log_lik)
 
     def filter(self, observations: np.ndarray) -> FilterResult:
@@ -236,21 +320,25 @@ class UnscentedKalmanFilter(Filter):
         for t in range(T):
             self.predict()
             self.update(observations[t])
-            means.append(self.mean.copy())
-            covs.append(self.cov.copy())
+            # Store TF tensors — convert once after loop
+            means.append(self.mean.value())
+            covs.append(self.cov.value())
 
-        # Compute total log-likelihood
-        total_log_likelihood = sum(self.log_likelihoods)
+        # Convert accumulated TF tensors to numpy once
+        means_np = tf.stack(means).numpy()
+        covs_np = tf.stack(covs).numpy()
+        log_liks_tf = tf.stack(self.log_likelihoods)
+        total_log_likelihood = float(tf.reduce_sum(log_liks_tf).numpy())
 
         return FilterResult(
-            means=np.array(means),
-            covs=np.array(covs),
+            means=means_np,
+            covs=covs_np,
             log_likelihood=total_log_likelihood,
             metadata={
                 'filter_type': 'UnscentedKalmanFilter',
                 'alpha': self.alpha,
                 'beta': self.beta,
                 'kappa': self.kappa,
-                'log_likelihoods': np.array(self.log_likelihoods)
+                'log_likelihoods': log_liks_tf.numpy()
             }
         )

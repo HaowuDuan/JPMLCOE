@@ -3,7 +3,6 @@ _target_: src.filters.particle.ledh_flow.LocalExactDaumHuangFlow
 n_particles: 500
 n_lambda_steps: 29  # Exponential decay schedule (same as ledh_invertible)
 integration_method: euler  # 'euler' or 'rk4'
-filter_type: ekf  # 'ekf' or 'ukf' for parallel filter
 use_feedback: true  # Feed DH mean back to EKF
 regularization: 1.0e-5  # Minimum regularization for numerical stability (adaptive scaling applied)
 n_threads: null  # null = use CPU count
