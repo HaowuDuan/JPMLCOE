@@ -90,8 +90,8 @@ def log_det(A: tf.Tensor) -> tf.Tensor:
     Returns:
         log|det(A)| of shape (...)
     """
-    """TODO: write assertion for positive definite matrix""" 
     sign, logdet = tf.linalg.slogdet(A)
+    tf.debugging.assert_positive(sign, message="log_det: matrix is not positive definite (sign <= 0)")
     return logdet
 
 

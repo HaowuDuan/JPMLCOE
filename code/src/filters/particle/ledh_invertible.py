@@ -296,7 +296,7 @@ class LEDHParticleFlowFilter:
             self.n_unique_particles.append(n_unique)
 
     def _resample(self):
-        """Resample particles and per-particle filters (TF distance computation)."""
+        """Resample particles and per-particle covariances."""
         seed = tf.constant([self.seed_counter, 0], dtype=tf.int32)
         self.seed_counter += 1
 
@@ -307,26 +307,21 @@ class LEDHParticleFlowFilter:
             **self.resampling_config
         )
 
-        # Handle different return types
-        if isinstance(result, tuple):
-            resampled_particles, new_weights = result
+        # Get ancestor indices from ResampleResult
+        if result.ancestor_indices is not None:
+            # Index-based (systematic, soft): direct gather
+            indices = result.ancestor_indices
+        elif result.transport_matrix is not None:
+            # Transport-based (OT): use dominant ancestor per row
+            indices = tf.argmax(result.transport_matrix, axis=1)
         else:
-            resampled_particles = result
-            new_weights = tf.ones(self.n_particles, dtype=self.dtype) / tf.cast(self.n_particles, self.dtype)
+            raise ValueError("ResampleResult has neither ancestor_indices nor transport_matrix")
 
-        # Match resampled particles to original indices using TF distance computation
-        # dists[i, j] = ||resampled[i] - original[j]||^2
-        dists = tf.reduce_sum(
-            (resampled_particles[:, tf.newaxis, :] - self.particles.value()[tf.newaxis, :, :]) ** 2,
-            axis=2
-        )
-        indices = tf.argmin(dists, axis=1)
-
-        # Resample covariances using TF gather
+        # Resample covariances using ancestor indices
         self.particle_covs.assign(tf.gather(self.particle_covs.value(), indices))
 
-        self.particles.assign(resampled_particles)
-        self.weights.assign(new_weights)
+        self.particles.assign(result.particles)
+        self.weights.assign(result.weights)
 
     def _estimate_mean_cov(self) -> Tuple[tf.Tensor, tf.Tensor]:
         """Estimate weighted mean and covariance (TF ops)."""

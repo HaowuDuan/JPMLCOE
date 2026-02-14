@@ -1,0 +1,15 @@
+# @package _global_
+
+# Experiment: EDH Flow Global on Range-Bearing Model (100 lambda steps)
+# Tests global EDH flow with more steps to reduce overshooting
+
+defaults:
+  - override /model: range_bearing
+  - override /filter: edh_flow_global
+
+# Override settings
+T: 100
+seed: 42
+plot: true
+n_lambda_steps: 100
+output_dir: outputs/range_bearing/range_bearing_edh_flow_global_100steps

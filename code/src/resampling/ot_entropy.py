@@ -11,6 +11,7 @@ Reference:
 
 import tensorflow as tf
 from typing import Tuple
+from .types import ResampleResult
 
 
 # =============================================================================
@@ -423,7 +424,6 @@ def compute_transport_matrix_with_gradient(
     return T, gradient
 
 
-@tf.function
 def ot_entropy_resample(
     particles: tf.Tensor,
     weights: tf.Tensor,
@@ -432,7 +432,7 @@ def ot_entropy_resample(
     max_iter: int = 100,
     convergence_threshold: float = 1e-3,
     epsilon_scaling: float = 0.9
-) -> Tuple[tf.Tensor, tf.Tensor]:
+) -> ResampleResult:
     """
     Entropy-regularized optimal transport resampling.
 
@@ -457,23 +457,7 @@ def ot_entropy_resample(
                         Larger = faster reduction (may be less stable)
 
     Returns:
-        Tuple of (resampled_particles, new_weights):
-        - resampled_particles: (N, state_dim) - transported particles
-        - new_weights: (N,) - uniform weights (all 1/N)
-
-    Example:
-        >>> import tensorflow as tf
-        >>> N = 100
-        >>> particles = tf.random.normal([N, 2])
-        >>> weights = tf.nn.softmax(tf.random.normal([N]))
-        >>> seed = tf.constant([0, 0], dtype=tf.int32)
-        >>>
-        >>> resampled, new_weights = ot_entropy_resample(
-        ...     particles, weights, epsilon=0.5, seed=seed
-        ... )
-        >>>
-        >>> # Check uniform weights
-        >>> tf.reduce_all(tf.abs(new_weights - 1.0/N) < 1e-6)
+        ResampleResult with transported particles, uniform weights, and transport matrix T
 
     Reference:
         Corenflos et al. (2021). Differentiable Particle Filtering via
@@ -497,9 +481,14 @@ def ot_entropy_resample(
     # Result: (N, D)
     resampled_particles = T @ particles
 
-    # Return uniform weights
+    # Uniform weights
     N = tf.shape(particles)[0]
     N_float = tf.cast(N, particles.dtype)
     uniform_weights = tf.ones(N, dtype=particles.dtype) / N_float
 
-    return resampled_particles, uniform_weights
+    return ResampleResult(
+        particles=resampled_particles,
+        weights=uniform_weights,
+        ancestor_indices=None,
+        transport_matrix=T,
+    )

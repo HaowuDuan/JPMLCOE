@@ -1,0 +1,7 @@
+_target_: src.filters.particle.sde_local_correction.SDELocalCorrection
+
+n_particles: 500
+n_lambda_steps: 29  # Exponential decay schedule (same as edh_flow)
+diffusion_scale: 0.00  # Scalar q for Q = q*I. 0.0 = deterministic flow
+schedule_mu: 0.0  # 0.0 = linear schedule (β=λ). >0 = optimal stiffness-mitigating schedule
+n_threads: null  # null = use CPU count

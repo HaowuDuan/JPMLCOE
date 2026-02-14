@@ -228,9 +228,11 @@ class Lorenz96Model(StateSpaceModel):
     # Batch methods for optimized particle filtering
 
     def state_transition_mean_batch(self, particles: np.ndarray) -> np.ndarray:
-        """Vectorized state transition mean using RK4 integration."""
-        # Apply RK4 to each particle
-        return np.array([rk4_step(x, self._lorenz96_tendency, self.dt) for x in particles])
+        """Vectorized state transition mean using RK4 integration (obs_interval steps)."""
+        result = particles.copy()
+        for _ in range(self.obs_interval):
+            result = np.array([rk4_step(x, self._lorenz96_tendency, self.dt) for x in result])
+        return result
 
     def state_transition_cov_batch(self, particles: np.ndarray) -> np.ndarray:
         """Q is constant - return single matrix."""
@@ -239,7 +241,7 @@ class Lorenz96Model(StateSpaceModel):
     def log_observation_prob_batch(self, observation: np.ndarray, particles: np.ndarray) -> np.ndarray:
         """Vectorized observation log-prob for all particles."""
         # Observed states: particles[:, self.observed_dims]
-        observed_states = particles[:, self.observed_dims]  # (N, obs_dim)
+        observed_states = particles[:, self.obs_indices]  # (N, obs_dim)
 
         # diff: (N, obs_dim)
         diff = observation - observed_states

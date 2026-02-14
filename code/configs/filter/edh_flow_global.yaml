@@ -1,0 +1,6 @@
+_target_: src.filters.particle.edh_flow_global.ExactDaumHuangFlowglobal
+
+n_particles: 500
+n_lambda_steps: 29  # Exponential decay schedule (same as edh_flow)
+integration_method: euler  # 'euler' or 'rk4'
+n_threads: null  # null = use CPU count

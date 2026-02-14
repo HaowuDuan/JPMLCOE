@@ -1,8 +1,9 @@
 import tensorflow as tf
+from .types import ResampleResult
 
-@tf.function
+
 def soft_resample(particles: tf.Tensor, weights: tf.Tensor, alpha: float,
-                 seed: tf.Tensor) -> tuple:
+                 seed: tf.Tensor) -> ResampleResult:
     """
     Soft resampling (TensorFlow implementation).
 
@@ -23,9 +24,7 @@ def soft_resample(particles: tf.Tensor, weights: tf.Tensor, alpha: float,
         seed: Random seed tensor of shape (2,)
 
     Returns:
-        Tuple of (resampled_particles, new_weights) where:
-        - resampled_particles: (N, state_dim)
-        - new_weights: (N,) Normalized importance weights for the next step
+        ResampleResult with particles, importance weights, and ancestor indices
     """
     N = tf.shape(particles)[0]
     N_float = tf.cast(N, weights.dtype)
@@ -62,4 +61,9 @@ def soft_resample(particles: tf.Tensor, weights: tf.Tensor, alpha: float,
     # Normalize weights to sum to 1 for the next iteration
     new_weights = new_weights / tf.reduce_sum(new_weights)
 
-    return resampled_particles, new_weights
+    return ResampleResult(
+        particles=resampled_particles,
+        weights=new_weights,
+        ancestor_indices=indices,
+        transport_matrix=None,
+    )

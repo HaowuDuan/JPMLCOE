@@ -1,0 +1,13 @@
+# @package _global_
+
+# Experiment: EDH Invertible on Kitagawa Model
+
+defaults:
+  - override /model: kitagawa
+  - override /filter: edh_invertible
+
+# Override settings
+T: 500
+seed: 42
+plot: true
+output_dir: outputs/kitagawa/kitagawa_edh_invertible

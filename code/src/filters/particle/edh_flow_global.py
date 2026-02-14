@@ -1,29 +1,31 @@
-"""Exact Daum-Huang (EDH) particle flow filter with out intermidiate linearization."""
+"""Exact Daum-Huang (EDH) particle flow filter with global (fixed) linearization.
+
+Linearizes once at η̄_0 and keeps H fixed throughout the flow.
+Uses the global formula: b(λ) = (I + 2λA)[(I + λA)P H^T R^{-1} z + A η̄_0].
+"""
 
 import tensorflow as tf
 import numpy as np
 from typing import Tuple, Optional, Callable, Dict, Any
 from .flow_base import FlowFilterBase
 from ..kalman.extended_kalman import ExtendedKalmanFilter
-from ...utils.flow_params import compute_flow_params
+from ...utils.flow_params import compute_flow_params_global
 from ...utils.ode_solvers import euler_step, rk4_step
 from ...resampling import systematic_resample, soft_resample, ot_entropy_resample
 
 
 class ExactDaumHuangFlowglobal(FlowFilterBase):
     """
-    Exact Daum-Huang particle flow filter with feedback mechanism.
+    Exact Daum-Huang particle flow filter with global (fixed) linearization.
 
-    Assumes Gaussian prior/predictive posterior with covariance P.
-    Linearizes nonlinear measurement model at mean particle location.
+    Linearizes H once at η̄_0 and keeps it fixed throughout the flow.
+    Uses the global formula (no nonlinear e correction):
+    - A(λ) = -1/2 P H^T (λ HPH^T + R)^{-1} H
+    - b(λ) = (I + 2λA)[(I + λA)P H^T R^{-1} z + A η̄_0]
 
-    Flow equation: dη/dλ = A(λ)η + b(λ)
-    where A(λ) and b(λ) are computed from Equations (10) and (11).
-
-    All particles have equal weight 1/N throughout.
-
-    Key modification: Implements feedback from particle ensemble to EKF/UKF
-    as described in Algorithm 2 of the paper.
+    Can be used standalone or as a base class (e.g. for StochasticEDHFlow).
+    For cross-checking: should match edh_flow for linear models (e=0),
+    and match stochastic_edh with diffusion_scale=0.
     """
 
     def __init__(self, model, n_particles: int = 1000,
@@ -128,7 +130,7 @@ class ExactDaumHuangFlowglobal(FlowFilterBase):
         seed = tf.constant(seed, dtype=tf.int32)
 
         L = tf.linalg.cholesky(initial_cov_tf)
-        z = tf.random.stateless_normal([self.n_particles, self.state_dim], seed=seed)
+        z = tf.random.stateless_normal([self.n_particles, self.state_dim], seed=seed, dtype=self.dtype)
         particles_tf = initial_mean_tf + tf.linalg.matmul(z, L, transpose_b=True)
 
         # Store as TensorFlow Variable
@@ -200,11 +202,10 @@ class ExactDaumHuangFlowglobal(FlowFilterBase):
 
     def update(self, y: tf.Tensor):
         """
-        Update step: flow particles from λ=0 to λ=1.
+        Update step: flow particles from λ=0 to λ=1 with global (fixed) linearization.
 
-        All particles maintain equal weight 1/N (no resampling needed for EDH flow).
-        After particle flow completes, the ensemble mean is fed back to
-        the EKF/UKF before its update step (Algorithm 2, line 18).
+        H is computed once at η̄_0 and kept fixed. No relinearization during flow.
+        Uses the global formula: b uses z directly (no e correction).
 
         Args:
             y: Observation TF tensor, shape (obs_dim,)
@@ -216,6 +217,9 @@ class ExactDaumHuangFlowglobal(FlowFilterBase):
 
         # Compute R_inv (once per update)
         R_inv_tf = tf.linalg.inv(R_tf)
+
+        # Compute H once at η̄_0 (global linearization — no relinearization)
+        H_fixed = self.model.observation_jacobian(eta_bar_0_tf)
 
         # Use exponential lambda schedule
         particles_flow = self.particles.value()
@@ -231,16 +235,13 @@ class ExactDaumHuangFlowglobal(FlowFilterBase):
                 'flow_steps': []
             }
 
-        eta_bar = eta_bar_0_tf
-
         for i in range(self.n_lambda_steps):
             d_lambda = self.lambda_steps[i]
             lambda_val = lambda_val + d_lambda  # TF tensor accumulation
 
             # Debug: Capture flow step diagnostics (sample steps)
             if self.debug_mode and i % 10 == 0:
-                A, b = compute_flow_params(self.model, eta_bar, lambda_val, observation, P_tf, R_tf, R_inv_tf, eta_bar_0_tf, self.state_dim)
-                H = self.model.observation_jacobian(eta_bar)
+                A, b = compute_flow_params_global(H_fixed, lambda_val, observation, P_tf, R_tf, R_inv_tf, eta_bar_0_tf, self.state_dim)
 
                 A_np = A.numpy()
                 try:
@@ -256,7 +257,7 @@ class ExactDaumHuangFlowglobal(FlowFilterBase):
                     'epsilon': float(d_lambda),
                     'A_matrix': A_np.copy(),
                     'b_vector': b.numpy().copy(),
-                    'H_jacobian': H.numpy().copy(),
+                    'H_jacobian': H_fixed.numpy().copy(),
                     'eigenvalues': eigvals,
                     'condition_number': cond_A,
                     'particle_mean': tf.reduce_mean(particles_flow, axis=0).numpy(),
@@ -265,14 +266,12 @@ class ExactDaumHuangFlowglobal(FlowFilterBase):
                 timestep_debug['flow_steps'].append(flow_step_debug)
 
             if self.integration_method == 'euler':
-                A, b = compute_flow_params(self.model, eta_bar, lambda_val, observation, P_tf, R_tf, R_inv_tf, eta_bar_0_tf, self.state_dim)
+                A, b = compute_flow_params_global(H_fixed, lambda_val, observation, P_tf, R_tf, R_inv_tf, eta_bar_0_tf, self.state_dim)
                 particles_flow = euler_step(particles_flow, self._compute_drift, d_lambda, A, b)
             elif self.integration_method == 'rk4':
                 raise NotImplementedError("RK4 integration not yet implemented for TensorFlow EDH flow")
             else:
                 raise ValueError(f"Unknown integration method: {self.integration_method}")
-
-            eta_bar = tf.reduce_mean(particles_flow, axis=0)
 
         # Particles at λ=1 represent posterior
         self.particles.assign(particles_flow)

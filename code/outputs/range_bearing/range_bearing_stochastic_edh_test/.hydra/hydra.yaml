@@ -113,11 +113,11 @@ hydra:
     - hydra.mode=RUN
     task:
     - device=auto
-    - experiment=range_bearing/range_bearing_stochastic_edhtest
+    - experiment=range_bearing/range_bearing_stochastic_edh
   job:
     name: run_experiment
     chdir: null
-    override_dirname: device=auto,experiment=range_bearing/range_bearing_stochastic_edhtest
+    override_dirname: device=auto,experiment=range_bearing/range_bearing_stochastic_edh
     id: ???
     num: ???
     config_name: config
@@ -144,7 +144,7 @@ hydra:
       provider: schema
     output_dir: /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/outputs/range_bearing/range_bearing_stochastic_edh_test
     choices:
-      experiment: range_bearing/range_bearing_stochastic_edhtest
+      experiment: range_bearing/range_bearing_stochastic_edh
       filter: stochastic_edh
       model: range_bearing
       hydra/env: default

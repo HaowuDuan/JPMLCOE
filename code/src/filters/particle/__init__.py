@@ -3,11 +3,13 @@
 from .particle_base import ParticleFilterBase
 from .bootstrap_pf_tf import ParticleFilterTF
 from .edh_flow import ExactDaumHuangFlow
+from .edh_flow_global import ExactDaumHuangFlowglobal
 from .ledh_flow import LocalExactDaumHuangFlow
 from .edh_invertible import EDHParticleFlowFilter
 from .ledh_invertible import LEDHParticleFlowFilter
 from .kernel_flow import KernelMappingPF
 from .stochastic_edh import StochasticEDHFlow
+from .sde_local_correction import SDELocalCorrection
 
 # TensorFlow Probability particle filter (optional)
 try:
@@ -20,11 +22,13 @@ __all__ = [
     'ParticleFilterBase',
     'ParticleFilterTF',
     'ExactDaumHuangFlow',
+    'ExactDaumHuangFlowglobal',
     'LocalExactDaumHuangFlow',
     'EDHParticleFlowFilter',
     'LEDHParticleFlowFilter',
     'KernelMappingPF',
     'StochasticEDHFlow',
+    'SDELocalCorrection',
 ]
 
 if _TFP_AVAILABLE:

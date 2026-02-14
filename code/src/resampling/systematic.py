@@ -1,9 +1,10 @@
 """Systematic resampling for particle filters (TensorFlow)."""
 import tensorflow as tf
+from .types import ResampleResult
 
-@tf.function
+
 def systematic_resample(particles: tf.Tensor, weights: tf.Tensor,
-                       seed: tf.Tensor) -> tf.Tensor:
+                       seed: tf.Tensor) -> ResampleResult:
     """
     Systematic resampling (TensorFlow implementation).
 
@@ -23,7 +24,7 @@ def systematic_resample(particles: tf.Tensor, weights: tf.Tensor,
         seed: Random seed tensor of shape (2,) for stateless sampling
 
     Returns:
-        Resampled particles of shape (N, state_dim)
+        ResampleResult with particles, uniform weights, and ancestor indices
     """
     N = tf.shape(particles)[0]
     N_float = tf.cast(N, weights.dtype)
@@ -46,29 +47,12 @@ def systematic_resample(particles: tf.Tensor, weights: tf.Tensor,
     # Resample particles
     resampled_particles = tf.gather(particles, indices)
 
-    return resampled_particles
-
-
-@tf.function
-def systematic_resample_with_weights(particles: tf.Tensor, weights: tf.Tensor,
-                                    seed: tf.Tensor) -> tuple:
-    """
-    Systematic resampling that also returns uniform weights.
-
-    Args:
-        particles: Particle positions of shape (N, state_dim)
-        weights: Normalized weights of shape (N,)
-        seed: Random seed tensor of shape (2,)
-
-    Returns:
-        Tuple of (resampled_particles, uniform_weights) where:
-        - resampled_particles: (N, state_dim)
-        - uniform_weights: (N,) all equal to 1/N
-    """
-    resampled_particles = systematic_resample(particles, weights, seed)
-
-    N = tf.shape(particles)[0]
-    N_float = tf.cast(N, weights.dtype)
+    # Uniform weights after resampling
     uniform_weights = tf.ones(N, dtype=weights.dtype) / N_float
 
-    return resampled_particles, uniform_weights
+    return ResampleResult(
+        particles=resampled_particles,
+        weights=uniform_weights,
+        ancestor_indices=indices,
+        transport_matrix=None,
+    )
