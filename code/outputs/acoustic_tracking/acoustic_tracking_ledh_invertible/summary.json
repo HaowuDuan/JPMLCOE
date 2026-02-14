@@ -8,12 +8,12 @@
     "resampling_method": "systematic",
     "resampling_rate": 1.0,
     "performance": {
-      "wall_time_seconds": 91.04056279081851,
-      "time_per_timestep_ms": 1820.8112558163702,
-      "peak_memory_mb": 16.275699615478516,
-      "memory_increase_mb": 1721.171875,
-      "start_memory_mb": 930.078125,
-      "end_memory_mb": 2651.25,
+      "wall_time_seconds": 89.59380316734314,
+      "time_per_timestep_ms": 1791.8760633468628,
+      "peak_memory_mb": 16.442408561706543,
+      "memory_increase_mb": 2010.828125,
+      "start_memory_mb": 931.75,
+      "end_memory_mb": 2942.578125,
       "num_timesteps": 50
     }
   },

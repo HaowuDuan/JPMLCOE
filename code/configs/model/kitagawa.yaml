@@ -1,0 +1,12 @@
+# Kitagawa Model Configuration (Andrieu et al., 2010)
+# X_n = X_{n-1}/2 + 25*X_{n-1}/(1+X_{n-1}^2) + 8*cos(1.2*n) + V_n
+# Y_n = X_n^2/20 + W_n
+
+_target_: src.models.kitagawa.KitagawaModel
+
+# Noise parameters
+sigma_V: 10.0       # Process noise std (sqrt(Q))
+sigma_W: 1.0        # Observation noise std (sqrt(R))
+
+# Initial state distribution: X_0 ~ N(0, initial_var)
+initial_var: 5.0

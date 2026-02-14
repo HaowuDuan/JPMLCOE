@@ -1,7 +1,9 @@
 """Distribution utilities for stable probability computations - TensorFlow version."""
 
+import math
 import tensorflow as tf
 from typing import Optional, Tuple
+from .linalg import safe_cholesky
 
 
 @tf.function
@@ -26,11 +28,11 @@ def log_gaussian_prob(x: tf.Tensor, mean: tf.Tensor, cov: tf.Tensor) -> tf.Tenso
     sign, logdet = tf.linalg.slogdet(cov)
 
     # Compute Mahalanobis distance using Cholesky
-    L = tf.linalg.cholesky(cov)
+    L = safe_cholesky(cov)
     y = tf.linalg.triangular_solve(L, diff[..., tf.newaxis], lower=True)[..., 0]
     mahalanobis = tf.reduce_sum(y**2, axis=-1)
 
-    return -0.5 * (n * tf.math.log(2.0 * tf.constant(3.14159265359, dtype=x.dtype)) + logdet + mahalanobis)
+    return -0.5 * (n * tf.math.log(2.0 * tf.constant(math.pi, dtype=x.dtype)) + logdet + mahalanobis)
 
 
 @tf.function
@@ -163,7 +165,7 @@ def compute_flow_weights(
     log_p_eta1 = -0.5 * (
         tf.reduce_sum(y_1**2, axis=1) +
         2.0 * tf.reduce_sum(tf.math.log(tf.linalg.diag_part(L_Q))) +
-        tf.cast(state_dim, eta_1.dtype) * tf.math.log(2.0 * tf.constant(3.14159265359, dtype=eta_1.dtype))
+        tf.cast(state_dim, eta_1.dtype) * tf.math.log(2.0 * tf.constant(math.pi, dtype=eta_1.dtype))
     )
 
     # 5. Vectorized log p(η₀ | x_{k-1})
@@ -174,7 +176,7 @@ def compute_flow_weights(
     log_p_eta0 = -0.5 * (
         tf.reduce_sum(y_0**2, axis=1) +
         2.0 * tf.reduce_sum(tf.math.log(tf.linalg.diag_part(L_Q))) +
-        tf.cast(state_dim, eta_1.dtype) * tf.math.log(2.0 * tf.constant(3.14159265359, dtype=eta_1.dtype))
+        tf.cast(state_dim, eta_1.dtype) * tf.math.log(2.0 * tf.constant(math.pi, dtype=eta_1.dtype))
     )
 
     # 6. Combine in log space
@@ -192,6 +194,9 @@ def compute_flow_weights(
     # Check for weight collapse
     is_finite = tf.reduce_all(tf.math.is_finite(weights))
     uniform_weights = tf.ones(n_particles, dtype=eta_1.dtype) / tf.cast(n_particles, eta_1.dtype)
-    weights = tf.cond(is_finite, lambda: weights, lambda: uniform_weights)
+    def _warn_and_uniform():
+        tf.print("WARNING: weight collapse detected, falling back to uniform weights")
+        return uniform_weights
+    weights = tf.cond(is_finite, lambda: weights, _warn_and_uniform)
 
     return weights

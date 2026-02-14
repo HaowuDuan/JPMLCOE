@@ -1,0 +1,46 @@
+{
+  "rmse": 0.2652213900100696,
+  "log_likelihood": null,
+  "metadata": {
+    "filter_type": "SDELocalCorrection",
+    "n_particles": 500,
+    "n_lambda_steps": 29,
+    "integration_method": "euler",
+    "performance": {
+      "wall_time_seconds": 93.6836964590475,
+      "time_per_timestep_ms": 936.836964590475,
+      "peak_memory_mb": 101.60047626495361,
+      "memory_increase_mb": 160.265625,
+      "start_memory_mb": 401.515625,
+      "end_memory_mb": 561.78125,
+      "num_timesteps": 100
+    }
+  },
+  "config": {
+    "model": {
+      "_target_": "src.models.range_bearing.RangeBearingModel",
+      "sigma_range": 0.1,
+      "sigma_bearing": 0.1
+    },
+    "filter": {
+      "_target_": "src.filters.particle.sde_local_correction.SDELocalCorrection",
+      "n_particles": 500,
+      "n_lambda_steps": 29,
+      "diffusion_scale": 0.0,
+      "schedule_mu": 0.0,
+      "n_threads": null
+    },
+    "seed": 42,
+    "dtype": "float64",
+    "T": 100,
+    "output_dir": "outputs/range_bearing/range_bearing_sde_local_correction_optimal",
+    "plot": true,
+    "device": "auto",
+    "tf_log_level": 2,
+    "verbose": true,
+    "show_progress": true,
+    "diffusion_scale": 0.0,
+    "n_lambda_steps": 29,
+    "schedule_mu": 1.0
+  }
+}

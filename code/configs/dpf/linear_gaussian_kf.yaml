@@ -1,0 +1,55 @@
+# DPF: Infer noise scales of LinearGaussianModel using EKF (= KF for linear models)
+
+model:
+  _target_: src.models.linear_gaussian.LinearGaussianModel
+  F: [[0.9, 0.1], [0.0, 0.8]]
+  B: [[1.0], [0.5]]      # B_base (direction; scaled by process_noise_std)
+  H: [[1.0, 0.0]]
+  D: [[1.0]]             # D_base (direction; scaled by obs_noise_std)
+  mu_0: [0.0, 0.0]
+  Sigma_0: [[1.0, 0.0], [0.0, 1.0]]
+  process_noise_std: 0.5   # Initial guess (true: 1.0)
+  obs_noise_std: 1.0       # Initial guess (true: 0.5)
+
+filter:
+  _target_: src.filters.kalman.extended_kalman.ExtendedKalmanFilter
+  sample_initial_mean: false
+
+dpf:
+  sampler: hmc
+
+  trainable_params:
+    process_noise_std:
+      init_value: 0.5
+      constraint: positive
+      prior:
+        _target_: tensorflow_probability.distributions.LogNormal
+        loc: 0.0
+        scale: 1.0
+    obs_noise_std:
+      init_value: 1.0
+      constraint: positive
+      prior:
+        _target_: tensorflow_probability.distributions.LogNormal
+        loc: 0.0
+        scale: 1.0
+
+  hmc:
+    num_samples: 1000
+    num_burnin: 500
+    step_size: 0.01
+    max_tree_depth: 10
+    adaptation_rate: 0.8
+    target_accept_prob: 0.75
+    seed: 42
+
+data:
+  T: 200
+  seed: 42
+  true_params:
+    process_noise_std: 1.0
+    obs_noise_std: 0.5
+
+output:
+  save_samples: true
+  plot_posteriors: true

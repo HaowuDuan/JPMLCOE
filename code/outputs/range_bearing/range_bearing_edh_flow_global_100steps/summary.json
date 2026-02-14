@@ -1,0 +1,43 @@
+{
+  "rmse": 1.3071511051634748,
+  "log_likelihood": null,
+  "metadata": {
+    "filter_type": "ExactDaumHuangFlowglobal",
+    "n_particles": 500,
+    "n_lambda_steps": 29,
+    "integration_method": "euler",
+    "performance": {
+      "wall_time_seconds": 86.55949124973267,
+      "time_per_timestep_ms": 865.5949124973267,
+      "peak_memory_mb": 101.62409496307373,
+      "memory_increase_mb": 207.15625,
+      "start_memory_mb": 402.734375,
+      "end_memory_mb": 609.890625,
+      "num_timesteps": 100
+    }
+  },
+  "config": {
+    "model": {
+      "_target_": "src.models.range_bearing.RangeBearingModel",
+      "sigma_range": 0.1,
+      "sigma_bearing": 0.1
+    },
+    "filter": {
+      "_target_": "src.filters.particle.edh_flow_global.ExactDaumHuangFlowglobal",
+      "n_particles": 500,
+      "n_lambda_steps": 29,
+      "integration_method": "euler",
+      "n_threads": null
+    },
+    "seed": 42,
+    "dtype": "float64",
+    "T": 100,
+    "output_dir": "outputs/range_bearing/range_bearing_edh_flow_global_100steps",
+    "plot": true,
+    "device": "auto",
+    "tf_log_level": 2,
+    "verbose": true,
+    "show_progress": true,
+    "n_lambda_steps": 100
+  }
+}

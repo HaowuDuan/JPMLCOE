@@ -10,9 +10,12 @@ filter:
   schedule_mu: 0.0
   n_threads: null
 seed: 42
+dtype: float64
 T: 100
 output_dir: outputs/range_bearing/range_bearing_stochastic_edh_test
 plot: true
 device: auto
+tf_log_level: 2
 verbose: true
-diffusion_scale: 0.0
+show_progress: true
+diffusion_scale: 0.1

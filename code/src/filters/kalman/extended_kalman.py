@@ -200,6 +200,70 @@ class ExtendedKalmanFilter(Filter):
 
         return mean_updated, cov_updated, log_lik
 
+    def log_marginal_likelihood_tf(
+        self,
+        observations: tf.Tensor,
+        seed: tf.Tensor = None
+    ) -> tf.Tensor:
+        """
+        Total log marginal likelihood as a differentiable TF scalar.
+
+        Reimplements the EKF predict/update loop using local tensor state
+        (no side effects on self.mean/self.cov). Reads Q and R from the model
+        dynamically at each step, so when DifferentiableModel sets noise params
+        as tensors via setattr, the gradient chain is preserved.
+
+        NOT decorated with @tf.function — either runs eagerly or is traced
+        by TFP internally for HMC gradient computation.
+
+        Args:
+            observations: (T, obs_dim), dtype matching filter
+            seed: Unused (EKF is deterministic). Present for protocol compat.
+
+        Returns:
+            Scalar tf.Tensor: log p(y_{1:T})
+        """
+        T = observations.shape[0]
+
+        mean = tf.identity(self.mean_0)
+        cov = tf.identity(self.Sigma_0)
+        total_log_lik = tf.constant(0.0, dtype=self.dtype)
+
+        for t in range(T):
+            # === PREDICT ===
+            mean_pred = self.model.state_transition_mean(mean)
+            F = self.model.state_jacobian(mean)
+            Q = self.model.state_transition_cov(mean)
+            cov_pred = F @ cov @ tf.transpose(F) + Q
+            cov_pred = symmetrize(cov_pred)
+
+            # === UPDATE ===
+            y_pred = self.model.observation_mean(mean_pred)
+            R = self.model.observation_cov(mean_pred)
+            H = self.model.observation_jacobian(mean_pred)
+            innovation = observations[t] - y_pred
+            S = H @ cov_pred @ tf.transpose(H) + R
+
+            # Kalman gain via Cholesky
+            L_S = safe_cholesky(S)
+            K_T = tf.linalg.cholesky_solve(L_S, H @ cov_pred)
+            K = tf.transpose(K_T)
+
+            # Update mean and covariance (Joseph form)
+            mean = mean_pred + tf.linalg.matvec(K, innovation)
+            I = tf.eye(self.state_dim, dtype=self.dtype)
+            I_KH = I - K @ H
+            cov = I_KH @ cov_pred @ tf.transpose(I_KH) + K @ R @ tf.transpose(K)
+            cov = symmetrize(cov)
+
+            # Log-likelihood: log p(y_t | y_{1:t-1})
+            _, logdet = tf.linalg.slogdet(2.0 * np.pi * S)
+            S_inv_inn = safe_solve(S, innovation, method='cholesky')
+            mahalanobis = tf.reduce_sum(innovation * S_inv_inn)
+            total_log_lik = total_log_lik + (-0.5 * (logdet + mahalanobis))
+
+        return total_log_lik
+
     def predict(self):
         """Prediction step: propagate state estimate forward."""
         mean_pred, cov_pred = self._predict_step(self.mean.value(), self.cov.value())

@@ -1,0 +1,14 @@
+# @package _global_
+
+# Experiment: EDH Flow Global on Range-Bearing Model
+# Tests exact Daum-Huang flow with global (fixed) linearization on range-bearing tracking
+
+defaults:
+  - override /model: range_bearing
+  - override /filter: edh_flow_global
+
+# Override settings
+T: 100
+seed: 42
+plot: true
+output_dir: outputs/range_bearing/range_bearing_edh_flow_global

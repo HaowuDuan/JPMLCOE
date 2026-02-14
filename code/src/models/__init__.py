@@ -7,6 +7,7 @@ from .acoustic_tracking import AcousticTrackingModel
 from .acoustic_tracking_full import AcousticTrackingFullModel
 from .two_sensor_bearing import TwoSensorBearingOnlyModel
 from .lorenz96 import Lorenz96Model
+from .kitagawa import KitagawaModel
 from .utils import generate_data
 
 __all__ = [
@@ -17,5 +18,6 @@ __all__ = [
     'AcousticTrackingFullModel',
     'TwoSensorBearingOnlyModel',
     'Lorenz96Model',
+    'KitagawaModel',
     'generate_data'
 ]

@@ -328,15 +328,8 @@ class EDHParticleFlowFilter:
             **self.resampling_config
         )
 
-        # Handle different return types
-        if isinstance(result, tuple):
-            resampled_particles, new_weights = result
-        else:
-            resampled_particles = result
-            new_weights = tf.ones(self.n_particles, dtype=self.dtype) / tf.cast(self.n_particles, self.dtype)
-
-        self.particles.assign(resampled_particles)
-        self.weights.assign(new_weights)
+        self.particles.assign(result.particles)
+        self.weights.assign(result.weights)
 
     def _estimate_mean_cov(self) -> Tuple[tf.Tensor, tf.Tensor]:
         """Estimate weighted mean and covariance from particles (TF ops)."""

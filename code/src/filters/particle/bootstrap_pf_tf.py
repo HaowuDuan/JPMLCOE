@@ -91,31 +91,18 @@ class ParticleFilterTF(ParticleFilterBase):
 
     def _resample(self, particles, weights, seed):
         """
-        Wrapper for resampling that handles different method signatures.
-        
+        Wrapper for resampling that returns (particles, weights).
+
         Args:
             particles: Particle positions (N, state_dim)
             weights: Normalized weights (N,)
             seed: Random seed tensor (2,)
-        
+
         Returns:
             Tuple of (resampled_particles, new_weights)
         """
-        # Call the resampling method with config parameters
         result = self.resampling_method(particles, weights, seed=seed, **self.resampling_config)
-        
-        # Handle different return types
-        if isinstance(result, tuple):
-            # Methods that return (particles, weights)
-            resampled_particles, new_weights = result
-        else:
-            # Methods that only return particles (e.g., systematic_resample without _with_weights)
-            resampled_particles = result
-            N = tf.shape(particles)[0]
-            N_float = tf.cast(N, self.dtype)
-            new_weights = tf.ones(N, dtype=self.dtype) / N_float
-        
-        return resampled_particles, new_weights
+        return result.particles, result.weights
 
     @tf.function
     def _effective_sample_size_tf(self, weights):

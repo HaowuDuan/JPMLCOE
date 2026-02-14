@@ -1,0 +1,13 @@
+# @package _global_
+
+# Experiment: Bootstrap Particle Filter on Kitagawa Model
+
+defaults:
+  - override /model: kitagawa
+  - override /filter: particle
+
+# Override settings
+T: 500
+seed: 42
+plot: true
+output_dir: outputs/kitagawa/kitagawa_pf

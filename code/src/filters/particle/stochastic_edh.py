@@ -12,7 +12,7 @@ With optional stiffness-mitigating schedule from:
 import numpy as np
 import tensorflow as tf
 from .edh_flow import ExactDaumHuangFlow
-from ...utils.flow_params import compute_flow_params
+from ...utils.flow_params import compute_flow_params_global
 from ...utils.ode_solvers import euler_step
 
 
@@ -28,8 +28,8 @@ class StochasticEDHFlow(ExactDaumHuangFlow):
     so A(λ) = A_det(λ) - (q/2)·Σ(λ)⁻¹ and b(λ) = b_det(λ) + (q/2)·Σ(λ)⁻¹·m(λ).
     The posterior is identical for all Q (Theorem 3.1).
 
-    Uses re-linearization at the flowing mean (same as edh_flow)
-    for stability with nonlinear observation models.
+    Uses global (fixed) linearization at η̄_0 — no relinearization
+    during the flow, consistent with the SDE derivation.
 
     Optional stiffness mitigation (schedule_mu > 0): solves for an
     optimal schedule β(λ) that minimizes the condition number of
@@ -178,6 +178,9 @@ class StochasticEDHFlow(ExactDaumHuangFlow):
         R_inv = tf.linalg.inv(R)
         particles_flow = self.particles.value()
 
+        # Compute H once at η̄_0 (global linearization)
+        H_fixed = self.model.observation_jacobian(eta_bar_0)
+
         # --- Precompute score correction quantities (constant over λ) ---
         # Score correction (Corollary 2.1, Eq. 8):
         #   A = A_det - (q/2)·Σ(λ)⁻¹
@@ -186,12 +189,11 @@ class StochasticEDHFlow(ExactDaumHuangFlow):
         # and   Σ(λ)⁻¹·m(λ) = P⁻¹·η̄₀ + λ·Hᵀ R⁻¹·y  (info vector)
         q = self.diffusion_scale
         if q > 0:
-            H_tf = self.model.observation_jacobian(eta_bar_0)
             P_inv = tf.linalg.inv(P)
-            H_T_R_inv_H = tf.transpose(H_tf) @ R_inv @ H_tf
+            H_T_R_inv_H = tf.transpose(H_fixed) @ R_inv @ H_fixed
             P_inv_eta = tf.linalg.matvec(P_inv, eta_bar_0)
             H_T_R_inv_y = tf.linalg.matvec(
-                tf.transpose(H_tf) @ R_inv, observation)
+                tf.transpose(H_fixed) @ R_inv, observation)
 
         # --- Compute optimal schedule if μ > 0 ---
         if self.schedule_mu > 0:
@@ -212,10 +214,10 @@ class StochasticEDHFlow(ExactDaumHuangFlow):
                 homotopy_param = lambda_val
                 step_size = d_lambda
 
-            # Compute A_det(β), b_det(β) using Exact Flow formulas
-            # KEY: linearize at eta_bar_0 (fixed), NOT at flowing mean
-            A, b = compute_flow_params(
-                self.model, eta_bar_0, homotopy_param,
+            # Compute A_det(β), b_det(β) using global flow formulas
+            # H is fixed at η̄_0, b uses z directly (no e correction)
+            A, b = compute_flow_params_global(
+                H_fixed, homotopy_param,
                 observation, P, R, R_inv, eta_bar_0, self.state_dim
             )
 

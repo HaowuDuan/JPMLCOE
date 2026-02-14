@@ -1,5 +1,5 @@
 {
-  "rmse": 2.353953401203876,
+  "rmse": 1.3070210967310003,
   "log_likelihood": null,
   "metadata": {
     "filter_type": "StochasticEDHFlow",
@@ -7,12 +7,12 @@
     "n_lambda_steps": 29,
     "integration_method": "euler",
     "performance": {
-      "wall_time_seconds": 81.33537304075435,
-      "time_per_timestep_ms": 813.3537304075435,
-      "peak_memory_mb": 101.67109107971191,
-      "memory_increase_mb": 651.03125,
-      "start_memory_mb": 419.390625,
-      "end_memory_mb": 1070.421875,
+      "wall_time_seconds": 90.33408249961212,
+      "time_per_timestep_ms": 903.3408249961212,
+      "peak_memory_mb": 101.62600135803223,
+      "memory_increase_mb": 128.40625,
+      "start_memory_mb": 402.1875,
+      "end_memory_mb": 530.59375,
       "num_timesteps": 100
     }
   },
@@ -31,11 +31,14 @@
       "n_threads": null
     },
     "seed": 42,
+    "dtype": "float64",
     "T": 100,
     "output_dir": "outputs/range_bearing/range_bearing_stochastic_edh_test",
     "plot": true,
     "device": "auto",
+    "tf_log_level": 2,
     "verbose": true,
+    "show_progress": true,
     "diffusion_scale": 0.0
   }
 }

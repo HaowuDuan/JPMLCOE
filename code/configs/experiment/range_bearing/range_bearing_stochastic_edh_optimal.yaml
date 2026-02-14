@@ -1,20 +1,17 @@
 # @package _global_
 
 # Experiment: Stochastic EDH with Optimal Schedule on Range-Bearing Model
-# Tests stochastic exact Daum-Huang flow with optimal stiffness-mitigating schedule
+# Uses stiffness-mitigating optimal β(λ) schedule (arXiv:2107.04672)
 
 defaults:
   - override /model: range_bearing
   - override /filter: stochastic_edh
 
-# Override filter settings for optimal schedule
-filter:
-  use_optimal_schedule: true
-  use_ekf_covariance: true
-  filter_type: ekf
-
 # Override settings
-T: 10
+T: 100
 seed: 42
 plot: true
+diffusion_scale: 0.00
+schedule_mu: 1.0
+n_lambda_steps: 100
 output_dir: outputs/range_bearing/range_bearing_stochastic_edh_optimal

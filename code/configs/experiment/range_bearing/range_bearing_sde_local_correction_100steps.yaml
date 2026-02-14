@@ -1,0 +1,16 @@
+# @package _global_
+
+# Experiment: SDE Local Correction on Range-Bearing Model (100 steps)
+# Global linearization with e₀ correction, 100 lambda steps
+
+defaults:
+  - override /model: range_bearing
+  - override /filter: sde_local_correction
+
+# Override settings
+T: 100
+seed: 42
+plot: true
+diffusion_scale: 0.00
+n_lambda_steps: 29
+output_dir: outputs/range_bearing/range_bearing_sde_local_correction_100steps

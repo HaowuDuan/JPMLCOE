@@ -338,8 +338,9 @@ class TwoSensorBearingOnlyModel(StateSpaceModel):
         # Means: (N, 2)
         means = tf.stack([bearing1, bearing2], axis=1)
 
-        # diff: (N, 2)
+        # diff: (N, 2) — wrap to [-pi, pi] for angular differences
         diff = observation - means
+        diff = tf.atan2(tf.sin(diff), tf.cos(diff))
 
         # Cholesky of R (2x2 diagonal)
         L_R = tf.linalg.cholesky(self.R)

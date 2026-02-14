@@ -37,6 +37,8 @@ class LinearGaussianModel(StateSpaceModel):
         D: Union[np.ndarray, List, tf.Tensor],
         mu_0: Optional[Union[np.ndarray, List, tf.Tensor]] = None,
         Sigma_0: Optional[Union[np.ndarray, List, tf.Tensor]] = None,
+        process_noise_std: Optional[float] = None,
+        obs_noise_std: Optional[float] = None,
         dtype=tf.float32
     ):
         """
@@ -44,11 +46,17 @@ class LinearGaussianModel(StateSpaceModel):
 
         Args:
             F: State transition matrix (nx, nx)
-            B: Process noise matrix (nx, nv)
+            B: Process noise matrix (nx, nv). When process_noise_std is set,
+               B is treated as the noise direction; Q = process_noise_std^2 * B@B^T.
             H: Observation matrix (ny, nx)
-            D: Observation noise matrix (ny, nw)
+            D: Observation noise matrix (ny, nw). When obs_noise_std is set,
+               D is treated as the noise direction; R = obs_noise_std^2 * D@D^T.
             mu_0: Initial state mean (nx,). If None, uses zero vector.
             Sigma_0: Initial state covariance (nx, nx). If None, uses identity.
+            process_noise_std: Optional scalar noise scale for Q. When set,
+                Q = process_noise_std^2 * B@B^T. Used for HMC parameter inference.
+            obs_noise_std: Optional scalar noise scale for R. When set,
+                R = obs_noise_std^2 * D@D^T. Used for HMC parameter inference.
         """
         # Store dtype
         self.dtype = dtype
@@ -76,11 +84,17 @@ class LinearGaussianModel(StateSpaceModel):
         if self.D.shape != (self.ny, self.nw):
             raise ValueError(f"D must be ({self.ny}, {self.nw}), got {self.D.shape}")
 
-        # Compute noise covariances
-        self.Q = self.B @ tf.transpose(self.B)  # Process noise covariance
-        self.R = self.D @ tf.transpose(self.D)  # Observation noise covariance
+        # Base noise covariances (direction only, scale is separate)
+        self._Q_base = self.B @ tf.transpose(self.B)
+        self._R_base = self.D @ tf.transpose(self.D)
 
-        # Initial state distribution (compute dimensions first, then use)
+        # Optional scalar noise parameters (for HMC inference)
+        # When set: Q = process_noise_std^2 * _Q_base, R = obs_noise_std^2 * _R_base
+        # When None: Q = _Q_base, R = _R_base (backward compatible)
+        self.process_noise_std = process_noise_std
+        self.obs_noise_std = obs_noise_std
+
+        # Initial state distribution
         if mu_0 is None:
             self.mu_0 = tf.zeros(self.nx, dtype=self.dtype)
         else:
@@ -103,6 +117,46 @@ class LinearGaussianModel(StateSpaceModel):
     @property
     def obs_dim(self) -> int:
         return self.ny
+
+    @property
+    def Q(self):
+        """Process noise covariance — dynamic if process_noise_std is set."""
+        if self.process_noise_std is not None:
+            pns = self.process_noise_std
+            if not isinstance(pns, tf.Tensor):
+                pns = tf.constant(float(pns), dtype=self.dtype)
+            return pns ** 2 * self._Q_base
+        return self._Q_base
+
+    @Q.setter
+    def Q(self, value):
+        """Allow direct assignment for backward compat (e.g. generate_data)."""
+        self._Q_base = value
+
+    @property
+    def R(self):
+        """Observation noise covariance — dynamic if obs_noise_std is set."""
+        if self.obs_noise_std is not None:
+            ons = self.obs_noise_std
+            if not isinstance(ons, tf.Tensor):
+                ons = tf.constant(float(ons), dtype=self.dtype)
+            return ons ** 2 * self._R_base
+        return self._R_base
+
+    @R.setter
+    def R(self, value):
+        """Allow direct assignment for backward compat."""
+        self._R_base = value
+
+    @property
+    def initial_state_cov(self) -> tf.Tensor:
+        """Initial state covariance for EKF compatibility."""
+        return self.Sigma_0
+
+    @property
+    def initial_state_mean(self) -> tf.Tensor:
+        """Initial state mean for EKF compatibility."""
+        return self.mu_0
 
     # TensorFlow methods
 
@@ -162,7 +216,7 @@ class LinearGaussianModel(StateSpaceModel):
         return tf.linalg.matvec(self.F, x)
 
     def state_transition_cov(self, x: tf.Tensor) -> tf.Tensor:
-        """Covariance of state transition: Cov[X' | X] = Q."""
+        """Covariance of state transition: Cov[X' | X] = Q (dynamic when process_noise_std set)."""
         return self.Q
 
     def state_jacobian(self, x: tf.Tensor) -> tf.Tensor:
@@ -174,7 +228,7 @@ class LinearGaussianModel(StateSpaceModel):
         return tf.linalg.matvec(self.H, x)
 
     def observation_cov(self, x: tf.Tensor) -> tf.Tensor:
-        """Covariance of observation: Cov[Y | X] = R."""
+        """Covariance of observation: Cov[Y | X] = R (dynamic when obs_noise_std set)."""
         return self.R
 
     def observation_jacobian(self, x: tf.Tensor) -> tf.Tensor:
@@ -193,28 +247,23 @@ class LinearGaussianModel(StateSpaceModel):
         return tf.zeros((self.obs_dim, self.state_dim, self.state_dim), dtype=self.dtype)
 
     def log_observation_prob(self, y: tf.Tensor, x: tf.Tensor) -> tf.Tensor:
-        """
-        Log probability of observation: log p(y | x).
-
-        p(y | x) = N(y | H·x, R)
-        """
+        """Log probability of observation: log p(y | x). p(y | x) = N(y | H·x, R)."""
         from ..utils.distributions import log_gaussian_prob
         mean = tf.linalg.matvec(self.H, x)
-        return log_gaussian_prob(y, mean, self.R)
+        return log_gaussian_prob(y, mean, self.R)  # Uses dynamic R property
 
-    # For flow filters
     def observation_function(self, x: tf.Tensor) -> tf.Tensor:
         """Observation function h(x) for flow filters: returns H·x."""
         return tf.linalg.matvec(self.H, x)
 
     @property
     def observation_noise_cov(self) -> tf.Tensor:
-        """Observation noise covariance R for flow filters."""
+        """Observation noise covariance R for flow filters (dynamic)."""
         return self.R
 
     @property
     def process_noise_cov(self) -> tf.Tensor:
-        """Process noise covariance Q for flow filters."""
+        """Process noise covariance Q for flow filters (dynamic)."""
         return self.Q
 
     # Batch methods for optimized particle filtering
