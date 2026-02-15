@@ -1,0 +1,132 @@
+{
+  "summary": {
+    "sigma_V": {
+      "mean": 5.171605348587036,
+      "std": 0.10624432563781738,
+      "median": 5.171605348587036,
+      "q5": 5.075985455513001,
+      "q25": 5.118483185768127,
+      "q75": 5.224727511405945,
+      "q95": 5.267225241661071,
+      "min": 5.065361022949219,
+      "max": 5.2778496742248535
+    },
+    "sigma_W": {
+      "mean": 1.5847198963165283,
+      "std": 0.12638306617736816,
+      "median": 1.5847198963165283,
+      "q5": 1.470975136756897,
+      "q25": 1.5215283632278442,
+      "q75": 1.6479114294052124,
+      "q95": 1.6984646558761596,
+      "min": 1.4583368301391602,
+      "max": 1.7111029624938965
+    }
+  },
+  "diagnostics": {
+    "acceptance_rate": 1.0,
+    "final_step_size": 0.009999999776482582,
+    "ess": {
+      "sigma_V": NaN,
+      "sigma_W": NaN
+    },
+    "rhat": {
+      "sigma_V": NaN,
+      "sigma_W": NaN
+    }
+  },
+  "metadata": {
+    "model_type": "KitagawaModel",
+    "filter_type": "LEDHParticleFlowFilterHMC",
+    "sampler": "hmc",
+    "num_samples": 2,
+    "num_burnin": 1,
+    "num_leapfrog_steps": 10,
+    "num_observations": 5,
+    "timing": {
+      "step_times": [
+        38.02409675018862,
+        37.93268704181537,
+        38.022345749661326
+      ],
+      "total_time_seconds": 113.97912954166532,
+      "mean_step_time": 37.993043180555105,
+      "median_step_time": 38.022345749661326,
+      "min_step_time": 37.93268704181537,
+      "max_step_time": 38.02409675018862,
+      "burnin_time_seconds": 38.02409675018862,
+      "sampling_time_seconds": 75.9550327914767,
+      "mean_time_per_gradient_eval": 3.7993043180555106
+    }
+  },
+  "true_params": {
+    "sigma_V": 10.0,
+    "sigma_W": 1.0
+  },
+  "config": {
+    "dtype": "float32",
+    "tf_log_level": 2,
+    "model": {
+      "_target_": "src.models.kitagawa.KitagawaModel",
+      "sigma_V": 5.0,
+      "sigma_W": 2.0,
+      "initial_var": 5.0
+    },
+    "filter": {
+      "_target_": "src.filters.particle.ledh_invertible_hmc.LEDHParticleFlowFilterHMC",
+      "n_particles": 200,
+      "n_lambda_steps": 29,
+      "resampling_method": "ot_entropy",
+      "resampling_config": {
+        "epsilon": 0.5
+      },
+      "weight_clip_range": 50.0,
+      "stop_gradient_resampling": true,
+      "eager_mode": true
+    },
+    "dpf": {
+      "sampler": "hmc",
+      "trainable_params": {
+        "sigma_V": {
+          "constraint": "positive",
+          "prior": {
+            "_target_": "tensorflow_probability.distributions.LogNormal",
+            "loc": 2.3,
+            "scale": 0.5
+          }
+        },
+        "sigma_W": {
+          "constraint": "positive",
+          "prior": {
+            "_target_": "tensorflow_probability.distributions.LogNormal",
+            "loc": 0.0,
+            "scale": 1.0
+          }
+        }
+      },
+      "hmc": {
+        "num_samples": 2,
+        "num_burnin": 1,
+        "step_size": 0.01,
+        "num_leapfrog_steps": 10,
+        "max_tree_depth": 10,
+        "adaptation_rate": 0.8,
+        "target_accept_prob": 0.7,
+        "seed": 42
+      }
+    },
+    "data": {
+      "T": 5,
+      "seed": 42,
+      "true_params": {
+        "sigma_V": 10.0,
+        "sigma_W": 1.0
+      }
+    }
+  },
+  "performance": {
+    "wall_time_seconds": 121.13546808389947,
+    "peak_memory_mb": 25.273903846740723,
+    "memory_increase_mb": 386.84375
+  }
+}

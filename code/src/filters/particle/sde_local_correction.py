@@ -9,6 +9,7 @@ import numpy as np
 import tensorflow as tf
 from .stochastic_edh import StochasticEDHFlow
 from ...utils.flow_params import compute_flow_params_global
+from ...utils.linalg import safe_inv
 from ...utils.ode_solvers import euler_step
 
 
@@ -36,7 +37,7 @@ class SDELocalCorrection(StochasticEDHFlow):
         P = self.predicted_cov
         R = tf.constant(self.model.observation_noise_cov, dtype=self.dtype)
         eta_bar_0 = self.eta_bar_0
-        R_inv = tf.linalg.inv(R)
+        R_inv = safe_inv(R)
         particles_flow = self.particles.value()
 
         # Compute H once at η̄_0 (global linearization)
@@ -52,7 +53,7 @@ class SDELocalCorrection(StochasticEDHFlow):
         # --- Precompute score correction quantities (constant over λ) ---
         q = self.diffusion_scale
         if q > 0:
-            P_inv = tf.linalg.inv(P)
+            P_inv = safe_inv(P)
             H_T_R_inv_H = tf.transpose(H_fixed) @ R_inv @ H_fixed
             P_inv_eta = tf.linalg.matvec(P_inv, eta_bar_0)
             # Use z_corrected for score correction

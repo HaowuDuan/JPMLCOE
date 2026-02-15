@@ -17,6 +17,7 @@ from .ledh_invertible import LEDHParticleFlowFilter
 from ...core.model_base import StateSpaceModel
 from ...utils.flow_params import compute_flow_params_batch
 from ...utils.distributions import compute_flow_weights
+from ...utils.linalg import safe_log_abs_det, safe_inv
 from ..kalman.batched_ekf import batched_ekf_update
 from ...resampling.diagnosis import effective_sample_size as ess_tf
 
@@ -86,7 +87,7 @@ class LEDHInvertibleBimodal(LEDHParticleFlowFilter):
 
         # Cache R_inv (constant across timesteps)
         if self.R_inv_cache is None:
-            self.R_inv_cache = tf.linalg.inv(R)
+            self.R_inv_cache = safe_inv(R)
         R_inv = self.R_inv_cache
         regularization_tf = tf.constant(self.regularization, dtype=self.dtype)
 
@@ -112,7 +113,7 @@ class LEDHInvertibleBimodal(LEDHParticleFlowFilter):
             eta_1 = eta_1 + d_lambda * drift_1
 
             M_batch = tf.expand_dims(I_sd, 0) + d_lambda * A_batch
-            log_det_M = tf.math.log(tf.abs(tf.linalg.det(M_batch)))
+            log_det_M = safe_log_abs_det(M_batch)
             log_theta = log_theta + log_det_M
 
         # Normalize Jacobians
@@ -177,7 +178,7 @@ class LEDHInvertibleBimodal(LEDHParticleFlowFilter):
         # Transition mean and covariance
         f_prev = self.model.state_transition_mean_batch(self.particles_prev.value())
         Q = self.model.state_transition_cov_batch(self.particles_prev.value())
-        Q_inv = tf.linalg.inv(Q)
+        Q_inv = safe_inv(Q)
 
         # Log transition probabilities (up to shared normalizing constant)
         diff_plus = eta_1 - f_prev

@@ -13,6 +13,7 @@ import numpy as np
 import tensorflow as tf
 from .edh_flow import ExactDaumHuangFlow
 from ...utils.flow_params import compute_flow_params_global
+from ...utils.linalg import safe_inv
 from ...utils.ode_solvers import euler_step
 
 
@@ -78,7 +79,7 @@ class StochasticEDHFlow(ExactDaumHuangFlow):
         beta_dot = state[1]
 
         M = J_prior + beta * J_meas
-        M_inv = tf.linalg.inv(M)
+        M_inv = safe_inv(M)
         dkappa = (tf.linalg.trace(J_meas) * tf.linalg.trace(M_inv)
                   - tf.linalg.trace(M) * tf.linalg.trace(
                       M_inv @ J_meas @ M_inv))
@@ -114,7 +115,7 @@ class StochasticEDHFlow(ExactDaumHuangFlow):
             dbeta_values: TF tensor, shape (n_lambda_steps,), dβ per step
         """
         H_tf = self.model.observation_jacobian(self.eta_bar_0)
-        J_prior = tf.linalg.inv(P)
+        J_prior = safe_inv(P)
         J_meas = tf.transpose(H_tf) @ R_inv @ H_tf
 
         # --- Bisection to find u₀ (Section 4) ---
@@ -175,7 +176,7 @@ class StochasticEDHFlow(ExactDaumHuangFlow):
         P = self.predicted_cov  # Already TF tensor from predict()
         R = tf.constant(self.model.observation_noise_cov, dtype=self.dtype)
         eta_bar_0 = self.eta_bar_0  # Already TF tensor from predict()
-        R_inv = tf.linalg.inv(R)
+        R_inv = safe_inv(R)
         particles_flow = self.particles.value()
 
         # Compute H once at η̄_0 (global linearization)
@@ -189,7 +190,7 @@ class StochasticEDHFlow(ExactDaumHuangFlow):
         # and   Σ(λ)⁻¹·m(λ) = P⁻¹·η̄₀ + λ·Hᵀ R⁻¹·y  (info vector)
         q = self.diffusion_scale
         if q > 0:
-            P_inv = tf.linalg.inv(P)
+            P_inv = safe_inv(P)
             H_T_R_inv_H = tf.transpose(H_fixed) @ R_inv @ H_fixed
             P_inv_eta = tf.linalg.matvec(P_inv, eta_bar_0)
             H_T_R_inv_y = tf.linalg.matvec(

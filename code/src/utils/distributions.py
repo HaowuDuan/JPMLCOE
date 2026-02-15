@@ -158,7 +158,7 @@ def compute_flow_weights(
 
     # 4. Vectorized log p(η₁ | x_{k-1})
     diff_1 = eta_1 - f_prev
-    L_Q = tf.linalg.cholesky(Q)
+    L_Q = safe_cholesky(Q)
     y_1 = tf.linalg.triangular_solve(L_Q, tf.transpose(diff_1), lower=True)
     y_1 = tf.transpose(y_1)
 
@@ -187,6 +187,9 @@ def compute_flow_weights(
         log_p_eta0 +
         tf.math.log(tf.maximum(prev_weights, 1e-300))
     )
+
+    # Replace NaN with -inf so those particles get zero weight
+    log_weights = tf.where(tf.math.is_finite(log_weights), log_weights, tf.constant(-1e30, dtype=log_weights.dtype))
 
     # Normalize
     weights = normalize_log_weights(log_weights, clip_range=clip_range)

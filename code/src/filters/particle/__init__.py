@@ -7,6 +7,7 @@ from .edh_flow_global import ExactDaumHuangFlowglobal
 from .ledh_flow import LocalExactDaumHuangFlow
 from .edh_invertible import EDHParticleFlowFilter
 from .ledh_invertible import LEDHParticleFlowFilter
+from .ledh_invertible_hmc import LEDHParticleFlowFilterHMC
 from .kernel_flow import KernelMappingPF
 from .stochastic_edh import StochasticEDHFlow
 from .sde_local_correction import SDELocalCorrection
@@ -26,6 +27,7 @@ __all__ = [
     'LocalExactDaumHuangFlow',
     'EDHParticleFlowFilter',
     'LEDHParticleFlowFilter',
+    'LEDHParticleFlowFilterHMC',
     'KernelMappingPF',
     'StochasticEDHFlow',
     'SDELocalCorrection',

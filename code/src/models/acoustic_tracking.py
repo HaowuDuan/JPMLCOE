@@ -375,7 +375,7 @@ class AcousticTrackingModel(StateSpaceModel):
             sensor_positions = tf.constant(self.sensor_positions, dtype=self.dtype)
             R_tf = tf.constant(self.R, dtype=self.dtype)
             R_inv = tf.linalg.inv(R_tf)
-            log_det_2pi_R = tf.math.log(tf.linalg.det(2.0 * np.pi * R_tf))
+            sign, log_det_2pi_R = tf.linalg.slogdet(2.0 * np.pi * R_tf)
 
             psi = tf.constant(self.source_intensity, dtype=self.dtype)
             d0 = tf.constant(self.regularization, dtype=self.dtype)
