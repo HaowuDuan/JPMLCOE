@@ -204,6 +204,20 @@ class DPFRunner:
 
         print(f"{self.sampler.upper()} complete!")
 
+        # Timing statistics
+        step_times_arr = np.array(step_times)
+        timing = {
+            'step_times': step_times_arr.tolist(),
+            'total_time_seconds': float(np.sum(step_times_arr)),
+            'mean_step_time': float(np.mean(step_times_arr)),
+            'median_step_time': float(np.median(step_times_arr)),
+            'min_step_time': float(np.min(step_times_arr)),
+            'max_step_time': float(np.max(step_times_arr)),
+            'burnin_time_seconds': float(np.sum(step_times_arr[:num_burnin])),
+            'sampling_time_seconds': float(np.sum(step_times_arr[num_burnin:])),
+            'mean_time_per_gradient_eval': float(np.mean(step_times_arr) / num_leapfrog_steps),
+        }
+
         return DPFResult(
             samples=samples_constrained,
             summary=summary,
@@ -214,7 +228,9 @@ class DPFRunner:
                 'sampler': self.sampler,
                 'num_samples': num_samples,
                 'num_burnin': num_burnin,
-                'num_observations': len(observations)
+                'num_leapfrog_steps': num_leapfrog_steps,
+                'num_observations': len(observations),
+                'timing': timing,
             }
         )
 
