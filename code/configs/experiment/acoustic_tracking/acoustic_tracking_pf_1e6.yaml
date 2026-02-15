@@ -10,5 +10,8 @@ defaults:
 T: 50
 seed: 42
 plot: true
-n_particles: 1000000
+
 output_dir: outputs/acoustic_tracking/acoustic_tracking_pf_1e6
+
+filter:
+  n_particles: 1000000

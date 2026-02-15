@@ -39,7 +39,7 @@ def soft_resample(particles: tf.Tensor, weights: tf.Tensor, alpha: float,
     cumsum = tf.cumsum(q_weights)
     
     # Generate systematic samples: u + k/N
-    u = tf.random.stateless_uniform([], seed=seed, minval=0.0, maxval=1.0/N_float)
+    u = tf.random.stateless_uniform([], seed=seed, minval=0.0, maxval=1.0/N_float, dtype=weights.dtype)
     u_vals = u + tf.range(N, dtype=weights.dtype) / N_float
 
     # Find indices using the q_weights cumulative sum

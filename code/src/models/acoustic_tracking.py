@@ -352,7 +352,7 @@ class AcousticTrackingModel(StateSpaceModel):
             # Noise: sample from N(0, Q)
             # Use Cholesky decomposition: Q = L @ L^T
             L = tf.linalg.cholesky(Q_tf)
-            z = tf.random.stateless_normal(input_shape, seed=seed)
+            z = tf.random.stateless_normal(input_shape, seed=seed, dtype=self.dtype)
             if len(x_tf.shape) == 1:
                 noise = L @ z
             else:
@@ -438,9 +438,9 @@ class AcousticTrackingModel(StateSpaceModel):
             seed1, seed2 = tf.random.experimental.stateless_split(seed)
 
             # Position: uniform [10, 30] x [10, 30]
-            xy = tf.random.stateless_uniform([n, 2], seed=seed1, minval=10.0, maxval=30.0)
+            xy = tf.random.stateless_uniform([n, 2], seed=seed1, minval=10.0, maxval=30.0, dtype=self.dtype)
 
             # Velocity: N(0, 1)
-            v = tf.random.stateless_normal([n, 2], seed=seed2)
+            v = tf.random.stateless_normal([n, 2], seed=seed2, dtype=self.dtype)
 
             return tf.concat([xy, v], axis=1)

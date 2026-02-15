@@ -1,0 +1,44 @@
+{
+  "rmse": 20.120685791294786,
+  "log_likelihood": -135.53130906125364,
+  "metadata": {
+    "filter_type": "LEDHParticleFlowFilter",
+    "n_particles": 500,
+    "n_lambda_steps": 29,
+    "resampling_method": "systematic",
+    "resampling_rate": 0.41,
+    "performance": {
+      "wall_time_seconds": 15.489183084107935,
+      "time_per_timestep_ms": 154.89183084107935,
+      "peak_memory_mb": 8.131532669067383,
+      "memory_increase_mb": 47.09375,
+      "start_memory_mb": 394.875,
+      "end_memory_mb": 441.96875,
+      "num_timesteps": 100
+    }
+  },
+  "config": {
+    "model": {
+      "_target_": "src.models.kitagawa.KitagawaModel",
+      "sigma_V": 10.0,
+      "sigma_W": 1.0,
+      "initial_var": 5.0
+    },
+    "filter": {
+      "_target_": "src.filters.particle.ledh_invertible_bimodal.LEDHInvertibleBimodal",
+      "n_particles": 500,
+      "n_lambda_steps": 29,
+      "resample_threshold": 0.5,
+      "flip_fraction": 1.0
+    },
+    "seed": 42,
+    "dtype": "float64",
+    "T": 100,
+    "output_dir": "outputs/kitagawa/kitagawa_ledh_invertible_bimodal",
+    "plot": true,
+    "device": "auto",
+    "tf_log_level": 2,
+    "verbose": true,
+    "show_progress": true
+  }
+}

@@ -1,0 +1,22 @@
+model:
+  _target_: src.models.kitagawa.KitagawaModel
+  sigma_V: 10.0
+  sigma_W: 1.0
+  initial_var: 5.0
+filter:
+  _target_: src.filters.particle.ledh_flow.LocalExactDaumHuangFlow
+  n_particles: 10000
+  n_lambda_steps: 29
+  integration_method: euler
+  use_feedback: true
+  regularization: 1.0e-05
+  n_threads: null
+seed: 42
+dtype: float64
+T: 100
+output_dir: outputs/kitagawa/kitagawa_ledh_flow_1e4
+plot: true
+device: auto
+tf_log_level: 2
+verbose: true
+show_progress: true

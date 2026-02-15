@@ -139,7 +139,7 @@ class LocalExactDaumHuangFlow(FlowFilterBase):
         seed = tf.constant(seed, dtype=tf.int32)
 
         L = tf.linalg.cholesky(initial_cov_tf)
-        z = tf.random.stateless_normal([self.n_particles, self.state_dim], seed=seed)
+        z = tf.random.stateless_normal([self.n_particles, self.state_dim], seed=seed, dtype=self.dtype)
         particles_tf = initial_mean_tf + tf.linalg.matmul(z, L, transpose_b=True)
 
         # Store as TensorFlow Variable

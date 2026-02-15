@@ -29,6 +29,7 @@ class LEDHParticleFlowFilter:
         resample_threshold: float = 0.5,
         resampling_method: Optional[Callable] = None,
         resampling_config: Optional[Dict[str, Any]] = None,
+        weight_clip_range: Optional[float] = None,
         debug_mode: bool = False,
         **filter_kwargs
     ):
@@ -41,6 +42,9 @@ class LEDHParticleFlowFilter:
             resample_threshold: Resample when ESS/N < threshold
             resampling_method: Resampling function (systematic/soft/ot_entropy)
             resampling_config: Dict of additional parameters for resampling
+            weight_clip_range: If set, clip log-weights to (-val, val) before normalization.
+                              Prevents weight collapse while preserving gradient signal.
+                              Typical values: 30-50. None = no clipping (MATLAB behavior).
             debug_mode: If True, store detailed diagnostics
         """
         self.model = model
@@ -51,6 +55,7 @@ class LEDHParticleFlowFilter:
         self.n_lambda_steps = n_lambda_steps
         self.regularization = regularization
         self.resample_threshold = resample_threshold
+        self.weight_clip_range = (-weight_clip_range, weight_clip_range) if weight_clip_range is not None else None
         self.debug_mode = debug_mode
 
         # Handle resampling method configuration
@@ -263,7 +268,7 @@ class LEDHParticleFlowFilter:
             model=self.model,
             prev_weights=self.weights.value(),
             jacobians=theta,
-            clip_range=None  # No clipping - use max-normalization only (matches MATLAB)
+            clip_range=self.weight_clip_range
         )
         self.weights.assign(weights_new)
 
@@ -336,6 +341,47 @@ class LEDHParticleFlowFilter:
             axis=0
         )
         return mean, cov
+
+    def log_marginal_likelihood_tf(
+        self,
+        observations: tf.Tensor,
+        seed: tf.Tensor = None
+    ) -> tf.Tensor:
+        """
+        Total log marginal likelihood as a differentiable TF scalar.
+
+        Runs the full LEDH filter (initialize, predict/update loop)
+        and sums per-step log-likelihoods. All ops stay in TF graph
+        for HMC gradient computation.
+
+        For differentiability, resampling must use a differentiable method
+        (ot_entropy or soft). Systematic resampling will break gradients.
+
+        Args:
+            observations: (T, obs_dim), dtype matching model
+            seed: TF random seed (2,) for initialization
+
+        Returns:
+            Scalar tf.Tensor: log p(y_{1:T})
+        """
+        random_seed = int(seed[0].numpy()) if seed is not None else 42
+        self.initialize(random_seed=random_seed)
+
+        T = observations.shape[0]
+        total_log_lik = tf.constant(0.0, dtype=self.dtype)
+
+        for t in range(T):
+            # Advance time step for time-dependent models (e.g., Kitagawa)
+            if hasattr(self.model, 't'):
+                self.model.t = t + 1
+
+            self.predict()
+            self.update(observations[t])
+
+            # Accumulate the log-likelihood already computed in update()
+            total_log_lik = total_log_lik + self.log_likelihoods[-1]
+
+        return total_log_lik
 
     def filter(self, observations: np.ndarray,
                initial_mean: Optional[np.ndarray] = None,

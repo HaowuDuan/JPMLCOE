@@ -1,0 +1,43 @@
+{
+  "rmse": 20.67009986657791,
+  "log_likelihood": -132.73304158175154,
+  "metadata": {
+    "filter_type": "EDHParticleFlowFilter",
+    "n_particles": 500,
+    "n_lambda_steps": 29,
+    "resampling_method": "systematic",
+    "resampling_rate": 0.4,
+    "performance": {
+      "wall_time_seconds": 18.320190500002354,
+      "time_per_timestep_ms": 183.20190500002354,
+      "peak_memory_mb": 9.594672203063965,
+      "memory_increase_mb": 57.546875,
+      "start_memory_mb": 392.671875,
+      "end_memory_mb": 450.21875,
+      "num_timesteps": 100
+    }
+  },
+  "config": {
+    "model": {
+      "_target_": "src.models.kitagawa.KitagawaModel",
+      "sigma_V": 10.0,
+      "sigma_W": 1.0,
+      "initial_var": 5.0
+    },
+    "filter": {
+      "_target_": "src.filters.particle.edh_invertible.EDHParticleFlowFilter",
+      "n_particles": 500,
+      "n_lambda_steps": 29,
+      "resample_threshold": 0.5
+    },
+    "seed": 42,
+    "dtype": "float64",
+    "T": 100,
+    "output_dir": "outputs/kitagawa/kitagawa_edh_invertible",
+    "plot": true,
+    "device": "auto",
+    "tf_log_level": 2,
+    "verbose": true,
+    "show_progress": true
+  }
+}

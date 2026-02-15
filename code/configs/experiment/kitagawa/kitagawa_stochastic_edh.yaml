@@ -7,7 +7,7 @@ defaults:
   - override /filter: stochastic_edh
 
 # Override settings
-T: 500
+T: 100
 seed: 42
 plot: true
 output_dir: outputs/kitagawa/kitagawa_stochastic_edh

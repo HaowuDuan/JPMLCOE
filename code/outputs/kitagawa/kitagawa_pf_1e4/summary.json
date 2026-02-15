@@ -1,0 +1,43 @@
+{
+  "rmse": 19.27474298770512,
+  "log_likelihood": -359.00381805852214,
+  "metadata": {
+    "filter_type": "ParticleFilterTF",
+    "n_particles": 10000,
+    "resampling_rate": 1.0,
+    "resampling_method": "systematic",
+    "resampling_config": {},
+    "performance": {
+      "wall_time_seconds": 1.3293409999459982,
+      "time_per_timestep_ms": 13.293409999459982,
+      "peak_memory_mb": 9.954585075378418,
+      "memory_increase_mb": 55.9375,
+      "start_memory_mb": 394.890625,
+      "end_memory_mb": 450.828125,
+      "num_timesteps": 100
+    }
+  },
+  "config": {
+    "model": {
+      "_target_": "src.models.kitagawa.KitagawaModel",
+      "sigma_V": 10.0,
+      "sigma_W": 1.0,
+      "initial_var": 5.0
+    },
+    "filter": {
+      "_target_": "src.filters.particle.bootstrap_pf_tf.ParticleFilterTF",
+      "_recursive_": false,
+      "n_particles": 10000,
+      "resample_threshold": 0.5
+    },
+    "seed": 42,
+    "dtype": "float64",
+    "T": 100,
+    "output_dir": "outputs/kitagawa/kitagawa_pf_1e4",
+    "plot": true,
+    "device": "auto",
+    "tf_log_level": 2,
+    "verbose": true,
+    "show_progress": true
+  }
+}
