@@ -1,0 +1,53 @@
+# @package _global_
+# DPF: Infer noise parameters of Kitagawa model using LEDH with OT resampling
+
+model:
+  _target_: src.models.kitagawa.KitagawaModel
+  sigma_V: 5.0       # Initial guess (true: 10.0)
+  sigma_W: 2.0       # Initial guess (true: 1.0)
+  initial_var: 5.0
+
+filter:
+  _target_: src.filters.particle.ledh_invertible.LEDHParticleFlowFilter
+  n_particles: 200
+  n_lambda_steps: 29
+  resampling_method: ot_entropy
+  resampling_config:
+    epsilon: 0.5
+  weight_clip_range: 50.0    # Clip log-weights to (-50, 50) to prevent collapse
+
+dpf:
+  sampler: hmc
+
+  trainable_params:
+    sigma_V:
+      # init_value auto-read from model.sigma_V
+      constraint: positive
+      prior:
+        _target_: tensorflow_probability.distributions.LogNormal
+        loc: 2.3          # log(10) ~ 2.3
+        scale: 0.5
+    sigma_W:
+      # init_value auto-read from model.sigma_W
+      constraint: positive
+      prior:
+        _target_: tensorflow_probability.distributions.LogNormal
+        loc: 0.0
+        scale: 1.0
+
+  hmc:
+    num_samples: 500
+    num_burnin: 250
+    step_size: 0.01
+    num_leapfrog_steps: 10
+    max_tree_depth: 10
+    adaptation_rate: 0.8
+    target_accept_prob: 0.7
+    seed: 42
+
+data:
+  T: 100
+  seed: 42
+  true_params:
+    sigma_V: 10.0
+    sigma_W: 1.0

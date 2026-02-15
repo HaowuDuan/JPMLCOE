@@ -206,7 +206,7 @@ class StochasticVolatilityModel(StateSpaceModel):
             input_shape = tf.shape(x_tf)
 
             # Generate noise with correct shape
-            w = tf.random.stateless_normal(input_shape, seed=seed)
+            w = tf.random.stateless_normal(input_shape, seed=seed, dtype=self.dtype)
 
             # State transition: x' = α·x + σ·w
             return tf.constant(self.alpha, dtype=self.dtype) * x_tf + tf.constant(self.sigma, dtype=self.dtype) * w
@@ -247,5 +247,5 @@ class StochasticVolatilityModel(StateSpaceModel):
             Returns:
                 Initial states (n, 1)
             """
-            samples = tf.random.stateless_normal([n, 1], seed=seed) * np.sqrt(self.stationary_var)
+            samples = tf.random.stateless_normal([n, 1], seed=seed, dtype=self.dtype) * np.sqrt(self.stationary_var)
             return samples

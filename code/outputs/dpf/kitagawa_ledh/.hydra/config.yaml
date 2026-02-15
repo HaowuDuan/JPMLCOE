@@ -1,0 +1,45 @@
+dtype: float32
+tf_log_level: 2
+model:
+  _target_: src.models.kitagawa.KitagawaModel
+  sigma_V: 5.0
+  sigma_W: 2.0
+  initial_var: 5.0
+filter:
+  _target_: src.filters.particle.ledh_invertible.LEDHParticleFlowFilter
+  n_particles: 200
+  n_lambda_steps: 29
+  resampling_method: ot_entropy
+  resampling_config:
+    epsilon: 0.5
+  weight_clip_range: 50.0
+dpf:
+  sampler: hmc
+  trainable_params:
+    sigma_V:
+      constraint: positive
+      prior:
+        _target_: tensorflow_probability.distributions.LogNormal
+        loc: 2.3
+        scale: 0.5
+    sigma_W:
+      constraint: positive
+      prior:
+        _target_: tensorflow_probability.distributions.LogNormal
+        loc: 0.0
+        scale: 1.0
+  hmc:
+    num_samples: 10
+    num_burnin: 5
+    step_size: 0.01
+    num_leapfrog_steps: 10
+    max_tree_depth: 10
+    adaptation_rate: 0.8
+    target_accept_prob: 0.7
+    seed: 42
+data:
+  T: 100
+  seed: 42
+  true_params:
+    sigma_V: 10.0
+    sigma_W: 1.0

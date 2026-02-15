@@ -45,7 +45,8 @@ def batched_ekf_predict(
     F_T = tf.linalg.matrix_transpose(F_batch)
     cov_pred = tf.matmul(F_cov, F_T)
 
-    # Add Q (broadcast if Q is (sd, sd))
+    # Add Q (broadcast if Q is (sd, sd)), cast to match dtype
+    Q = tf.cast(Q, covs.dtype)
     if len(Q.shape) == 2:
         cov_pred = cov_pred + tf.expand_dims(Q, 0)
     else:
@@ -85,7 +86,7 @@ def batched_ekf_update(
     H_batch = model.observation_jacobian_batch(means)
 
     # Observation noise covariance — typically constant: (od, od)
-    R = model.observation_cov(means[0])
+    R = tf.cast(model.observation_cov(means[0]), covs.dtype)
 
     # Innovation: (N, od)
     innovation = tf.expand_dims(observation, 0) - y_pred

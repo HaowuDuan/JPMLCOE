@@ -1,3 +1,4 @@
+# @package _global_
 # DPF: Infer noise scales of LinearGaussianModel using EKF (= KF for linear models)
 
 model:
@@ -20,14 +21,14 @@ dpf:
 
   trainable_params:
     process_noise_std:
-      init_value: 0.5
+      # init_value auto-read from model.process_noise_std
       constraint: positive
       prior:
         _target_: tensorflow_probability.distributions.LogNormal
         loc: 0.0
         scale: 1.0
     obs_noise_std:
-      init_value: 1.0
+      # init_value auto-read from model.obs_noise_std
       constraint: positive
       prior:
         _target_: tensorflow_probability.distributions.LogNormal
@@ -38,6 +39,7 @@ dpf:
     num_samples: 1000
     num_burnin: 500
     step_size: 0.01
+    num_leapfrog_steps: 10
     max_tree_depth: 10
     adaptation_rate: 0.8
     target_accept_prob: 0.75

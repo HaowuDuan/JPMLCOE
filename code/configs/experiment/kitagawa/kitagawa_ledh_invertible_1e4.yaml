@@ -1,0 +1,17 @@
+# @package _global_
+
+# Experiment: LEDH Invertible on Kitagawa Model
+
+defaults:
+  - override /model: kitagawa
+  - override /filter: ledh_invertible
+
+# Override settings
+T: 100
+seed: 42
+plot: true
+output_dir: outputs/kitagawa/kitagawa_ledh_invertible_1e4
+
+
+filter:
+  n_particles: 10000

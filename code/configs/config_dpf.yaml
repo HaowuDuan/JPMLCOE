@@ -1,0 +1,17 @@
+# Base Hydra config for DPF (HMC parameter inference) experiments
+
+defaults:
+  - _self_
+  - optional dpf: null
+  - override hydra/job_logging: default
+  - override hydra/hydra_logging: default
+
+dtype: float32
+tf_log_level: 2
+
+hydra:
+  run:
+    dir: outputs/dpf/${hydra:runtime.choices.dpf}
+  sweep:
+    dir: outputs/dpf
+    subdir: ${hydra.job.override_dirname}

@@ -18,13 +18,15 @@ class ParameterHandler:
     - Handles Jacobian adjustments for log probability
     """
     
-    def __init__(self, param_specs: Dict[str, ParameterSpec]):
+    def __init__(self, param_specs: Dict[str, ParameterSpec], dtype=None):
         """
         Initialize parameter handler.
-        
+
         Args:
             param_specs: Dictionary mapping parameter names to specifications
+            dtype: TensorFlow dtype for parameter tensors (default: tf.float32)
         """
+        self.dtype = dtype if dtype is not None else tf.float32
         self.param_specs = param_specs
         self.param_names = list(param_specs.keys())
         self.num_params = len(self.param_names)
@@ -83,10 +85,10 @@ class ParameterHandler:
             bijector = self.bijectors[name]
             
             # Transform constrained → unconstrained via inverse bijector
-            constrained = tf.constant(spec.init_value, dtype=tf.float32)
+            constrained = tf.constant(spec.init_value, dtype=self.dtype)
             unconstrained = bijector.inverse(constrained)
             unconstrained_values.append(unconstrained)
-        
+
         return tf.stack(unconstrained_values)
     
     def constrain(self, unconstrained_params: tf.Tensor) -> Dict[str, tf.Tensor]:
@@ -122,7 +124,7 @@ class ParameterHandler:
         
         for name in self.param_names:
             bijector = self.bijectors[name]
-            constrained = tf.constant(constrained_params[name], dtype=tf.float32)
+            constrained = tf.constant(constrained_params[name], dtype=self.dtype)
             unconstrained = bijector.inverse(constrained)
             unconstrained_values.append(unconstrained)
         
@@ -142,7 +144,7 @@ class ParameterHandler:
         Returns:
             Log prior probability (scalar)
         """
-        log_prob = tf.constant(0.0, dtype=tf.float32)
+        log_prob = tf.constant(0.0, dtype=self.dtype)
         
         for name in self.param_names:
             spec = self.param_specs[name]

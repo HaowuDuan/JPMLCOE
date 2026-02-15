@@ -152,7 +152,7 @@ class StochasticEDHFlow(ExactDaumHuangFlow):
             beta_values.append(state[0])
 
         beta_tf = tf.stack(beta_values)
-        dbeta_tf = beta_tf - tf.concat([[0.0], beta_tf[:-1]], axis=0)
+        dbeta_tf = beta_tf - tf.concat([tf.zeros([1], dtype=self.dtype), beta_tf[:-1]], axis=0)
         return beta_tf, dbeta_tf
 
     # ------------------------------------------------------------------
