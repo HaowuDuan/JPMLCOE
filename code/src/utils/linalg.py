@@ -95,6 +95,50 @@ def log_det(A: tf.Tensor) -> tf.Tensor:
     return logdet
 
 
+def safe_inv(A: tf.Tensor, jitter: float = 1e-10) -> tf.Tensor:
+    """
+    Compute matrix inverse with diagonal regularization.
+
+    Prevents crashes when A is singular or near-singular (e.g. during
+    HMC exploration when parameters take extreme values).
+
+    NOT @tf.function: must run eagerly so MatrixInverse returns NaN/Inf
+    instead of raising on near-singular inputs.
+
+    Args:
+        A: Matrix of shape (..., n, n)
+        jitter: Regularization added to diagonal (default: 1e-10)
+
+    Returns:
+        A^{-1} of shape (..., n, n)
+    """
+    n = tf.shape(A)[-1]
+    eye = tf.eye(n, dtype=A.dtype)
+    return tf.linalg.inv(A + jitter * eye)
+
+
+@tf.function
+def safe_log_abs_det(M: tf.Tensor, jitter: float = 1e-8) -> tf.Tensor:
+    """
+    Compute log|det(M)| with regularization for backward pass stability.
+
+    TF's gradient of det(M) uses MatrixInverse, which crashes in @tf.function
+    when M is singular (eager mode silently returns NaN instead). Adding
+    jitter*I ensures M is always invertible for the backward pass.
+
+    Args:
+        M: Matrix of shape (..., n, n). Need not be symmetric or PD.
+        jitter: Regularization added to diagonal (default: 1e-8)
+
+    Returns:
+        log|det(M)| of shape (...)
+    """
+    n = tf.shape(M)[-1]
+    eye = tf.eye(n, dtype=M.dtype)
+    M_reg = M + jitter * eye
+    return tf.math.log(tf.abs(tf.linalg.det(M_reg)))
+
+
 @tf.function
 def symmetrize(A: tf.Tensor) -> tf.Tensor:
     """

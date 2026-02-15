@@ -7,6 +7,7 @@ from concurrent.futures import ThreadPoolExecutor
 from .flow_base import FlowFilterBase
 from ..kalman.extended_kalman import ExtendedKalmanFilter
 from ...utils.flow_params import compute_flow_params, compute_flow_params_batch
+from ...utils.linalg import safe_inv, safe_cholesky
 from ...utils.ode_solvers import euler_step
 from ...resampling import systematic_resample, soft_resample, ot_entropy_resample
 
@@ -138,7 +139,7 @@ class LocalExactDaumHuangFlow(FlowFilterBase):
             seed = [0, 0]
         seed = tf.constant(seed, dtype=tf.int32)
 
-        L = tf.linalg.cholesky(initial_cov_tf)
+        L = safe_cholesky(initial_cov_tf)
         z = tf.random.stateless_normal([self.n_particles, self.state_dim], seed=seed, dtype=self.dtype)
         particles_tf = initial_mean_tf + tf.linalg.matmul(z, L, transpose_b=True)
 
@@ -321,7 +322,7 @@ class LocalExactDaumHuangFlow(FlowFilterBase):
 
         # Cache R_inv (constant across timesteps)
         if self.R_inv_cache is None:
-            self.R_inv_cache = tf.linalg.inv(R_tf)
+            self.R_inv_cache = safe_inv(R_tf)
         R_inv_tf = self.R_inv_cache
 
         # Use exponential lambda schedule

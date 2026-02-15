@@ -7,7 +7,7 @@ from typing import Optional, Tuple, Callable
 from ...core.filter_base import Filter
 from ...core.types import FilterResult
 from ...core.model_base import StateSpaceModel
-from ...utils.linalg import safe_cholesky, symmetrize
+from ...utils.linalg import safe_cholesky, safe_inv, symmetrize
 
 
 class UnscentedKalmanFilter(Filter):
@@ -255,7 +255,7 @@ class UnscentedKalmanFilter(Filter):
         )
 
         # Kalman gain
-        K = P_xy @ tf.linalg.inv(S)
+        K = P_xy @ safe_inv(S)
 
         # Innovation
         innovation = observation - y_pred

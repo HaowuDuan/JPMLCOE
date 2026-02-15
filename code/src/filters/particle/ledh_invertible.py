@@ -9,6 +9,7 @@ from ...core.types import FilterResult
 from ..kalman.batched_ekf import batched_ekf_predict, batched_ekf_update
 from ...utils.flow_params import compute_flow_params_batch
 from ...utils.distributions import compute_flow_weights
+from ...utils.linalg import safe_log_abs_det, safe_inv, safe_cholesky
 from ...resampling import systematic_resample, soft_resample, ot_entropy_resample
 from ...resampling.diagnosis import effective_sample_size as ess_tf
 
@@ -162,7 +163,7 @@ class LEDHParticleFlowFilter:
         initial_mean_tf = tf.constant(initial_mean, dtype=self.dtype)
         initial_cov_tf = tf.constant(initial_cov, dtype=self.dtype)
 
-        L = tf.linalg.cholesky(initial_cov_tf)
+        L = safe_cholesky(initial_cov_tf)
         z = tf.random.stateless_normal([self.n_particles, self.state_dim], seed=seed, dtype=self.dtype)
         particles_tf = initial_mean_tf + tf.linalg.matmul(z, L, transpose_b=True)
 
@@ -218,7 +219,7 @@ class LEDHParticleFlowFilter:
 
         # Cache R_inv (constant across timesteps)
         if self.R_inv_cache is None:
-            self.R_inv_cache = tf.linalg.inv(R)
+            self.R_inv_cache = safe_inv(R)
         R_inv = self.R_inv_cache
         regularization_tf = tf.constant(self.regularization, dtype=self.dtype)
 
@@ -249,7 +250,7 @@ class LEDHParticleFlowFilter:
 
             # Vectorized log-det of Jacobian: M = I + dλ * A
             M_batch = tf.expand_dims(I_sd, 0) + d_lambda * A_batch  # (N, sd, sd)
-            log_det_M = tf.math.log(tf.abs(tf.linalg.det(M_batch)))  # (N,)
+            log_det_M = safe_log_abs_det(M_batch)  # (N,)
             log_theta = log_theta + log_det_M
 
         # Normalize Jacobians for numerical stability

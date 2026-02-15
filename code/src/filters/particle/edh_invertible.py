@@ -10,6 +10,7 @@ from ...core.types import FilterResult
 from ..kalman.extended_kalman import ExtendedKalmanFilter
 from ...utils.flow_params import compute_flow_params
 from ...utils.distributions import compute_flow_weights
+from ...utils.linalg import safe_inv, safe_cholesky
 from ...utils.ode_solvers import euler_step
 from ...resampling import systematic_resample, soft_resample, ot_entropy_resample
 from ...resampling.diagnosis import effective_sample_size as ess_tf
@@ -167,7 +168,7 @@ class EDHParticleFlowFilter:
         initial_mean_tf = tf.constant(initial_mean, dtype=self.dtype)
         initial_cov_tf = tf.constant(initial_cov, dtype=self.dtype)
 
-        L = tf.linalg.cholesky(initial_cov_tf)
+        L = safe_cholesky(initial_cov_tf)
         z = tf.random.stateless_normal([self.n_particles, self.state_dim], seed=seed, dtype=self.dtype)
         particles_tf = initial_mean_tf + tf.linalg.matmul(z, L, transpose_b=True)
 
@@ -237,8 +238,8 @@ class EDHParticleFlowFilter:
         # Cache R_inv
         R = self.model.observation_noise_cov
         if self.R_inv_cache is None:
-            L = tf.linalg.cholesky(R)
-            self.R_inv_cache = tf.linalg.inv(tf.transpose(L)) @ tf.linalg.inv(L)
+            L = safe_cholesky(R)
+            self.R_inv_cache = safe_inv(R)
             self.L_cache = L
 
         # Line 9: Set η̄ = η̄_0 (plain tensor, reassigned each step)

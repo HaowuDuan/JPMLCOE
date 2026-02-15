@@ -6,7 +6,7 @@ import time
 from typing import Tuple, Union, List, Optional, Callable
 from ...core.filter_base import Filter
 from ...core.types import FilterResult
-from ...utils.linalg import symmetrize
+from ...utils.linalg import symmetrize, safe_inv
 
 
 class KalmanFilter(Filter):
@@ -160,7 +160,7 @@ class KalmanFilter(Filter):
         innovation_cov = self.H @ cov @ tf.transpose(self.H) + self.R
 
         # Kalman gain
-        kalman_gain = cov @ tf.transpose(self.H) @ tf.linalg.inv(innovation_cov)
+        kalman_gain = cov @ tf.transpose(self.H) @ safe_inv(innovation_cov)
 
         # Update mean
         mean_updated = mean + tf.linalg.matvec(kalman_gain, innovation)

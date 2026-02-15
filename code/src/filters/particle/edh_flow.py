@@ -6,6 +6,7 @@ from typing import Tuple, Optional, Callable, Dict, Any
 from .flow_base import FlowFilterBase
 from ..kalman.extended_kalman import ExtendedKalmanFilter
 from ...utils.flow_params import compute_flow_params
+from ...utils.linalg import safe_inv, safe_cholesky
 from ...utils.ode_solvers import euler_step, rk4_step
 from ...resampling import systematic_resample, soft_resample, ot_entropy_resample
 
@@ -127,7 +128,7 @@ class ExactDaumHuangFlow(FlowFilterBase):
             seed = [0, 0]
         seed = tf.constant(seed, dtype=tf.int32)
 
-        L = tf.linalg.cholesky(initial_cov_tf)
+        L = safe_cholesky(initial_cov_tf)
         z = tf.random.stateless_normal([self.n_particles, self.state_dim], seed=seed, dtype=self.dtype)
         particles_tf = initial_mean_tf + tf.linalg.matmul(z, L, transpose_b=True)
 
@@ -215,7 +216,7 @@ class ExactDaumHuangFlow(FlowFilterBase):
         eta_bar_0_tf = self.eta_bar_0  # Already TF tensor from predict()
 
         # Compute R_inv (once per update)
-        R_inv_tf = tf.linalg.inv(R_tf)
+        R_inv_tf = safe_inv(R_tf)
 
         # Use exponential lambda schedule
         particles_flow = self.particles.value()
