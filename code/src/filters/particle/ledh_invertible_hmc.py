@@ -129,6 +129,15 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
         resample_fn = self._hmc_resampling_method
         resample_cfg = self._hmc_resampling_config
 
+        # Bypass nested @tf.function — inline into this trace so model
+        # attributes (sigma_V, sigma_W) resolve to symbolic tensors and
+        # gradients flow correctly through the full computation.
+        _ekf_predict = batched_ekf_predict.python_function
+        _ekf_update = batched_ekf_update.python_function
+        _flow_params = compute_flow_params_batch.python_function
+        _flow_weights = compute_flow_weights.python_function
+        _log_abs_det = safe_log_abs_det.python_function
+
         @tf.function
         def compiled_filter(observations, particles, weights, covs,
                             R, R_inv, regularization, seed_start,
@@ -147,7 +156,7 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
 
                 # --- Predict ---
                 particles_prev = particles
-                eta_bar_0, covs = batched_ekf_predict(model, particles, covs)
+                eta_bar_0, covs = _ekf_predict(model, particles, covs)
 
                 seed_tf = tf.stack([seed_ctr, tf.constant(0, dtype=tf.int32)])
                 seed_ctr = seed_ctr + 1
@@ -165,7 +174,7 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
                     d_lambda = lambda_steps[j]
                     lambda_val = lambda_val + d_lambda
 
-                    A_batch, b_batch = compute_flow_params_batch(
+                    A_batch, b_batch = _flow_params(
                         model, eta_bar, lambda_val, y, covs,
                         R, R_inv, eta_bar_0, sd, regularization
                     )
@@ -177,7 +186,7 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
                     eta_1 = eta_1 + d_lambda * drift_1
 
                     M_batch = tf.expand_dims(I_sd, 0) + d_lambda * A_batch
-                    log_det_M = safe_log_abs_det(M_batch)
+                    log_det_M = _log_abs_det(M_batch)
                     log_theta = log_theta + log_det_M
 
                 # Normalize Jacobians
@@ -188,7 +197,7 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
                 particles = eta_1
 
                 # --- Weights ---
-                weights = compute_flow_weights(
+                weights = _flow_weights(
                     eta_1=eta_1, eta_0=eta_0,
                     particles_prev=particles_prev,
                     observation=y, model=model,
@@ -206,7 +215,7 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
                 log_lik = log_lik + log_lik_step
 
                 # --- EKF covariance update ---
-                _, covs = batched_ekf_update(model, eta_bar_0, covs, y)
+                _, covs = _ekf_update(model, eta_bar_0, covs, y)
 
                 # --- Conditional resampling via tf.cond ---
                 ess = ess_tf(weights)
@@ -286,14 +295,14 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
                 observations, R, R_inv, regularization_tf
             )
 
-        # Ensure model params are tensors (not Python floats) so @tf.function
-        # treats them as tensor inputs and doesn't re-trace on value changes.
+        # Ensure model params are plain tensors so @tf.function treats them as
+        # tensor inputs (not constants baked in at trace time).
+        # tf.identity converts tf.Variable -> plain tensor while keeping the
+        # gradient chain intact.
         sigma_V = self.model.sigma_V
-        if not isinstance(sigma_V, tf.Tensor):
-            sigma_V = tf.constant(float(sigma_V), dtype=self.dtype)
+        sigma_V = tf.identity(sigma_V) if isinstance(sigma_V, tf.Tensor) else tf.constant(float(sigma_V), dtype=self.dtype)
         sigma_W = self.model.sigma_W
-        if not isinstance(sigma_W, tf.Tensor):
-            sigma_W = tf.constant(float(sigma_W), dtype=self.dtype)
+        sigma_W = tf.identity(sigma_W) if isinstance(sigma_W, tf.Tensor) else tf.constant(float(sigma_W), dtype=self.dtype)
 
         return self._compiled_filter(
             observations,
@@ -307,6 +316,14 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
 
     def _run_eager(self, observations, R, R_inv, regularization_tf):
         """Eager fallback: Python for-loop with Variable.assign."""
+        # Bypass @tf.function to avoid autograph issues (e.g. isinstance in
+        # _as_sigma) and ensure GradientTape tracks ops eagerly.
+        _ekf_predict = batched_ekf_predict.python_function
+        _ekf_update = batched_ekf_update.python_function
+        _flow_params = compute_flow_params_batch.python_function
+        _flow_weights = compute_flow_weights.python_function
+        _log_abs_det = safe_log_abs_det.python_function
+
         T = observations.shape[0]
         total_log_lik = tf.constant(0.0, dtype=self.dtype)
 
@@ -317,7 +334,7 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
             # --- Predict ---
             self.particles_prev.assign(self.particles.value())
 
-            eta_bar_0_tf, cov_pred_tf = batched_ekf_predict(
+            eta_bar_0_tf, cov_pred_tf = _ekf_predict(
                 self.model, self.particles.value(), self.particle_covs.value()
             )
             self.particle_covs.assign(cov_pred_tf)
@@ -342,7 +359,7 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
                 d_lambda = self.lambda_steps[j]
                 lambda_val = lambda_val + d_lambda
 
-                A_batch, b_batch = compute_flow_params_batch(
+                A_batch, b_batch = _flow_params(
                     self.model, eta_bar, lambda_val, y,
                     self.particle_covs.value(),
                     R, R_inv, self.eta_bar_0.value(),
@@ -356,7 +373,7 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
                 eta_1 = eta_1 + d_lambda * drift_1
 
                 M_batch = tf.expand_dims(I_sd, 0) + d_lambda * A_batch
-                log_det_M = safe_log_abs_det(M_batch)
+                log_det_M = _log_abs_det(M_batch)
                 log_theta = log_theta + log_det_M
 
             # Normalize Jacobians
@@ -367,7 +384,7 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
             self.particles.assign(eta_1)
 
             # --- Weights ---
-            weights_new = compute_flow_weights(
+            weights_new = _flow_weights(
                 eta_1=eta_1,
                 eta_0=self.eta_0.value(),
                 particles_prev=self.particles_prev.value(),
@@ -388,7 +405,7 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
             total_log_lik = total_log_lik + log_lik
 
             # --- EKF covariance update ---
-            _, cov_updated = batched_ekf_update(
+            _, cov_updated = _ekf_update(
                 self.model, self.eta_bar_0.value(),
                 self.particle_covs.value(), y
             )

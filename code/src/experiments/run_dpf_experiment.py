@@ -170,6 +170,7 @@ def run_dpf_experiment(cfg: DictConfig) -> Dict[str, Any]:
             target_accept_prob=hmc_cfg.get('target_accept_prob', 0.75),
             seed=hmc_cfg.get('seed', 42),
             max_tree_depth=hmc_cfg.get('max_tree_depth', 10),
+            grad_clip_norm=float(hmc_cfg.get('grad_clip_norm', 100.0)),
         )
 
     # 6. Print results

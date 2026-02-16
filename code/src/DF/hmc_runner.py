@@ -1,4 +1,4 @@
-"""Main HMC/NUTS runner for parameter inference with differentiable filters."""
+"""Main HMC/NUTS/PMMH runner for parameter inference with differentiable filters."""
 
 import tensorflow as tf
 import tensorflow_probability as tfp
@@ -43,7 +43,7 @@ class DPFRunner:
             filter_class: Filter class (e.g., ExtendedKalmanFilter)
             filter_kwargs: Keyword arguments for filter initialization
             param_specs: Dictionary of parameter specifications
-            sampler: 'nuts' or 'hmc'
+            sampler: 'nuts', 'hmc', or 'custom_hmc'
         """
         self.base_model = base_model
         self.filter_class = filter_class
@@ -87,6 +87,18 @@ class DPFRunner:
 
         return -(log_likelihood + log_prior)
 
+    def _value_and_grad(self, q):
+        """Compute log-posterior and its gradient at q."""
+        with tf.GradientTape() as tape:
+            tape.watch(q)
+            nlp = self._negative_log_posterior(q)
+        grad = tape.gradient(nlp, q)
+        # Replace None/NaN gradient with zeros
+        if grad is None:
+            grad = tf.zeros_like(q)
+        grad = tf.where(tf.math.is_finite(grad), grad, tf.zeros_like(grad))
+        return -nlp, -grad  # return log_prob and grad_log_prob
+
     def run_inference(
         self,
         observations: np.ndarray,
@@ -97,11 +109,28 @@ class DPFRunner:
         adaptation_rate: float = 0.8,
         target_accept_prob: float = 0.75,
         seed: Optional[int] = None,
-        max_tree_depth: int = 10
+        max_tree_depth: int = 10,
+        grad_clip_norm: float = 100.0,
     ) -> DPFResult:
-        """Run HMC or NUTS to sample from posterior p(theta | y)."""
+        """Run HMC or NUTS to sample from posterior p(theta | y).
+
+        Args:
+            grad_clip_norm: Max gradient L2 norm for custom_hmc sampler.
+        """
         dtype = getattr(self.base_model, 'dtype', tf.float32)
         self._observations_tf = tf.constant(observations, dtype=dtype)
+
+        if self.sampler == 'custom_hmc':
+            return self._run_custom_hmc(
+                num_samples=num_samples,
+                num_burnin=num_burnin,
+                step_size=step_size,
+                num_leapfrog_steps=num_leapfrog_steps,
+                target_accept_prob=target_accept_prob,
+                grad_clip_norm=grad_clip_norm,
+                seed=seed,
+                dtype=dtype,
+            )
 
         def target_log_prob_fn(unconstrained_params):
             return -self._negative_log_posterior(unconstrained_params)
@@ -124,7 +153,7 @@ class DPFRunner:
 
         # Adaptive step size
         num_adaptation_steps = int(adaptation_rate * num_burnin)
-        adaptive_kernel = tfp.mcmc.SimpleStepSizeAdaptation(
+        adaptive_kernel = tfp.mcmc.DualAveragingStepSizeAdaptation(
             inner_kernel,
             num_adaptation_steps=num_adaptation_steps,
             target_accept_prob=target_accept_prob
@@ -133,16 +162,9 @@ class DPFRunner:
         if seed is not None:
             tf.random.set_seed(seed)
 
-        def trace_fn(_, pkr):
-            return {
-                'is_accepted': pkr.inner_results.is_accepted,
-                'step_size': pkr.new_step_size
-            }
-
         total_steps = num_burnin + num_samples
         print(f"Running {self.sampler.upper()}: {num_burnin} burn-in + {num_samples} sampling = {total_steps} total steps")
 
-        # Manual loop (identical to sample_chain internally) with progress tracking
         current_state = self.param_handler.unconstrained_init
         kernel_results = adaptive_kernel.bootstrap_results(current_state)
 
@@ -167,34 +189,187 @@ class DPFRunner:
                 is_accepted_list.append(accepted)
                 step_size_list.append(cur_step_size)
 
-                phase = "burn-in" if i < num_burnin else "sample"
-                idx = i - num_burnin + 1 if i >= num_burnin else i + 1
-                phase_total = num_samples if i >= num_burnin else num_burnin
-
-                # Current param values
-                constrained = self.param_handler.constrain(current_state)
-                param_str = ", ".join(f"{n}={float(v.numpy()):.4f}" for n, v in constrained.items())
-
-                # ETA
-                avg_dt = np.mean(step_times[-10:])  # rolling average of last 10
-                remaining = total_steps - (i + 1)
-                eta = avg_dt * remaining
-
-                # Running acceptance rate
-                accept_rate = np.mean(is_accepted_list[-min(50, len(is_accepted_list)):])
-
-                print(f"  [{phase} {idx}/{phase_total}] "
-                      f"{dt:.1f}s | accept={accept_rate:.0%} | step_size={cur_step_size:.4f} | "
-                      f"{param_str} | ETA {eta:.0f}s")
+                self._print_progress(
+                    i, num_burnin, num_samples, total_steps,
+                    dt, step_times, cur_step_size, current_state,
+                    is_accepted_list
+                )
 
                 if i >= num_burnin:
                     samples_list.append(current_state.numpy().copy())
 
-        samples_unconstrained = tf.constant(np.stack(samples_list), dtype=current_state.dtype)
+        return self._finalize(
+            samples_list, is_accepted_list, step_size_list,
+            step_times, num_burnin, num_samples, num_leapfrog_steps,
+            current_state.dtype, observations
+        )
+
+    # Backward compat
+    run_hmc = run_inference
+
+    def _run_custom_hmc(
+        self,
+        num_samples,
+        num_burnin,
+        step_size,
+        num_leapfrog_steps,
+        target_accept_prob,
+        grad_clip_norm,
+        seed,
+        dtype,
+    ):
+        """Custom HMC with gradient clipping for noisy particle filter gradients.
+
+        Uses gradient norm clipping to prevent leapfrog trajectories from
+        diverging when the particle filter likelihood surface has cliffs.
+        Dual averaging adapts step_size during burn-in.
+        """
+        if seed is not None:
+            tf.random.set_seed(seed)
+
+        total_steps = num_burnin + num_samples
+        print(f"Using Custom HMC (leapfrog={num_leapfrog_steps}, "
+              f"grad_clip={grad_clip_norm})")
+        print(f"Running: {num_burnin} burn-in + {num_samples} sampling "
+              f"= {total_steps} total steps")
+
+        q = self.param_handler.unconstrained_init
+
+        # Evaluate at starting point
+        lp, grad_lp = self._value_and_grad(q)
+        print(f"  Initial: lp={lp.numpy():.4f}, |grad|={tf.norm(grad_lp).numpy():.1f}, "
+              f"grad={grad_lp.numpy()}")
+
+        # Dual averaging state for step size adaptation
+        # (Hoffman & Gelman, 2014, Algorithm 5)
+        log_eps = tf.math.log(tf.constant(step_size, dtype=dtype))
+        log_eps_bar = tf.constant(0.0, dtype=dtype)
+        H_bar = tf.constant(0.0, dtype=dtype)
+        mu = tf.math.log(tf.constant(10.0 * step_size, dtype=dtype))
+        gamma = tf.constant(0.05, dtype=dtype)
+        t0 = tf.constant(10.0, dtype=dtype)
+        kappa = tf.constant(0.75, dtype=dtype)
+        num_adapt = int(0.8 * num_burnin)
+
+        samples_list = []
+        is_accepted_list = []
+        step_size_list = []
+        step_times = []
+        n_accepted = 0
+
+        for i in range(total_steps):
+            t_start = time.perf_counter()
+            eps = tf.exp(log_eps)
+
+            # Draw momentum
+            p = tf.random.normal(q.shape, dtype=dtype)
+            current_lp, current_grad = self._value_and_grad(q)
+
+            # Leapfrog integration with gradient clipping
+            q_prop = tf.identity(q)
+            p_prop = tf.identity(p)
+
+            # Half step for momentum
+            grad_clipped = tf.clip_by_norm(current_grad, grad_clip_norm)
+            p_prop = p_prop + 0.5 * eps * grad_clipped
+
+            for _ in range(num_leapfrog_steps):
+                # Full step for position
+                q_prop = q_prop + eps * p_prop
+                # Full step for momentum (except at end)
+                _, g = self._value_and_grad(q_prop)
+                g = tf.clip_by_norm(g, grad_clip_norm)
+                p_prop = p_prop + eps * g
+
+            # Undo last full momentum step, do half step instead
+            _, g = self._value_and_grad(q_prop)
+            g = tf.clip_by_norm(g, grad_clip_norm)
+            p_prop = p_prop - eps * g  # undo
+            p_prop = p_prop + 0.5 * eps * g  # half step
+
+            # Compute energies
+            prop_lp, _ = self._value_and_grad(q_prop)
+            H_start = -current_lp + 0.5 * tf.reduce_sum(p**2)
+            H_end = -prop_lp + 0.5 * tf.reduce_sum(p_prop**2)
+            dH = H_end - H_start
+            log_alpha = tf.minimum(tf.constant(0.0, dtype=dtype), -dH)
+            accept_prob = tf.exp(log_alpha)
+
+            # Metropolis accept/reject
+            u = tf.random.uniform([], dtype=dtype)
+            accepted = bool((u < accept_prob).numpy())
+            if accepted:
+                q = q_prop
+                n_accepted += 1
+
+            dt = time.perf_counter() - t_start
+
+            # Dual averaging step size adaptation (during burn-in)
+            m = tf.constant(float(i + 1), dtype=dtype)
+            if i < num_adapt:
+                w = tf.constant(1.0, dtype=dtype) / (m + t0)
+                H_bar = (1.0 - w) * H_bar + w * (target_accept_prob - accept_prob)
+                log_eps = mu - tf.sqrt(m) / gamma * H_bar
+                m_kappa = tf.pow(m, -kappa)
+                log_eps_bar = m_kappa * log_eps + (1.0 - m_kappa) * log_eps_bar
+            elif i == num_adapt:
+                log_eps = log_eps_bar  # fix step size after adaptation
+
+            cur_eps = float(tf.exp(log_eps).numpy())
+            is_accepted_list.append(accepted)
+            step_size_list.append(cur_eps)
+            step_times.append(dt)
+
+            self._print_progress(
+                i, num_burnin, num_samples, total_steps,
+                dt, step_times, cur_eps, q, is_accepted_list
+            )
+
+            if i >= num_burnin:
+                samples_list.append(q.numpy().copy())
+
+        return self._finalize(
+            samples_list, is_accepted_list, step_size_list,
+            step_times, num_burnin, num_samples, num_leapfrog_steps,
+            dtype, self._observations_tf.numpy()
+        )
+
+    def _print_progress(self, i, num_burnin, num_samples, total_steps,
+                        dt, step_times, cur_step_size, current_state,
+                        is_accepted_list):
+        """Print progress for HMC step."""
+        phase = "burn-in" if i < num_burnin else "sample"
+        idx = i - num_burnin + 1 if i >= num_burnin else i + 1
+        phase_total = num_samples if i >= num_burnin else num_burnin
+
+        constrained = self.param_handler.constrain(current_state)
+        param_str = ", ".join(
+            f"{n}={float(v.numpy()):.4f}" for n, v in constrained.items()
+        )
+
+        avg_dt = np.mean(step_times[-10:])
+        remaining = total_steps - (i + 1)
+        eta = avg_dt * remaining
+
+        accept_rate = np.mean(
+            is_accepted_list[-min(50, len(is_accepted_list)):]
+        )
+
+        print(f"  [{phase} {idx}/{phase_total}] "
+              f"{dt:.1f}s | accept={accept_rate:.0%} | step_size={cur_step_size:.4f} | "
+              f"{param_str} | ETA {eta:.0f}s")
+
+    def _finalize(self, samples_list, is_accepted_list, step_size_list,
+                  step_times, num_burnin, num_samples, num_leapfrog_steps,
+                  dtype, observations):
+        """Post-process samples and compute diagnostics."""
+        samples_unconstrained = tf.constant(
+            np.stack(samples_list),
+            dtype=dtype if not isinstance(dtype, np.dtype) else tf.float32
+        )
         trace_is_accepted = tf.constant(is_accepted_list[num_burnin:])
         trace_step_sizes = tf.constant(step_size_list[num_burnin:])
 
-        # Post-process
         samples_constrained = self._transform_samples(samples_unconstrained)
         diagnostics = self._compute_diagnostics(
             samples_constrained, trace_is_accepted, trace_step_sizes
@@ -204,7 +379,6 @@ class DPFRunner:
 
         print(f"{self.sampler.upper()} complete!")
 
-        # Timing statistics
         step_times_arr = np.array(step_times)
         timing = {
             'step_times': step_times_arr.tolist(),
@@ -215,7 +389,9 @@ class DPFRunner:
             'max_step_time': float(np.max(step_times_arr)),
             'burnin_time_seconds': float(np.sum(step_times_arr[:num_burnin])),
             'sampling_time_seconds': float(np.sum(step_times_arr[num_burnin:])),
-            'mean_time_per_gradient_eval': float(np.mean(step_times_arr) / num_leapfrog_steps),
+            'mean_time_per_gradient_eval': float(
+                np.mean(step_times_arr) / max(num_leapfrog_steps, 1)
+            ),
         }
 
         return DPFResult(
@@ -229,13 +405,11 @@ class DPFRunner:
                 'num_samples': num_samples,
                 'num_burnin': num_burnin,
                 'num_leapfrog_steps': num_leapfrog_steps,
-                'num_observations': len(observations),
+                'num_observations': len(observations)
+                    if hasattr(observations, '__len__') else 0,
                 'timing': timing,
             }
         )
-
-    # Backward compat
-    run_hmc = run_inference
 
     def _transform_samples(self, samples_unconstrained):
         num_samples = samples_unconstrained.shape[0]
