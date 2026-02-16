@@ -41,14 +41,16 @@ def _compute_gradient(observations, n_lambda_steps, eager_mode):
         eager_mode=eager_mode,
     )
 
-    # Simulate HMC: create tensors for sigma_V, sigma_W and watch them
+    # Simulate HMC: create Variables and convert to plain tensors via
+    # tf.identity (same as HMC runner which uses setattr with plain tensors).
     sigma_V = tf.Variable(5.0, dtype=tf.float32)
     sigma_W = tf.Variable(2.0, dtype=tf.float32)
 
     with tf.GradientTape() as tape:
-        # Set model params (same as HMC runner does via setattr)
-        model.sigma_V = sigma_V
-        model.sigma_W = sigma_W
+        tape.watch([sigma_V, sigma_W])
+        # Convert to plain tensors — gradient still flows through tf.identity
+        model.sigma_V = tf.identity(sigma_V)
+        model.sigma_W = tf.identity(sigma_W)
 
         seed = tf.constant([42, 0], dtype=tf.int32)
         log_lik = filter_obj.log_marginal_likelihood_tf(observations, seed=seed)

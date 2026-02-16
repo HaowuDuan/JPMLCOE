@@ -20,7 +20,7 @@ model:
 
 filter:
   _target_: src.filters.particle.ledh_invertible_hmc.LEDHParticleFlowFilterHMC
-  n_particles: 200
+  n_particles: 1000
   n_lambda_steps: 29
   resampling_method: ot_entropy       # used by filter() path (standalone filtering)
   resampling_config:
