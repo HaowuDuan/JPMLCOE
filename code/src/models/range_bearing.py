@@ -102,8 +102,8 @@ class RangeBearingModel(StateSpaceModel):
         if Sigma_0_np.shape != (2, 2):
             raise ValueError(f"Sigma_0 must be (2, 2), got {Sigma_0_np.shape}")
 
-        self.mu_0 = tf.constant(mu_0_np, dtype=self.dtype)
-        self.Sigma_0 = tf.constant(Sigma_0_np, dtype=self.dtype)
+        self._mu_0 = tf.constant(mu_0_np, dtype=self.dtype)
+        self._Sigma_0 = tf.constant(Sigma_0_np, dtype=self.dtype)
 
     @property
     def state_dim(self) -> int:
@@ -112,6 +112,14 @@ class RangeBearingModel(StateSpaceModel):
     @property
     def obs_dim(self) -> int:
         return 2
+
+    @property
+    def mu_0(self) -> tf.Tensor:
+        return self._mu_0
+
+    @property
+    def Sigma_0(self) -> tf.Tensor:
+        return self._Sigma_0
 
     @tf.function
     def sample_initial_state(self, seed: tf.Tensor) -> tf.Tensor:
@@ -233,11 +241,6 @@ class RangeBearingModel(StateSpaceModel):
     @tf.function
     def observation_function(self, x: tf.Tensor) -> tf.Tensor:
         """Observation function h(x) for flow filters: returns [range, bearing]."""
-        return self.observation_mean(x)
-
-    @tf.function
-    def observe(self, x: tf.Tensor) -> tf.Tensor:
-        """Observation function for kernel flow filters: returns [range, bearing]."""
         return self.observation_mean(x)
 
     @property

@@ -35,7 +35,7 @@ class SDELocalCorrection(StochasticEDHFlow):
         # --- Setup ---
         observation = y
         P = self.predicted_cov
-        R = tf.constant(self.model.observation_noise_cov, dtype=self.dtype)
+        R = tf.cast(self.model.observation_noise_cov, self.dtype)
         eta_bar_0 = self.eta_bar_0
         R_inv = safe_inv(R)
         particles_flow = self.particles.value()

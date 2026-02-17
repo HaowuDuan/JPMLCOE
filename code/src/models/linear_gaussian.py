@@ -96,19 +96,19 @@ class LinearGaussianModel(StateSpaceModel):
 
         # Initial state distribution
         if mu_0 is None:
-            self.mu_0 = tf.zeros(self.nx, dtype=self.dtype)
+            self._mu_0 = tf.zeros(self.nx, dtype=self.dtype)
         else:
-            self.mu_0 = tf.constant(mu_0, dtype=self.dtype)
+            self._mu_0 = tf.constant(mu_0, dtype=self.dtype)
 
         if Sigma_0 is None:
-            self.Sigma_0 = tf.eye(self.nx, dtype=self.dtype)
+            self._Sigma_0 = tf.eye(self.nx, dtype=self.dtype)
         else:
-            self.Sigma_0 = tf.constant(Sigma_0, dtype=self.dtype)
+            self._Sigma_0 = tf.constant(Sigma_0, dtype=self.dtype)
 
-        if self.mu_0.shape != (self.nx,):
-            raise ValueError(f"mu_0 must be ({self.nx},), got {self.mu_0.shape}")
-        if self.Sigma_0.shape != (self.nx, self.nx):
-            raise ValueError(f"Sigma_0 must be ({self.nx}, {self.nx}), got {self.Sigma_0.shape}")
+        if self._mu_0.shape != (self.nx,):
+            raise ValueError(f"mu_0 must be ({self.nx},), got {self._mu_0.shape}")
+        if self._Sigma_0.shape != (self.nx, self.nx):
+            raise ValueError(f"Sigma_0 must be ({self.nx}, {self.nx}), got {self._Sigma_0.shape}")
 
     @property
     def state_dim(self) -> int:
@@ -117,6 +117,14 @@ class LinearGaussianModel(StateSpaceModel):
     @property
     def obs_dim(self) -> int:
         return self.ny
+
+    @property
+    def mu_0(self) -> tf.Tensor:
+        return self._mu_0
+
+    @property
+    def Sigma_0(self) -> tf.Tensor:
+        return self._Sigma_0
 
     @property
     def Q(self):
@@ -148,66 +156,21 @@ class LinearGaussianModel(StateSpaceModel):
         """Allow direct assignment for backward compat."""
         self._R_base = value
 
-    @property
-    def initial_state_cov(self) -> tf.Tensor:
-        """Initial state covariance for EKF compatibility."""
-        return self.Sigma_0
+    # Sampling methods
 
-    @property
-    def initial_state_mean(self) -> tf.Tensor:
-        """Initial state mean for EKF compatibility."""
-        return self.mu_0
-
-    # TensorFlow methods
-
-    def sample_initial_state(self, seed: Union[tf.Tensor, np.random.Generator]):
-        """Sample from initial state distribution: X_0 ~ N(mu_0, Sigma_0).
-
-        Accepts either a numpy Generator (from generate_data) or TF seed (tuple of 2 ints)."""
-        if hasattr(seed, 'standard_normal'):
-            # NumPy rng from generate_data
-            rng = seed
-            z = rng.standard_normal(self.nx).astype(self.np_dtype)
-            L = np.linalg.cholesky(np.array(self.Sigma_0))
-            return np.array(self.mu_0) + L @ z
-        return self._sample_initial_state_tf(seed)
-
-    @tf.function
-    def _sample_initial_state_tf(self, seed: tf.Tensor) -> tf.Tensor:
-        """TF implementation for filters that pass seed."""
+    def sample_initial_state(self, seed: tf.Tensor) -> tf.Tensor:
+        """Sample from initial state distribution: X_0 ~ N(mu_0, Sigma_0)."""
         L = tf.linalg.cholesky(self.Sigma_0)
         z = tf.random.stateless_normal([self.nx], seed=seed, dtype=self.dtype)
         return self.mu_0 + tf.linalg.matvec(L, z)
 
-    def sample_state_transition(self, x, seed: Union[tf.Tensor, np.random.Generator]):
+    def sample_state_transition(self, x: tf.Tensor, seed: tf.Tensor) -> tf.Tensor:
         """Sample from state transition: X' = F·X + B·v, v ~ N(0, I)."""
-        if hasattr(seed, 'standard_normal'):
-            rng = seed
-            x_np = np.asarray(x)
-            v = rng.standard_normal(self.nv).astype(self.np_dtype)
-            F_np, B_np = np.array(self.F), np.array(self.B)
-            return F_np @ x_np + B_np @ v
-        return self._sample_state_transition_tf(x, seed)
-
-    @tf.function
-    def _sample_state_transition_tf(self, x: tf.Tensor, seed: tf.Tensor) -> tf.Tensor:
-        """TF implementation for filters that pass seed."""
         v = tf.random.stateless_normal([self.nv], seed=seed, dtype=self.dtype)
         return tf.linalg.matvec(self.F, x) + tf.linalg.matvec(self.B, v)
 
-    def sample_observation(self, x, seed: Union[tf.Tensor, np.random.Generator]):
+    def sample_observation(self, x: tf.Tensor, seed: tf.Tensor) -> tf.Tensor:
         """Sample observation: Y = H·X + D·W, W ~ N(0, I)."""
-        if hasattr(seed, 'standard_normal'):
-            rng = seed
-            x_np = np.asarray(x)
-            w = rng.standard_normal(self.nw).astype(self.np_dtype)
-            H_np, D_np = np.array(self.H), np.array(self.D)
-            return H_np @ x_np + D_np @ w
-        return self._sample_observation_tf(x, seed)
-
-    @tf.function
-    def _sample_observation_tf(self, x: tf.Tensor, seed: tf.Tensor) -> tf.Tensor:
-        """TF implementation for filters that pass seed."""
         w = tf.random.stateless_normal([self.nw], seed=seed, dtype=self.dtype)
         return tf.linalg.matvec(self.H, x) + tf.linalg.matvec(self.D, w)
 

@@ -1,4 +1,4 @@
-"""Acoustic Tracking Model matching Li & Coates paper.
+"""Acoustic Tracking Model matching Li & Coates paper (TensorFlow).
 
 This model matches the acoustic tracking scenario in Section V of:
 "Particle Filtering with Invertible Particle Flow" by Li & Coates.
@@ -7,12 +7,8 @@ Uses amplitude decay measurements from multiple sensors.
 """
 
 import numpy as np
-from typing import Optional, List
-try:
-    import tensorflow as tf
-    TF_AVAILABLE = True
-except ImportError:
-    TF_AVAILABLE = False
+import tensorflow as tf
+from typing import Optional
 
 from ..core.model_base import StateSpaceModel
 
@@ -29,20 +25,12 @@ class AcousticTrackingModel(StateSpaceModel):
         x_{t+1} = F @ x_t + w_t, w_t ~ N(0, Q)
 
     Observation (amplitude decay at each sensor):
-        z_j = Ψ / (r_j^2 + d_0) + noise
+        z_j = Psi / (r_j^2 + d_0) + noise
 
     where:
-        - Ψ: source intensity (10 in paper)
+        - Psi: source intensity (10 in paper)
         - r_j = ||x - s_j||: distance to sensor j
-        - s_j: position of sensor j
         - d_0: regularization parameter (0.1 in paper)
-        - noise ~ N(0, sigma_w^2)
-
-    Parameters from Li & Coates paper:
-        - State dim: 4
-        - Number of sensors:  25 
-        - Measurement noise: sigma_w^2 = 0.01
-        - Process noise: Q_filter (larger than ground truth)
     """
 
     def __init__(
@@ -53,22 +41,8 @@ class AcousticTrackingModel(StateSpaceModel):
         measurement_noise_std: float = 0.1,
         process_noise_cov: Optional[list] = None,
         dt: float = 1.0,
-        dtype=None
+        dtype=None,
     ):
-        """
-        Initialize Amplitude-based Acoustic Tracking Model.
-
-        Args:
-            sensor_positions: List of sensor positions [[s1_x, s1_y], ...],
-                             default: 4 sensors at corners of 40x40m area
-            source_intensity: Source intensity Ψ (paper uses 10)
-            regularization: Regularization parameter d_0 (paper uses 0.1)
-            measurement_noise_std: Measurement noise std (sigma_w)
-            process_noise_cov: Process noise covariance Q (4x4),
-                              default: Paper's filter covariance
-            dt: Time step
-        """
-        import tensorflow as tf
         if dtype is None:
             dtype = tf.float32
         self.dtype = dtype
@@ -80,40 +54,48 @@ class AcousticTrackingModel(StateSpaceModel):
 
         # Default: 4 sensors at corners of 40m x 40m area
         if sensor_positions is None:
-            self.sensor_positions = np.array([
-                [0.0, 0.0],      # Bottom-left
-                [40.0, 0.0],     # Bottom-right
-                [0.0, 40.0],     # Top-left
-                [40.0, 40.0]     # Top-right
+            sp_np = np.array([
+                [0.0, 0.0], [40.0, 0.0], [0.0, 40.0], [40.0, 40.0]
             ])
         else:
-            self.sensor_positions = np.array(sensor_positions)
+            sp_np = np.array(sensor_positions)
+        self.n_sensors = len(sp_np)
 
-        self.n_sensors = len(self.sensor_positions)
+        # TF constants
+        self._sensor_positions_tf = tf.constant(sp_np, dtype=dtype)
+        self._psi_tf = tf.constant(source_intensity, dtype=dtype)
+        self._d0_tf = tf.constant(regularization, dtype=dtype)
+        self._meas_noise_std_tf = tf.constant(measurement_noise_std, dtype=dtype)
 
         # State transition matrix (constant velocity model)
-        self.F = np.array([
-            [1, 0, dt, 0],
-            [0, 1, 0, dt],
-            [0, 0, 1, 0],
-            [0, 0, 0, 1]
+        F_np = np.array([
+            [1, 0, dt, 0], [0, 1, 0, dt], [0, 0, 1, 0], [0, 0, 0, 1]
         ])
+        self._F_tf = tf.constant(F_np, dtype=dtype)
 
-        # Process noise covariance - paper's filter covariance
+        # Process noise covariance
         if process_noise_cov is None:
-            # From Li & Coates paper Section V, Page 8
-            # Q = (1/20) * [[1/3, 0, 0.5, 0], [0, 1/3, 0, 0.5], [0.5, 0, 1, 0], [0, 0.5, 0, 1]]
-            self.Q = (1.0 / 20.0) * np.array([
-                [1.0/3.0,  0.0,      0.5,  0.0],
-                [0.0,      1.0/3.0,  0.0,  0.5],
-                [0.5,      0.0,      1.0,  0.0],
-                [0.0,      0.5,      0.0,  1.0]
+            Q_np = (1.0 / 20.0) * np.array([
+                [1.0/3.0, 0.0, 0.5, 0.0],
+                [0.0, 1.0/3.0, 0.0, 0.5],
+                [0.5, 0.0, 1.0, 0.0],
+                [0.0, 0.5, 0.0, 1.0],
             ])
         else:
-            self.Q = np.array(process_noise_cov)
+            Q_np = np.array(process_noise_cov)
+        self._Q_tf = tf.constant(Q_np, dtype=dtype)
+        self._L_Q = tf.linalg.cholesky(self._Q_tf)
 
         # Observation noise covariance
-        self.R = np.eye(self.n_sensors) * (measurement_noise_std ** 2)
+        self._R_tf = tf.eye(self.n_sensors, dtype=dtype) * tf.constant(
+            measurement_noise_std ** 2, dtype=dtype
+        )
+
+        # Initial distribution
+        self._mu_0 = tf.constant([20.0, 20.0, 0.0, 0.0], dtype=dtype)
+        self._Sigma_0 = tf.constant(
+            np.diag([33.33, 33.33, 1.0, 1.0]), dtype=dtype
+        )
 
     @property
     def state_dim(self) -> int:
@@ -124,323 +106,148 @@ class AcousticTrackingModel(StateSpaceModel):
         return self.n_sensors
 
     @property
-    def initial_state_mean(self) -> np.ndarray:
-        """
-        Initial state mean for Kalman filters.
-        
-        Returns center of sampling region [10, 30] x [10, 30] with zero velocity.
-        This matches the expected value of the sampling distribution.
-        """
-        return np.array([20.0, 20.0, 0.0, 0.0])
+    def mu_0(self) -> tf.Tensor:
+        return self._mu_0
 
     @property
-    def initial_state_cov(self) -> np.ndarray:
-        """
-        Initial state covariance for Kalman filters.
-        
-        Position: uniform([10, 30]) has variance = (30-10)^2 / 12 ≈ 33.33
-        Velocity: N(0, 1) has variance = 1.0
-        """
-        return np.diag([33.33, 33.33, 1.0, 1.0])
-
-    # NumPy sampling methods
-
-    def sample_initial_state(self, rng: np.random.Generator) -> np.ndarray:
-        """
-        Sample from initial state distribution.
-
-        Default: Uniform position in [10, 30] x [10, 30], velocity ~ N(0, 1)
-        """
-        x = rng.uniform(10, 30)
-        y = rng.uniform(10, 30)
-        vx = rng.normal(0, 1)
-        vy = rng.normal(0, 1)
-        return np.array([x, y, vx, vy])
-
-    def sample_state_transition(self, x: np.ndarray, rng: np.random.Generator) -> np.ndarray:
-        """Sample from state transition: x' = F @ x + w, w ~ N(0, Q)."""
-        mean = self.F @ x
-        noise = rng.multivariate_normal(np.zeros(4), self.Q)
-        return mean + noise
-
-    def sample_observation(self, x: np.ndarray, rng: np.random.Generator) -> np.ndarray:
-        """Sample observation: amplitude at each sensor with Gaussian noise."""
-        amplitudes = np.zeros(self.n_sensors)
-
-        for j in range(self.n_sensors):
-            # Distance from source to sensor j
-            dx = x[0] - self.sensor_positions[j, 0]
-            dy = x[1] - self.sensor_positions[j, 1]
-            r_squared = dx**2 + dy**2
-
-            # Amplitude decay model: z_j = Ψ / (r^2 + d_0)
-            true_amplitude = self.source_intensity / (r_squared + self.regularization)
-
-            # Add Gaussian noise
-            amplitudes[j] = true_amplitude + rng.normal(0, self.measurement_noise_std)
-
-        return amplitudes
-
-    # Deterministic methods (for Kalman/EKF/UKF)
-
-    def state_transition_mean(self, x: np.ndarray) -> np.ndarray:
-        """Mean of state transition: E[x' | x] = F @ x."""
-        return self.F @ x
-
-    def state_transition_cov(self, x: np.ndarray) -> np.ndarray:
-        """Covariance of state transition: Cov[x' | x] = Q."""
-        return self.Q
-
-    def state_jacobian(self, x: np.ndarray) -> np.ndarray:
-        """Jacobian of state transition: ∂f/∂x = F."""
-        return self.F
-
-    def observation_mean(self, x: np.ndarray) -> np.ndarray:
-        """Mean of observation: E[y | x] = h(x)."""
-        amplitudes = np.zeros(self.n_sensors)
-
-        for j in range(self.n_sensors):
-            dx = x[0] - self.sensor_positions[j, 0]
-            dy = x[1] - self.sensor_positions[j, 1]
-            r_squared = dx**2 + dy**2
-            amplitudes[j] = self.source_intensity / (r_squared + self.regularization)
-
-        return amplitudes
-
-    def observation_cov(self, x: np.ndarray) -> np.ndarray:
-        """Covariance of observation: Cov[y | x] = R."""
-        return self.R
-
-    def observation_jacobian(self, x: np.ndarray) -> np.ndarray:
-        """
-        Jacobian of observation function: ∂h/∂x.
-
-        h_j(x) = Ψ / (r_j^2 + d_0)
-
-        where r_j^2 = (x - s_j_x)^2 + (y - s_j_y)^2
-
-        ∂h_j/∂x = -2 * Ψ * (x - s_j_x) / (r_j^2 + d_0)^2
-        ∂h_j/∂y = -2 * Ψ * (y - s_j_y) / (r_j^2 + d_0)^2
-        ∂h_j/∂vx = 0
-        ∂h_j/∂vy = 0
-
-        Returns:
-            H: (n_sensors, 4) Jacobian matrix
-        """
-        H = np.zeros((self.n_sensors, 4))
-        psi = self.source_intensity
-        d0 = self.regularization
-
-        for j in range(self.n_sensors):
-            dx = x[0] - self.sensor_positions[j, 0]
-            dy = x[1] - self.sensor_positions[j, 1]
-            r_squared = dx**2 + dy**2
-
-            # Gradient components: ∂(Ψ/(r^2+d0))/∂x = -2*Ψ*(x-sx)/(r^2+d0)^2
-            denominator_squared = (r_squared + d0) ** 2
-            H[j, 0] = -2.0 * psi * dx / denominator_squared  # ∂h_j/∂x
-            H[j, 1] = -2.0 * psi * dy / denominator_squared  # ∂h_j/∂y
-            H[j, 2] = 0.0  # ∂h_j/∂vx
-            H[j, 3] = 0.0  # ∂h_j/∂vy
-
-        return H
-
-    def log_observation_prob(self, y: np.ndarray, x: np.ndarray) -> float:
-        """
-        Log probability of observation: log p(y | x).
-
-        p(y | x) = N(y | h(x), R)
-        """
-        h_x = self.observation_mean(x)
-        residual = y - h_x
-
-        # Compute log probability using Cholesky for stability
-        try:
-            L = np.linalg.cholesky(self.R)
-            z = np.linalg.solve(L, residual)
-            log_det = 2 * np.sum(np.log(np.diag(L)))
-            mahalanobis = np.sum(z**2)
-        except np.linalg.LinAlgError:
-            # Fallback
-            R_inv = np.linalg.pinv(self.R)
-            log_det = np.log(np.linalg.det(2 * np.pi * self.R) + 1e-10)
-            mahalanobis = residual.T @ R_inv @ residual
-            return -0.5 * (log_det + mahalanobis)
-
-        return -0.5 * (log_det + self.obs_dim * np.log(2 * np.pi) + mahalanobis)
-
-    def observation_function(self, x: np.ndarray) -> np.ndarray:
-        """Observation function h(x) for flow filters."""
-        return self.observation_mean(x)
+    def Sigma_0(self) -> tf.Tensor:
+        return self._Sigma_0
 
     @property
-    def observation_noise_cov(self) -> np.ndarray:
-        """Observation noise covariance R for flow filters."""
-        return self.R
+    def observation_noise_cov(self) -> tf.Tensor:
+        return self._R_tf
 
     @property
-    def process_noise_cov(self) -> np.ndarray:
-        """Process noise covariance Q for flow filters."""
-        return self.Q
+    def process_noise_cov(self) -> tf.Tensor:
+        return self._Q_tf
 
-    # Batch methods for optimized particle filtering
+    # ------------------------------------------------------------------
+    # Observation helpers
+    # ------------------------------------------------------------------
 
-    def state_transition_mean_batch(self, particles: np.ndarray) -> np.ndarray:
-        """Vectorized state transition mean: F @ particles.T → transpose."""
-        return (self.F @ particles.T).T
+    def _amplitudes(self, x: tf.Tensor) -> tf.Tensor:
+        """Compute amplitude decay h(x) for single state (4,)."""
+        pos = x[:2]  # (2,)
+        diff = pos - self._sensor_positions_tf  # (n_sensors, 2)
+        r_sq = tf.reduce_sum(diff ** 2, axis=1)  # (n_sensors,)
+        return self._psi_tf / (r_sq + self._d0_tf)
 
-    def state_transition_cov_batch(self, particles: np.ndarray) -> np.ndarray:
-        """Q is constant - return single matrix."""
-        return self.Q
-
-    def log_observation_prob_batch(self, observation: np.ndarray, particles: np.ndarray) -> np.ndarray:
-        """Vectorized amplitude decay log-prob for all particles."""
-        # Positions: (N, 2) - extract x, y from [x, y, vx, vy]
+    def _amplitudes_batch(self, particles: tf.Tensor) -> tf.Tensor:
+        """Compute amplitude decay for batch (N, 4) -> (N, n_sensors)."""
         pos = particles[:, :2]  # (N, 2)
+        diff = pos[:, tf.newaxis, :] - self._sensor_positions_tf[tf.newaxis, :, :]
+        r_sq = tf.reduce_sum(diff ** 2, axis=2)  # (N, n_sensors)
+        return self._psi_tf / (r_sq + self._d0_tf)
 
-        # Distances from all particles to all sensors
-        # pos: (N, 2), sensor_positions: (M, 2)
-        # Broadcasting: (N, 1, 2) - (1, M, 2) → (N, M, 2)
-        diff = pos[:, np.newaxis, :] - self.sensor_positions[np.newaxis, :, :]
-        r_squared = np.sum(diff**2, axis=2)  # (N, M)
+    # ------------------------------------------------------------------
+    # Sampling methods
+    # ------------------------------------------------------------------
 
-        # Amplitudes: (N, M)
-        amplitudes = self.source_intensity / (r_squared + self.regularization)
+    def sample_initial_state(self, seed: tf.Tensor) -> tf.Tensor:
+        s1, s2 = tf.random.experimental.stateless_split(seed)
+        xy = tf.random.stateless_uniform([2], seed=s1, minval=10.0, maxval=30.0, dtype=self.dtype)
+        v = tf.random.stateless_normal([2], seed=s2, dtype=self.dtype)
+        return tf.concat([xy, v], axis=0)
 
-        # diff from observation: (N, M)
-        obs_diff = observation - amplitudes
+    def sample_state_transition(self, x: tf.Tensor, seed: tf.Tensor) -> tf.Tensor:
+        mean = tf.linalg.matvec(self._F_tf, x)
+        z = tf.random.stateless_normal([4], seed=seed, dtype=self.dtype)
+        return mean + tf.linalg.matvec(self._L_Q, z)
 
-        # Assuming R is diagonal: sigma^2 * I
-        variance = self.measurement_noise_std ** 2
+    def sample_observation(self, x: tf.Tensor, seed: tf.Tensor) -> tf.Tensor:
+        h_x = self._amplitudes(x)
+        noise = tf.random.stateless_normal(
+            [self.n_sensors], seed=seed, dtype=self.dtype
+        ) * self._meas_noise_std_tf
+        return h_x + noise
 
-        # Mahalanobis: sum((diff/sigma)^2) → (N,)
-        mahalanobis = np.sum(obs_diff**2, axis=1) / variance
+    # ------------------------------------------------------------------
+    # Deterministic methods
+    # ------------------------------------------------------------------
 
-        # Log determinant for diagonal R
-        logdet = self.n_sensors * np.log(2 * np.pi * variance)
+    def state_transition_mean(self, x: tf.Tensor) -> tf.Tensor:
+        return tf.linalg.matvec(self._F_tf, x)
 
+    def state_transition_cov(self, x: tf.Tensor) -> tf.Tensor:
+        return self._Q_tf
+
+    def state_jacobian(self, x: tf.Tensor) -> tf.Tensor:
+        return self._F_tf
+
+    def observation_mean(self, x: tf.Tensor) -> tf.Tensor:
+        return self._amplitudes(x)
+
+    def observation_cov(self, x: tf.Tensor) -> tf.Tensor:
+        return self._R_tf
+
+    def observation_jacobian(self, x: tf.Tensor) -> tf.Tensor:
+        """Jacobian of amplitude decay h(x) w.r.t. state [x,y,vx,vy]."""
+        pos = x[:2]
+        diff = pos - self._sensor_positions_tf  # (n_sensors, 2)
+        r_sq = tf.reduce_sum(diff ** 2, axis=1)  # (n_sensors,)
+        denom_sq = (r_sq + self._d0_tf) ** 2
+        # dh_j/dx = -2*psi*(x-sx)/(r^2+d0)^2, dh_j/dy = -2*psi*(y-sy)/(...)
+        dh_dxy = -2.0 * self._psi_tf * diff / denom_sq[:, tf.newaxis]  # (n_sensors, 2)
+        # dh/dvx = dh/dvy = 0
+        zeros = tf.zeros([self.n_sensors, 2], dtype=self.dtype)
+        return tf.concat([dh_dxy, zeros], axis=1)  # (n_sensors, 4)
+
+    def observation_function(self, x: tf.Tensor) -> tf.Tensor:
+        return self._amplitudes(x)
+
+    def log_observation_prob(self, y: tf.Tensor, x: tf.Tensor) -> tf.Tensor:
+        h_x = self._amplitudes(x)
+        residual = y - h_x
+        variance = self._meas_noise_std_tf ** 2
+        pi2 = tf.constant(2.0 * np.pi, dtype=self.dtype)
+        logdet = tf.cast(self.n_sensors, self.dtype) * tf.math.log(pi2 * variance)
+        mahalanobis = tf.reduce_sum(residual ** 2) / variance
         return -0.5 * (logdet + mahalanobis)
 
-    # TensorFlow methods for vectorized particle filter
+    # ------------------------------------------------------------------
+    # Batch methods
+    # ------------------------------------------------------------------
 
-    if TF_AVAILABLE:
-        @tf.function
-        def sample_state_transition_tf(self, x_tf: tf.Tensor, seed: tf.Tensor) -> tf.Tensor:
-            """
-            TensorFlow version of state transition sampling (vectorized).
+    def sample_initial_state_batch(self, n: int, seed: tf.Tensor) -> tf.Tensor:
+        s1, s2 = tf.random.experimental.stateless_split(seed)
+        xy = tf.random.stateless_uniform([n, 2], seed=s1, minval=10.0, maxval=30.0, dtype=self.dtype)
+        v = tf.random.stateless_normal([n, 2], seed=s2, dtype=self.dtype)
+        return tf.concat([xy, v], axis=1)
 
-            Args:
-                x_tf: Current states, shape (N, 4) or (4,)
-                seed: Random seed
+    def state_transition_batch(self, particles: tf.Tensor, seed: tf.Tensor) -> tf.Tensor:
+        mean = particles @ tf.transpose(self._F_tf)
+        z = tf.random.stateless_normal(tf.shape(particles), seed=seed, dtype=self.dtype)
+        return mean + z @ tf.transpose(self._L_Q)
 
-            Returns:
-                Next states, same shape as input
-            """
-            # Determine shape
-            input_shape = tf.shape(x_tf)
+    def state_transition_mean_batch(self, particles: tf.Tensor) -> tf.Tensor:
+        return particles @ tf.transpose(self._F_tf)
 
-            # Convert F and Q to tensors
-            F_tf = tf.constant(self.F, dtype=self.dtype)
-            Q_tf = tf.constant(self.Q, dtype=self.dtype)
+    def state_transition_cov_batch(self, particles: tf.Tensor) -> tf.Tensor:
+        return self._Q_tf
 
-            # Mean: F @ x
-            if len(x_tf.shape) == 1:
-                mean = F_tf @ x_tf
-            else:
-                mean = tf.linalg.matvec(F_tf, x_tf)
+    def log_observation_prob_batch(self, observation: tf.Tensor,
+                                   particles: tf.Tensor) -> tf.Tensor:
+        amplitudes = self._amplitudes_batch(particles)
+        diff = observation - amplitudes
+        variance = self._meas_noise_std_tf ** 2
+        pi2 = tf.constant(2.0 * np.pi, dtype=self.dtype)
+        mahalanobis = tf.reduce_sum(diff ** 2, axis=1) / variance
+        logdet = tf.cast(self.n_sensors, self.dtype) * tf.math.log(pi2 * variance)
+        return -0.5 * (logdet + mahalanobis)
 
-            # Noise: sample from N(0, Q)
-            # Use Cholesky decomposition: Q = L @ L^T
-            L = tf.linalg.cholesky(Q_tf)
-            z = tf.random.stateless_normal(input_shape, seed=seed, dtype=self.dtype)
-            if len(x_tf.shape) == 1:
-                noise = L @ z
-            else:
-                noise = tf.linalg.matvec(L, z)
+    def observation_function_batch(self, particles: tf.Tensor) -> tf.Tensor:
+        return self._amplitudes_batch(particles)
 
-            return mean + noise
+    def observation_jacobian_batch(self, particles: tf.Tensor) -> tf.Tensor:
+        pos = particles[:, :2]  # (N, 2)
+        diff = pos[:, tf.newaxis, :] - self._sensor_positions_tf[tf.newaxis, :, :]  # (N, M, 2)
+        r_sq = tf.reduce_sum(diff ** 2, axis=2)  # (N, M)
+        denom_sq = (r_sq + self._d0_tf) ** 2
+        dh_dxy = -2.0 * self._psi_tf * diff / denom_sq[:, :, tf.newaxis]  # (N, M, 2)
+        N = tf.shape(particles)[0]
+        zeros = tf.zeros([N, self.n_sensors, 2], dtype=self.dtype)
+        return tf.concat([dh_dxy, zeros], axis=2)  # (N, M, 4)
 
-        @tf.function
-        def log_observation_prob_tf(self, y_tf: tf.Tensor, x_tf: tf.Tensor) -> tf.Tensor:
-            """
-            TensorFlow version of observation log-probability (vectorized).
-
-            Args:
-                y_tf: Observation, shape (n_sensors,)
-                x_tf: States, shape (N, 4) or (4,)
-
-            Returns:
-                Log probabilities, shape (N,) or scalar
-            """
-            sensor_positions = tf.constant(self.sensor_positions, dtype=self.dtype)
-            R_tf = tf.constant(self.R, dtype=self.dtype)
-            R_inv = tf.linalg.inv(R_tf)
-            sign, log_det_2pi_R = tf.linalg.slogdet(2.0 * np.pi * R_tf)
-
-            psi = tf.constant(self.source_intensity, dtype=self.dtype)
-            d0 = tf.constant(self.regularization, dtype=self.dtype)
-
-            # Handle both single and batch inputs
-            if len(x_tf.shape) == 1:
-                # Single state (4,)
-                amplitudes = []
-                for j in range(self.n_sensors):
-                    sensor_x = sensor_positions[j, 0]
-                    sensor_y = sensor_positions[j, 1]
-                    dx = x_tf[0] - sensor_x
-                    dy = x_tf[1] - sensor_y
-                    r_squared = dx**2 + dy**2
-                    amp = psi / (r_squared + d0)
-                    amplitudes.append(amp)
-
-                h_x = tf.stack(amplitudes)
-                residual = y_tf - h_x
-
-                # Mahalanobis distance
-                mahalanobis = tf.reduce_sum(residual * (R_inv @ residual))
-                log_prob = -0.5 * (log_det_2pi_R + mahalanobis)
-            else:
-                # Batch of states (N, 4)
-                amplitudes = []
-                for j in range(self.n_sensors):
-                    sensor_x = sensor_positions[j, 0]
-                    sensor_y = sensor_positions[j, 1]
-                    dx = x_tf[:, 0] - sensor_x
-                    dy = x_tf[:, 1] - sensor_y
-                    r_squared = dx**2 + dy**2
-                    amp = psi / (r_squared + d0)
-                    amplitudes.append(amp)
-
-                h_x = tf.stack(amplitudes, axis=1)  # (N, n_sensors)
-                residual = y_tf - h_x  # (N, n_sensors)
-
-                # Mahalanobis distance for each particle
-                mahalanobis = tf.reduce_sum(
-                    residual * tf.linalg.matvec(R_inv, residual),
-                    axis=1
-                )
-                log_prob = -0.5 * (log_det_2pi_R + mahalanobis)
-
-            return log_prob
-
-        @tf.function
-        def sample_initial_state_batch_tf(self, n: int, seed: tf.Tensor) -> tf.Tensor:
-            """
-            Sample n initial states using TensorFlow.
-
-            Args:
-                n: Number of samples
-                seed: Random seed
-
-            Returns:
-                Initial states (n, 4)
-            """
-            seed1, seed2 = tf.random.experimental.stateless_split(seed)
-
-            # Position: uniform [10, 30] x [10, 30]
-            xy = tf.random.stateless_uniform([n, 2], seed=seed1, minval=10.0, maxval=30.0, dtype=self.dtype)
-
-            # Velocity: N(0, 1)
-            v = tf.random.stateless_normal([n, 2], seed=seed2, dtype=self.dtype)
-
-            return tf.concat([xy, v], axis=1)
+    def state_jacobian_batch(self, particles: tf.Tensor) -> tf.Tensor:
+        N = tf.shape(particles)[0]
+        return tf.tile(tf.expand_dims(self._F_tf, 0), [N, 1, 1])

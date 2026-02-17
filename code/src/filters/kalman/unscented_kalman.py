@@ -89,25 +89,12 @@ class UnscentedKalmanFilter(Filter):
             mean_0_tf = self.model.sample_initial_state(seed)
             self.mean_0 = tf.cast(mean_0_tf, self.dtype)
         elif mean_0 is None:
-            # Try to use model's initial_state_mean property
-            if hasattr(self.model, 'initial_state_mean'):
-                mean_0_val = self.model.initial_state_mean
-                self.mean_0 = tf.cast(mean_0_val, self.dtype) if isinstance(mean_0_val, tf.Tensor) else tf.constant(mean_0_val, dtype=self.dtype)
-            else:
-                self.mean_0 = tf.zeros(self.state_dim, dtype=self.dtype)
+            self.mean_0 = tf.cast(self.model.mu_0, self.dtype)
         else:
             self.mean_0 = tf.constant(mean_0, dtype=self.dtype)
 
         if Sigma_0 is None:
-            # Try to use model's initial_state_cov property
-            if hasattr(self.model, 'initial_state_cov'):
-                Sigma_0_val = self.model.initial_state_cov
-                self.Sigma_0 = tf.cast(Sigma_0_val, self.dtype) if isinstance(Sigma_0_val, tf.Tensor) else tf.constant(Sigma_0_val, dtype=self.dtype)
-            # Otherwise use stationary covariance if available
-            elif hasattr(self.model, 'stationary_var'):
-                self.Sigma_0 = tf.eye(self.state_dim, dtype=self.dtype) * self.model.stationary_var
-            else:
-                self.Sigma_0 = tf.eye(self.state_dim, dtype=self.dtype)
+            self.Sigma_0 = tf.cast(self.model.Sigma_0, self.dtype)
         else:
             self.Sigma_0 = tf.constant(Sigma_0, dtype=self.dtype)
 
