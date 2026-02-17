@@ -46,6 +46,7 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
         hmc_resampling_method: Optional[str] = None,
         hmc_resampling_config: Optional[Dict[str, Any]] = None,
         eager_mode: bool = False,
+        debug_gradients: bool = False,
         **kwargs
     ):
         """
@@ -68,6 +69,7 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
         super().__init__(*args, **kwargs)
         self.stop_gradient_resampling = stop_gradient_resampling
         self.eager_mode = eager_mode
+        self.debug_gradients = debug_gradients
 
         # Set up HMC-specific resampling
         method_map = {
@@ -128,6 +130,7 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
         stop_grad = self.stop_gradient_resampling
         resample_fn = self._hmc_resampling_method
         resample_cfg = self._hmc_resampling_config
+        uses_transport_matrix = (self._hmc_resampling_name == 'ot_entropy')
 
         # Bypass nested @tf.function — inline into this trace so model
         # attributes (sigma_V, sigma_W) resolve to symbolic tensors and
@@ -225,10 +228,15 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
                     result = resample_fn(
                         particles, weights, seed=rseed, **resample_cfg
                     )
-                    indices = result.ancestor_indices
-                    new_covs = tf.gather(covs, indices)
                     new_p = result.particles
                     new_w = result.weights
+                    if uses_transport_matrix:
+                        # OT resampling: transport covs via T @ covs (differentiable)
+                        T = result.transport_matrix
+                        new_covs = tf.einsum('ij,jkl->ikl', T, covs)
+                    else:
+                        # Index-based resampling (systematic, soft)
+                        new_covs = tf.gather(covs, result.ancestor_indices)
                     if stop_grad:
                         new_p = tf.stop_gradient(new_p)
                         new_w = tf.stop_gradient(new_w)
@@ -404,6 +412,13 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
             )
             total_log_lik = total_log_lik + log_lik
 
+            if self.debug_gradients:
+                ess_val = float(ess_tf(self.weights.value()).numpy())
+                print(f"    [t={t+1:3d}] log_lik_t={float(log_lik.numpy()):+.4f} "
+                      f"cumul={float(total_log_lik.numpy()):+.4f} "
+                      f"ESS={ess_val:.1f} "
+                      f"max_log_theta={float(max_log_theta.numpy()):+.4f}")
+
             # --- EKF covariance update ---
             _, cov_updated = _ekf_update(
                 self.model, self.eta_bar_0.value(),
@@ -434,16 +449,21 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
             **self._hmc_resampling_config
         )
 
-        if result.ancestor_indices is not None:
-            indices = result.ancestor_indices
-        elif result.transport_matrix is not None:
-            indices = tf.argmax(result.transport_matrix, axis=1)
+        if result.transport_matrix is not None:
+            # OT resampling: transport covs via T @ covs (differentiable)
+            T = result.transport_matrix
+            self.particle_covs.assign(
+                tf.einsum('ij,jkl->ikl', T, self.particle_covs.value())
+            )
+        elif result.ancestor_indices is not None:
+            # Index-based resampling (systematic, soft)
+            self.particle_covs.assign(
+                tf.gather(self.particle_covs.value(), result.ancestor_indices)
+            )
         else:
             raise ValueError(
                 "ResampleResult has neither ancestor_indices nor transport_matrix"
             )
-
-        self.particle_covs.assign(tf.gather(self.particle_covs.value(), indices))
         self.particles.assign(result.particles)
         self.weights.assign(result.weights)
 

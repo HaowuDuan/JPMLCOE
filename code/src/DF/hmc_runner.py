@@ -33,7 +33,8 @@ class DPFRunner:
         filter_class: Type,
         filter_kwargs: Dict[str, Any],
         param_specs: Dict[str, ParameterSpec],
-        sampler: str = 'hmc'
+        sampler: str = 'hmc',
+        debug_gradients: bool = False,
     ):
         """
         Initialize DPF runner.
@@ -44,11 +45,13 @@ class DPFRunner:
             filter_kwargs: Keyword arguments for filter initialization
             param_specs: Dictionary of parameter specifications
             sampler: 'nuts', 'hmc', or 'custom_hmc'
+            debug_gradients: If True, print per-component gradient info at each step
         """
         self.base_model = base_model
         self.filter_class = filter_class
         self.filter_kwargs = filter_kwargs
         self.sampler = sampler.lower()
+        self.debug_gradients = debug_gradients
 
         # Wrap model: tracks trainable params, delegates everything else
         trainable_param_names = list(param_specs.keys())
@@ -97,6 +100,17 @@ class DPFRunner:
         if grad is None:
             grad = tf.zeros_like(q)
         grad = tf.where(tf.math.is_finite(grad), grad, tf.zeros_like(grad))
+
+        if self.debug_gradients:
+            grad_norm = float(tf.norm(grad).numpy())
+            nlp_val = float(nlp.numpy())
+            param_names = self.param_handler.param_names
+            grad_parts = []
+            for idx, name in enumerate(param_names):
+                if idx < grad.shape[0]:
+                    grad_parts.append(f"d/d_{name}={float(grad[idx].numpy()):.4f}")
+            print(f"    [GRAD] nlp={nlp_val:.4f} |grad|={grad_norm:.4f} {' '.join(grad_parts)}")
+
         return -nlp, -grad  # return log_prob and grad_log_prob
 
     def run_inference(

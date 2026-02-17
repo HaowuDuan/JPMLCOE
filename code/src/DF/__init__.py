@@ -4,6 +4,7 @@ from .types import ParameterSpec, DPFResult
 from .parameter_handler import ParameterHandler
 from .differentiable_model import DifferentiableModel
 from .hmc_runner import DPFRunner
+from .pmmh_runner import PMMHRunner
 
 __all__ = [
     'ParameterSpec',
@@ -11,6 +12,7 @@ __all__ = [
     'ParameterHandler',
     'DifferentiableModel',
     'DPFRunner',
+    'PMMHRunner',
 ]
 
 

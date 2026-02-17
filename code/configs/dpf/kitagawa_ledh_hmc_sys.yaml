@@ -33,7 +33,8 @@ filter:
   # hmc_resampling_config defaults to {} when using systematic
 
 dpf:
-  sampler: hmc
+  sampler: custom_hmc
+  debug_gradients: true
 
   trainable_params:
     sigma_V:
@@ -58,6 +59,7 @@ dpf:
     adaptation_rate: 0.8
     target_accept_prob: 0.7
     seed: 42
+    grad_clip_norm: 100.0
 
 data:
   T: 100

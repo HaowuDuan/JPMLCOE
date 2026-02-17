@@ -174,7 +174,7 @@ class StochasticEDHFlow(ExactDaumHuangFlow):
         # --- Setup (all TF tensors, no numpy conversions) ---
         observation = y  # Already TF tensor from flow_base.filter()
         P = self.predicted_cov  # Already TF tensor from predict()
-        R = tf.constant(self.model.observation_noise_cov, dtype=self.dtype)
+        R = tf.cast(self.model.observation_noise_cov, self.dtype)
         eta_bar_0 = self.eta_bar_0  # Already TF tensor from predict()
         R_inv = safe_inv(R)
         particles_flow = self.particles.value()

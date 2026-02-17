@@ -102,6 +102,41 @@ class StateSpaceModel(ABC):
         """Jacobian of observation function: dh/dx."""
         pass
 
+    @abstractmethod
+    def observation_function(self, x: tf.Tensor) -> tf.Tensor:
+        """Observation function h(x). Same as observation_mean for additive noise."""
+        pass
+
+    # Properties required by flow filters and experiment runners
+
+    @property
+    @abstractmethod
+    def observation_noise_cov(self) -> tf.Tensor:
+        """Observation noise covariance R."""
+        pass
+
+    @property
+    @abstractmethod
+    def process_noise_cov(self) -> tf.Tensor:
+        """Process noise covariance Q."""
+        pass
+
+    @property
+    @abstractmethod
+    def mu_0(self) -> tf.Tensor:
+        """Initial state mean."""
+        pass
+
+    @property
+    @abstractmethod
+    def Sigma_0(self) -> tf.Tensor:
+        """Initial state covariance."""
+        pass
+
+    def observe(self, x: tf.Tensor) -> tf.Tensor:
+        """Observation operator h(x). Delegates to observation_function."""
+        return self.observation_function(x)
+
     # For particle filters
 
     @abstractmethod

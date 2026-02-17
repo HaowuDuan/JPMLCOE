@@ -127,12 +127,12 @@ class AcousticTrackingFullModel(StateSpaceModel):
             [15.0, 35.0, 0.002, 0.002],     # Target 4
         ]
         paper_initial_states = np.concatenate(all_initial_states[:n_targets]).astype(self.np_dtype)
-        self.mu_0 = tf.constant(paper_initial_states, dtype=self.dtype)
+        self._mu_0 = tf.constant(paper_initial_states, dtype=self.dtype)
 
         # Initial state covariance: σ = 10 for positions, σ = 1 for velocities
         single_target_cov = np.array([100.0, 100.0, 1.0, 1.0], dtype=self.np_dtype)  # σ² = [10², 10², 1², 1²]
         Sigma_0_np = np.diag(np.tile(single_target_cov, n_targets))
-        self.Sigma_0 = tf.constant(Sigma_0_np, dtype=self.dtype)
+        self._Sigma_0 = tf.constant(Sigma_0_np, dtype=self.dtype)
 
         # TensorFlow constants for observation function
         self.psi = tf.constant(source_intensity, dtype=self.dtype)
@@ -161,6 +161,14 @@ class AcousticTrackingFullModel(StateSpaceModel):
     @property
     def obs_dim(self) -> int:
         return self.n_sensors  # 25
+
+    @property
+    def mu_0(self) -> tf.Tensor:
+        return self._mu_0
+
+    @property
+    def Sigma_0(self) -> tf.Tensor:
+        return self._Sigma_0
 
     @property
     def observation_noise_cov(self) -> tf.Tensor:

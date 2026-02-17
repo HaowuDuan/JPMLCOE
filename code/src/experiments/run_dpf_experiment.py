@@ -132,11 +132,8 @@ def run_dpf_experiment(cfg: DictConfig) -> Dict[str, Any]:
     param_specs = _build_param_specs(cfg.dpf.trainable_params, cfg.model)
     print(f"Trainable params: {list(param_specs.keys())}")
 
-    # 4. Create DPF runner
-    from src.DF import DPFRunner
-
+    # 4. Import filter class
     filter_class_path = cfg.filter._target_
-    # Import the filter class
     module_path, class_name = filter_class_path.rsplit('.', 1)
     import importlib
     filter_module = importlib.import_module(module_path)
@@ -147,31 +144,60 @@ def run_dpf_experiment(cfg: DictConfig) -> Dict[str, Any]:
     filter_kwargs.pop('_target_', None)
 
     sampler = cfg.dpf.get('sampler', 'hmc')
-    runner = DPFRunner(
-        base_model=inference_model,
-        filter_class=filter_class,
-        filter_kwargs=filter_kwargs,
-        param_specs=param_specs,
-        sampler=sampler,
-    )
-
-    # 5. Run HMC inference
-    hmc_cfg = cfg.dpf.hmc
     print(f"\nRunning {sampler.upper()} inference...")
 
-    with _PerfTracker() as perf:
-        result = runner.run_inference(
-            observations=observations,
-            num_samples=hmc_cfg.num_samples,
-            num_burnin=hmc_cfg.num_burnin,
-            step_size=hmc_cfg.step_size,
-            num_leapfrog_steps=hmc_cfg.get('num_leapfrog_steps', 10),
-            adaptation_rate=hmc_cfg.get('adaptation_rate', 0.8),
-            target_accept_prob=hmc_cfg.get('target_accept_prob', 0.75),
-            seed=hmc_cfg.get('seed', 42),
-            max_tree_depth=hmc_cfg.get('max_tree_depth', 10),
-            grad_clip_norm=float(hmc_cfg.get('grad_clip_norm', 100.0)),
+    if sampler == 'pmmh':
+        # PMMH: no DifferentiableModel, no gradients
+        from src.DF import PMMHRunner
+
+        runner = PMMHRunner(
+            base_model=inference_model,
+            filter_class=filter_class,
+            filter_kwargs=filter_kwargs,
+            param_specs=param_specs,
         )
+
+        pmmh_cfg = cfg.dpf.get('pmmh', cfg.dpf.get('hmc', {}))
+        proposal_std = None
+        if 'proposal_std' in pmmh_cfg:
+            proposal_std = OmegaConf.to_container(pmmh_cfg.proposal_std, resolve=True)
+
+        with _PerfTracker() as perf:
+            result = runner.run_inference(
+                observations=observations,
+                num_samples=int(pmmh_cfg.get('num_samples', 1000)),
+                num_burnin=int(pmmh_cfg.get('num_burnin', 500)),
+                proposal_std=proposal_std,
+                seed=int(pmmh_cfg.get('seed', 42)),
+            )
+    else:
+        # HMC / NUTS / custom_hmc: needs DifferentiableModel + gradients
+        from src.DF import DPFRunner
+
+        runner = DPFRunner(
+            base_model=inference_model,
+            filter_class=filter_class,
+            filter_kwargs=filter_kwargs,
+            param_specs=param_specs,
+            sampler=sampler,
+            debug_gradients=bool(cfg.dpf.get('debug_gradients', False)),
+        )
+
+        hmc_cfg = cfg.dpf.hmc
+
+        with _PerfTracker() as perf:
+            result = runner.run_inference(
+                observations=observations,
+                num_samples=hmc_cfg.num_samples,
+                num_burnin=hmc_cfg.num_burnin,
+                step_size=hmc_cfg.step_size,
+                num_leapfrog_steps=hmc_cfg.get('num_leapfrog_steps', 10),
+                adaptation_rate=hmc_cfg.get('adaptation_rate', 0.8),
+                target_accept_prob=hmc_cfg.get('target_accept_prob', 0.75),
+                seed=hmc_cfg.get('seed', 42),
+                max_tree_depth=hmc_cfg.get('max_tree_depth', 10),
+                grad_clip_norm=float(hmc_cfg.get('grad_clip_norm', 100.0)),
+            )
 
     # 6. Print results
     true_params = OmegaConf.to_container(cfg.data.true_params, resolve=True)

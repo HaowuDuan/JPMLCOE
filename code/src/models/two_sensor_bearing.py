@@ -101,8 +101,8 @@ class TwoSensorBearingOnlyModel(StateSpaceModel):
             raise ValueError(f"sensor_positions must be (2, 2), got {sensor_positions_np.shape}")
 
         # Convert to TensorFlow
-        self.mu_0 = tf.constant(mu_0_np, dtype=self.dtype)
-        self.Sigma_0 = tf.constant(Sigma_0_np, dtype=self.dtype)
+        self._mu_0 = tf.constant(mu_0_np, dtype=self.dtype)
+        self._Sigma_0 = tf.constant(Sigma_0_np, dtype=self.dtype)
         self.sensor_positions = tf.constant(sensor_positions_np, dtype=self.dtype)
 
         # Observation noise parameters
@@ -124,6 +124,14 @@ class TwoSensorBearingOnlyModel(StateSpaceModel):
     @property
     def obs_dim(self) -> int:
         return 2
+
+    @property
+    def mu_0(self) -> tf.Tensor:
+        return self._mu_0
+
+    @property
+    def Sigma_0(self) -> tf.Tensor:
+        return self._Sigma_0
 
     @tf.function
     def sample_initial_state(self, seed: tf.Tensor) -> tf.Tensor:

@@ -212,7 +212,7 @@ class ExactDaumHuangFlow(FlowFilterBase):
         """
         observation = y  # Already TF tensor from flow_base.filter()
         P_tf = self.predicted_cov  # Already TF tensor from predict()
-        R_tf = tf.constant(self.model.observation_noise_cov, dtype=self.dtype)
+        R_tf = tf.cast(self.model.observation_noise_cov, self.dtype)
         eta_bar_0_tf = self.eta_bar_0  # Already TF tensor from predict()
 
         # Compute R_inv (once per update)
