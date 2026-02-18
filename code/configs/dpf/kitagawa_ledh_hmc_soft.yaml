@@ -27,7 +27,6 @@ filter:
 
 dpf:
   sampler: custom_hmc
-  debug_gradients: true
 
   trainable_params:
     sigma_V:

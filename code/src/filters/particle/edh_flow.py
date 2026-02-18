@@ -147,14 +147,28 @@ class ExactDaumHuangFlow(FlowFilterBase):
         else:
             initial_cov_emp = tf.matmul(diff, diff, transpose_a=True) / tf.cast(self.n_particles, self.dtype)
 
-        # Initialize global EKF for covariance guidance (constructor needs numpy)
-        ensemble_mean_np = ensemble_mean.numpy()
-        initial_cov_emp_np = initial_cov_emp.numpy()
-        self.global_filter = ExtendedKalmanFilter(self.model, mean_0=ensemble_mean_np, Sigma_0=initial_cov_emp_np)
+        # Initialize global EKF for covariance guidance.
+        # Reuse existing object across calls so @tf.function traces on
+        # _predict_step/_update_step are kept (avoids retracing every MC run).
+        if self.global_filter is None:
+            ensemble_mean_np = ensemble_mean.numpy()
+            initial_cov_emp_np = initial_cov_emp.numpy()
+            self.global_filter = ExtendedKalmanFilter(
+                self.model, mean_0=ensemble_mean_np, Sigma_0=initial_cov_emp_np)
+        else:
+            # Update stored initial state so reset() stays correct too
+            self.global_filter.mean_0 = ensemble_mean
+            self.global_filter.Sigma_0 = initial_cov_emp
 
         self.global_filter.mean.assign(ensemble_mean)
         self.global_filter.cov.assign(initial_cov_emp)
         self.predicted_cov = self.global_filter.cov.value()  # TF tensor
+
+        # Reset storage (mirrors FlowFilterBase.initialize())
+        self.means = []
+        self.covs = []
+        self.ess_history = []
+        self.weights_history = []
 
         # Initialize seed counter
         self.seed_counter = 0

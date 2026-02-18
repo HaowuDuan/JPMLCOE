@@ -78,16 +78,16 @@ class TwoSensorBearingOnlyModel(StateSpaceModel):
             raise ValueError(f"sigma_bearing must be positive, got {sigma_bearing}")
 
         # Default initial state (from paper)
-        mu_0_np = mu_0 if mu_0 is not None else np.array([3.0, 5.0])
+        mu_0_np = np.array(mu_0) if mu_0 is not None else np.array([3.0, 5.0])
 
         # Default initial covariance (highly anisotropic - this creates stiffness!)
-        Sigma_0_np = Sigma_0 if Sigma_0 is not None else np.array([
+        Sigma_0_np = np.array(Sigma_0) if Sigma_0 is not None else np.array([
             [1000.0, 0.0],
             [0.0, 2.0]
         ])
 
         # Default sensor positions (on x-axis, symmetric)
-        sensor_positions_np = sensor_positions if sensor_positions is not None else np.array([
+        sensor_positions_np = np.array(sensor_positions) if sensor_positions is not None else np.array([
             [3.5, 0.0],   # Sensor 1
             [-3.5, 0.0]   # Sensor 2
         ])

@@ -7,6 +7,13 @@ import numpy as np
 from ..core.model_base import StateSpaceModel
 
 
+def _as_sigma(sigma, dtype):
+    """Cast sigma to TF tensor if it isn't already."""
+    if isinstance(sigma, tf.Tensor):
+        return sigma
+    return tf.constant(float(sigma), dtype=dtype)
+
+
 class RangeBearingModel(StateSpaceModel):
     """
     Range-Bearing Observation Model.
@@ -87,11 +94,10 @@ class RangeBearingModel(StateSpaceModel):
             raise ValueError(f"sensor_pos must be (2,), got {sensor_pos.shape}")
         self.sensor_pos = tf.constant(sensor_pos, dtype=self.dtype)
 
-        # Observation noise parameters
+        # Observation noise parameters (stored as plain floats; may be
+        # overwritten with TF tensors by DifferentiableModel.update_parameters)
         self.sigma_range = sigma_range
         self.sigma_bearing = sigma_bearing
-        R = np.diag([sigma_range ** 2, sigma_bearing ** 2])
-        self.R = tf.constant(R, dtype=self.dtype)
 
         # Initial state distribution
         mu_0_np = mu_0 if mu_0 is not None else np.array([1.0, 1.0])
@@ -120,6 +126,17 @@ class RangeBearingModel(StateSpaceModel):
     @property
     def Sigma_0(self) -> tf.Tensor:
         return self._Sigma_0
+
+    @property
+    def R(self) -> tf.Tensor:
+        """Observation noise covariance, computed fresh from sigma_range/sigma_bearing.
+
+        Returns a new tensor each access so that gradient tape records the
+        dependency on sigma_range and sigma_bearing even after setattr updates.
+        """
+        sr = _as_sigma(self.sigma_range, self.dtype)
+        sb = _as_sigma(self.sigma_bearing, self.dtype)
+        return tf.linalg.diag(tf.stack([sr ** 2, sb ** 2]))
 
     @tf.function
     def sample_initial_state(self, seed: tf.Tensor) -> tf.Tensor:
@@ -154,7 +171,9 @@ class RangeBearingModel(StateSpaceModel):
 
         # Add noise
         noise = tf.random.stateless_normal([2], seed=seed, dtype=self.dtype)
-        noise = noise * tf.constant([self.sigma_range, self.sigma_bearing], dtype=self.dtype)
+        sr = _as_sigma(self.sigma_range, self.dtype)
+        sb = _as_sigma(self.sigma_bearing, self.dtype)
+        noise = noise * tf.stack([sr, sb])
 
         return tf.stack([range_true, bearing_true]) + noise
 
