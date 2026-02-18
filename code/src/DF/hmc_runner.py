@@ -4,7 +4,7 @@ import tensorflow as tf
 import tensorflow_probability as tfp
 import numpy as np
 import time
-from typing import Any, Dict, Optional, Type
+from typing import Any, Callable, Dict, Optional, Type
 import warnings
 
 from .types import ParameterSpec, DPFResult
@@ -34,7 +34,7 @@ class DPFRunner:
         filter_kwargs: Dict[str, Any],
         param_specs: Dict[str, ParameterSpec],
         sampler: str = 'hmc',
-        debug_gradients: bool = False,
+        on_grad: Optional[Callable] = None,
     ):
         """
         Initialize DPF runner.
@@ -45,13 +45,16 @@ class DPFRunner:
             filter_kwargs: Keyword arguments for filter initialization
             param_specs: Dictionary of parameter specifications
             sampler: 'nuts', 'hmc', or 'custom_hmc'
-            debug_gradients: If True, print per-component gradient info at each step
+            on_grad: Optional callback(step, nlp, grad) called after each
+                gradient evaluation. Useful for diagnostics without polluting
+                production logs.
         """
         self.base_model = base_model
         self.filter_class = filter_class
         self.filter_kwargs = filter_kwargs
         self.sampler = sampler.lower()
-        self.debug_gradients = debug_gradients
+        self.on_grad = on_grad
+        self._grad_step = 0
 
         # Wrap model: tracks trainable params, delegates everything else
         trainable_param_names = list(param_specs.keys())
@@ -101,15 +104,9 @@ class DPFRunner:
             grad = tf.zeros_like(q)
         grad = tf.where(tf.math.is_finite(grad), grad, tf.zeros_like(grad))
 
-        if self.debug_gradients:
-            grad_norm = float(tf.norm(grad).numpy())
-            nlp_val = float(nlp.numpy())
-            param_names = self.param_handler.param_names
-            grad_parts = []
-            for idx, name in enumerate(param_names):
-                if idx < grad.shape[0]:
-                    grad_parts.append(f"d/d_{name}={float(grad[idx].numpy()):.4f}")
-            print(f"    [GRAD] nlp={nlp_val:.4f} |grad|={grad_norm:.4f} {' '.join(grad_parts)}")
+        if self.on_grad is not None:
+            self.on_grad(step=self._grad_step, nlp=float(nlp.numpy()), grad=grad)
+            self._grad_step += 1
 
         return -nlp, -grad  # return log_prob and grad_log_prob
 

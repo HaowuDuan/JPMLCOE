@@ -1,0 +1,7 @@
+_target_: src.filters.particle.stochastic_edh_paper.StochasticEDHFlowPaper
+
+n_particles: 50
+n_lambda_steps: 100
+diffusion_scale: [4.0, 0.4]   # Paper Section 4: Q = diag(4, 0.4)
+schedule_mu: 0.0               # Linear schedule β=λ (Remark 3.1)
+lambda_schedule: uniform       # Uniform steps dλ=1/100 (paper Section 4)

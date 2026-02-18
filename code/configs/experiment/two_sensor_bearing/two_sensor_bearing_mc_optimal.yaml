@@ -1,0 +1,14 @@
+# @package _global_
+
+# Experiment: Two-Sensor Bearing MC — optimal schedule β*(λ) (paper Section 4)
+
+defaults:
+  - override /model: two_sensor_bearing
+  - override /filter: stochastic_edh_paper_optimal
+
+output_dir: outputs/two_sensor_bearing/mc_optimal
+
+# Paper Section 4 fixed values
+truth: [4.0, 4.0]
+z_fixed: [0.4754, 1.1868]
+n_mc_runs: 20

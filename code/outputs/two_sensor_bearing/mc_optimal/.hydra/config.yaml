@@ -1,0 +1,41 @@
+model:
+  _target_: src.models.two_sensor_bearing.TwoSensorBearingOnlyModel
+  mu_0:
+  - 3.0
+  - 5.0
+  Sigma_0:
+  - - 1000.0
+    - 0.0
+  - - 0.0
+    - 2.0
+  sensor_positions:
+  - - 3.5
+    - 0.0
+  - - -3.5
+    - 0.0
+  sigma_bearing: 0.2
+filter:
+  _target_: src.filters.particle.stochastic_edh_paper.StochasticEDHFlowPaper
+  n_particles: 50
+  n_lambda_steps: 100
+  diffusion_scale:
+  - 4.0
+  - 0.4
+  schedule_mu: 0.2
+  lambda_schedule: uniform
+seed: 42
+dtype: float64
+T: 100
+output_dir: outputs/two_sensor_bearing/mc_optimal
+plot: false
+device: auto
+tf_log_level: 2
+verbose: true
+show_progress: true
+truth:
+- 4.0
+- 4.0
+z_fixed:
+- 0.4754
+- 1.1868
+n_mc_runs: 20

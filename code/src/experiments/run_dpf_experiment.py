@@ -180,7 +180,6 @@ def run_dpf_experiment(cfg: DictConfig) -> Dict[str, Any]:
             filter_kwargs=filter_kwargs,
             param_specs=param_specs,
             sampler=sampler,
-            debug_gradients=bool(cfg.dpf.get('debug_gradients', False)),
         )
 
         hmc_cfg = cfg.dpf.hmc

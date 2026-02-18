@@ -15,7 +15,7 @@ Optimizations:
 
 import tensorflow as tf
 import numpy as np
-from typing import Optional, Dict, Any
+from typing import Any, Callable, Dict, Optional
 
 from .ledh_invertible import LEDHParticleFlowFilter
 from ..kalman.batched_ekf import batched_ekf_predict, batched_ekf_update
@@ -46,7 +46,7 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
         hmc_resampling_method: Optional[str] = None,
         hmc_resampling_config: Optional[Dict[str, Any]] = None,
         eager_mode: bool = False,
-        debug_gradients: bool = False,
+        on_timestep: Optional[Callable] = None,
         **kwargs
     ):
         """
@@ -64,12 +64,15 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
                 If None and using different method: empty config.
             eager_mode: If True, run without @tf.function / tf.while_loop.
                 Errors appear instantly. GradientTape still works (just slower).
+            on_timestep: Optional callback(t, log_lik_t, ess, max_log_theta)
+                called at each timestep in the eager path. Use for diagnostics
+                without polluting production logs.
             *args, **kwargs: Passed to LEDHParticleFlowFilter.__init__
         """
         super().__init__(*args, **kwargs)
         self.stop_gradient_resampling = stop_gradient_resampling
         self.eager_mode = eager_mode
-        self.debug_gradients = debug_gradients
+        self.on_timestep = on_timestep
 
         # Set up HMC-specific resampling
         method_map = {
@@ -412,12 +415,14 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
             )
             total_log_lik = total_log_lik + log_lik
 
-            if self.debug_gradients:
+            if self.on_timestep is not None:
                 ess_val = float(ess_tf(self.weights.value()).numpy())
-                print(f"    [t={t+1:3d}] log_lik_t={float(log_lik.numpy()):+.4f} "
-                      f"cumul={float(total_log_lik.numpy()):+.4f} "
-                      f"ESS={ess_val:.1f} "
-                      f"max_log_theta={float(max_log_theta.numpy()):+.4f}")
+                self.on_timestep(
+                    t=t + 1,
+                    log_lik_t=float(log_lik.numpy()),
+                    ess=ess_val,
+                    max_log_theta=float(max_log_theta.numpy()),
+                )
 
             # --- EKF covariance update ---
             _, cov_updated = _ekf_update(
