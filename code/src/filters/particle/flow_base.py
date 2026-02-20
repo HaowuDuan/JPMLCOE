@@ -46,7 +46,7 @@ class FlowFilterBase:
 
         # State (TF Variable, set in initialize())
         self.particles = None
-        self.random_state = np.random.default_rng()
+        self.rng_key = tf.constant([42, 0], dtype=tf.int32)
 
         # Storage (lists of TF tensors, converted in filter())
         self.means = []
@@ -72,14 +72,18 @@ class FlowFilterBase:
         cov = tf.matmul(diff, diff, transpose_a=True) / tf.cast(self.n_particles, self.dtype)
         return mean, cov
 
-    def _make_tf_seed(self) -> tf.Tensor:
-        """Create a TF-compatible seed from the numpy random state."""
-        return tf.constant(self.random_state.integers(0, 2**31, size=2), dtype=tf.int32)
+    def _next_seed(self):
+        """Split RNG key, return subkey for use."""
+        keys = tf.random.experimental.stateless_split(self.rng_key, num=2)
+        self.rng_key = keys[0]
+        return keys[1]
 
-    def predict(self):
+    def predict(self, t=None):
         """Prediction step: propagate particles through state transition using batch method."""
-        seed = self._make_tf_seed()
-        particles_predicted = self.model.state_transition_batch(self.particles.value(), seed)
+        if t is not None and hasattr(self.model, 't'):
+            self.model.t = t
+        seed = self._next_seed()
+        particles_predicted = self.model.state_transition_batch(self.particles.value(), seed, t=t)
         self.particles.assign(particles_predicted)
 
     def update(self, y: tf.Tensor):
@@ -89,10 +93,13 @@ class FlowFilterBase:
     def initialize(self, random_state: Optional[np.random.Generator] = None):
         """Initialize particles from initial distribution as TF Variable."""
         if random_state is not None:
-            self.random_state = random_state
+            seed_val = random_state.integers(0, 2**31)
+            self.rng_key = tf.constant([seed_val, 0], dtype=tf.int32)
+        else:
+            self.rng_key = tf.constant([42, 0], dtype=tf.int32)
 
         # Sample initial particles using model's batch method
-        seed = self._make_tf_seed()
+        seed = self._next_seed()
         particles_tf = self.model.sample_initial_state_batch(self.n_particles, seed)
         self.particles = tf.Variable(particles_tf, dtype=self.dtype)
 
@@ -124,7 +131,7 @@ class FlowFilterBase:
 
         for t in range(T):
             t0 = time.perf_counter()
-            self.predict()
+            self.predict(t=t + 1)
             self.update(obs_tf[t])
             mean, cov = self._estimate_mean_cov()
             self.means.append(mean)

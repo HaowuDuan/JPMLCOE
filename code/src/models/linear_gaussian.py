@@ -232,7 +232,7 @@ class LinearGaussianModel(StateSpaceModel):
     # Batch methods for optimized particle filtering
 
     @tf.function
-    def state_transition_mean_batch(self, particles: tf.Tensor) -> tf.Tensor:
+    def state_transition_mean_batch(self, particles: tf.Tensor, t=None) -> tf.Tensor:
         """Vectorized state transition mean: particles @ F^T (more efficient than transposing twice)."""
         return particles @ tf.transpose(self.F)
 
@@ -260,7 +260,8 @@ class LinearGaussianModel(StateSpaceModel):
         # Log determinant
         logdet = 2.0 * tf.reduce_sum(tf.math.log(tf.linalg.diag_part(L_R)))
 
-        return -0.5 * (tf.cast(self.obs_dim, observation.dtype) * tf.math.log(2.0 * 3.14159265359) + logdet + mahalanobis)
+        log_2pi = tf.math.log(tf.constant(2.0 * 3.14159265358979323846, dtype=observation.dtype))
+        return -0.5 * (tf.cast(self.obs_dim, observation.dtype) * log_2pi + logdet + mahalanobis)
 
     @tf.function
     def observation_jacobian_batch(self, particles: tf.Tensor) -> tf.Tensor:
@@ -278,6 +279,18 @@ class LinearGaussianModel(StateSpaceModel):
         """F is constant — broadcast to (N, nx, nx)."""
         N = tf.shape(particles)[0]
         return tf.tile(tf.expand_dims(self.F, 0), [N, 1, 1])
+
+    def state_transition_batch(self, particles: tf.Tensor, seed: tf.Tensor, t=None) -> tf.Tensor:
+        """Vectorized state transition: X' = F·X + B·v, v ~ N(0, I)."""
+        N = tf.shape(particles)[0]
+        v = tf.random.stateless_normal([N, self.nv], seed=seed, dtype=self.dtype)
+        noise = tf.linalg.matmul(v, self.B, transpose_b=True)  # (N, nx)
+        if self.process_noise_std is not None:
+            pns = self.process_noise_std
+            if not isinstance(pns, tf.Tensor):
+                pns = tf.constant(float(pns), dtype=self.dtype)
+            noise = pns * noise
+        return particles @ tf.transpose(self.F) + noise
 
     @tf.function
     def sample_initial_state_batch(self, n: int, seed: tf.Tensor) -> tf.Tensor:

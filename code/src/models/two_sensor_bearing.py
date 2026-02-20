@@ -319,7 +319,7 @@ class TwoSensorBearingOnlyModel(StateSpaceModel):
         return tf.tile(tf.expand_dims(self.F, 0), [N, 1, 1])
 
     @tf.function
-    def state_transition_mean_batch(self, particles: tf.Tensor) -> tf.Tensor:
+    def state_transition_mean_batch(self, particles: tf.Tensor, t=None) -> tf.Tensor:
         """Vectorized state transition mean: identity for static target."""
         return tf.identity(particles)
 

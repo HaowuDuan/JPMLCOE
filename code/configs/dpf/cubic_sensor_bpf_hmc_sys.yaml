@@ -1,0 +1,53 @@
+# @package _global_
+# DPF: Cubic Sensor model with Bootstrap PF + systematic resampling + stop_gradient
+#
+# Bootstrap PF baseline (no flow). Infers sigma_V and sigma_W (true: 1.0, 1.0).
+
+model:
+  _target_: src.models.cubic_sensor.CubicSensorModel
+  a: 0.9
+  c: 0.05
+  sigma_V: 5.0
+  sigma_W: 2.0
+  initial_var: 5.0
+
+filter:
+  _target_: src.filters.particle.bootstrap_pf_hmc.BootstrapPFHMC
+  n_particles: 1000
+  resampling_method: systematic
+  stop_gradient_resampling: true
+  eager_mode: false
+
+dpf:
+  sampler: hmc
+
+  trainable_params:
+    sigma_V:
+      constraint: positive
+      prior:
+        _target_: tensorflow_probability.distributions.LogNormal
+        loc: 0.0
+        scale: 1.0
+    sigma_W:
+      constraint: positive
+      prior:
+        _target_: tensorflow_probability.distributions.LogNormal
+        loc: 0.0
+        scale: 1.0
+
+  hmc:
+    num_samples: 2
+    num_burnin: 3
+    step_size: 0.01
+    num_leapfrog_steps: 5
+    max_tree_depth: 10
+    adaptation_rate: 0.8
+    target_accept_prob: 0.7
+    seed: 42
+
+data:
+  T: 100
+  seed: 42
+  true_params:
+    sigma_V: 1.0
+    sigma_W: 1.0

@@ -13,8 +13,9 @@ import numpy as np
 import tensorflow as tf
 from .edh_flow import ExactDaumHuangFlow
 from ...utils.flow_params import compute_flow_params_global
-from ...utils.linalg import safe_inv
+from ...utils.linalg import safe_inv, to_numpy
 from ...utils.ode_solvers import euler_step
+from ...utils.constants import BVPShootingConfig
 
 
 class StochasticEDHFlow(ExactDaumHuangFlow):
@@ -45,6 +46,7 @@ class StochasticEDHFlow(ExactDaumHuangFlow):
     def __init__(self, model, diffusion_scale=0.0,
                  schedule_mu: float = 0.0,
                  lambda_schedule: str = 'exponential',
+                 bvp_config: BVPShootingConfig = BVPShootingConfig(),
                  **kwargs):
         """
         Args:
@@ -61,11 +63,11 @@ class StochasticEDHFlow(ExactDaumHuangFlow):
             **kwargs: Passed to ExactDaumHuangFlow.
         """
         self._lambda_schedule_override = lambda_schedule
+        self.bvp_config = bvp_config
         super().__init__(model, **kwargs)
         self.dtype = getattr(model, 'dtype', tf.float64)
         self.np_dtype = np.float64 if self.dtype == tf.float64 else np.float32
         self.schedule_mu = schedule_mu
-        self.seed_counter = 0
 
         # Normalize diffusion_scale to (state_dim,) numpy array
         q_raw = np.asarray(diffusion_scale, dtype=np.float64).ravel()
@@ -123,7 +125,7 @@ class StochasticEDHFlow(ExactDaumHuangFlow):
                       - np.trace(M) * np.trace(M_inv @ J_meas @ M_inv))
             return np.array([beta_dot, mu * dkappa])
 
-        def _shoot(u0, n_steps=500):
+        def _shoot(u0, n_steps=self.bvp_config.n_ode_steps):
             """Euler integrate ODE from λ=0 to λ=1, return β(1)."""
             state = np.array([0.0, u0])
             dlam  = 1.0 / n_steps
@@ -132,11 +134,11 @@ class StochasticEDHFlow(ExactDaumHuangFlow):
             return float(state[0])
 
         # --- Bisection to find u₀ ---
-        u_lo, u_hi = 0.1, 20.0
+        u_lo, u_hi = self.bvp_config.bracket_lo, self.bvp_config.bracket_hi
         if _shoot(u_lo) > 1.0:
-            u_lo = 0.01
+            u_lo = self.bvp_config.bracket_lo_min
         if _shoot(u_hi) < 1.0:
-            u_hi = 50.0
+            u_hi = self.bvp_config.bracket_hi_max
 
         err_lo = _shoot(u_lo) - 1.0
         err_hi = _shoot(u_hi) - 1.0
@@ -144,7 +146,7 @@ class StochasticEDHFlow(ExactDaumHuangFlow):
             # Bracket invalid — fall back to linear schedule β = λ
             return tf.cumsum(self.lambda_steps), self.lambda_steps
 
-        for _ in range(40):
+        for _ in range(self.bvp_config.n_bisection):
             u_mid = (u_lo + u_hi) / 2.0
             if _shoot(u_mid) < 1.0:
                 u_lo = u_mid
@@ -187,7 +189,9 @@ class StochasticEDHFlow(ExactDaumHuangFlow):
         P = self.predicted_cov  # Already TF tensor from predict()
         R = tf.cast(self.model.observation_noise_cov, self.dtype)
         eta_bar_0 = self.eta_bar_0  # Already TF tensor from predict()
-        R_inv = safe_inv(R)
+        if self.R_inv_cache is None:
+            self.R_inv_cache = safe_inv(R)
+        R_inv = self.R_inv_cache
         particles_flow = self.particles.value()
 
         # Compute H once at η̄_0 (global linearization)
@@ -251,15 +255,13 @@ class StochasticEDHFlow(ExactDaumHuangFlow):
             # SDE noise: √(Q_diag · dλ) · dW — uses dλ (not dβ), since
             # Brownian motion is parameterized by λ; Q_tf broadcasts over N
             if self._has_diffusion:
-                seed = tf.constant([self.seed_counter, i], dtype=tf.int32)
+                seed = self._next_seed()
                 noise = tf.random.stateless_normal(
                     tf.shape(particles_flow), seed=seed,
                     dtype=particles_flow.dtype
                 )
                 particles_flow = particles_flow + noise * tf.sqrt(Q_tf * d_lambda)
 
-        self.seed_counter += 1
-
         # --- Finalize ---
         self.particles.assign(particles_flow)
-        self.global_filter.update(y.numpy() if isinstance(y, tf.Tensor) else y)
+        self.global_filter.update(to_numpy(y))

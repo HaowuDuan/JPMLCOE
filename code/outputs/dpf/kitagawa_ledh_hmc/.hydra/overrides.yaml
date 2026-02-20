@@ -1,4 +1,0 @@
-- dpf=kitagawa_ledh_hmc
-- filter.n_lambda_steps=5
-- dpf.hmc.num_samples=3
-- dpf.hmc.num_burnin=2

@@ -78,7 +78,7 @@ def euler_maruyama_step(x: tf.Tensor, f: Callable, dt: float, *args: Any,
 
     if diffusion_coeff > 0 and seed is not None:
         noise = tf.random.stateless_normal(tf.shape(x), seed=seed, dtype=x.dtype)
-        noise = noise * tf.sqrt(dt) * tf.sqrt(diffusion_coeff)
+        noise = noise * tf.sqrt(tf.cast(dt, x.dtype)) * tf.sqrt(tf.cast(diffusion_coeff, x.dtype))
         return x + drift * dt + noise
     else:
         return x + drift * dt

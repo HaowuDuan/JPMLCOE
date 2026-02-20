@@ -100,6 +100,20 @@ def multivariate_normal_sample(mean: tf.Tensor, cov: tf.Tensor,
     return mean + tf.linalg.matmul(z, L, transpose_b=True)
 
 
+def sample_particles_cholesky(
+    initial_mean: tf.Tensor,
+    initial_cov: tf.Tensor,
+    n_particles: int,
+    state_dim: int,
+    seed: tf.Tensor,
+    dtype=tf.float64
+) -> tf.Tensor:
+    """Sample N particles from N(mean, cov) via Cholesky decomposition."""
+    L = safe_cholesky(initial_cov)
+    z = tf.random.stateless_normal([n_particles, state_dim], seed=seed, dtype=dtype)
+    return initial_mean + tf.linalg.matmul(z, L, transpose_b=True)
+
+
 @tf.function
 def compute_flow_weights(
     eta_1: tf.Tensor,

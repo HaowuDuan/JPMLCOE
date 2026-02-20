@@ -21,7 +21,10 @@ from .ledh_invertible import LEDHParticleFlowFilter
 from ..kalman.batched_ekf import batched_ekf_predict, batched_ekf_update
 from ...utils.flow_params import compute_flow_params_batch
 from ...utils.distributions import compute_flow_weights
-from ...utils.linalg import safe_log_abs_det, safe_inv
+from ...utils.linalg import (
+    safe_log_abs_det, safe_inv,
+    graph_safe_log_abs_det, graph_safe_log_abs_det_fast, graph_safe_inv,
+)
 from ...resampling import systematic_resample, soft_resample, ot_entropy_resample
 from ...resampling.diagnosis import effective_sample_size as ess_tf
 
@@ -136,21 +139,26 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
         uses_transport_matrix = (self._hmc_resampling_name == 'ot_entropy')
 
         # Bypass nested @tf.function — inline into this trace so model
-        # attributes (sigma_V, sigma_W) resolve to symbolic tensors and
-        # gradients flow correctly through the full computation.
+        # attributes resolve to symbolic tensors and gradients flow correctly
+        # through the full computation.
         _ekf_predict = batched_ekf_predict.python_function
         _ekf_update = batched_ekf_update.python_function
         _flow_params = compute_flow_params_batch.python_function
         _flow_weights = compute_flow_weights.python_function
-        _log_abs_det = safe_log_abs_det.python_function
+        # Graph mode: use graph_safe_log_abs_det (custom gradient with pinv
+        # backward) to avoid MatrixInverse crash on GPU in graph mode.
+        _log_abs_det = graph_safe_log_abs_det_fast.python_function
+
+        # Capture param names at build time (works for any model)
+        param_names = list(self.model.trainable_param_names)
 
         @tf.function
         def compiled_filter(observations, particles, weights, covs,
                             R, R_inv, regularization, seed_start,
-                            sigma_V, sigma_W):
+                            param_values):
             # Set model params to symbolic tensors — graph reads current HMC values
-            model.sigma_V = sigma_V
-            model.sigma_W = sigma_W
+            for i, name in enumerate(param_names):
+                setattr(model, name, param_values[i])
             T = tf.shape(observations)[0]
 
             def cond(t, _particles, _weights, _covs, _seed, _log_lik):
@@ -279,7 +287,7 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
         """Initialize filter state, also resetting R_inv cache.
 
         The parent caches R_inv but never resets it. For HMC, R changes
-        between proposals (sigma_W changes), so the cache must be cleared.
+        between proposals (model params change), so the cache must be cleared.
         """
         super().initialize(*args, **kwargs)
         self.R_inv_cache = None
@@ -298,22 +306,27 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
         self.initialize(random_seed=random_seed)
 
         R = self.model.observation_noise_cov
-        R_inv = safe_inv(R)
         regularization_tf = tf.constant(self.regularization, dtype=self.dtype)
 
         if self.eager_mode:
+            R_inv = safe_inv(R)
             return self._run_eager(
                 observations, R, R_inv, regularization_tf
             )
 
-        # Ensure model params are plain tensors so @tf.function treats them as
-        # tensor inputs (not constants baked in at trace time).
+        # Graph mode: use graph_safe_inv (pinv) to avoid MatrixInverse crash
+        R_inv = graph_safe_inv(R)
+
+        # Gather trainable params as plain tensors so @tf.function treats them
+        # as tensor inputs (not constants baked in at trace time).
         # tf.identity converts tf.Variable -> plain tensor while keeping the
         # gradient chain intact.
-        sigma_V = self.model.sigma_V
-        sigma_V = tf.identity(sigma_V) if isinstance(sigma_V, tf.Tensor) else tf.constant(float(sigma_V), dtype=self.dtype)
-        sigma_W = self.model.sigma_W
-        sigma_W = tf.identity(sigma_W) if isinstance(sigma_W, tf.Tensor) else tf.constant(float(sigma_W), dtype=self.dtype)
+        param_values = []
+        for name in self.model.trainable_param_names:
+            val = getattr(self.model, name)
+            val = tf.identity(val) if isinstance(val, tf.Tensor) else tf.constant(float(val), dtype=self.dtype)
+            param_values.append(val)
+        param_values = tf.stack(param_values)
 
         return self._compiled_filter(
             observations,
@@ -321,8 +334,8 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
             self.weights.value(),
             self.particle_covs.value(),
             R, R_inv, regularization_tf,
-            tf.constant(self.seed_counter, dtype=tf.int32),
-            sigma_V, sigma_W
+            self.rng_key[0],
+            param_values
         )
 
     def _run_eager(self, observations, R, R_inv, regularization_tf):
@@ -351,10 +364,9 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
             self.particle_covs.assign(cov_pred_tf)
             self.eta_bar_0.assign(eta_bar_0_tf)
 
-            seed_tf = tf.constant([self.seed_counter, 0], dtype=tf.int32)
-            self.seed_counter += 1
+            seed_tf = self._next_seed()
             eta_0_tf = self.model.state_transition_batch(
-                self.particles_prev.value(), seed_tf
+                self.particles_prev.value(), seed_tf, t=t + 1
             )
             self.eta_0.assign(eta_0_tf)
 
@@ -444,8 +456,7 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
         Used by the eager path only. The compiled path inlines resampling
         into the tf.while_loop body via tf.cond.
         """
-        seed = tf.constant([self.seed_counter, 0], dtype=tf.int32)
-        self.seed_counter += 1
+        seed = self._next_seed()
 
         result = self._hmc_resampling_method(
             self.particles.value(),

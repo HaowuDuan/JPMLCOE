@@ -247,7 +247,7 @@ class Lorenz96Model(StateSpaceModel):
         )
         return self._spinup_state_tf + noise
 
-    def state_transition_batch(self, particles: tf.Tensor, seed: tf.Tensor) -> tf.Tensor:
+    def state_transition_batch(self, particles: tf.Tensor, seed: tf.Tensor, t=None) -> tf.Tensor:
         """Vectorized: tendency with axis=-1 handles (N, state_dim)."""
         result = self._integrate_rk4(particles, self.obs_interval)
         if self.process_noise_std > 0:
@@ -260,7 +260,7 @@ class Lorenz96Model(StateSpaceModel):
             result = result + noise
         return result
 
-    def state_transition_mean_batch(self, particles: tf.Tensor) -> tf.Tensor:
+    def state_transition_mean_batch(self, particles: tf.Tensor, t=None) -> tf.Tensor:
         return self._integrate_rk4(particles, self.obs_interval)
 
     def state_transition_cov_batch(self, particles: tf.Tensor) -> tf.Tensor:

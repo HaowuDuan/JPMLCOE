@@ -9,7 +9,7 @@ import numpy as np
 import tensorflow as tf
 from .stochastic_edh import StochasticEDHFlow
 from ...utils.flow_params import compute_flow_params_global
-from ...utils.linalg import safe_inv
+from ...utils.linalg import safe_inv, to_numpy
 from ...utils.ode_solvers import euler_step
 
 
@@ -99,15 +99,13 @@ class SDELocalCorrection(StochasticEDHFlow):
 
             # SDE noise
             if q > 0:
-                seed = tf.constant([self.seed_counter, i], dtype=tf.int32)
+                seed = self._next_seed()
                 noise = tf.random.stateless_normal(
                     tf.shape(particles_flow), seed=seed,
                     dtype=particles_flow.dtype
                 )
                 particles_flow = particles_flow + noise * tf.sqrt(q * d_lambda)
 
-        self.seed_counter += 1
-
         # --- Finalize ---
         self.particles.assign(particles_flow)
-        self.global_filter.update(y.numpy() if isinstance(y, tf.Tensor) else y)
+        self.global_filter.update(to_numpy(y))

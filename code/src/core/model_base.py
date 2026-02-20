@@ -133,9 +133,11 @@ class StateSpaceModel(ABC):
         """Initial state covariance."""
         pass
 
-    def observe(self, x: tf.Tensor) -> tf.Tensor:
-        """Observation operator h(x). Delegates to observation_function."""
-        return self.observation_function(x)
+    # def observe(self, x: tf.Tensor) -> tf.Tensor:
+    #     """Observation operator h(x). Delegates to observation_function.
+    #        Currently unused (0 callers). Kept for potential future use in
+    #        data generation or custom pipelines."""
+    #     return self.observation_function(x)
 
     # For particle filters
 
@@ -160,13 +162,13 @@ class StateSpaceModel(ABC):
         seeds = tf.random.experimental.stateless_split(seed, num=n)
         return tf.stack([self.sample_initial_state(seeds[i]) for i in range(n)])
 
-    def state_transition_batch(self, particles: tf.Tensor, seed: tf.Tensor) -> tf.Tensor:
+    def state_transition_batch(self, particles: tf.Tensor, seed: tf.Tensor, t=None) -> tf.Tensor:
         """Propagate batch of particles. Default: loop."""
         N = particles.shape[0]
         seeds = tf.random.experimental.stateless_split(seed, num=N)
         return tf.stack([self.sample_state_transition(particles[i], seeds[i]) for i in range(N)])
 
-    def state_transition_mean_batch(self, particles: tf.Tensor) -> tf.Tensor:
+    def state_transition_mean_batch(self, particles: tf.Tensor, t=None) -> tf.Tensor:
         """Compute transition means for batch. Default: loop."""
         return tf.stack([self.state_transition_mean(x) for x in particles])
 

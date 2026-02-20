@@ -1,3 +1,0 @@
-- dpf=linear_gaussian_kf
-- dpf.hmc.num_samples=10
-- dpf.hmc.num_burnin=5

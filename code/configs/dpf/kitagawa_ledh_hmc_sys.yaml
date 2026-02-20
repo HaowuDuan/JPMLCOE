@@ -33,7 +33,7 @@ filter:
   # hmc_resampling_config defaults to {} when using systematic
 
 dpf:
-  sampler: custom_hmc
+  sampler: hmc
 
   trainable_params:
     sigma_V:
@@ -50,10 +50,10 @@ dpf:
         scale: 1.0
 
   hmc:
-    num_samples: 500
-    num_burnin: 250
+    num_samples: 2
+    num_burnin: 3
     step_size: 0.01
-    num_leapfrog_steps: 10
+    num_leapfrog_steps: 5
     max_tree_depth: 10
     adaptation_rate: 0.8
     target_accept_prob: 0.7

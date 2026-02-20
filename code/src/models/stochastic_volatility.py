@@ -131,11 +131,11 @@ class StochasticVolatilityModel(StateSpaceModel):
         std = tf.sqrt(self._stationary_var)
         return tf.random.stateless_normal([n, 1], seed=seed, dtype=self.dtype) * std
 
-    def state_transition_batch(self, particles: tf.Tensor, seed: tf.Tensor) -> tf.Tensor:
+    def state_transition_batch(self, particles: tf.Tensor, seed: tf.Tensor, t=None) -> tf.Tensor:
         w = tf.random.stateless_normal(tf.shape(particles), seed=seed, dtype=self.dtype)
         return self._alpha_tf * particles + self._sigma_tf * w
 
-    def state_transition_mean_batch(self, particles: tf.Tensor) -> tf.Tensor:
+    def state_transition_mean_batch(self, particles: tf.Tensor, t=None) -> tf.Tensor:
         return self._alpha_tf * particles
 
     def state_transition_cov_batch(self, particles: tf.Tensor) -> tf.Tensor:

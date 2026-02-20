@@ -10,9 +10,11 @@ from ...core.types import FilterResult
 from ..kalman.extended_kalman import ExtendedKalmanFilter
 from ...utils.flow_params import compute_flow_params
 from ...utils.distributions import compute_flow_weights
-from ...utils.linalg import safe_inv, safe_cholesky
+from ...utils.linalg import safe_inv, safe_cholesky, to_numpy
+from ...utils.distributions import sample_particles_cholesky
 from ...utils.ode_solvers import euler_step
-from ...resampling import systematic_resample, soft_resample, ot_entropy_resample
+from ...utils.constants import FlowScheduleConfig
+from ...utils.resampling_config import resolve_resampling
 from ...resampling.diagnosis import effective_sample_size as ess_tf
 
 
@@ -33,6 +35,7 @@ class EDHParticleFlowFilter:
         resampling_method: Optional[Callable] = None,
         resampling_config: Optional[Dict[str, Any]] = None,
         debug_mode: bool = False,
+        flow_config: FlowScheduleConfig = FlowScheduleConfig(),
         **filter_kwargs
     ):
         """
@@ -48,8 +51,10 @@ class EDHParticleFlowFilter:
                               - Any custom callable with signature (particles, weights, seed, **kwargs)
             resampling_config: Dict of additional parameters for resampling method
             debug_mode: If True, store detailed diagnostics
+            flow_config: Flow schedule configuration
         """
         self.model = model
+        self.flow_config = flow_config
         self.dtype = getattr(model, 'dtype', tf.float64)
         self.np_dtype = np.float64 if self.dtype == tf.float64 else np.float32
         self.state_dim = model.state_dim
@@ -59,33 +64,10 @@ class EDHParticleFlowFilter:
         self.resample_threshold = resample_threshold
         self.debug_mode = debug_mode
 
-        # Handle resampling method configuration
-        if isinstance(resampling_method, str):
-            method_map = {
-                'systematic': systematic_resample,
-                'soft': soft_resample,
-                'ot_entropy': ot_entropy_resample,
-            }
-            self.resampling_method = method_map.get(resampling_method, systematic_resample)
-            self.resampling_method_name = resampling_method
-        elif resampling_method is not None:
-            self.resampling_method = resampling_method
-            self.resampling_method_name = getattr(resampling_method, '__name__', 'custom')
-        else:
-            # Default to systematic
-            self.resampling_method = systematic_resample
-            self.resampling_method_name = 'systematic'
-
-        # Convert resampling config values to Python scalars
-        self.resampling_config = {}
-        if resampling_config is not None:
-            for key, value in resampling_config.items():
-                if isinstance(value, (int, np.integer)):
-                    self.resampling_config[key] = int(value)
-                elif isinstance(value, (float, np.floating)):
-                    self.resampling_config[key] = float(value)
-                else:
-                    self.resampling_config[key] = value
+        # Resolve resampling method and config
+        self.resampling_method, self.resampling_method_name, self.resampling_config = (
+            resolve_resampling(resampling_method, resampling_config)
+        )
 
         # Particles and weights (TensorFlow variables)
         self.particles = None
@@ -111,34 +93,25 @@ class EDHParticleFlowFilter:
         self.resampled_at = []
         self.n_unique_particles = []
 
-        # Random seed counter
-        self.seed_counter = 0
+        # RNG key for stateless random sampling
+        self.rng_key = tf.constant([42, 0], dtype=tf.int32)
 
-        # Debug storage
-        if self.debug_mode:
-            self.debug_info = {
-                'timesteps': [],
-                'flow_steps': [],
-                'particles_before_flow': [],
-                'particles_after_flow': [],
-                'A_matrices': [],
-                'b_vectors': [],
-                'H_jacobians': [],
-                'jacobian_dets': [],
-                'eigenvalues': [],
-                'condition_numbers': [],
-                'particle_stats': []
-            }
-        else:
-            self.debug_info = None
+        # Debug storage (populated on demand when debug_mode=True)
+        self.debug_info = {} if self.debug_mode else None
 
         # Precompute exponentially spaced step sizes (constant across timesteps)
         self._generate_lambda_steps()
 
+    def _next_seed(self):
+        """Split RNG key, return subkey for use."""
+        keys = tf.random.experimental.stateless_split(self.rng_key, num=2)
+        self.rng_key = keys[0]
+        return keys[1]
+
     def _create_filter(self, initial_mean: tf.Tensor, initial_cov: tf.Tensor):
         """Create EKF for global covariance guidance."""
-        initial_mean_np = initial_mean.numpy() if isinstance(initial_mean, tf.Tensor) else initial_mean
-        initial_cov_np = initial_cov.numpy() if isinstance(initial_cov, tf.Tensor) else initial_cov
+        initial_mean_np = to_numpy(initial_mean)
+        initial_cov_np = to_numpy(initial_cov)
 
         return ExtendedKalmanFilter(self.model, mean_0=initial_mean_np, Sigma_0=initial_cov_np,
                                     sample_initial_mean=False)
@@ -148,7 +121,9 @@ class EDHParticleFlowFilter:
                    random_seed: Optional[int] = None):
         """Initialize particles and global filter."""
         if random_seed is not None:
-            self.seed_counter = random_seed
+            self.rng_key = tf.constant([random_seed, 0], dtype=tf.int32)
+        else:
+            self.rng_key = tf.constant([42, 0], dtype=tf.int32)
 
         if initial_mean is None:
             # Use model's initial mean directly (not a random sample)
@@ -163,14 +138,13 @@ class EDHParticleFlowFilter:
                 initial_cov = np.eye(self.state_dim)
 
         # Sample initial particles using TensorFlow
-        seed = tf.constant([self.seed_counter, 0], dtype=tf.int32)
-        self.seed_counter += 1
+        seed = self._next_seed()
         initial_mean_tf = tf.constant(initial_mean, dtype=self.dtype)
         initial_cov_tf = tf.constant(initial_cov, dtype=self.dtype)
 
-        L = safe_cholesky(initial_cov_tf)
-        z = tf.random.stateless_normal([self.n_particles, self.state_dim], seed=seed, dtype=self.dtype)
-        particles_tf = initial_mean_tf + tf.linalg.matmul(z, L, transpose_b=True)
+        particles_tf = sample_particles_cholesky(
+            initial_mean_tf, initial_cov_tf, self.n_particles, self.state_dim, seed, self.dtype
+        )
 
         self.particles = tf.Variable(particles_tf, dtype=self.dtype)
         self.weights = tf.Variable(tf.ones(self.n_particles, dtype=self.dtype) / self.n_particles)
@@ -191,7 +165,7 @@ class EDHParticleFlowFilter:
 
     def _generate_lambda_steps(self):
         """Precompute exponentially spaced step sizes as TF tensor (called once in __init__)."""
-        q = 1.2
+        q = self.flow_config.geometric_ratio
         epsilon_1 = (1 - q) / (1 - q**self.n_lambda_steps)
         lambda_steps_np = epsilon_1 * q**np.arange(self.n_lambda_steps)
         self.lambda_steps = tf.constant(lambda_steps_np, dtype=self.dtype)
@@ -206,8 +180,11 @@ class EDHParticleFlowFilter:
         """Compute drift for batch of particles: dη/dλ = Aη + b (vectorized)."""
         return particles @ tf.transpose(A) + b
 
-    def predict(self):
+    def predict(self, t=None):
         """Prediction step (Algorithm 2, lines 4-8)."""
+        if t is not None and hasattr(self.model, 't'):
+            self.model.t = t
+
         # Store previous particles for weight calculation
         self.particles_prev.assign(self.particles.value())
 
@@ -225,10 +202,9 @@ class EDHParticleFlowFilter:
         self.eta_bar_0 = self.global_filter.mean.value()  # TF tensor
 
         # Lines 5-8: Propagate particles using model's batch method
-        seed = tf.constant([self.seed_counter, 0], dtype=tf.int32)
-        self.seed_counter += 1
+        seed = self._next_seed()
 
-        eta_0 = self.model.state_transition_batch(self.particles.value(), seed)
+        eta_0 = self.model.state_transition_batch(self.particles.value(), seed, t=t)
 
         self.particles.assign(eta_0)
         self.eta_0.assign(eta_0)
@@ -249,7 +225,7 @@ class EDHParticleFlowFilter:
         lambda_val = tf.constant(0.0, dtype=self.dtype)
 
         # Lines 11-18: Flow loop (all TF tensor operations)
-        for j in tf.range(self.n_lambda_steps):
+        for j in range(self.n_lambda_steps):
             epsilon_j = self.lambda_steps[j]
 
             # Line 12: λ = λ + ε_j
@@ -315,12 +291,11 @@ class EDHParticleFlowFilter:
         self.log_likelihoods.append(log_lik)
 
         # Line 26: Update global filter (EKF needs numpy)
-        self.global_filter.update(y.numpy() if isinstance(y, tf.Tensor) else y)
+        self.global_filter.update(to_numpy(y))
 
     def _resample(self):
         """Resample particles using configured resampling method."""
-        seed = tf.constant([self.seed_counter, 0], dtype=tf.int32)
-        self.seed_counter += 1
+        seed = self._next_seed()
 
         result = self.resampling_method(
             self.particles.value(),
@@ -360,7 +335,7 @@ class EDHParticleFlowFilter:
 
         for t in range(T):
             t0 = time.perf_counter()
-            self.predict()
+            self.predict(t=t + 1)
             self.update(obs_tf[t])
             mean, cov = self._estimate_mean_cov()
             self.means.append(mean)  # TF tensor
