@@ -349,8 +349,9 @@ def compute_flow_params_batch_global(
     # P @ H^T @ R_inv: (N, sd, od)
     PHT_Rinv = tf.matmul(PH_T, tf.expand_dims(R_inv, 0))
 
-    # z broadcast: (1, od)
-    z_broadcast = tf.expand_dims(observation, 0)
+    # z broadcast: (N, od) — tile to match batch dimension for einsum
+    N = tf.shape(H_batch)[0]
+    z_broadcast = tf.tile(tf.expand_dims(observation, 0), [N, 1])
 
     # (I + λA) @ P @ H^T @ R_inv @ z: (N, sd)
     inner = tf.einsum('nij,nj->ni', tf.matmul(I_lA, PHT_Rinv), z_broadcast)

@@ -197,8 +197,7 @@ class LEDHInvertibleBimodal(LEDHParticleFlowFilter):
         # Apply flip_fraction: only a subset of particles are candidates
         if self.flip_fraction < 1.0:
             # Mask out particles that aren't eligible
-            seed_mask = tf.constant([self.seed_counter, 1], dtype=tf.int32)
-            self.seed_counter += 1
+            seed_mask = self._next_seed()
             eligible = tf.cast(
                 tf.random.stateless_uniform([self.n_particles], seed=seed_mask, dtype=self.dtype)
                 < self.flip_fraction,
@@ -207,8 +206,7 @@ class LEDHInvertibleBimodal(LEDHParticleFlowFilter):
             flip_prob = flip_prob * eligible
 
         # Stochastic flip decision
-        seed = tf.constant([self.seed_counter, 0], dtype=tf.int32)
-        self.seed_counter += 1
+        seed = self._next_seed()
         u = tf.random.stateless_uniform([self.n_particles], seed=seed, dtype=self.dtype)
         flip_mask = tf.cast(u < flip_prob, self.dtype)
 

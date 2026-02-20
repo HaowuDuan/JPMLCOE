@@ -419,7 +419,7 @@ class AcousticTrackingFullModel(StateSpaceModel):
 
     # Alias for compatibility with different filter implementations
     @tf.function
-    def state_transition_batch(self, particles: tf.Tensor, seed: tf.Tensor) -> tf.Tensor:
+    def state_transition_batch(self, particles: tf.Tensor, seed: tf.Tensor, t=None) -> tf.Tensor:
         """Alias for sample_state_transition_batch for filter compatibility."""
         return self.sample_state_transition_batch(particles, seed)
 
@@ -481,7 +481,7 @@ class AcousticTrackingFullModel(StateSpaceModel):
         return tf.tile(tf.expand_dims(self.F, 0), [N, 1, 1])
 
     @tf.function
-    def state_transition_mean_batch(self, particles: tf.Tensor) -> tf.Tensor:
+    def state_transition_mean_batch(self, particles: tf.Tensor, t=None) -> tf.Tensor:
         """Vectorized state transition mean: particles @ F.T."""
         return particles @ tf.transpose(self.F)
 

@@ -33,11 +33,13 @@ class StochasticEDHFlowPaper(StochasticEDHFlow):
         self.predicted_cov = prior_cov
         self.eta_bar_0     = prior_mean
 
-    def predict(self):
+    def predict(self, t=None):
         """Propagate particles; EKF advances from its own state (no particle feedback)."""
-        seed = tf.constant([self.seed_counter, 0], dtype=tf.int32)
+        if t is not None and hasattr(self.model, 't'):
+            self.model.t = t
+        seed = self._next_seed()
         particles_predicted = self.model.state_transition_batch(
-            self.particles.value(), seed)
+            self.particles.value(), seed, t=t)
         self.particles.assign(particles_predicted)
         # EKF predicts from its own mean — no particle empirical mean overwrite
         self.global_filter.predict()

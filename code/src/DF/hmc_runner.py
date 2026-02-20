@@ -91,7 +91,10 @@ class DPFRunner:
         # 4. Log prior with Jacobian adjustment
         log_prior = self.param_handler.log_prior(constrained_params)
 
-        return -(log_likelihood + log_prior)
+        nlp = -(log_likelihood + log_prior)
+        tf.print("  [nlp] ll=", log_likelihood, " prior=", log_prior,
+                 " nlp=", nlp, " q=", unconstrained_params)
+        return nlp
 
     def _value_and_grad(self, q):
         """Compute log-posterior and its gradient at q."""

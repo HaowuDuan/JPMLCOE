@@ -10,9 +10,11 @@ from typing import Tuple, Optional, Callable, Dict, Any
 from .flow_base import FlowFilterBase
 from ..kalman.extended_kalman import ExtendedKalmanFilter
 from ...utils.flow_params import compute_flow_params_global
-from ...utils.linalg import safe_inv, safe_cholesky
-from ...utils.ode_solvers import euler_step, rk4_step
-from ...resampling import systematic_resample, soft_resample, ot_entropy_resample
+from ...utils.linalg import safe_inv, to_numpy
+from ...utils.ode_solvers import euler_step
+from ...utils.constants import FlowScheduleConfig
+from ...utils.distributions import sample_particles_cholesky
+from ...utils.resampling_config import resolve_resampling
 
 
 class ExactDaumHuangFlowglobal(FlowFilterBase):
@@ -35,7 +37,8 @@ class ExactDaumHuangFlowglobal(FlowFilterBase):
                  resampling_method: Optional[Callable] = None,
                  resampling_config: Optional[Dict[str, Any]] = None,
                  n_threads: Optional[int] = None,
-                 debug_mode: bool = False):
+                 debug_mode: bool = False,
+                 flow_config: FlowScheduleConfig = FlowScheduleConfig()):
         """
         Initialize Exact Daum-Huang flow filter.
 
@@ -51,8 +54,10 @@ class ExactDaumHuangFlowglobal(FlowFilterBase):
                 For ot_entropy: {'reg': float, 'n_iter': int}
             n_threads: Number of threads (None = use CPU count, ignored for now)
             debug_mode: If True, collect detailed diagnostics
+            flow_config: Flow schedule configuration
         """
         super().__init__(model, n_particles, n_lambda_steps, integration_method, n_threads)
+        self.flow_config = flow_config
         self.dtype = getattr(model, 'dtype', tf.float64)
         self.np_dtype = np.float64 if self.dtype == tf.float64 else np.float32
         self.debug_mode = debug_mode
@@ -60,32 +65,10 @@ class ExactDaumHuangFlowglobal(FlowFilterBase):
         self.eta_bar_0 = None      # η̄_0 (mean at λ=0, TF tensor)
         self.global_filter = None  # EKF for covariance guidance
 
-        # Configure resampling method
-        if isinstance(resampling_method, str):
-            method_map = {
-                'systematic': systematic_resample,
-                'soft': soft_resample,
-                'ot_entropy': ot_entropy_resample,
-            }
-            self.resampling_method = method_map.get(resampling_method, systematic_resample)
-        elif callable(resampling_method):
-            self.resampling_method = resampling_method
-        else:
-            self.resampling_method = systematic_resample
-
-        # Process resampling config (convert to Python scalars for TF compatibility)
-        self.resampling_config = {}
-        if resampling_config is not None:
-            for key, value in resampling_config.items():
-                if isinstance(value, (int, np.integer)):
-                    self.resampling_config[key] = int(value)
-                elif isinstance(value, (float, np.floating)):
-                    self.resampling_config[key] = float(value)
-                else:
-                    self.resampling_config[key] = value
-
-        # Seed counter for stateless random sampling
-        self.seed_counter = 0
+        # Resolve resampling method and config
+        self.resampling_method, self.resampling_method_name, self.resampling_config = (
+            resolve_resampling(resampling_method, resampling_config)
+        )
 
         # Cache R_inv if R is constant
         self.R_inv_cache = None
@@ -123,16 +106,19 @@ class ExactDaumHuangFlowglobal(FlowFilterBase):
         initial_mean_tf = tf.constant(initial_mean, dtype=self.dtype)
         initial_cov_tf = tf.constant(initial_cov, dtype=self.dtype)
 
-        # Sample initial particles using TensorFlow
+        # Initialize RNG key
         if random_state is not None:
-            seed = [random_state.integers(0, 2**31), random_state.integers(0, 2**31)]
+            seed_val = random_state.integers(0, 2**31)
+            self.rng_key = tf.constant([seed_val, 0], dtype=tf.int32)
         else:
-            seed = [0, 0]
-        seed = tf.constant(seed, dtype=tf.int32)
+            self.rng_key = tf.constant([42, 0], dtype=tf.int32)
 
-        L = safe_cholesky(initial_cov_tf)
-        z = tf.random.stateless_normal([self.n_particles, self.state_dim], seed=seed, dtype=self.dtype)
-        particles_tf = initial_mean_tf + tf.linalg.matmul(z, L, transpose_b=True)
+        # Sample initial particles using TensorFlow
+        seed = self._next_seed()
+
+        particles_tf = sample_particles_cholesky(
+            initial_mean_tf, initial_cov_tf, self.n_particles, self.state_dim, seed, self.dtype
+        )
 
         # Store as TensorFlow Variable
         self.particles = tf.Variable(particles_tf, dtype=self.dtype)
@@ -158,15 +144,12 @@ class ExactDaumHuangFlowglobal(FlowFilterBase):
         self.global_filter.cov.assign(initial_cov_emp)
         self.predicted_cov = self.global_filter.cov.value()  # TF tensor
 
-        # Initialize seed counter
-        self.seed_counter = 0
-
     def _generate_lambda_steps(self):
         """
         Generate exponential decay schedule for lambda steps as TF tensor.
         Uses geometric sequence with ratio q=1.2, normalized to sum to 1.
         """
-        q = 1.2
+        q = self.flow_config.geometric_ratio
         epsilon_1 = (1 - q) / (1 - q**self.n_lambda_steps)
         steps_np = epsilon_1 * q**np.arange(self.n_lambda_steps)
         self.lambda_steps = tf.constant(steps_np, dtype=self.dtype)
@@ -176,13 +159,16 @@ class ExactDaumHuangFlowglobal(FlowFilterBase):
         """Compute drift for EDH flow: dη/dλ = Aη + b (vectorized)."""
         return particles @ tf.transpose(A) + b
 
-    def predict(self):
+    def predict(self, t=None):
         """
         Prediction step - propagate particles and get covariance from EKF/UKF.
 
         Uses global EKF/UKF to estimate P_{k|k-1} for flow guidance.
         Implements feedback from particle ensemble to EKF/UKF (Algorithm 2).
         """
+        if t is not None and hasattr(self.model, 't'):
+            self.model.t = t
+
         # FEEDBACK: Update global filter mean to ensemble mean (TF ops, no numpy)
         ensemble_mean = tf.reduce_mean(self.particles.value(), axis=0)
         self.global_filter.mean.assign(ensemble_mean)
@@ -195,10 +181,9 @@ class ExactDaumHuangFlowglobal(FlowFilterBase):
         self.eta_bar_0 = self.global_filter.mean.value()  # TF tensor
 
         # Propagate particles through state transition using model's batch method
-        seed = tf.constant([self.seed_counter, 0], dtype=tf.int32)
-        self.seed_counter += 1
+        seed = self._next_seed()
 
-        particles_predicted = self.model.state_transition_batch(self.particles.value(), seed)
+        particles_predicted = self.model.state_transition_batch(self.particles.value(), seed, t=t)
         self.particles.assign(particles_predicted)
 
     def update(self, y: tf.Tensor):
@@ -290,13 +275,13 @@ class ExactDaumHuangFlowglobal(FlowFilterBase):
             self.debug_info['timesteps'].append(timestep_debug)
 
         # Update global filter for next prediction cycle (EKF accepts numpy)
-        self.global_filter.update(y.numpy() if isinstance(y, tf.Tensor) else y)
+        self.global_filter.update(to_numpy(y))
 
     def get_diagnostics(self) -> dict:
         """Return diagnostic information about flow convergence."""
         return {
             'final_particles': self.particles.numpy(),
-            'predicted_cov': self.predicted_cov.numpy() if isinstance(self.predicted_cov, tf.Tensor) else self.predicted_cov,
+            'predicted_cov': to_numpy(self.predicted_cov),
             'global_filter_mean': self.global_filter.mean,
             'global_filter_cov': self.global_filter.cov
         }

@@ -54,8 +54,10 @@ class ParameterHandler:
                 bijectors[name] = tfp.bijectors.Identity()
             
             elif constraint == 'positive':
-                # x > 0: exponential bijector
-                bijectors[name] = tfp.bijectors.Exp()
+                # x > 0: softplus bijector (Exp overflows to Inf for large
+                # unconstrained values during HMC leapfrog; Softplus grows
+                # linearly instead. Jacobian correction keeps it exact.)
+                bijectors[name] = tfp.bijectors.Softplus()
             
             elif constraint == 'unit':
                 # x ∈ (0, 1): sigmoid bijector

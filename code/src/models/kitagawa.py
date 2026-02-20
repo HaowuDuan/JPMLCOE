@@ -120,8 +120,8 @@ class KitagawaModel(StateSpaceModel):
     # Deterministic methods
     # ------------------------------------------------------------------
 
-    def state_transition_mean(self, x: tf.Tensor) -> tf.Tensor:
-        t_val = tf.cast(self.t, self.dtype)
+    def state_transition_mean(self, x: tf.Tensor, t=None) -> tf.Tensor:
+        t_val = tf.cast(t if t is not None else self.t, self.dtype)
         x0 = x[0] if len(x.shape) == 1 else x
         mean = x0 / 2.0 + 25.0 * x0 / (1.0 + x0 ** 2) + 8.0 * tf.cos(1.2 * t_val)
         return tf.reshape(mean, tf.shape(x))
@@ -177,16 +177,16 @@ class KitagawaModel(StateSpaceModel):
         std = tf.sqrt(iv)
         return tf.random.stateless_normal([n, 1], seed=seed, dtype=self.dtype) * std
 
-    def state_transition_batch(self, particles: tf.Tensor, seed: tf.Tensor) -> tf.Tensor:
+    def state_transition_batch(self, particles: tf.Tensor, seed: tf.Tensor, t=None) -> tf.Tensor:
         sigma_V = _as_sigma(self.sigma_V, self.dtype)
-        t_val = tf.cast(self.t, self.dtype)
+        t_val = tf.cast(t if t is not None else self.t, self.dtype)
         x = particles[:, 0:1]
         mean = x / 2.0 + 25.0 * x / (1.0 + x ** 2) + 8.0 * tf.cos(1.2 * t_val)
         w = tf.random.stateless_normal(tf.shape(particles), seed=seed, dtype=self.dtype)
         return mean + sigma_V * w
 
-    def state_transition_mean_batch(self, particles: tf.Tensor) -> tf.Tensor:
-        t_val = tf.cast(self.t, self.dtype)
+    def state_transition_mean_batch(self, particles: tf.Tensor, t=None) -> tf.Tensor:
+        t_val = tf.cast(t if t is not None else self.t, self.dtype)
         x = particles[:, 0:1]
         return x / 2.0 + 25.0 * x / (1.0 + x ** 2) + 8.0 * tf.cos(1.2 * t_val)
 

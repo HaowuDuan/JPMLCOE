@@ -38,6 +38,11 @@ class DifferentiableModel:
             original_value = getattr(base_model, param_name)
             self._original_values[param_name] = copy.deepcopy(original_value)
 
+    @property
+    def trainable_param_names(self) -> List[str]:
+        """Names of trainable parameters (used by compiled filter path)."""
+        return list(self._trainable_params)
+
     def update_parameters(self, param_dict: Dict[str, tf.Tensor]) -> None:
         """
         Update trainable parameters via setattr — preserves gradient chain.

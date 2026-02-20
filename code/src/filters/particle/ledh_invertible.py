@@ -9,8 +9,10 @@ from ...core.types import FilterResult
 from ..kalman.batched_ekf import batched_ekf_predict, batched_ekf_update
 from ...utils.flow_params import compute_flow_params_batch
 from ...utils.distributions import compute_flow_weights
-from ...utils.linalg import safe_log_abs_det, safe_inv, safe_cholesky
-from ...resampling import systematic_resample, soft_resample, ot_entropy_resample
+from ...utils.linalg import safe_log_abs_det, safe_inv
+from ...utils.distributions import sample_particles_cholesky
+from ...utils.constants import FlowScheduleConfig
+from ...utils.resampling_config import resolve_resampling
 from ...resampling.diagnosis import effective_sample_size as ess_tf
 
 
@@ -32,6 +34,7 @@ class LEDHParticleFlowFilter:
         resampling_config: Optional[Dict[str, Any]] = None,
         weight_clip_range: Optional[float] = None,
         debug_mode: bool = False,
+        flow_config: FlowScheduleConfig = FlowScheduleConfig(),
         **filter_kwargs
     ):
         """
@@ -47,8 +50,10 @@ class LEDHParticleFlowFilter:
                               Prevents weight collapse while preserving gradient signal.
                               Typical values: 30-50. None = no clipping (MATLAB behavior).
             debug_mode: If True, store detailed diagnostics
+            flow_config: Flow schedule configuration
         """
         self.model = model
+        self.flow_config = flow_config
         self.dtype = getattr(model, 'dtype', tf.float64)
         self.state_dim = model.state_dim
         self.obs_dim = model.obs_dim
@@ -59,32 +64,10 @@ class LEDHParticleFlowFilter:
         self.weight_clip_range = (-weight_clip_range, weight_clip_range) if weight_clip_range is not None else None
         self.debug_mode = debug_mode
 
-        # Handle resampling method configuration
-        if isinstance(resampling_method, str):
-            method_map = {
-                'systematic': systematic_resample,
-                'soft': soft_resample,
-                'ot_entropy': ot_entropy_resample,
-            }
-            self.resampling_method = method_map.get(resampling_method, systematic_resample)
-            self.resampling_method_name = resampling_method
-        elif resampling_method is not None:
-            self.resampling_method = resampling_method
-            self.resampling_method_name = getattr(resampling_method, '__name__', 'custom')
-        else:
-            self.resampling_method = systematic_resample
-            self.resampling_method_name = 'systematic'
-
-        # Convert resampling config values to Python scalars
-        self.resampling_config = {}
-        if resampling_config is not None:
-            for key, value in resampling_config.items():
-                if isinstance(value, (int, np.integer)):
-                    self.resampling_config[key] = int(value)
-                elif isinstance(value, (float, np.floating)):
-                    self.resampling_config[key] = float(value)
-                else:
-                    self.resampling_config[key] = value
+        # Resolve resampling method and config
+        self.resampling_method, self.resampling_method_name, self.resampling_config = (
+            resolve_resampling(resampling_method, resampling_config)
+        )
 
         # Particles and weights
         self.particles = None
@@ -108,32 +91,23 @@ class LEDHParticleFlowFilter:
         self.resampled_at = []
         self.n_unique_particles = []
 
-        # Random seed counter
-        self.seed_counter = 0
+        # RNG key for stateless random sampling
+        self.rng_key = tf.constant([42, 0], dtype=tf.int32)
 
-        # Debug storage
-        if self.debug_mode:
-            self.debug_info = {
-                'timesteps': [],
-                'flow_steps': [],
-                'particles_before_flow': [],
-                'particles_after_flow': [],
-                'A_matrices': [],
-                'b_vectors': [],
-                'H_jacobians': [],
-                'jacobian_dets': [],
-                'eigenvalues': [],
-                'condition_numbers': [],
-                'particle_stats': []
-            }
-        else:
-            self.debug_info = None
+        # Debug storage (populated on demand when debug_mode=True)
+        self.debug_info = {} if self.debug_mode else None
 
         self._generate_lambda_steps()
 
+    def _next_seed(self):
+        """Split RNG key, return subkey for use."""
+        keys = tf.random.experimental.stateless_split(self.rng_key, num=2)
+        self.rng_key = keys[0]
+        return keys[1]
+
     def _generate_lambda_steps(self):
         """Generate exponentially spaced step sizes as TF tensor."""
-        q = 1.2
+        q = self.flow_config.geometric_ratio
         epsilon_1 = (1 - q) / (1 - q**self.n_lambda_steps)
         lambda_steps_np = epsilon_1 * q**np.arange(self.n_lambda_steps)
         self.lambda_steps = tf.constant(lambda_steps_np, dtype=self.dtype)
@@ -143,7 +117,9 @@ class LEDHParticleFlowFilter:
                    random_seed: Optional[int] = None):
         """Initialize particles and per-particle filters."""
         if random_seed is not None:
-            self.seed_counter = random_seed
+            self.rng_key = tf.constant([random_seed, 0], dtype=tf.int32)
+        else:
+            self.rng_key = tf.constant([42, 0], dtype=tf.int32)
 
         if initial_mean is None:
             # Use model's initial mean directly (not a random sample)
@@ -158,14 +134,13 @@ class LEDHParticleFlowFilter:
                 initial_cov = np.eye(self.state_dim)
 
         # Sample initial particles using TensorFlow
-        seed = tf.constant([self.seed_counter, 0], dtype=tf.int32)
-        self.seed_counter += 1
+        seed = self._next_seed()
         initial_mean_tf = tf.constant(initial_mean, dtype=self.dtype)
         initial_cov_tf = tf.constant(initial_cov, dtype=self.dtype)
 
-        L = safe_cholesky(initial_cov_tf)
-        z = tf.random.stateless_normal([self.n_particles, self.state_dim], seed=seed, dtype=self.dtype)
-        particles_tf = initial_mean_tf + tf.linalg.matmul(z, L, transpose_b=True)
+        particles_tf = sample_particles_cholesky(
+            initial_mean_tf, initial_cov_tf, self.n_particles, self.state_dim, seed, self.dtype
+        )
 
         self.particles = tf.Variable(particles_tf, dtype=self.dtype)
         self.weights = tf.Variable(tf.ones(self.n_particles, dtype=self.dtype) / self.n_particles)
@@ -189,8 +164,11 @@ class LEDHParticleFlowFilter:
         self.resampled_at = []
         self.n_unique_particles = []
 
-    def predict(self):
+    def predict(self, t=None):
         """Prediction step with batched EKF (all TF ops)."""
+        if t is not None and hasattr(self.model, 't'):
+            self.model.t = t
+
         self.particles_prev.assign(self.particles.value())
 
         # Batched EKF predict - single tf.function call (all TF tensors)
@@ -202,9 +180,8 @@ class LEDHParticleFlowFilter:
         self.eta_bar_0.assign(eta_bar_0_tf)
 
         # Stochastic prediction - use batch method
-        seed = tf.constant([self.seed_counter, 0], dtype=tf.int32)
-        self.seed_counter += 1
-        eta_0_tf = self.model.state_transition_batch(self.particles_prev.value(), seed)
+        seed = self._next_seed()
+        eta_0_tf = self.model.state_transition_batch(self.particles_prev.value(), seed, t=t)
         self.eta_0.assign(eta_0_tf)
 
     def update(self, y: tf.Tensor):
@@ -303,8 +280,7 @@ class LEDHParticleFlowFilter:
 
     def _resample(self):
         """Resample particles and per-particle covariances."""
-        seed = tf.constant([self.seed_counter, 0], dtype=tf.int32)
-        self.seed_counter += 1
+        seed = self._next_seed()
 
         result = self.resampling_method(
             self.particles.value(),
@@ -372,11 +348,7 @@ class LEDHParticleFlowFilter:
         total_log_lik = tf.constant(0.0, dtype=self.dtype)
 
         for t in range(T):
-            # Advance time step for time-dependent models (e.g., Kitagawa)
-            if hasattr(self.model, 't'):
-                self.model.t = t + 1
-
-            self.predict()
+            self.predict(t=t + 1)
             self.update(observations[t])
 
             # Accumulate the log-likelihood already computed in update()
@@ -398,7 +370,7 @@ class LEDHParticleFlowFilter:
 
         for t in range(T):
             t0 = time.perf_counter()
-            self.predict()
+            self.predict(t=t + 1)
             self.update(obs_tf[t])
             mean, cov = self._estimate_mean_cov()
             self.means.append(mean)  # TF tensor

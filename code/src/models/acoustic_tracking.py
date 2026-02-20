@@ -214,12 +214,12 @@ class AcousticTrackingModel(StateSpaceModel):
         v = tf.random.stateless_normal([n, 2], seed=s2, dtype=self.dtype)
         return tf.concat([xy, v], axis=1)
 
-    def state_transition_batch(self, particles: tf.Tensor, seed: tf.Tensor) -> tf.Tensor:
+    def state_transition_batch(self, particles: tf.Tensor, seed: tf.Tensor, t=None) -> tf.Tensor:
         mean = particles @ tf.transpose(self._F_tf)
         z = tf.random.stateless_normal(tf.shape(particles), seed=seed, dtype=self.dtype)
         return mean + z @ tf.transpose(self._L_Q)
 
-    def state_transition_mean_batch(self, particles: tf.Tensor) -> tf.Tensor:
+    def state_transition_mean_batch(self, particles: tf.Tensor, t=None) -> tf.Tensor:
         return particles @ tf.transpose(self._F_tf)
 
     def state_transition_cov_batch(self, particles: tf.Tensor) -> tf.Tensor:
