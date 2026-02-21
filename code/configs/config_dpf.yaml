@@ -6,7 +6,7 @@ defaults:
   - override hydra/job_logging: default
   - override hydra/hydra_logging: default
 
-dtype: float32
+dtype: float64
 tf_log_level: 2
 
 hydra:

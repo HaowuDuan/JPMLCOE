@@ -5,7 +5,7 @@
 
 defaults:
   - override /model: stochastic_volatility
-  - override /filter: particle_tf
+  - override /filter: particle
 
 # Override settings
 T: 500

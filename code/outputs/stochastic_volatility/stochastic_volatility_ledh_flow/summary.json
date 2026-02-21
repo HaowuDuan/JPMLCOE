@@ -1,0 +1,45 @@
+{
+  "rmse": 3.2075572007318818,
+  "log_likelihood": null,
+  "metadata": {
+    "filter_type": "LocalExactDaumHuangFlow",
+    "n_particles": 500,
+    "n_lambda_steps": 29,
+    "integration_method": "euler",
+    "performance": {
+      "wall_time_seconds": 3.369754708983237,
+      "time_per_timestep_ms": 168.48773544916185,
+      "peak_memory_mb": 4.3915863037109375,
+      "memory_increase_mb": 30.265625,
+      "start_memory_mb": 409.875,
+      "end_memory_mb": 440.140625,
+      "num_timesteps": 20
+    }
+  },
+  "config": {
+    "model": {
+      "_target_": "src.models.stochastic_volatility.StochasticVolatilityModel",
+      "alpha": 0.91,
+      "sigma": 1.0,
+      "beta": 0.5
+    },
+    "filter": {
+      "_target_": "src.filters.particle.ledh_flow.LocalExactDaumHuangFlow",
+      "n_particles": 500,
+      "n_lambda_steps": 29,
+      "integration_method": "euler",
+      "use_feedback": true,
+      "regularization": 1e-05,
+      "n_threads": null
+    },
+    "seed": 42,
+    "dtype": "float64",
+    "T": 20,
+    "output_dir": "outputs/stochastic_volatility/stochastic_volatility_ledh_flow",
+    "plot": true,
+    "device": "auto",
+    "tf_log_level": 2,
+    "verbose": true,
+    "show_progress": true
+  }
+}

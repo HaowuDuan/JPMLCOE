@@ -170,6 +170,64 @@ def run_dpf_experiment(cfg: DictConfig) -> Dict[str, Any]:
                 proposal_std=proposal_std,
                 seed=int(pmmh_cfg.get('seed', 42)),
             )
+    elif sampler == 'pgibbs':
+        # Particle Gibbs + HMC: Gibbs alternation between theta-step and x-step
+        from src.DF import PGibbsRunner
+
+        # Import CSMC filter class
+        pgibbs_cfg = cfg.dpf.pgibbs
+        csmc_target = cfg.filter._target_
+
+        # Build CSMC kwargs (everything except _target_ and model)
+        csmc_kwargs = OmegaConf.to_container(cfg.filter, resolve=True)
+        csmc_kwargs.pop('_target_', None)
+
+        runner = PGibbsRunner(
+            base_model=inference_model,
+            csmc_class=filter_class,
+            csmc_kwargs=csmc_kwargs,
+            param_specs=param_specs,
+        )
+
+        with _PerfTracker() as perf:
+            result = runner.run_inference(
+                observations=observations,
+                num_samples=int(pgibbs_cfg.get('num_samples', 1000)),
+                num_burnin=int(pgibbs_cfg.get('num_burnin', 500)),
+                theta_sampler=pgibbs_cfg.get('theta_sampler', 'hmc'),
+                hmc_steps_per_iter=int(pgibbs_cfg.get('hmc_steps_per_iter', 5)),
+                hmc_step_size=float(pgibbs_cfg.get('hmc_step_size', 0.05)),
+                hmc_num_leapfrog=int(pgibbs_cfg.get('hmc_num_leapfrog', 10)),
+                target_accept_prob=float(pgibbs_cfg.get('target_accept_prob', 0.8)),
+                grad_clip_norm=float(pgibbs_cfg.get('grad_clip_norm', 100.0)),
+                mh_proposal_std=float(pgibbs_cfg.get('mh_proposal_std', 0.1)),
+                mh_steps_per_iter=int(pgibbs_cfg.get('mh_steps_per_iter', 1)),
+                seed=int(pgibbs_cfg.get('seed', 42)),
+            )
+
+    elif sampler == 'map':
+        # MAP: Adam/SGD point estimate (fast diagnostic)
+        from src.DF import DPFRunner
+
+        runner = DPFRunner(
+            base_model=inference_model,
+            filter_class=filter_class,
+            filter_kwargs=filter_kwargs,
+            param_specs=param_specs,
+            sampler='map',
+        )
+
+        map_cfg = cfg.dpf.map
+
+        with _PerfTracker() as perf:
+            result = runner.run_map(
+                observations=observations,
+                num_steps=int(map_cfg.get('num_steps', 200)),
+                learning_rate=float(map_cfg.get('learning_rate', 0.01)),
+                optimizer=map_cfg.get('optimizer', 'adam'),
+                random_seed=bool(map_cfg.get('random_seed', False)),
+                seed=int(map_cfg.get('seed', 42)),
+            )
     else:
         # HMC / NUTS / custom_hmc: needs DifferentiableModel + gradients
         from src.DF import DPFRunner

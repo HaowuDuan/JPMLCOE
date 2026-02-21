@@ -35,7 +35,7 @@ def safe_cholesky(A: tf.Tensor, jitter: float = 1e-10, adaptive: bool = True) ->
         avg_diag = trace_A / n_float
         
         # Scale jitter, with minimum = base jitter
-        scaled_jitter = jitter * tf.maximum(avg_diag, 1.0)
+        scaled_jitter = jitter * tf.maximum(avg_diag, tf.constant(1.0, dtype=avg_diag.dtype))
     else:
         scaled_jitter = tf.cast(jitter, A.dtype)
     
@@ -226,7 +226,7 @@ def _graph_safe_log_abs_det_fast_impl(M_reg):
         )
         # Extra backward jitter for near-singular cases
         M_inv_T = tf.linalg.matrix_transpose(
-            tf.linalg.inv(M_safe + 1e-6 * eye)
+            tf.linalg.inv(M_safe + tf.constant(1e-6, dtype=eye.dtype) * eye)
         )
         # Zero out gradient for NaN matrices
         M_inv_T = tf.where(
@@ -279,7 +279,7 @@ def graph_safe_log_abs_det_svd(M: tf.Tensor, jitter: float = 1e-8) -> tf.Tensor:
     eye = tf.eye(n, dtype=M.dtype)
     M_reg = M + jitter * eye
     s = tf.linalg.svd(M_reg, compute_uv=False)
-    return tf.reduce_sum(tf.math.log(tf.maximum(s, 1e-30)), axis=-1)
+    return tf.reduce_sum(tf.math.log(tf.maximum(s, tf.constant(1e-30, dtype=s.dtype))), axis=-1)
 
 
 @tf.function
@@ -313,7 +313,7 @@ def matrix_sqrt(A: tf.Tensor, method: str = 'cholesky') -> tf.Tensor:
     elif method == 'eig':
         # Eigenvalue decomposition
         eigvals, eigvecs = tf.linalg.eigh(A)
-        eigvals = tf.maximum(eigvals, 1e-10)  # Ensure positive
+        eigvals = tf.maximum(eigvals, tf.constant(1e-10, dtype=eigvals.dtype))  # Ensure positive
         sqrt_eigvals = tf.sqrt(eigvals)
         # sqrt(A) = V @ diag(sqrt(λ)) @ V^T
         return eigvecs @ tf.linalg.diag(sqrt_eigvals) @ tf.linalg.matrix_transpose(eigvecs)

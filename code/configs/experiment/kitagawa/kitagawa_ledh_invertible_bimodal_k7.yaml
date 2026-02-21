@@ -1,0 +1,16 @@
+# @package _global_
+
+# Experiment: LEDH Invertible Bimodal on Kitagawa Model (K=7 lookahead)
+
+defaults:
+  - override /model: kitagawa
+  - override /filter: ledh_invertible_bimodal
+
+# Override settings
+T: 100
+seed: 42
+plot: true
+output_dir: outputs/kitagawa/kitagawa_ledh_invertible_bimodal_k7
+
+filter:
+  lookahead_steps: 7

@@ -103,12 +103,16 @@ class StochasticEDHFlow(ExactDaumHuangFlow):
         Solve BVP β̈ = μ·∂κ/∂β, β(0)=0, β(1)=1 (Eqs. 26-27).
 
         Uses bisection shooting to find β̇(0) = u₀, then integrates
-        to record β at each λ step. Entirely in numpy for speed.
+        to record β at each λ step.  The ODE is stiff (∂κ/∂β can be
+        O(10⁵) near β=0 for ill-conditioned priors), so we use
+        scipy's adaptive Radau solver instead of fixed-step Euler.
 
         Returns:
             beta_values:  TF tensor, shape (n_lambda_steps,), β at each step
             dbeta_values: TF tensor, shape (n_lambda_steps,), dβ per step
         """
+        from scipy.integrate import solve_ivp
+
         # Convert to numpy once — no gradients needed for schedule solve
         H_np = self.model.observation_jacobian(self.eta_bar_0).numpy()
         J_prior = np.linalg.inv(P.numpy())   # P is PD, inv is safe
@@ -116,35 +120,44 @@ class StochasticEDHFlow(ExactDaumHuangFlow):
         mu      = float(self.schedule_mu)
         lambda_steps_np = self.lambda_steps.numpy()  # (n_lambda_steps,)
 
-        def _drift(state):
-            """Numpy drift [β̇, μ·∂κ/∂β] for ODE state [β, β̇]."""
+        def _rhs(lam, state):
+            """ODE right-hand side [β̇, μ·∂κ/∂β]."""
             beta, beta_dot = state[0], state[1]
             M     = J_prior + beta * J_meas
             M_inv = np.linalg.inv(M)
-            dkappa = (np.trace(J_meas) * np.trace(M_inv)
-                      - np.trace(M) * np.trace(M_inv @ J_meas @ M_inv))
-            return np.array([beta_dot, mu * dkappa])
+            # ∂κ_ν/∂β where κ_ν = tr(M)·tr(M⁻¹) (nuclear norm condition number).
+            # Use ∂(log κ_ν)/∂β = (∂κ_ν/∂β)/κ_ν to keep the BVP well-conditioned
+            # (raw ∂κ_ν/∂β ≈ −558k at β=0 for anisotropic priors, making the
+            # BVP unsolvable; dividing by κ_ν reduces it to ≈ −1100).
+            kappa = np.trace(M) * np.trace(M_inv)
+            dkappa_raw = (np.trace(J_meas) * np.trace(M_inv)
+                          - np.trace(M) * np.trace(M_inv @ J_meas @ M_inv))
+            dkappa = dkappa_raw / kappa
+            return [beta_dot, mu * dkappa]
 
-        def _shoot(u0, n_steps=self.bvp_config.n_ode_steps):
-            """Euler integrate ODE from λ=0 to λ=1, return β(1)."""
-            state = np.array([0.0, u0])
-            dlam  = 1.0 / n_steps
-            for _ in range(n_steps):
-                state = state + dlam * _drift(state)
-            return float(state[0])
+        def _shoot(u0):
+            """Integrate ODE from λ=0 to λ=1 with adaptive stiff solver, return β(1)."""
+            sol = solve_ivp(_rhs, [0.0, 1.0], [0.0, u0],
+                            method='Radau', rtol=1e-8, atol=1e-10)
+            if not sol.success:
+                return np.inf  # signal failure to bracket logic
+            return float(sol.y[0, -1])
 
-        # --- Bisection to find u₀ ---
-        u_lo, u_hi = self.bvp_config.bracket_lo, self.bvp_config.bracket_hi
-        if _shoot(u_lo) > 1.0:
-            u_lo = self.bvp_config.bracket_lo_min
-        if _shoot(u_hi) < 1.0:
-            u_hi = self.bvp_config.bracket_hi_max
+        # --- Find bracket [u_lo, u_hi] where _shoot(u_lo)<1<_shoot(u_hi) ---
+        # Scan a geometric grid to find one value below and one above target.
+        u_below, u_above = None, None
+        for u0 in [0.01, 0.1, 0.5, 1.0, 1.5, 2.0, 5.0, 10.0, 20.0, 50.0]:
+            val = _shoot(u0)
+            if val < 1.0:
+                u_below = u0
+            elif val > 1.0 and val != np.inf:
+                u_above = u0
+                if u_below is not None:
+                    break  # found valid bracket
 
-        err_lo = _shoot(u_lo) - 1.0
-        err_hi = _shoot(u_hi) - 1.0
-        if err_lo * err_hi > 0:
-            # Bracket invalid — fall back to linear schedule β = λ
+        if u_below is None or u_above is None:
             return tf.cumsum(self.lambda_steps), self.lambda_steps
+        u_lo, u_hi = u_below, u_above
 
         for _ in range(self.bvp_config.n_bisection):
             u_mid = (u_lo + u_hi) / 2.0
@@ -155,12 +168,15 @@ class StochasticEDHFlow(ExactDaumHuangFlow):
 
         optimal_u0 = (u_lo + u_hi) / 2.0
 
-        # --- Record β at each λ step point ---
-        state = np.array([0.0, optimal_u0])
-        beta_np = np.empty(self.n_lambda_steps, dtype=np.float64)
-        for i in range(self.n_lambda_steps):
-            state = state + lambda_steps_np[i] * _drift(state)
-            beta_np[i] = state[0]
+        # --- Record β at each λ step point (adaptive solver at exact λ points) ---
+        lambda_cumsum = np.clip(np.cumsum(lambda_steps_np), 0.0, 1.0)
+        sol = solve_ivp(_rhs, [0.0, 1.0], [0.0, optimal_u0],
+                        method='Radau', rtol=1e-8, atol=1e-10,
+                        t_eval=lambda_cumsum)
+        if not sol.success or sol.y.shape[1] != self.n_lambda_steps:
+            return tf.cumsum(self.lambda_steps), self.lambda_steps
+
+        beta_np = sol.y[0]  # β at each cumulative λ point
 
         dbeta_np = np.empty_like(beta_np)
         dbeta_np[0]  = beta_np[0]

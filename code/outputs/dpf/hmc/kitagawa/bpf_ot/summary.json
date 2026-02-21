@@ -1,0 +1,157 @@
+{
+  "summary": {
+    "sigma_V": {
+      "mean": 5.000000006398035,
+      "std": 1.3273975100668555e-11,
+      "median": 5.000000006395888,
+      "q5": 5.000000006386234,
+      "q25": 5.000000006386234,
+      "q75": 5.000000006405544,
+      "q95": 5.0000000064173555,
+      "min": 5.000000006386234,
+      "max": 5.00000000642702
+    },
+    "sigma_W": {
+      "mean": 1.9999999964095394,
+      "std": 4.1922987487152526e-11,
+      "median": 1.9999999964058885,
+      "q5": 1.9999999963689081,
+      "q25": 1.9999999963689081,
+      "q75": 1.999999996442869,
+      "q95": 1.999999996462949,
+      "min": 1.9999999963689081,
+      "max": 1.999999996479378
+    }
+  },
+  "diagnostics": {
+    "acceptance_rate": 0.3,
+    "final_step_size": 9.29210961647664e-12,
+    "ess": {
+      "sigma_V": NaN,
+      "sigma_W": NaN
+    },
+    "rhat": {
+      "sigma_V": 0.5877135258553087,
+      "sigma_W": 0.5234636603057101
+    }
+  },
+  "metadata": {
+    "model_type": "KitagawaModel",
+    "filter_type": "BootstrapPFHMC",
+    "sampler": "hmc",
+    "num_samples": 10,
+    "num_burnin": 15,
+    "num_leapfrog_steps": 5,
+    "num_observations": 100,
+    "timing": {
+      "step_times": [
+        1.1833704253658652,
+        1.185128765180707,
+        53.81905199959874,
+        27.669404064305127,
+        26.24291309248656,
+        25.96389182470739,
+        26.01926378160715,
+        26.496635792776942,
+        26.264969100244343,
+        26.22997399419546,
+        26.28373861964792,
+        26.20313970092684,
+        25.939111680723727,
+        26.0138385174796,
+        26.2467492390424,
+        26.090238824486732,
+        26.21096185222268,
+        26.20027337409556,
+        26.010829662904143,
+        26.15006774943322,
+        26.272997301071882,
+        26.442722648382187,
+        26.260512094944715,
+        26.20243787392974,
+        26.221939435228705
+      ],
+      "total_time_seconds": 633.8241614149883,
+      "mean_step_time": 25.352966456599532,
+      "median_step_time": 26.21096185222268,
+      "min_step_time": 1.1833704253658652,
+      "max_step_time": 53.81905199959874,
+      "burnin_time_seconds": 371.7611805982888,
+      "sampling_time_seconds": 262.06298081669956,
+      "mean_time_per_gradient_eval": 5.0705932913199065
+    }
+  },
+  "true_params": {
+    "sigma_V": 10.0,
+    "sigma_W": 1.0
+  },
+  "config": {
+    "dtype": "float64",
+    "tf_log_level": 2,
+    "model": {
+      "_target_": "src.models.kitagawa.KitagawaModel",
+      "sigma_V": 5.0,
+      "sigma_W": 2.0,
+      "initial_var": 5.0
+    },
+    "filter": {
+      "_target_": "src.filters.particle.bootstrap_pf_hmc.BootstrapPFHMC",
+      "n_particles": 1000,
+      "resampling_method": "ot_entropy",
+      "resampling_config": {
+        "epsilon": 0.5
+      },
+      "stop_gradient_resampling": false,
+      "hmc_resampling_method": "ot_entropy",
+      "hmc_resampling_config": {
+        "epsilon": 0.5
+      },
+      "eager_mode": false
+    },
+    "dpf": {
+      "sampler": "hmc",
+      "trainable_params": {
+        "sigma_V": {
+          "constraint": "positive",
+          "prior": {
+            "_target_": "tensorflow_probability.distributions.LogNormal",
+            "loc": 2.3,
+            "scale": 0.5
+          }
+        },
+        "sigma_W": {
+          "constraint": "positive",
+          "prior": {
+            "_target_": "tensorflow_probability.distributions.LogNormal",
+            "loc": 0.0,
+            "scale": 1.0
+          }
+        }
+      },
+      "hmc": {
+        "num_samples": 10,
+        "num_burnin": 15,
+        "step_size": 0.001,
+        "num_leapfrog_steps": 5,
+        "max_tree_depth": 10,
+        "adaptation_rate": 0.8,
+        "target_accept_prob": 0.9,
+        "seed": 42,
+        "grad_clip_norm": 100.0
+      }
+    },
+    "data": {
+      "T": 100,
+      "seed": 42,
+      "true_params": {
+        "sigma_V": 10.0,
+        "sigma_W": 1.0
+      }
+    }
+  },
+  "performance": {
+    "wall_time_seconds": 649.9619870167226,
+    "peak_memory_mb": 6.740034103393555,
+    "memory_increase_mb": 229.99609375
+  }
+}

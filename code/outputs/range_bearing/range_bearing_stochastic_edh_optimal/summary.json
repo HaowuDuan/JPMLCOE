@@ -1,18 +1,18 @@
 {
-  "rmse": 1.3070210967310003,
+  "rmse": 1.306736735886351,
   "log_likelihood": null,
   "metadata": {
     "filter_type": "StochasticEDHFlow",
     "n_particles": 500,
-    "n_lambda_steps": 29,
+    "n_lambda_steps": 100,
     "integration_method": "euler",
     "performance": {
-      "wall_time_seconds": 88.40281195798889,
-      "time_per_timestep_ms": 884.0281195798889,
-      "peak_memory_mb": 101.62349224090576,
-      "memory_increase_mb": 206.390625,
-      "start_memory_mb": 402.28125,
-      "end_memory_mb": 608.671875,
+      "wall_time_seconds": 257.8515581660031,
+      "time_per_timestep_ms": 2578.515581660031,
+      "peak_memory_mb": 139.62963962554932,
+      "memory_increase_mb": 271.25,
+      "start_memory_mb": 418.375,
+      "end_memory_mb": 689.625,
       "num_timesteps": 100
     }
   },
@@ -25,9 +25,9 @@
     "filter": {
       "_target_": "src.filters.particle.stochastic_edh.StochasticEDHFlow",
       "n_particles": 500,
-      "n_lambda_steps": 29,
+      "n_lambda_steps": 100,
       "diffusion_scale": 0.0,
-      "schedule_mu": 0.0,
+      "schedule_mu": 1.0,
       "n_threads": null
     },
     "seed": 42,
@@ -38,9 +38,6 @@
     "device": "auto",
     "tf_log_level": 2,
     "verbose": true,
-    "show_progress": true,
-    "diffusion_scale": 0.0,
-    "schedule_mu": 1.0,
-    "n_lambda_steps": 100
+    "show_progress": true
   }
 }

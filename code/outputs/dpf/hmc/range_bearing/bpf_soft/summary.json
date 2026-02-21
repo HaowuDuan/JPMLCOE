@@ -1,0 +1,155 @@
+{
+  "summary": {
+    "sigma_range": {
+      "mean": 0.2954023613782869,
+      "std": 0.0017780105746114528,
+      "median": 0.2950789151661254,
+      "q5": 0.2933198059259797,
+      "q25": 0.29369390319552996,
+      "q75": 0.2972665177450106,
+      "q95": 0.2977784313208854,
+      "min": 0.293217902689864,
+      "max": 0.29805248610495383
+    },
+    "sigma_bearing": {
+      "mean": 0.3004854130124929,
+      "std": 0.0011645017251381165,
+      "median": 0.3004739239313924,
+      "q5": 0.2990536028148995,
+      "q25": 0.29960040586266806,
+      "q75": 0.30118544218623705,
+      "q95": 0.3023412752718117,
+      "min": 0.2989578072370945,
+      "max": 0.302838995518289
+    }
+  },
+  "diagnostics": {
+    "acceptance_rate": 0.9,
+    "final_step_size": 0.0008924573194235563,
+    "ess": {
+      "sigma_range": NaN,
+      "sigma_bearing": NaN
+    },
+    "rhat": {
+      "sigma_range": 0.6140585179123292,
+      "sigma_bearing": 0.6352118178694077
+    }
+  },
+  "metadata": {
+    "model_type": "RangeBearingModel",
+    "filter_type": "BootstrapPFHMC",
+    "sampler": "hmc",
+    "num_samples": 10,
+    "num_burnin": 15,
+    "num_leapfrog_steps": 5,
+    "num_observations": 50,
+    "timing": {
+      "step_times": [
+        26.053993449546397,
+        26.016697165556252,
+        26.078684895299375,
+        25.990621246397495,
+        26.121512244455516,
+        26.206773062236607,
+        26.000788643956184,
+        26.086330289952457,
+        26.022532299160957,
+        26.109679635614157,
+        26.06438636034727,
+        25.916767592541873,
+        26.127417941577733,
+        26.09421424102038,
+        26.010402051731944,
+        25.984780923463404,
+        25.97453924547881,
+        25.876587426289916,
+        25.97773991059512,
+        26.00899184308946,
+        26.106815993785858,
+        26.015389346517622,
+        26.04144450556487,
+        25.923123324289918,
+        25.954897570423782
+      ],
+      "total_time_seconds": 650.7651112088934,
+      "mean_step_time": 26.030604448355735,
+      "median_step_time": 26.016697165556252,
+      "min_step_time": 25.876587426289916,
+      "max_step_time": 26.206773062236607,
+      "burnin_time_seconds": 390.9008011193946,
+      "sampling_time_seconds": 259.86431008949876,
+      "mean_time_per_gradient_eval": 5.206120889671147
+    }
+  },
+  "true_params": {
+    "sigma_range": 0.1,
+    "sigma_bearing": 0.1
+  },
+  "config": {
+    "dtype": "float64",
+    "tf_log_level": 2,
+    "model": {
+      "_target_": "src.models.range_bearing.RangeBearingModel",
+      "sigma_range": 0.3,
+      "sigma_bearing": 0.3
+    },
+    "filter": {
+      "_target_": "src.filters.particle.bootstrap_pf_hmc.BootstrapPFHMC",
+      "n_particles": 500,
+      "resampling_method": "soft",
+      "resampling_config": {
+        "alpha": 0.5
+      },
+      "stop_gradient_resampling": false,
+      "hmc_resampling_method": "soft",
+      "hmc_resampling_config": {
+        "alpha": 0.5
+      },
+      "eager_mode": false
+    },
+    "dpf": {
+      "sampler": "hmc",
+      "trainable_params": {
+        "sigma_range": {
+          "constraint": "positive",
+          "prior": {
+            "_target_": "tensorflow_probability.distributions.LogNormal",
+            "loc": -2.3,
+            "scale": 0.5
+          }
+        },
+        "sigma_bearing": {
+          "constraint": "positive",
+          "prior": {
+            "_target_": "tensorflow_probability.distributions.LogNormal",
+            "loc": -2.3,
+            "scale": 0.5
+          }
+        }
+      },
+      "hmc": {
+        "num_samples": 10,
+        "num_burnin": 15,
+        "step_size": 0.001,
+        "num_leapfrog_steps": 5,
+        "max_tree_depth": 10,
+        "adaptation_rate": 0.8,
+        "target_accept_prob": 0.9,
+        "seed": 42
+      }
+    },
+    "data": {
+      "T": 50,
+      "seed": 42,
+      "true_params": {
+        "sigma_range": 0.1,
+        "sigma_bearing": 0.1
+      }
+    }
+  },
+  "performance": {
+    "wall_time_seconds": 705.5945710390806,
+    "peak_memory_mb": 59.42837905883789,
+    "memory_increase_mb": 1242.359375
+  }
+}

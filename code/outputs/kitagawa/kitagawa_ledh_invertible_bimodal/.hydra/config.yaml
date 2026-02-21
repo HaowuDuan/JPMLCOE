@@ -8,7 +8,7 @@ filter:
   n_particles: 500
   n_lambda_steps: 29
   resample_threshold: 0.5
-  flip_fraction: 1.0
+  lookahead_steps: 2
 seed: 42
 dtype: float64
 T: 100

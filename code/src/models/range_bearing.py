@@ -227,8 +227,8 @@ class RangeBearingModel(StateSpaceModel):
         dy = x[1] - self.sensor_pos[1]
         range_val = tf.sqrt(dx ** 2 + dy ** 2)
 
-        # Avoid division by zero
-        range_val = tf.maximum(range_val, 1e-10)
+        # Floor range to prevent 1/r² and 1/r³ blowup in Jacobian and its gradient
+        range_val = tf.maximum(range_val, tf.constant(0.3, dtype=range_val.dtype))
 
         # Jacobian matrix
         H = tf.stack([
@@ -279,7 +279,7 @@ class RangeBearingModel(StateSpaceModel):
         """Vectorized Jacobian for range-bearing: (N, 2, 2)."""
         dx = particles[:, 0] - self.sensor_pos[0]  # (N,)
         dy = particles[:, 1] - self.sensor_pos[1]  # (N,)
-        range_val = tf.maximum(tf.sqrt(dx**2 + dy**2), 1e-10)  # (N,)
+        range_val = tf.maximum(tf.sqrt(dx**2 + dy**2), tf.constant(0.3, dtype=dx.dtype))  # (N,)
         range_sq = range_val**2  # (N,)
 
         # H[i] = [[dx/r, dy/r], [-dy/r^2, dx/r^2]]
@@ -345,7 +345,8 @@ class RangeBearingModel(StateSpaceModel):
 
         logdet = 2.0 * tf.reduce_sum(tf.math.log(tf.linalg.diag_part(L_R)))
 
-        return -0.5 * (2.0 * tf.math.log(2.0 * np.pi) + logdet + mahalanobis)
+        log_2pi = tf.constant(np.log(2.0 * np.pi), dtype=self.dtype)
+        return -0.5 * (2.0 * log_2pi + logdet + mahalanobis)
 
     @tf.function
     def sample_state_transition_batch(self, particles: tf.Tensor, seed: tf.Tensor) -> tf.Tensor:

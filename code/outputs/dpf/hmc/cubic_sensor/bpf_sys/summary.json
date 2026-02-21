@@ -1,0 +1,151 @@
+{
+  "summary": {
+    "sigma_V": {
+      "mean": 4.978251660199895,
+      "std": 0.0075635799781981535,
+      "median": 4.976792828301415,
+      "q5": 4.969310613202757,
+      "q25": 4.971012012738582,
+      "q75": 4.986186118113321,
+      "q95": 4.988326116623969,
+      "min": 4.968553535045201,
+      "max": 4.989399675507106
+    },
+    "sigma_W": {
+      "mean": 1.9578086972387598,
+      "std": 0.004175345802200145,
+      "median": 1.9572089207584629,
+      "q5": 1.9524483393650498,
+      "q25": 1.9550355915017816,
+      "q75": 1.9606572919739227,
+      "q95": 1.964283259015052,
+      "min": 1.9521740975492303,
+      "max": 1.9664232228061802
+    }
+  },
+  "diagnostics": {
+    "acceptance_rate": 0.9,
+    "final_step_size": 0.001053412794135511,
+    "ess": {
+      "sigma_V": NaN,
+      "sigma_W": NaN
+    },
+    "rhat": {
+      "sigma_V": 0.6086313781273033,
+      "sigma_W": 0.6899616796546845
+    }
+  },
+  "metadata": {
+    "model_type": "CubicSensorModel",
+    "filter_type": "BootstrapPFHMC",
+    "sampler": "hmc",
+    "num_samples": 10,
+    "num_burnin": 15,
+    "num_leapfrog_steps": 5,
+    "num_observations": 50,
+    "timing": {
+      "step_times": [
+        0.7961737671867013,
+        0.7945139091461897,
+        0.7995828855782747,
+        0.7953280536457896,
+        0.7996525429189205,
+        0.815174357034266,
+        0.7965756738558412,
+        0.8020282676443458,
+        0.7854453977197409,
+        0.7869244962930679,
+        0.7880922798067331,
+        0.7927844310179353,
+        0.7950496515259147,
+        0.7925289319828153,
+        0.7865875624120235,
+        0.7826342098414898,
+        0.7830401426181197,
+        0.7827164335176349,
+        0.7848769584670663,
+        0.7866718079894781,
+        0.7795946821570396,
+        0.7804180374369025,
+        0.7807771619409323,
+        0.7843793416395783,
+        0.786292253062129
+      ],
+      "total_time_seconds": 19.75784323643893,
+      "mean_step_time": 0.7903137294575572,
+      "median_step_time": 0.7869244962930679,
+      "min_step_time": 0.7795946821570396,
+      "max_step_time": 0.815174357034266,
+      "burnin_time_seconds": 11.92644220776856,
+      "sampling_time_seconds": 7.831401028670371,
+      "mean_time_per_gradient_eval": 0.15806274589151142
+    }
+  },
+  "true_params": {
+    "sigma_V": 1.0,
+    "sigma_W": 1.0
+  },
+  "config": {
+    "dtype": "float64",
+    "tf_log_level": 2,
+    "model": {
+      "_target_": "src.models.cubic_sensor.CubicSensorModel",
+      "a": 0.9,
+      "c": 0.05,
+      "sigma_V": 5.0,
+      "sigma_W": 2.0,
+      "initial_var": 5.0
+    },
+    "filter": {
+      "_target_": "src.filters.particle.bootstrap_pf_hmc.BootstrapPFHMC",
+      "n_particles": 1000,
+      "resampling_method": "systematic",
+      "stop_gradient_resampling": true,
+      "eager_mode": false
+    },
+    "dpf": {
+      "sampler": "hmc",
+      "trainable_params": {
+        "sigma_V": {
+          "constraint": "positive",
+          "prior": {
+            "_target_": "tensorflow_probability.distributions.LogNormal",
+            "loc": 0.0,
+            "scale": 1.0
+          }
+        },
+        "sigma_W": {
+          "constraint": "positive",
+          "prior": {
+            "_target_": "tensorflow_probability.distributions.LogNormal",
+            "loc": 0.0,
+            "scale": 1.0
+          }
+        }
+      },
+      "hmc": {
+        "num_samples": 10,
+        "num_burnin": 15,
+        "step_size": 0.001,
+        "num_leapfrog_steps": 5,
+        "max_tree_depth": 10,
+        "adaptation_rate": 0.8,
+        "target_accept_prob": 0.9,
+        "seed": 42
+      }
+    },
+    "data": {
+      "T": 50,
+      "seed": 42,
+      "true_params": {
+        "sigma_V": 1.0,
+        "sigma_W": 1.0
+      }
+    }
+  },
+  "performance": {
+    "wall_time_seconds": 23.885958845727146,
+    "peak_memory_mb": 3.537501335144043,
+    "memory_increase_mb": 128.15234375
+  }
+}

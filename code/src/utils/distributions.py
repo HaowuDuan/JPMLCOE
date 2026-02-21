@@ -149,7 +149,11 @@ def compute_flow_weights(
         clip_range: Optional range to clip log weights before exp(). None for no clipping (MATLAB behavior).
 
     Returns:
-        Normalized weights, shape (N,)
+        Tuple of (normalized_weights, log_marginal_likelihood):
+        - normalized_weights: shape (N,)
+        - log_marginal_likelihood: scalar, logsumexp of unnormalized log-weights.
+          This is the correct incremental marginal likelihood estimate
+          p(y_t | y_{1:t-1}) for importance-weighted particle filters.
     """
     n_particles = tf.shape(eta_1)[0]
     state_dim = tf.shape(eta_1)[1]
@@ -197,13 +201,17 @@ def compute_flow_weights(
     log_weights = (
         log_p_eta1 +
         log_p_obs +
-        tf.math.log(tf.maximum(jacobians, 1e-300)) -
+        tf.math.log(tf.maximum(jacobians, tf.constant(1e-300, dtype=jacobians.dtype))) -
         log_p_eta0 +
-        tf.math.log(tf.maximum(prev_weights, 1e-300))
+        tf.math.log(tf.maximum(prev_weights, tf.constant(1e-300, dtype=prev_weights.dtype)))
     )
 
     # Replace NaN with -inf so those particles get zero weight
     log_weights = tf.where(tf.math.is_finite(log_weights), log_weights, tf.constant(-1e30, dtype=log_weights.dtype))
+
+    # Log marginal likelihood = logsumexp of unnormalized log-weights
+    # This is the correct importance-weighted estimate of p(y_t | y_{1:t-1})
+    log_marginal_lik = tf.reduce_logsumexp(log_weights)
 
     # Normalize
     weights = normalize_log_weights(log_weights, clip_range=clip_range)
@@ -216,4 +224,4 @@ def compute_flow_weights(
         return uniform_weights
     weights = tf.cond(is_finite, lambda: weights, _warn_and_uniform)
 
-    return weights
+    return weights, log_marginal_lik

@@ -37,7 +37,8 @@ def compute_cost_matrix(x: tf.Tensor, y: tf.Tensor) -> tf.Tensor:
     y_sqnorm = tf.expand_dims(tf.reduce_sum(y * y, axis=-1), -2)
     xy = tf.matmul(x, y, transpose_b=True)
 
-    squared_dist = tf.clip_by_value(x_sqnorm - 2 * xy + y_sqnorm, 0.0, float('inf'))
+    diff = x_sqnorm - 2 * xy + y_sqnorm
+    squared_dist = tf.maximum(diff, tf.zeros((), dtype=diff.dtype))
     return squared_dist / 2.0
 
 
@@ -108,7 +109,7 @@ def compute_diameter(x: tf.Tensor) -> tf.Tensor:
     diameter = tf.reduce_max(std_per_dim, axis=-1)  # (B,)
 
     # Avoid zero diameter
-    diameter = tf.where(diameter == 0.0, 1.0, diameter)
+    diameter = tf.where(tf.equal(diameter, tf.zeros_like(diameter)), tf.ones_like(diameter), diameter)
 
     if len(x.shape) == 2:
         diameter = diameter[0]
@@ -153,8 +154,11 @@ def sinkhorn_iteration(
         - beta: Dual potential, shape (N,) or (B, N)
         - n_iterations: Number of iterations performed
     """
+    dtype = cost_matrix.dtype
+    threshold = tf.cast(threshold, dtype)
+
     N = tf.shape(cost_matrix)[-1]
-    float_N = tf.cast(N, cost_matrix.dtype)
+    float_N = tf.cast(N, dtype)
     log_N = tf.math.log(float_N)
 
     # Uniform target for resampling
@@ -332,6 +336,9 @@ def compute_transport_matrix_from_potentials(
     Returns:
         Transport matrix T, shape (N, N) or (B, N, N)
     """
+    # Cast epsilon to match particle dtype
+    epsilon = tf.cast(epsilon, particles.dtype)
+
     # Compute cost matrix
     cost_matrix = compute_cost_matrix(particles, particles)
 
@@ -365,65 +372,6 @@ def compute_transport_matrix_from_potentials(
     return T
 
 
-@tf.custom_gradient
-def compute_transport_matrix_with_gradient(
-    particles: tf.Tensor,
-    log_weights: tf.Tensor,
-    epsilon: float,
-    scaling: float,
-    max_iter: int,
-    threshold: float
-) -> tf.Tensor:
-    """
-    Compute transport matrix with custom gradient for stability.
-
-    Forward pass: Standard Sinkhorn algorithm
-    Backward pass: Implicit differentiation with gradient clipping
-
-    Args:
-        particles: Particle positions, shape (N, D)
-        log_weights: Log-weights, shape (N,)
-        epsilon: Regularization parameter
-        scaling: Epsilon-scaling factor
-        max_iter: Maximum Sinkhorn iterations
-        threshold: Convergence threshold
-
-    Returns:
-        Transport matrix T, shape (N, N)
-    """
-    # Center and scale particles for numerical stability
-    mean = tf.reduce_mean(particles, axis=0, keepdims=True)
-    centered = particles - tf.stop_gradient(mean)
-
-    std = tf.math.reduce_std(particles)
-    dimension = tf.cast(tf.shape(particles)[-1], particles.dtype)
-    scale_factor = tf.stop_gradient(std * tf.sqrt(dimension) + 1e-8)
-    scaled = centered / scale_factor
-
-    # Compute Sinkhorn potentials
-    alpha, beta = sinkhorn_with_epsilon_scaling(
-        log_weights, scaled, epsilon, scaling, max_iter, threshold
-    )
-
-    # Construct transport matrix
-    T = compute_transport_matrix_from_potentials(
-        scaled, alpha, beta, epsilon, log_weights
-    )
-
-    def gradient(dT):
-        """Custom gradient with clipping for stability."""
-        # Clip incoming gradients
-        dT_clipped = tf.clip_by_value(dT, -1.0, 1.0)
-
-        # Compute gradients using implicit differentiation
-        dparticles, dlog_weights = tf.gradients(T, [particles, log_weights], dT_clipped)
-
-        # Return gradients (None for non-differentiable parameters)
-        return dparticles, dlog_weights, None, None, None, None
-
-    return T, gradient
-
-
 def ot_entropy_resample(
     particles: tf.Tensor,
     weights: tf.Tensor,
@@ -431,7 +379,8 @@ def ot_entropy_resample(
     seed: tf.Tensor,
     max_iter: int = 100,
     convergence_threshold: float = 1e-3,
-    epsilon_scaling: float = 0.9
+    epsilon_scaling: float = 0.9,
+    clip_gradients: bool = False
 ) -> ResampleResult:
     """
     Entropy-regularized optimal transport resampling.
@@ -455,6 +404,9 @@ def ot_entropy_resample(
         convergence_threshold: Stop when potential change < threshold (default: 1e-3)
         epsilon_scaling: Epsilon reduction factor for epsilon-scaling (default: 0.9)
                         Larger = faster reduction (may be less stable)
+        clip_gradients: If True, clip incoming gradients element-wise to [-1, 1]
+                        in the backward pass. May help SGD-style optimizers but
+                        destroys gradient direction needed by HMC. Default: False.
 
     Returns:
         ResampleResult with transported particles, uniform weights, and transport matrix T
@@ -464,10 +416,43 @@ def ot_entropy_resample(
         Entropy-Regularized Optimal Transport. ICML 2021.
     """
     # Convert weights to log-space for numerical stability
-    log_weights = tf.math.log(weights + 1e-10)
+    log_weights = tf.math.log(weights + tf.constant(1e-10, dtype=weights.dtype))
 
     # Compute transport matrix with custom gradients
-    T = compute_transport_matrix_with_gradient(
+    @tf.custom_gradient
+    def _compute_transport_matrix(particles, log_weights, epsilon, scaling,
+                                  max_iter, threshold):
+        # Center and scale particles for numerical stability
+        mean = tf.reduce_mean(particles, axis=0, keepdims=True)
+        centered = particles - tf.stop_gradient(mean)
+
+        std = tf.math.reduce_std(particles)
+        dimension = tf.cast(tf.shape(particles)[-1], particles.dtype)
+        scale_factor = tf.stop_gradient(std * tf.sqrt(dimension) + tf.constant(1e-8, dtype=particles.dtype))
+        scaled = centered / scale_factor
+
+        # Compute Sinkhorn potentials
+        alpha, beta = sinkhorn_with_epsilon_scaling(
+            log_weights, scaled, epsilon, scaling, max_iter, threshold
+        )
+
+        # Construct transport matrix
+        T = compute_transport_matrix_from_potentials(
+            scaled, alpha, beta, epsilon, log_weights
+        )
+
+        def gradient(dT):
+            if clip_gradients:
+                dT = tf.clip_by_value(dT, tf.constant(-1.0, dtype=dT.dtype), tf.constant(1.0, dtype=dT.dtype))
+
+            dparticles, dlog_weights = tf.gradients(
+                T, [particles, log_weights], dT
+            )
+            return dparticles, dlog_weights, None, None, None, None
+
+        return T, gradient
+
+    T = _compute_transport_matrix(
         particles,
         log_weights,
         epsilon,

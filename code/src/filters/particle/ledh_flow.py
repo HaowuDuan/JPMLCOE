@@ -209,7 +209,7 @@ class LocalExactDaumHuangFlow(FlowFilterBase):
 
         # Clip drift magnitude per-particle
         drift_norms = tf.norm(drift, axis=1, keepdims=True)
-        scale = tf.minimum(1.0, self.clip_config.max_drift_norm / (drift_norms + self.clip_config.epsilon))
+        scale = tf.minimum(tf.constant(1.0, dtype=drift_norms.dtype), self.clip_config.max_drift_norm / (drift_norms + self.clip_config.epsilon))
         drift = drift * scale
 
         # Euler step
@@ -217,7 +217,7 @@ class LocalExactDaumHuangFlow(FlowFilterBase):
 
         # Apply clipping to prevent divergence
         norms = tf.norm(particles_new, axis=1, keepdims=True)
-        scale = tf.minimum(1.0, self.clip_config.max_particle_norm / (norms + self.clip_config.epsilon))
+        scale = tf.minimum(tf.constant(1.0, dtype=norms.dtype), self.clip_config.max_particle_norm / (norms + self.clip_config.epsilon))
         particles_new = particles_new * scale
 
         return particles_new

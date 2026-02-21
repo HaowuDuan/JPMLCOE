@@ -55,8 +55,7 @@ def soft_resample(particles: tf.Tensor, weights: tf.Tensor, alpha: float,
     selected_q = tf.gather(q_weights, indices)
 
     # Avoid division by zero (though q is strictly positive if alpha < 1)
-    epsilon = 1e-8
-    new_weights = selected_weights / (selected_q + epsilon)
+    new_weights = selected_weights / (selected_q + tf.constant(1e-8, dtype=selected_weights.dtype))
 
     # Normalize weights to sum to 1 for the next iteration
     new_weights = new_weights / tf.reduce_sum(new_weights)

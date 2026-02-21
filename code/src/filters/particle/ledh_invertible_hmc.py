@@ -210,21 +210,14 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
 
                 particles = eta_1
 
-                # --- Weights ---
-                weights = _flow_weights(
+                # --- Weights and log-likelihood ---
+                weights, log_lik_step = _flow_weights(
                     eta_1=eta_1, eta_0=eta_0,
                     particles_prev=particles_prev,
                     observation=y, model=model,
                     prev_weights=weights,
                     jacobians=theta,
                     clip_range=clip_range
-                )
-
-                # --- Log-likelihood ---
-                log_likelihood = model.log_observation_prob_batch(y, eta_1)
-                max_ll = tf.reduce_max(log_likelihood)
-                log_lik_step = max_ll + tf.math.log(
-                    tf.reduce_mean(tf.exp(log_likelihood - max_ll))
                 )
                 log_lik = log_lik + log_lik_step
 
@@ -406,8 +399,8 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
 
             self.particles.assign(eta_1)
 
-            # --- Weights ---
-            weights_new = _flow_weights(
+            # --- Weights and log-likelihood ---
+            weights_new, log_lik = _flow_weights(
                 eta_1=eta_1,
                 eta_0=self.eta_0.value(),
                 particles_prev=self.particles_prev.value(),
@@ -418,13 +411,6 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
                 clip_range=self.weight_clip_range
             )
             self.weights.assign(weights_new)
-
-            # --- Log-likelihood ---
-            log_likelihood = self.model.log_observation_prob_batch(y, eta_1)
-            max_ll = tf.reduce_max(log_likelihood)
-            log_lik = max_ll + tf.math.log(
-                tf.reduce_mean(tf.exp(log_likelihood - max_ll))
-            )
             total_log_lik = total_log_lik + log_lik
 
             if self.on_timestep is not None:

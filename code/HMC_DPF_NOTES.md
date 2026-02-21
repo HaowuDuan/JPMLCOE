@@ -205,30 +205,51 @@ Step 4 (`tf.gather`) does have a well-defined gradient: it scatters gradients ba
 
 With `stop_gradient_resampling: true`, the code explicitly wraps the resampled particles in `tf.stop_gradient()`. This cuts **all** gradient through resampling — both the (zero) gradient through index selection and the (nonzero) gradient through particle values. The effect is almost identical to the natural zero-gradient behavior, but more explicit and controlled.
 
-### What "differentiable resampling" provides
+### What "differentiable resampling" provides — and its limits
 
-Soft resampling and OT Sinkhorn replace the discrete index selection with a **continuous relaxation**. Instead of picking one particle per index, they compute a weighted mixture:
+Soft resampling and OT Sinkhorn both aim to provide gradient flow through resampling, but they achieve this to **different degrees**.
 
-**Soft resampling** blends weights with a uniform distribution:
+**Soft resampling is only partially differentiable.** It blends weights with a uniform distribution:
 
 $$\tilde{w}_i = \alpha \, w_i + (1 - \alpha) / N$$
 
-then resamples from $\tilde{w}$. The blending is differentiable, so $\partial \tilde{w}_i / \partial w_i = \alpha \neq 0$.
+The blending is differentiable ($\partial \tilde{w}_i / \partial w_i = \alpha$), but the particle *selection* still uses discrete index operations:
 
-**OT Sinkhorn** solves an entropy-regularized optimal transport problem to produce a differentiable transport plan $T_{ij}$:
+```python
+# soft.py — the non-differentiable core
+cumsum = tf.cumsum(q_weights)
+u_vals = u + tf.range(N) / N                    # systematic sampling points
+indices = tf.searchsorted(cumsum, u_vals)        # discrete: ∂indices/∂weights = 0
+resampled_particles = tf.gather(particles, indices)  # routes gradient to selected particles only
+```
+
+`tf.searchsorted` maps continuous weights to integer indices — a piecewise-constant function with zero gradient almost everywhere. `tf.gather` passes gradient through particle *values* at fixed indices, but cannot capture how changing weights would change *which* particles are selected.
+
+The "soft" part is the importance weight correction `w_new = w / q`, which is differentiable. So the autodiff gradient captures:
+- How observation log-probs change with parameters (through `log_observation_prob_batch`) ✓
+- How importance weights `w/q` change with parameters ✓
+- How particle *selection* changes with parameters ✗ (discrete, zero gradient)
+
+This makes autodiff through soft resampling a **biased** gradient estimate. Finite difference captures the full effect (including discrete index changes), so FD and autodiff disagree — and this gets **worse with more particles** because the cumulative-sum bins narrow (width ~1/N), making `searchsorted` indices more sensitive to tiny parameter perturbations.
+
+**OT Sinkhorn is fully differentiable.** It replaces discrete index selection with a continuous transport matrix:
 
 $$x'_i = \sum_j T_{ij} \, x_j$$
 
-Both approaches give nonzero gradients through resampling, but at a cost: soft resampling introduces high gradient variance, and OT Sinkhorn is computationally expensive.
+where $T$ is an $N \times N$ doubly-stochastic matrix computed via Sinkhorn iterations (all differentiable ops). Every input particle contributes to every output particle, weighted by $T_{ij}$. There is **no discrete index selection** — no `searchsorted`, no `gather`. The gradient flows smoothly through the matrix multiplication.
+
+This makes OT the only resampling method suitable for validating autodiff gradients against finite difference.
+
+Both approaches give nonzero gradients through resampling, but at different costs: soft resampling is cheap but partially differentiable (biased gradient), while OT Sinkhorn is fully differentiable but computationally expensive (Sinkhorn iterations + $O(N^2)$ transport matrix).
 
 ### Summary table
 
-| Resampling Strategy | Gradient Bias | Gradient Variance | Notes |
-|---|---|---|---|
-| Systematic + stop_gradient | High (ignores resampling dependency) | Low | Smooth energy surface |
-| Systematic without stop_gradient | High (zero gradient through indices) | Low | Nearly same as stop_gradient |
-| Soft resampling (PF-net) | Low (gradient flows through) | High | Noisy energy surface |
-| OT Sinkhorn | Low | Medium | Expensive per step |
+| Resampling Strategy | Fully Differentiable? | Gradient Bias | Gradient Variance | Notes |
+|---|---|---|---|---|
+| Systematic + stop_gradient | No | High (ignores resampling dependency) | Low | Smooth energy surface |
+| Systematic without stop_gradient | No | High (zero gradient through indices) | Low | Nearly same as stop_gradient |
+| Soft resampling (PF-net) | **Partial** (weight correction yes, index selection no) | Medium | High | `searchsorted`+`gather` is discrete; FD/autodiff mismatch grows with N |
+| OT Sinkhorn | **Yes** (continuous transport matrix, no discrete indices) | Low | Medium | Expensive per step; only method suitable for FD vs autodiff validation |
 
 ### Why this matters for HMC
 
@@ -645,3 +666,519 @@ First systematic run across all filter-resampling combinations. `num_burnin=3, n
 5. **NaN appeared in cubic_sensor_ledh_sys** (2-param model). Trajectory diverged to q=[-59080, 420407], then `prior=-inf → nlp=inf → q=[nan, 840820]`. Rejected safely, but near the edge of a crash.
 
 6. **Cubic sensor LEDH accepted moves toward σ_W→0** (the cliff). With more samples, the chain would crash or freeze at near-zero noise.
+
+---
+
+## Particle Gibbs + HMC: Two Orthogonal Tricks for LEDH
+
+### Motivation
+
+The experiments above demonstrate that direct HMC through the particle filter fails for all but the simplest cases. The core problems are:
+
+1. **Gradient cliffs** from resampling discontinuities
+2. **Weight collapse** from accumulated Jacobian products (LEDH's 15+ flow steps)
+3. **Bimodality trapping** (Kitagawa's $y = x^2/20$ admits $\pm\sqrt{20y}$)
+
+Particle Gibbs + CSMC solves these via **two independent tricks**, each targeting a different problem.
+
+---
+
+### Trick 1: Gibbs Decomposition (Efficiency)
+
+#### The Idea
+
+Instead of targeting the marginal posterior $p(\theta \mid y_{1:T})$ by integrating out $x$ (which requires differentiating through the PF), target the **joint** posterior $p(\theta, x_{0:T} \mid y_{1:T})$ via Gibbs sampling:
+
+**$\theta$-step**: Sample $\theta \mid x_{0:T}, y_{1:T}$ using HMC
+**$x$-step**: Sample $x_{0:T} \mid \theta, y_{1:T}$ using a particle filter (no gradients)
+
+#### $\theta$-step: Closed-Form Log-Posterior
+
+Given a fixed trajectory $x_{0:T}$, the conditional posterior of $\theta$ is:
+
+$$\log p(\theta \mid x_{0:T}, y_{1:T}) = \underbrace{\sum_{t=1}^{T} \log p(x_t \mid x_{t-1}, \theta)}_{\text{transition terms}} + \underbrace{\sum_{t=1}^{T} \log p(y_t \mid x_t, \theta)}_{\text{observation terms}} + \log p(x_0) + \log p(\theta) + \text{const}$$
+
+Each term is a Gaussian log-density. **No particle filter is involved.**
+
+**Transition term** ($t = 1, \ldots, T$):
+$$\log p(x_t \mid x_{t-1}, \theta) = -\frac{d}{2}\log(2\pi) - \frac{1}{2}\log|Q(\theta)| - \frac{1}{2}(x_t - f(x_{t-1}, t))^T Q(\theta)^{-1} (x_t - f(x_{t-1}, t))$$
+
+**Observation term** ($t = 1, \ldots, T$):
+$$\log p(y_t \mid x_t, \theta) = -\frac{m}{2}\log(2\pi) - \frac{1}{2}\log|R(\theta)| - \frac{1}{2}(y_t - h(x_t))^T R(\theta)^{-1} (y_t - h(x_t))$$
+
+**For Kitagawa** ($d = m = 1$, $Q = \sigma_V^2$, $R = \sigma_W^2$, $f(x,t) = x/2 + 25x/(1+x^2) + 8\cos(1.2t)$, $h(x) = x^2/20$):
+
+$$\log p(\sigma_V, \sigma_W \mid x_{0:T}, y_{1:T}) = -T\log\sigma_V - \frac{1}{2\sigma_V^2}\sum_{t=1}^{T}(x_t - f(x_{t-1}, t))^2 - T\log\sigma_W - \frac{1}{2\sigma_W^2}\sum_{t=1}^{T}(y_t - x_t^2/20)^2 + \log p(\sigma_V, \sigma_W)$$
+
+**Key properties:**
+- Smooth and differentiable — $\nabla_\theta$ is a closed-form sum of Gaussian score functions
+- No resampling, no Jacobians, no weight collapse
+- HMC can use large step sizes ($\epsilon \sim 10^{-1}$) and get 60-80% acceptance
+- Cost: $O(T)$ scalar operations (vs $O(T \cdot N \cdot n_\lambda)$ for LEDH forward+backward)
+
+#### $x$-step: Particle Filter (No Gradients)
+
+Sample a new trajectory $x_{0:T} \sim p(x_{0:T} \mid \theta, y_{1:T})$ using **any** particle filter:
+- Run the PF forward with fixed $\theta$
+- Store full particle genealogy (particles + ancestor indices at each $t$)
+- At $t = T$, sample one trajectory index $k \sim \text{Categorical}(w_T^{1:N})$
+- Trace ancestry backward to reconstruct $x_{0:T}^{(k)}$
+
+**No gradients are needed** — this is pure forward simulation. No GradientTape, no backprop through resampling, no Jacobian accumulation issues.
+
+#### Why Gibbs Helps
+
+| Aspect | Direct HMC through PF | Gibbs $\theta$-step |
+|--------|----------------------|---------------------|
+| Target surface | Ragged, discontinuous | Smooth Gaussian sum |
+| Gradient | Backprop through PF (expensive, unstable) | Closed-form sum (cheap, exact) |
+| Step size | $\epsilon \sim 10^{-3}$ (avoid divergence) | $\epsilon \sim 10^{-1}$ (smooth surface) |
+| Acceptance rate | 0-10% | 60-80% |
+| Weight collapse | 15+ Jacobian determinants | None |
+| Cost per step | $O(T \cdot N \cdot n_\lambda)$ (LEDH forward+backward) | $O(T)$ (Gaussian sums) |
+
+---
+
+### Trick 2: Conditional SMC / Reference Pinning (Bimodality)
+
+#### The Problem
+
+In the $x$-step, a standard PF can sample trajectories, but for bimodal models (Kitagawa), it may collapse to one mode. If the PF always picks the same mode, the Gibbs sampler gets trapped.
+
+#### CSMC Algorithm
+
+CSMC pins one particle (the **reference**) to the previous iteration's trajectory $x^*_{0:T}$:
+
+**Initialization** ($t = 0$):
+- Sample $x_0^i \sim p(x_0)$ for $i = 1, \ldots, N-1$
+- Set $x_0^N = x_0^*$ (reference pinned)
+- Set $w_0^i = 1/N$ for all $i$
+
+**For** $t = 1, \ldots, T$:
+
+1. **Resample** (reference-protected):
+   - Sample ancestors $a_i \sim \text{Categorical}(w_{t-1}^{1:N})$ for $i = 1, \ldots, N-1$
+   - Set $a_N = N$ (or use ancestor sampling, see below)
+
+2. **Propagate**:
+   - Free particles: $x_t^i \sim p(x_t \mid x_{t-1}^{a_i}, \theta)$ for $i = 1, \ldots, N-1$
+   - Reference: $x_t^N = x_t^*$ (deterministic, follows prescribed path)
+
+3. **Weight**:
+   - For all $i$: $w_t^i \propto p(y_t \mid x_t^i, \theta)$
+   - Normalize: $w_t^i = w_t^i / \sum_j w_t^j$
+
+**Output** ($t = T$):
+- Sample $k \sim \text{Categorical}(w_T^{1:N})$
+- Trace ancestry of particle $k$ → full trajectory $x_{0:T}^{(k)}$
+- This becomes $x^*_{0:T}$ for the next Gibbs iteration
+
+#### Why Reference Pinning Handles Bimodality
+
+- N-1 free particles explore both modes of $p(x_t \mid y_t)$
+- Reference anchors the sampler (guarantees ergodicity — the chain can always "stay put")
+- At $t = T$, the sampler can choose ANY particle's trajectory, including one that took a completely different path from the reference
+- Over Gibbs iterations, output trajectories can switch between modes
+
+#### Ancestor Sampling (Lindsten et al. 2014)
+
+Without ancestor sampling, CSMC suffers from **path degeneracy**: early in the trajectory, all free particles share a common ancestor, so the output trajectory almost always coincides with the reference. Mixing is slow.
+
+**Ancestor sampling** resamples the reference particle's ancestor at each $t$. For each candidate $j \in \{1, \ldots, N\}$:
+
+$$\tilde{w}_{t|T}^j \propto w_{t-1}^j \cdot p(x_t^* \mid x_{t-1}^j, \theta)$$
+
+Sample $a_N \sim \text{Categorical}(\tilde{w}_{t|T}^{1:N})$.
+
+The transition density for Gaussian models:
+$$p(x_t^* \mid x_{t-1}^j, \theta) = \mathcal{N}(x_t^*;\; f(x_{t-1}^j, t),\; Q(\theta))$$
+
+This allows the reference's history to "detach" and graft onto any particle's past, dramatically improving mixing. Cost: $N$ extra transition density evaluations per timestep.
+
+---
+
+### Full PGibbs + HMC Algorithm
+
+**Initialize:**
+- $\theta^{(0)} = \theta_{\text{init}}$
+- Run bootstrap PF with $\theta^{(0)}$, sample one trajectory → $x_{0:T}^{(0)}$
+
+**For iteration** $m = 1, 2, \ldots, M$:
+
+1. **$\theta$-step** (HMC on smooth surface):
+   - Target: $\log p(\theta \mid x_{0:T}^{(m-1)}, y_{1:T})$ (closed-form, see above)
+   - Run $L$ leapfrog steps with step size $\epsilon$
+   - Accept/reject via Metropolis criterion → $\theta^{(m)}$
+
+2. **$x$-step** (CSMC):
+   - Run CSMC with $\theta^{(m)}$ and reference $x_{0:T}^{(m-1)}$
+   - Ancestor sampling for better mixing
+   - Sample output trajectory → $x_{0:T}^{(m)}$
+
+---
+
+### CSMC with LEDH Flow
+
+#### Motivation
+
+The $x$-step can use **any** particle filter. Using LEDH instead of bootstrap PF gives:
+- Better proposals for free particles (flow moves particles toward likelihood → higher ESS)
+- More diverse trajectory candidates at $t = T$
+- Especially beneficial for high-dimensional models where bootstrap PF struggles
+
+#### Algorithm: Conditional LEDH
+
+Apply LEDH flow only to the N-1 free particles. The reference stays pinned.
+
+**For** $t = 1, \ldots, T$:
+
+1. **Resample** (reference-protected):
+   - Resample $i = 1, \ldots, N-1$ from $w_{t-1}^{1:N}$
+   - $a_N = N$ (standard) or ancestor-sampled
+   - Resample per-particle EKF covariances accordingly
+
+2. **Predict** (EKF + transition):
+   - Batched EKF predict for all $N$ particles → predictive covariances $P_t^i$
+   - Free: $\eta_0^i \sim p(x_t \mid x_{t-1}^{a_i}, \theta)$ for $i = 1, \ldots, N-1$
+   - Reference: $\eta_0^N = x_t^*$ (pinned, no stochastic sampling)
+   - Deterministic means: $\bar{\eta}_0^i = f(x_{t-1}^{a_i}, t)$ for all $i$
+
+3. **LEDH Flow** (free particles only, $i = 1, \ldots, N-1$):
+   - Initialize: $\lambda = 0$, $\log\theta^i = 0$
+   - For $j = 1, \ldots, n_\lambda$:
+     - $d\lambda = \lambda_j$ (exponentially decaying)
+     - $\lambda \leftarrow \lambda + d\lambda$
+     - $(A^i, b^i) = \text{FlowParams}(\bar{\eta}^i, \lambda, y_t, P_t^i, R, R^{-1})$
+     - $\bar{\eta}^i \leftarrow \bar{\eta}^i + d\lambda(A^i\bar{\eta}^i + b^i)$
+     - $\eta_1^i \leftarrow \eta_1^i + d\lambda(A^i\eta_1^i + b^i)$
+     - $\log\theta^i \leftarrow \log\theta^i + \log|\det(I + d\lambda \cdot A^i)|$
+   - Reference: $\eta_1^N = x_t^*$ (unchanged, no flow)
+
+4. **Weight** (heterogeneous proposals):
+
+   **Free particles** ($i = 1, \ldots, N-1$):
+   $$w_t^i \propto w_{t-1}^i \cdot p(y_t \mid \eta_1^i, \theta) \cdot \frac{p(\eta_1^i \mid x_{t-1}^{a_i}, \theta)}{p(\eta_0^i \mid x_{t-1}^{a_i}, \theta)} \cdot |\det J^i|$$
+
+   where $J^i = \prod_{j=1}^{n_\lambda}(I + d\lambda_j A_j^i)$.
+
+   The ratio $p(\eta_1^i \mid \cdot) / p(\eta_0^i \mid \cdot)$ corrects for the flow moving the particle:
+   - Proposal: sample $\eta_0^i \sim p(x_t \mid x_{t-1}^{a_i})$, then transform $\eta_1^i = T(\eta_0^i)$
+   - Effective proposal density: $q(\eta_1^i) = p(\eta_0^i \mid x_{t-1}^{a_i}) / |\det J^i|$ (change of variables)
+   - Importance weight = target / proposal = $\frac{p(y_t | \eta_1^i) \cdot p(\eta_1^i | x_{t-1}^{a_i})}{p(\eta_0^i | x_{t-1}^{a_i}) / |\det J^i|}$
+
+   **Reference particle** ($i = N$):
+   $$w_t^N \propto w_{t-1}^N \cdot p(y_t \mid x_t^*, \theta)$$
+
+   No flow → no Jacobian, no transition density ratio. The reference is weighted by the raw likelihood only.
+
+   **All $N$ weights normalized together.**
+
+5. **EKF update** for all particles' covariances.
+
+#### Why Skip the Flow for the Reference?
+
+CSMC's theoretical guarantee (ergodicity, correct target distribution) requires: **if we always select the reference's ancestors, we reproduce exactly $x^*_{0:T}$**.
+
+If the flow moved the reference from $x_t^*$ to some $\tilde{x}_t^*$, this invariant breaks — the chain would no longer have $x^*_{0:T}$ as a fixed point. Ergodicity is lost.
+
+By skipping the flow for the reference, we ensure:
+- Reference path is exactly $x^*_{0:T}$ (deterministic)
+- The Gibbs sampler can always "stay put" (choose the reference trajectory)
+- Detailed balance is preserved
+
+#### Why Heterogeneous Weights Are Valid
+
+Different particles use different proposals:
+- Free particles: $q_{\text{LEDH}}^i(\eta_1) = p(\eta_0 \mid x_{t-1}^{a_i}) / |\det J^i|$ (flow-adjusted transition)
+- Reference: $q_{\text{ref}}(x_t^N) = \delta(x_t^N - x_t^*)$ (point mass)
+
+Importance sampling allows heterogeneous proposals: each particle's weight must correctly account for **its own** proposal. The formulas above satisfy this. The point-mass proposal for the reference is handled by the CSMC conditional construction (Andrieu et al. 2010, Proposition 1).
+
+#### Ancestor Sampling in LEDH CSMC
+
+Same as bootstrap CSMC — ancestor sampling does NOT use the flow. At time $t$, for each candidate ancestor $j$:
+
+$$\tilde{w}_{t|T}^j \propto w_{t-1}^j \cdot p(x_t^* \mid x_{t-1}^j, \theta) = w_{t-1}^j \cdot \mathcal{N}(x_t^*;\; f(x_{t-1}^j, t),\; Q(\theta))$$
+
+Sample $a_N \sim \text{Categorical}(\tilde{w}_{t|T}^{1:N})$.
+
+This is a direct model evaluation (not a flow computation), so it's cheap.
+
+---
+
+### Trajectory Storage and Output Sampling
+
+#### Genealogy Tracking
+
+CSMC stores the full particle genealogy to reconstruct trajectories:
+- `particles_history[t]`: $(N, d)$ — particle values at time $t$
+- `ancestors_history[t]`: $(N,)$ — ancestor indices at time $t$
+
+Storage: $O(T \cdot N \cdot d)$ for particles, $O(T \cdot N)$ for ancestors.
+
+#### Backward Trajectory Sampling
+
+At $t = T$:
+1. Sample final index: $k_T \sim \text{Categorical}(w_T^{1:N})$
+2. Trace backward: $k_t = \text{ancestors\_history}[t+1][k_{t+1}]$ for $t = T-1, \ldots, 0$
+3. Extract: $x_t^{\text{out}} = \text{particles\_history}[t][k_t]$
+
+Result: full trajectory $x_{0:T}^{\text{out}}$ sampled from (approximate) smoothing distribution.
+
+---
+
+### Summary: What Each Trick Provides
+
+| | Without Trick | With Trick |
+|---|---|---|
+| **Trick 1 (Gibbs)** | HMC differentiates through PF: gradient cliffs, weight collapse, 0-10% acceptance | $\theta$-step on smooth surface: 60-80% acceptance, no PF in gradient path |
+| **Trick 2 (CSMC)** | Standard PF collapses to one mode for bimodal models | Reference particle preserves one mode; free particles explore others |
+
+**Combined**: PGibbs + HMC with CSMC solves both efficiency (smooth $\theta$-step) and bimodality ($x$-step explores all modes).
+
+### Implementation Phases
+
+| Phase | $x$-step filter | When to use |
+|-------|----------------|-------------|
+| **Phase 1** | Bootstrap CSMC (`conditional_smc.py`) | Start here — simplest, validates framework |
+| **Phase 2** | LEDH CSMC (`ledh_invertible_csmc.py`) | When bootstrap PF struggles (high-dim, strong nonlinearity) |
+
+---
+
+### HMC vs Metropolis-Hastings for the θ-step
+
+#### Convergence guarantee
+
+The Particle Gibbs convergence proof (Andrieu, Doucet & Holenstein 2010) requires that the θ-step is a **valid MCMC kernel** that leaves $p(\theta \mid x_{0:T}, y_{1:T})$ invariant. The theorem is stated for a generic kernel — any MCMC method that satisfies this invariance condition works. The proof relies on:
+
+1. CSMC targets $p(x_{0:T} \mid \theta, y_{1:T})$ correctly (reference particle ensures invariance)
+2. The θ-step kernel leaves $p(\theta \mid x_{0:T}, y_{1:T})$ invariant
+3. Together, the two-step Gibbs kernel leaves the joint $p(\theta, x_{0:T} \mid y_{1:T})$ invariant → ergodicity
+
+Both MH and HMC satisfy condition 2: MH via its accept/reject construction, HMC via leapfrog dynamics + Metropolis correction. So **convergence is guaranteed for both**. The original paper used MH as the concrete example, but the theorem applies to HMC equally.
+
+The practical question is not correctness but efficiency: HMC's gradient-guided exploration only pays off for high-dimensional θ ($d \gtrsim 10$). For the low-dimensional models in this project (1-2 parameters), MH is simpler and sufficient.
+
+#### Key difference
+
+HMC uses **gradient information** to propose parameters that follow the posterior's curvature. MH uses a **blind random walk** — propose $\theta' = \theta + \epsilon$, accept/reject based on density ratio.
+
+#### When HMC wins
+
+HMC's advantage is in **high-dimensional parameter spaces** ($d \gtrsim 10$). In $d$ dimensions:
+
+- **MH random walk**: To maintain reasonable acceptance (~23% optimal), the proposal std must scale as $\sigma \propto d^{-1/2}$. The chain moves $O(d^{-1/2})$ per step, needing $O(d)$ steps to traverse the posterior. Total cost to get one independent sample: $O(d^2)$ density evaluations.
+
+- **HMC**: The leapfrog integrator follows the gradient, so proposals can travel $O(1)$ distance in parameter space regardless of $d$. With properly tuned trajectory length, HMC needs $O(d^{1/4})$ steps per independent sample — dramatically better scaling.
+
+#### When MH is sufficient
+
+For **low-dimensional** problems ($d \leq 5$), MH works fine:
+
+- The random walk can explore a 2D or 3D space efficiently
+- Each MH step is cheap: just one density evaluation (no gradient, no leapfrog)
+- No risk of leapfrog divergence or step size tuning issues
+- Simpler implementation, fewer hyperparameters
+
+**For Kitagawa** ($d = 2$: $\sigma_V, \sigma_W$), MH is the pragmatic choice. The closed-form $\theta$-step posterior (smooth Gaussian sum) is easy for MH to navigate in 2D. HMC's gradient overhead (multiple leapfrog steps with `GradientTape`) makes each iteration more expensive for negligible mixing benefit.
+
+#### Summary
+
+| | MH | HMC |
+|---|---|---|
+| Cost per step | 1 density evaluation | $L$ gradient evaluations ($L$ = leapfrog steps) |
+| Scaling with $d$ | $O(d^2)$ | $O(d^{5/4})$ |
+| Hyperparameters | proposal_std | step_size, num_leapfrog, grad_clip_norm |
+| Divergence risk | None | Leapfrog can diverge at curvature cliffs |
+| Sweet spot | $d \leq 5$ | $d \geq 10$ |
+
+**Recommendation**: Use MH for Kitagawa and other low-parameter models. Reserve HMC for models with 10+ parameters where MH mixing becomes prohibitively slow.
+
+---
+
+## Resampling Gradient Mechanisms: Why OT Requires Graph Mode
+
+### The three resampling methods handle gradients differently
+
+Each resampling method uses a fundamentally different mechanism for backward-pass gradients. This determines whether it can run in eager mode or requires graph mode.
+
+### Systematic resampling — no gradient through resampling
+
+Systematic resampling uses `tf.searchsorted` (piecewise-constant → zero gradient) and `tf.gather` (scatters gradient to selected particles only). The gradient through index selection is zero almost everywhere.
+
+In practice, `stop_gradient_resampling=True` is always used with systematic, which explicitly cuts all gradient through resampling. TF's standard autodiff handles everything — **no custom gradient needed**.
+
+**Works in eager mode.**
+
+### Soft resampling — standard differentiable ops
+
+Soft resampling (PF-net) blends weights with a uniform distribution:
+
+$$\tilde{w}_i = \alpha \, w_i + (1 - \alpha) / N$$
+
+Then resamples from $\tilde{w}$ and computes importance weights $w'_i = w_i / \tilde{w}_i$.
+
+All operations — arithmetic, `tf.gather`, division, normalization — are standard TF ops with well-defined eager-mode gradients. TF's built-in `GradientTape` autodiff handles the full backward pass natively.
+
+**Works in eager mode.**
+
+### OT (Sinkhorn) resampling — `@tf.custom_gradient` with `tf.gradients()`
+
+OT resampling solves an entropy-regularized optimal transport problem via Sinkhorn iteration to produce a transport matrix $T_{ij}$. The Sinkhorn loop involves non-differentiable internal operations (iterative convergence, log-domain stabilization), so the result is wrapped in `@tf.custom_gradient`:
+
+```python
+# ot_entropy.py:422-453
+@tf.custom_gradient
+def _compute_transport_matrix(particles, log_weights, ...):
+    # Forward: Sinkhorn iteration → transport matrix T
+    T = compute_transport_matrix_from_potentials(...)
+
+    def gradient(dT):
+        # Backward: differentiate T w.r.t. inputs
+        dparticles, dlog_weights = tf.gradients(T, [particles, log_weights], dT)
+        return dparticles, dlog_weights, None, None, None, None
+
+    return T, gradient
+```
+
+The custom gradient function calls `tf.gradients()` — **a graph-mode-only API**. In eager mode, `tf.gradients()` raises:
+
+```
+RuntimeError: tf.gradients is not supported when eager execution is enabled.
+Use tf.GradientTape instead.
+```
+
+This is a TensorFlow limitation: `tf.gradients()` builds symbolic gradient ops in a graph, while `tf.GradientTape` records operations eagerly. They are fundamentally different mechanisms. The `@tf.custom_gradient` decorator bridges them in graph mode (the custom gradient function is called during graph construction), but in eager mode TF tries to execute `tf.gradients()` immediately, which fails.
+
+**Requires graph mode (`eager_mode=False`).**
+
+### Summary
+
+| Resampling | Gradient mechanism | `tf.gradients()`? | Eager mode? |
+|---|---|---|---|
+| Systematic | `stop_gradient` cuts all gradient | No | Yes |
+| Soft | Standard TF ops (arithmetic, gather) | No | Yes |
+| OT (Sinkhorn) | `@tf.custom_gradient` → `tf.gradients()` | **Yes** | **No — graph only** |
+
+### Implication for testing
+
+Tests that compute gradients through OT resampling must use `eager_mode=False`. The filter's internal loop runs inside `tf.while_loop` (graph context), where `tf.gradients()` works. The outer `GradientTape` (from TFP HMC or manual test code) traces through the compiled graph.
+
+Tests for systematic and soft can use `eager_mode=True` for simpler debugging.
+
+---
+
+## Critical Bug: `@tf.function` Caching Breaks Eager-Mode Parameter Updates
+
+### Discovery
+
+Diagnostic tests comparing autodiff vs finite-difference (FD) gradients revealed a 16× mismatch for BPF + systematic:
+
+| Component | Autodiff | FD | Ratio |
+|---|---|---|---|
+| Combined (prior + lik) | +9.998 | +0.597 | 16.7× |
+| Prior only | ~+0.6 | ~+0.6 | ~1× |
+| Likelihood only | ~+9.4 | **0.000** | ∞ |
+
+The likelihood FD is **exactly zero** — changing `obs_noise_std` via `update_parameters` does not change the filter's output. The entire combined FD (+0.597) comes from the prior gradient alone.
+
+### Root cause: `@tf.function` on model batch methods
+
+In `linear_gaussian.py`, the observation log-probability method is decorated with `@tf.function`:
+
+```python
+@tf.function
+def log_observation_prob_batch(self, observation, particles):
+    L_R = tf.linalg.cholesky(self.R)  # self.R reads self.obs_noise_std
+    ...
+```
+
+The `self.R` property dynamically computes `obs_noise_std² × D@Dᵀ`. This works correctly on the first call. The problem is **what happens on subsequent calls**.
+
+### How `@tf.function` caching works with object attributes
+
+When `@tf.function` traces a method:
+
+1. TF executes the Python code once to build a computation graph
+2. `self.R` is called during tracing — it reads `self.obs_noise_std` and computes `R`
+3. The resulting tensor is **embedded in the cached graph**
+4. On subsequent calls with the same input shapes, TF **reuses the cached graph** without re-executing the Python code
+5. `self.R` is **never called again** — the stale R value persists
+
+This is because `self.obs_noise_std` is a regular eager tensor (not a `tf.Variable`). TF's `@tf.function` does not track mutations to Python object attributes — it only checks function argument shapes/dtypes for cache invalidation.
+
+### Why the compiled path works but eager doesn't
+
+**Compiled path** (`eager_mode=False`, used for OT):
+
+```python
+@tf.function
+def compiled_filter(observations, particles, weights, seed_start, param_values):
+    for i, name in enumerate(param_names):
+        setattr(model, name, param_values[i])  # symbolic tensor in graph
+    ...
+    log_obs = model.log_observation_prob_batch(y, particles)
+```
+
+Here `param_values` is an **explicit function argument**. The inner `@tf.function` call is inlined during the outer trace, so `self.obs_noise_std` is a symbolic graph tensor. Different `param_values` → different graph execution → correct R.
+
+**Eager path** (`eager_mode=True`, used for systematic/soft):
+
+```python
+def _run_eager(self, observations, particles, weights, rng_key):
+    for t in range(T):
+        log_obs = self.model.log_observation_prob_batch(y, particles)  # @tf.function!
+```
+
+Here `log_observation_prob_batch` is called directly from Python. The first call traces it with the current `self.R`. All 50 subsequent calls (one per timestep) and **all future calls from different HMC iterations** reuse the cached graph with the stale R.
+
+### Impact on HMC production code
+
+In `DPFRunner._negative_log_posterior`, each HMC iteration:
+
+1. `update_parameters({'obs_noise_std': softplus(q_new)})` — updates the model attribute
+2. `filter_obj.log_marginal_likelihood_tf(observations, seed)` → `_run_eager` → calls `log_observation_prob_batch`
+
+Step 2 uses the **cached** `@tf.function` from the first-ever call. The observation noise covariance R is frozen at its initial value. Consequences:
+
+- **Likelihood forward pass is constant** — does not respond to parameter changes
+- **Only the prior changes** with the parameter
+- HMC effectively samples from the **prior only**, not the posterior
+- LogNormal(0,1) prior mode ≈ 0.37 → explains drift to `obs_noise_std ≈ 0.33`
+
+The autodiff gradient appears non-zero (+9.4) because the **first trace's graph** correctly captured the dependency on `obs_noise_std`. But subsequent forward passes don't honor this dependency — the gradient is a "phantom" that describes the first trace, not the current evaluation.
+
+### Impact on finite-difference tests
+
+The FD test helper `finite_difference_gradient` creates ONE runner and calls `_negative_log_posterior(q+eps)` then `_negative_log_posterior(q-eps)`. The first call traces `@tf.function`. The second call uses the cached graph. Both get the same R → same likelihood → FD of likelihood = 0.
+
+The FD result of +0.597 is entirely the prior's finite difference:
+
+```
+FD_total = FD_prior + FD_likelihood = ~0.6 + 0.0 = ~0.6
+```
+
+### Fix
+
+**For the eager path**: bypass `@tf.function` on model methods that depend on trainable parameters. Options:
+
+1. **Remove `@tf.function`** from `log_observation_prob_batch` and other batch methods that read dynamic properties (R, Q). The eager path already runs a Python for-loop, so `@tf.function` per-call overhead is minimal.
+
+2. **Call the underlying Python function** in `_run_eager`, bypassing the cache:
+   ```python
+   # Instead of: model.log_observation_prob_batch(y, particles)
+   # Use the unwrapped function:
+   log_obs = type(model).log_observation_prob_batch.python_function(model, y, particles)
+   ```
+
+3. **Pass R as an argument** to `log_observation_prob_batch` instead of reading from `self`. This makes R a traced input, not a captured constant.
+
+**For test helpers**: use a **fresh model/filter instance** for each FD evaluation point. Different model instances have different `@tf.function` cache entries, so each traces with the correct R.
+
+### Affected model classes
+
+Any model with `@tf.function` on batch methods that read dynamic properties (`self.R`, `self.Q`) is affected. Currently:
+
+- `LinearGaussianModel.log_observation_prob_batch` — reads `self.R` (depends on `obs_noise_std`)
+- `LinearGaussianModel.state_transition_cov_batch` — reads `self.Q` (depends on `process_noise_std`)
+- Other model classes need auditing for the same pattern

@@ -234,7 +234,7 @@ class TwoSensorBearingOnlyModel(StateSpaceModel):
             r_squared = dx ** 2 + dy ** 2
 
             # Avoid division by zero
-            r_squared = tf.maximum(r_squared, 1e-10)
+            r_squared = tf.maximum(r_squared, tf.constant(1e-10, dtype=r_squared.dtype))
 
             row = tf.stack([
                 -dy / r_squared,  # ∂bearing_i/∂x
@@ -289,12 +289,12 @@ class TwoSensorBearingOnlyModel(StateSpaceModel):
         # Sensor 1
         dx1 = particles[:, 0] - self.sensor_positions[0, 0]
         dy1 = particles[:, 1] - self.sensor_positions[0, 1]
-        r1_sq = tf.maximum(dx1**2 + dy1**2, 1e-10)
+        r1_sq = tf.maximum(dx1**2 + dy1**2, tf.constant(1e-10, dtype=dx1.dtype))
 
         # Sensor 2
         dx2 = particles[:, 0] - self.sensor_positions[1, 0]
         dy2 = particles[:, 1] - self.sensor_positions[1, 1]
-        r2_sq = tf.maximum(dx2**2 + dy2**2, 1e-10)
+        r2_sq = tf.maximum(dx2**2 + dy2**2, tf.constant(1e-10, dtype=dx2.dtype))
 
         # H[i] = [[-dy1/r1^2, dx1/r1^2], [-dy2/r2^2, dx2/r2^2]]
         row0 = tf.stack([-dy1 / r1_sq, dx1 / r1_sq], axis=1)  # (N, 2)
@@ -361,7 +361,8 @@ class TwoSensorBearingOnlyModel(StateSpaceModel):
 
         logdet = 2.0 * tf.reduce_sum(tf.math.log(tf.linalg.diag_part(L_R)))
 
-        return -0.5 * (2.0 * tf.math.log(2.0 * np.pi) + logdet + mahalanobis)
+        log_2pi = tf.constant(np.log(2.0 * np.pi), dtype=self.dtype)
+        return -0.5 * (2.0 * log_2pi + logdet + mahalanobis)
 
     @tf.function
     def sample_state_transition_batch(self, particles: tf.Tensor, seed: tf.Tensor) -> tf.Tensor:

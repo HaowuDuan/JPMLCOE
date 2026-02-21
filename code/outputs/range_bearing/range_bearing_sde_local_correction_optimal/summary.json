@@ -1,5 +1,5 @@
 {
-  "rmse": 0.2652213900100696,
+  "rmse": 0.24936147315860918,
   "log_likelihood": null,
   "metadata": {
     "filter_type": "SDELocalCorrection",
@@ -7,12 +7,12 @@
     "n_lambda_steps": 29,
     "integration_method": "euler",
     "performance": {
-      "wall_time_seconds": 93.6836964590475,
-      "time_per_timestep_ms": 936.836964590475,
-      "peak_memory_mb": 101.60047626495361,
-      "memory_increase_mb": 160.265625,
-      "start_memory_mb": 401.515625,
-      "end_memory_mb": 561.78125,
+      "wall_time_seconds": 217.53731954202522,
+      "time_per_timestep_ms": 2175.373195420252,
+      "peak_memory_mb": 119.44320106506348,
+      "memory_increase_mb": 245.890625,
+      "start_memory_mb": 417.1875,
+      "end_memory_mb": 663.078125,
       "num_timesteps": 100
     }
   },
@@ -27,7 +27,7 @@
       "n_particles": 500,
       "n_lambda_steps": 29,
       "diffusion_scale": 0.0,
-      "schedule_mu": 0.0,
+      "schedule_mu": 1.0,
       "n_threads": null
     },
     "seed": 42,
@@ -38,9 +38,6 @@
     "device": "auto",
     "tf_log_level": 2,
     "verbose": true,
-    "show_progress": true,
-    "diffusion_scale": 0.0,
-    "n_lambda_steps": 29,
-    "schedule_mu": 1.0
+    "show_progress": true
   }
 }

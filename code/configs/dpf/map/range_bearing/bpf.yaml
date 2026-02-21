@@ -1,0 +1,48 @@
+# @package _global_
+# MAP: Range-Bearing with BPF + Adam optimizer
+# Infers sigma_range and sigma_bearing (true: 0.1, 0.1).
+
+model:
+  _target_: src.models.range_bearing.RangeBearingModel
+  sigma_range: 0.3
+  sigma_bearing: 0.3
+
+filter:
+  _target_: src.filters.particle.bootstrap_pf_hmc.BootstrapPFHMC
+  n_particles: 200
+  resampling_method: ot_entropy
+  resampling_config:
+    epsilon: 0.5
+  stop_gradient_resampling: false
+  eager_mode: false
+
+dpf:
+  sampler: map
+
+  trainable_params:
+    sigma_range:
+      constraint: positive
+      prior:
+        _target_: tensorflow_probability.distributions.LogNormal
+        loc: -2.3
+        scale: 0.5
+    sigma_bearing:
+      constraint: positive
+      prior:
+        _target_: tensorflow_probability.distributions.LogNormal
+        loc: -2.3
+        scale: 0.5
+
+  map:
+    num_steps: 200
+    learning_rate: 0.01
+    optimizer: adam
+    random_seed: false
+    seed: 42
+
+data:
+  T: 100
+  seed: 42
+  true_params:
+    sigma_range: 0.1
+    sigma_bearing: 0.1

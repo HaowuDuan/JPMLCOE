@@ -1,0 +1,51 @@
+# @package _global_
+# MAP: Cubic Sensor with BPF + Adam optimizer
+# Infers sigma_V and sigma_W (true: 1.0, 1.0).
+
+model:
+  _target_: src.models.cubic_sensor.CubicSensorModel
+  a: 0.9
+  c: 0.05
+  sigma_V: 5.0
+  sigma_W: 2.0
+  initial_var: 5.0
+
+filter:
+  _target_: src.filters.particle.bootstrap_pf_hmc.BootstrapPFHMC
+  n_particles: 200
+  resampling_method: ot_entropy
+  resampling_config:
+    epsilon: 0.5
+  stop_gradient_resampling: false
+  eager_mode: false
+
+dpf:
+  sampler: map
+
+  trainable_params:
+    sigma_V:
+      constraint: positive
+      prior:
+        _target_: tensorflow_probability.distributions.LogNormal
+        loc: 0.0
+        scale: 1.0
+    sigma_W:
+      constraint: positive
+      prior:
+        _target_: tensorflow_probability.distributions.LogNormal
+        loc: 0.0
+        scale: 1.0
+
+  map:
+    num_steps: 200
+    learning_rate: 0.01
+    optimizer: adam
+    random_seed: false
+    seed: 42
+
+data:
+  T: 100
+  seed: 42
+  true_params:
+    sigma_V: 1.0
+    sigma_W: 1.0

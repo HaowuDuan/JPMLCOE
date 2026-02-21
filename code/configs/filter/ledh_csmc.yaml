@@ -1,0 +1,17 @@
+# LEDH Conditional SMC — standalone filtering mode
+# Uses LEDH particle flow with CSMC reference pinning (Trick 2).
+# For comparison with ledh_invertible_bimodal (Trick: look-ahead sign correction).
+#
+# Run: python -m src.experiments.run_experiment model=kitagawa filter=ledh_csmc
+
+_target_: src.filters.particle.ledh_invertible_csmc.LEDHConditionalSMC
+
+n_particles: 500
+n_lambda_steps: 15
+regularization: 1.0e-8
+resample_threshold: 0.5
+ancestor_sampling: true
+# resampling_method: systematic  # Options: systematic, soft, ot_entropy
+# resampling_config:
+#   alpha: 0.5        # For soft resampling
+#   epsilon: 0.5      # For ot_entropy resampling

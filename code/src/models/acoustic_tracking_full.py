@@ -244,7 +244,7 @@ class AcousticTrackingFullModel(StateSpaceModel):
 
                     dx = target_x - sensor_pos[0]
                     dy = target_y - sensor_pos[1]
-                    r = tf.sqrt(dx**2 + dy**2 + 1e-10)
+                    r = tf.maximum(tf.sqrt(dx**2 + dy**2), tf.constant(0.3, dtype=dx.dtype))
 
                     amp_sum += self.psi / (r + self.d0)
 
@@ -267,7 +267,7 @@ class AcousticTrackingFullModel(StateSpaceModel):
 
                     dx = target_x - sensor_pos[0]
                     dy = target_y - sensor_pos[1]
-                    r = tf.sqrt(dx**2 + dy**2 + 1e-10)
+                    r = tf.maximum(tf.sqrt(dx**2 + dy**2), tf.constant(0.3, dtype=dx.dtype))
 
                     amp_sum += self.psi / (r + self.d0)
 
@@ -326,7 +326,7 @@ class AcousticTrackingFullModel(StateSpaceModel):
 
                 dx = target_x - sensor_pos[0]
                 dy = target_y - sensor_pos[1]
-                r = tf.sqrt(dx**2 + dy**2 + 1e-10)
+                r = tf.maximum(tf.sqrt(dx**2 + dy**2), tf.constant(0.3, dtype=dx.dtype))
                 denominator = r * (r + self.d0) ** 2
 
                 # Partial derivatives: dh/dx = -Psi * dx / (r * (r + d0)^2)
@@ -444,7 +444,7 @@ class AcousticTrackingFullModel(StateSpaceModel):
                 sensor_pos = self.sensor_positions[s]
                 dx = target_x - sensor_pos[0]  # (N,)
                 dy = target_y - sensor_pos[1]  # (N,)
-                r = tf.sqrt(dx**2 + dy**2 + 1e-10)  # (N,)
+                r = tf.maximum(tf.sqrt(dx**2 + dy**2), tf.constant(0.3, dtype=dx.dtype))  # (N,)
                 denom = r * (r + self.d0) ** 2  # (N,)
 
                 dh_dx = -self.psi * dx / denom  # (N,)

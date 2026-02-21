@@ -236,12 +236,10 @@ class LinearGaussianModel(StateSpaceModel):
         """Vectorized state transition mean: particles @ F^T (more efficient than transposing twice)."""
         return particles @ tf.transpose(self.F)
 
-    @tf.function
     def state_transition_cov_batch(self, particles: tf.Tensor) -> tf.Tensor:
         """Q is constant - return single matrix."""
         return self.Q
 
-    @tf.function
     def log_observation_prob_batch(self, observation: tf.Tensor, particles: tf.Tensor) -> tf.Tensor:
         """Vectorized Gaussian log-prob for all particles."""
         # Mean: particles @ H^T

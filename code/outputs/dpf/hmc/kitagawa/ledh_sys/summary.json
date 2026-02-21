@@ -1,0 +1,155 @@
+{
+  "summary": {
+    "sigma_V": {
+      "mean": 4.999999246221428,
+      "std": 1.0050430057290037e-06,
+      "median": 4.999999017675514,
+      "q5": 4.9999980184840425,
+      "q25": 4.999998392146349,
+      "q75": 5.000000298096961,
+      "q95": 5.000000590098086,
+      "min": 4.999997875355736,
+      "max": 5.000000727795575
+    },
+    "sigma_W": {
+      "mean": 2.0000028527228153,
+      "std": 5.76591142750885e-07,
+      "median": 2.000002878913346,
+      "q5": 2.000002042599248,
+      "q25": 2.0000024680733524,
+      "q75": 2.00000321187585,
+      "q95": 2.0000036856320635,
+      "min": 2.000002008367259,
+      "max": 2.0000040007977575
+    }
+  },
+  "diagnostics": {
+    "acceptance_rate": 0.8,
+    "final_step_size": 1.4899175937443943e-07,
+    "ess": {
+      "sigma_V": NaN,
+      "sigma_W": NaN
+    },
+    "rhat": {
+      "sigma_V": 0.5888228578973578,
+      "sigma_W": 0.8056889958982104
+    }
+  },
+  "metadata": {
+    "model_type": "KitagawaModel",
+    "filter_type": "LEDHParticleFlowFilterHMC",
+    "sampler": "hmc",
+    "num_samples": 10,
+    "num_burnin": 15,
+    "num_leapfrog_steps": 5,
+    "num_observations": 100,
+    "timing": {
+      "step_times": [
+        15.748132422566414,
+        15.777836955152452,
+        15.778702042996883,
+        15.73947019688785,
+        15.807075096294284,
+        15.777926019392908,
+        15.743640997447073,
+        15.725441544316709,
+        15.72461211308837,
+        15.75723546743393,
+        15.755227152258158,
+        15.726520091295242,
+        15.74746722355485,
+        15.73970996402204,
+        15.718871861696243,
+        15.703299040906131,
+        15.779390123672783,
+        15.704632949084044,
+        15.699845829047263,
+        15.793599258176982,
+        15.767568838782609,
+        15.81240056362003,
+        15.763670392334461,
+        15.786652844399214,
+        15.789029274135828
+      ],
+      "total_time_seconds": 393.86795826256275,
+      "mean_step_time": 15.75471833050251,
+      "median_step_time": 15.755227152258158,
+      "min_step_time": 15.699845829047263,
+      "max_step_time": 15.81240056362003,
+      "burnin_time_seconds": 236.2678691484034,
+      "sampling_time_seconds": 157.60008911415935,
+      "mean_time_per_gradient_eval": 3.1509436661005017
+    }
+  },
+  "true_params": {
+    "sigma_V": 10.0,
+    "sigma_W": 1.0
+  },
+  "config": {
+    "dtype": "float64",
+    "tf_log_level": 2,
+    "model": {
+      "_target_": "src.models.kitagawa.KitagawaModel",
+      "sigma_V": 5.0,
+      "sigma_W": 2.0,
+      "initial_var": 5.0
+    },
+    "filter": {
+      "_target_": "src.filters.particle.ledh_invertible_hmc.LEDHParticleFlowFilterHMC",
+      "n_particles": 1000,
+      "n_lambda_steps": 15,
+      "resampling_method": "ot_entropy",
+      "resampling_config": {
+        "epsilon": 0.5
+      },
+      "weight_clip_range": 50.0,
+      "stop_gradient_resampling": true,
+      "eager_mode": false
+    },
+    "dpf": {
+      "sampler": "hmc",
+      "trainable_params": {
+        "sigma_V": {
+          "constraint": "positive",
+          "prior": {
+            "_target_": "tensorflow_probability.distributions.LogNormal",
+            "loc": 2.3,
+            "scale": 0.5
+          }
+        },
+        "sigma_W": {
+          "constraint": "positive",
+          "prior": {
+            "_target_": "tensorflow_probability.distributions.LogNormal",
+            "loc": 0.0,
+            "scale": 1.0
+          }
+        }
+      },
+      "hmc": {
+        "num_samples": 10,
+        "num_burnin": 15,
+        "step_size": 0.001,
+        "num_leapfrog_steps": 5,
+        "max_tree_depth": 10,
+        "adaptation_rate": 0.8,
+        "target_accept_prob": 0.9,
+        "seed": 42,
+        "grad_clip_norm": 100.0
+      }
+    },
+    "data": {
+      "T": 100,
+      "seed": 42,
+      "true_params": {
+        "sigma_V": 10.0,
+        "sigma_W": 1.0
+      }
+    }
+  },
+  "performance": {
+    "wall_time_seconds": 423.63160172104836,
+    "peak_memory_mb": 33.93944454193115,
+    "memory_increase_mb": 548.66015625
+  }
+}

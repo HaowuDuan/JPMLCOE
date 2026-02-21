@@ -8,6 +8,8 @@ from .ledh_flow import LocalExactDaumHuangFlow
 from .edh_invertible import EDHParticleFlowFilter
 from .ledh_invertible import LEDHParticleFlowFilter
 from .ledh_invertible_hmc import LEDHParticleFlowFilterHMC
+from .ledh_invertible_csmc import LEDHConditionalSMC
+from .conditional_smc import BootstrapConditionalSMC
 from .kernel_flow import KernelMappingPF
 from .stochastic_edh import StochasticEDHFlow
 from .stochastic_edh_paper import StochasticEDHFlowPaper
@@ -29,6 +31,8 @@ __all__ = [
     'EDHParticleFlowFilter',
     'LEDHParticleFlowFilter',
     'LEDHParticleFlowFilterHMC',
+    'LEDHConditionalSMC',
+    'BootstrapConditionalSMC',
     'KernelMappingPF',
     'StochasticEDHFlow',
     'StochasticEDHFlowPaper',

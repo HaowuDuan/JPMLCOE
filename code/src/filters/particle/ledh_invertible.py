@@ -238,7 +238,7 @@ class LEDHParticleFlowFilter:
         self.particles.assign(eta_1)
 
         # Compute weights using shared utility (with Jacobians for LEDH)
-        weights_new = compute_flow_weights(
+        weights_new, log_lik = compute_flow_weights(
             eta_1=eta_1,
             eta_0=self.eta_0.value(),
             particles_prev=self.particles_prev.value(),
@@ -253,11 +253,7 @@ class LEDHParticleFlowFilter:
         # Store TF tensors — convert to numpy once in filter()
         self.weights_history.append(self.weights.value())
 
-        # Log-likelihood using batch method
-        log_likelihood = self.model.log_observation_prob_batch(y, eta_1)
-
-        max_ll = tf.reduce_max(log_likelihood)
-        log_lik = max_ll + tf.math.log(tf.reduce_mean(tf.exp(log_likelihood - max_ll)))
+        # Log-likelihood from importance-weighted estimate
         self.log_likelihoods.append(log_lik)
 
         # Update per-particle covariances via batched EKF (all TF tensors)

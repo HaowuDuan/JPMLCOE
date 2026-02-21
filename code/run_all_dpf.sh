@@ -10,36 +10,36 @@ cd "$SCRIPT_DIR"
 
 EXPERIMENTS=(
     # Linear Gaussian (1D, trivial baseline)
-    linear_gaussian_ledh_hmc_sys
-    linear_gaussian_ledh_hmc_soft
-    linear_gaussian_ledh_hmc_ot
-    linear_gaussian_bpf_hmc_sys
-    linear_gaussian_bpf_hmc_soft
-    linear_gaussian_bpf_hmc_ot
+    hmc/linear_gaussian/ledh_sys
+    hmc/linear_gaussian/ledh_soft
+    hmc/linear_gaussian/ledh_ot
+    hmc/linear_gaussian/bpf_sys
+    hmc/linear_gaussian/bpf_soft
+    hmc/linear_gaussian/bpf_ot
 
     # Cubic Sensor (1D, mildly nonlinear)
-    cubic_sensor_ledh_hmc_sys
-    cubic_sensor_ledh_hmc_soft
-    cubic_sensor_ledh_hmc_ot
-    cubic_sensor_bpf_hmc_sys
-    cubic_sensor_bpf_hmc_soft
-    cubic_sensor_bpf_hmc_ot
+    hmc/cubic_sensor/ledh_sys
+    hmc/cubic_sensor/ledh_soft
+    hmc/cubic_sensor/ledh_ot
+    hmc/cubic_sensor/bpf_sys
+    hmc/cubic_sensor/bpf_soft
+    hmc/cubic_sensor/bpf_ot
 
     # Kitagawa (1D, highly nonlinear)
-    kitagawa_ledh_hmc_sys
-    kitagawa_ledh_hmc_soft
-    kitagawa_ledh_hmc_ot
-    kitagawa_bpf_hmc_sys
-    kitagawa_bpf_hmc_soft
-    kitagawa_bpf_hmc_ot
+    hmc/kitagawa/ledh_sys
+    hmc/kitagawa/ledh_soft
+    hmc/kitagawa/ledh_ot
+    hmc/kitagawa/bpf_sys
+    hmc/kitagawa/bpf_soft
+    hmc/kitagawa/bpf_ot
 
     # Range-Bearing (2D, nonlinear observation)
-    range_bearing_ledh_hmc_sys
-    range_bearing_ledh_hmc_soft
-    range_bearing_ledh_hmc_ot
-    range_bearing_bpf_hmc_sys
-    range_bearing_bpf_hmc_soft
-    range_bearing_bpf_hmc_ot
+    hmc/range_bearing/ledh_sys
+    hmc/range_bearing/ledh_soft
+    hmc/range_bearing/ledh_ot
+    hmc/range_bearing/bpf_sys
+    hmc/range_bearing/bpf_soft
+    hmc/range_bearing/bpf_ot
 )
 
 TOTAL=${#EXPERIMENTS[@]}

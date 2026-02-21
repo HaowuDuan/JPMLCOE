@@ -18,10 +18,8 @@ from ..core.model_base import StateSpaceModel
 
 
 def _as_sigma(sigma, dtype):
-    """Cast sigma to TF tensor if it isn't already."""
-    if isinstance(sigma, tf.Tensor):
-        return sigma
-    return tf.constant(float(sigma), dtype=dtype)
+    """Convert sigma to TF tensor with given dtype."""
+    return tf.cast(tf.convert_to_tensor(sigma), dtype)
 
 
 class CubicSensorModel(StateSpaceModel):

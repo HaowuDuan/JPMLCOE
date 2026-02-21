@@ -1,0 +1,44 @@
+{
+  "rmse": 2.6005529916514787,
+  "log_likelihood": null,
+  "metadata": {
+    "filter_type": "StochasticEDHFlow",
+    "n_particles": 500,
+    "n_lambda_steps": 29,
+    "integration_method": "euler",
+    "performance": {
+      "wall_time_seconds": 53.22650416701799,
+      "time_per_timestep_ms": 106.45300833403599,
+      "peak_memory_mb": 21.489251136779785,
+      "memory_increase_mb": 65.859375,
+      "start_memory_mb": 412.96875,
+      "end_memory_mb": 478.828125,
+      "num_timesteps": 500
+    }
+  },
+  "config": {
+    "model": {
+      "_target_": "src.models.stochastic_volatility.StochasticVolatilityModel",
+      "alpha": 0.91,
+      "sigma": 1.0,
+      "beta": 0.5
+    },
+    "filter": {
+      "_target_": "src.filters.particle.stochastic_edh.StochasticEDHFlow",
+      "n_particles": 500,
+      "n_lambda_steps": 29,
+      "diffusion_scale": 0.0,
+      "schedule_mu": 0.0,
+      "n_threads": null
+    },
+    "seed": 42,
+    "dtype": "float64",
+    "T": 500,
+    "output_dir": "outputs/stochastic_volatility/stochastic_volatility_stochastic_edh",
+    "plot": true,
+    "device": "auto",
+    "tf_log_level": 2,
+    "verbose": true,
+    "show_progress": true
+  }
+}

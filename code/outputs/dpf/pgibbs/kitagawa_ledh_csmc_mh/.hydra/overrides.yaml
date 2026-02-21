@@ -1,0 +1,3 @@
+- dpf=pgibbs/kitagawa_ledh_csmc_mh
+- dpf.pgibbs.num_burnin=2
+- dpf.pgibbs.num_samples=3
