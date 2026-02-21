@@ -1,0 +1,65 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.12.12, pytest-9.0.2, pluggy-1.6.0 -- /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/.venv/bin/python
+cachedir: .pytest_cache
+rootdir: /Users/haowuduan/Documents/githubrepos/JPMLCOE/code
+configfile: pytest.ini
+plugins: hydra-core-1.3.2
+collecting ... collected 10 items
+
+tests/test_bootstrap_pf.py::TestBPFCorrectness::test_posterior_mean_converges_to_kalman 
+  BPF vs KF posterior mean (N=5000, T=50):
+    Max absolute error:  0.1550
+    Mean absolute error: 0.0343
+PASSED
+tests/test_bootstrap_pf.py::TestBPFCorrectness::test_posterior_mean_unbiased_over_seeds 
+  BPF unbiasedness (N=500, 20 seeds):
+    Single-run error: 0.0743
+    Averaged error:   0.0394
+PASSED
+tests/test_bootstrap_pf.py::TestBPFCorrectness::test_log_likelihood_converges_to_kalman 
+  BPF vs KF log-likelihood (N=5000):
+    KF:       -95.6526
+    BPF:      -95.5040
+    Rel error: 0.0016
+PASSED
+tests/test_bootstrap_pf.py::TestBPFCorrectness::test_resampling_method_all_converge_to_kalman 
+  Resampling method comparison (N=2000):
+    systematic: mean_err=0.0371, max_err=0.1625
+    soft: mean_err=0.0626, max_err=0.3150
+    ot_entropy: mean_err=0.4420, max_err=2.2837
+PASSED
+tests/test_bootstrap_pf.py::TestBPFNumericalHealth::test_no_nan_inf PASSED
+tests/test_bootstrap_pf.py::TestBPFNumericalHealth::test_ess_never_collapses 
+  BPF ESS (N=500):
+    Min ESS:  28.7
+    Mean ESS: 246.1
+PASSED
+tests/test_bootstrap_pf.py::TestBPFNumericalHealth::test_weight_range_bounded 
+  Max log-weight range: 56.48
+PASSED
+tests/test_bootstrap_pf.py::TestBPFNumericalHealth::test_particle_diversity_after_resampling 
+  Particle diversity after resampling:
+    Min unique ratio:  0.242
+    Mean unique ratio: 0.451
+    Resampled at 27 of 50 steps
+PASSED
+tests/test_bootstrap_pf.py::TestBPFEdgeCases::test_few_particles_no_crash 
+  N=10: completed without crash, log_lik=-95.7738
+PASSED
+tests/test_bootstrap_pf.py::TestBPFEdgeCases::test_informative_observation_no_crash 
+  Tight R (0.001): min ESS = 2.5
+PASSED
+
+=============================== warnings summary ===============================
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: Type google._upb._message.MessageMapContainer uses PyType_Spec with a metaclass that has custom tp_new. This is deprecated and will no longer be allowed in Python 3.14.
+
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: Type google._upb._message.ScalarMapContainer uses PyType_Spec with a metaclass that has custom tp_new. This is deprecated and will no longer be allowed in Python 3.14.
+
+.venv/lib/python3.12/site-packages/keras/src/export/tf2onnx_lib.py:8
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/.venv/lib/python3.12/site-packages/keras/src/export/tf2onnx_lib.py:8: FutureWarning: In the future `np.object` will be defined as the corresponding NumPy scalar.
+    if not hasattr(np, "object"):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================= 10 passed, 3 warnings in 39.61s ========================

@@ -27,26 +27,61 @@ For i = 1, 2, ...:
 - **Theorem 3**: The PMMH sampler is ergodic — it converges to the correct posterior.
 - **Theorem 1, eq. 28**: Likelihood estimate variance scales as Var(Ẑ^N / Z) ≤ C·P / N (linear in time steps, inverse in particles).
 
-### Their exact settings for the Kitagawa model
-
-Section 3.1 (p. 280–283) uses **exactly our model**:
+### Model (Section 3.1, p. 280, eq. 14–15)
 
 $$X_n = \frac{X_{n-1}}{2} + 25\frac{X_{n-1}}{1 + X_{n-1}^2} + 8\cos(1.2n) + V_n, \quad V_n \sim \mathcal{N}(0, \sigma_V^2)$$
 $$Y_n = \frac{X_n^2}{20} + W_n, \quad W_n \sim \mathcal{N}(0, \sigma_W^2)$$
 
+where X₁ ~ N(0, 5). True parameters: σ_V² = 10, σ_W² = 1. Parameterized as θ = (σ_V, σ_W).
+
+### Three algorithms compared (Section 3.1, p. 283)
+
+All three use the same data (T=500), same priors (σ_V² ~ IG(0.01, 0.01), σ_W² ~ IG(0.01, 0.01)), same initial values (σ_V²(0) = σ_W²(0) = 10), and 50,000 MCMC iterations with 10,000 burn-in.
+
+#### (a) Standard MH one-at-a-time (baseline)
+- Updates x_{1:T} in blocks using MH with proposal density f_θ(x_n | x_{n-1})
+- Updates N state variables at each iteration, then updates θ
+- **Result**: Gets trapped in a local mode on most runs. Overestimates σ_V.
+
+#### (b) Particle Gibbs (PG) sampler (Section 2.4.3, p. 278)
+
 | Setting | Value |
 |---------|-------|
-| True params | σ_V² = 10, σ_W² = 1 |
-| Parameterization | σ_V² and σ_W² (**variances**, not std devs) |
-| Priors | Inverse Gamma: σ_V² ~ IG(0.01, 0.01), σ_W² ~ IG(0.01, 0.01) |
-| T (observations) | 500 |
-| N (particles) | 5000 for main results, 200–2000 in acceptance rate study |
-| Resampling | Multinomial (simplest possible) |
-| Proposal | Normal random walk, diagonal covariance |
-| Proposal std dev | 0.15 for σ_V, 0.08 for σ_W |
-| MCMC iterations | 50,000 |
-| Burn-in | 10,000 |
-| Initial values | σ_V(0)² = σ_W(0)² = 10 |
+| N (particles) | 5000 |
+| SMC proposal | Prior: q(x_n \| y_n, x_{n-1}) = f(x_n \| x_{n-1}) |
+| Resampling | Stratified |
+| θ-step | Sample from full conditional p(θ \| x_{1:T}, y_{1:T}) |
+| Initial values | σ_V²(0) = σ_W²(0) = 10 |
+
+The PG θ-step (p. 278, step 2a) says: "sample θ(i) ~ p{·\|y_{1:T}, X_{1:T}(i-1)}". With IG priors on σ² and Gaussian likelihoods, this is a **conjugate update** — direct sample from the posterior IG, no MH needed:
+- σ_V² \| x, y ~ IG(a + T/2, b + 0.5 · Σ(x_t - f(x_{t-1}))²)
+- σ_W² \| x, y ~ IG(a + T/2, b + 0.5 · Σ(y_t - x_t²/20)²)
+
+The x-step uses conditional SMC (CSMC) with a reference trajectory pinned (Section 2.4.3).
+
+**Result**: Never trapped. Both σ_V and σ_W converge correctly (Fig. 4b).
+
+#### (c) PMMH sampler (Section 2.4.2, p. 277)
+
+| Setting | Value |
+|---------|-------|
+| N (particles) | 5000 |
+| SMC proposal | Prior |
+| Resampling | Stratified |
+| θ-step | Random-walk MH: proposal std 0.15 (σ_V), 0.08 (σ_W) |
+| Initial values | σ_V²(0) = σ_W²(0) = 10 |
+
+Each iteration runs a full particle filter with a **fresh random seed**. Accepts/rejects based on the ratio of likelihood estimates (eq. 13). On rejection, keeps the old estimate.
+
+**Result**: Never trapped. Both σ_V and σ_W converge correctly (Fig. 4c).
+
+### Key result (p. 283)
+
+"the MH one at a time update appears to mix well...However, this algorithm tends to become trapped in a local mode of the multimodal posterior...and results in an overestimation of the true value of σ_V. This occurred on most runs when using initializations from the prior for X_{1:T}. **Using the same initial values, the PMMH and the PG samplers never became trapped in this local mode.**"
+
+### ACF comparison (Fig. 5, p. 282)
+
+PG ACF decays slower than PMMH ACF. Need N ≥ 2000 particles for PG to have reasonable ACF. With N=5000, both PG and PMMH ACFs are similar and close to the idealized MMH.
 
 ### Acceptance rate vs. N (from Fig. 3, for T = 100)
 
@@ -86,9 +121,9 @@ Our HMC uses a **fixed seed** to make the likelihood deterministic for gradients
 
 ### Trick 2 — Parameterization matters
 
-The paper uses **variances** (σ²) with **Inverse Gamma** priors, not standard deviations (σ) with LogNormal priors. IG(a,b) is the conjugate prior for Gaussian variance — the posterior is better-behaved.
+The paper uses **variances** (σ²) with **Inverse Gamma** priors. IG is the conjugate prior for Gaussian variance, so the PG θ-step is a direct sample (no MCMC needed for θ). Any valid MCMC kernel (MH, HMC) also works for the θ-step — convergence is guaranteed regardless — but conjugate sampling is more efficient.
 
-Our setup: σ_V and σ_W with Exp bijector (log-space HMC). The gradient of log p(y|σ) w.r.t. log(σ) involves an extra chain rule factor of σ, which amplifies gradient magnitudes for large σ. Switching to σ² parameterization might give a smoother landscape.
+Our setup: σ_V and σ_W (std devs) with LogNormal priors and Softplus bijector. Not conjugate, so we use MH or HMC for the θ-step. This is valid but slower to mix.
 
 ### Trick 3 — The "one at a time" MH trap (p. 283)
 
@@ -118,12 +153,17 @@ Even when a PMMH proposal is rejected, the N particles generated for that propos
 
 ---
 
-## Summary: What to Try Next
+## Our setup vs. paper
 
-| Priority | Action | Effort | Expected impact |
-|----------|--------|--------|----------------|
-| 1 | Test custom HMC with grad clipping on CUDA | Low — already written | Should get >0% acceptance |
-| 2 | Implement PMMH as gradient-free benchmark | Medium | Avoids gradient cliff entirely |
-| 3 | Try σ² parameterization with IG prior | Medium | Smoother gradient landscape |
-| 4 | Reduce T from 100 to 50 to test | Low — config change | Reduces likelihood variance |
-| 5 | Adaptive mass matrix from short pilot run | Medium | Better-conditioned HMC |
+| | Paper (PG) | Our PGibbs |
+|---|---|---|
+| T | 500 | 100 |
+| N particles | 5000 | 500 (LEDH) / 1000 (BPF) |
+| MCMC iterations | 50,000 | 3,000 |
+| Burn-in | 10,000 | 1,000 |
+| θ-step | Conjugate IG (exact) | MH or HMC (approximate) |
+| Priors | IG(0.01, 0.01) on σ² | LogNormal on σ |
+| x-step | Bootstrap CSMC | LEDH CSMC or Bootstrap CSMC |
+| Resampling | Stratified | Systematic |
+
+The paper uses 5x more data, 10x more particles, 17x more iterations, and exact conjugate θ-updates. Our LEDH CSMC x-step should produce better proposals than their bootstrap CSMC, partially compensating for fewer particles.

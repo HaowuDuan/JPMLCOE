@@ -1,0 +1,26 @@
+============================= test session starts ==============================
+cachedir: .pytest_cache
+tests/dpf/test_ledh_cubic_sensor.py::test_ledh_runs_without_error 2026-02-21 21:27:02.559602: I metal_plugin/src/device/metal_device.cc:1154] Metal device set to: Apple M4
+PASSED
+tests/dpf/test_ledh_cubic_sensor.py::test_output_shapes_1d PASSED
+tests/dpf/test_ledh_cubic_sensor.py::test_ess_stays_healthy 
+  min ESS = 13.3, threshold = 5.0
+PASSED
+tests/dpf/test_ledh_cubic_sensor.py::test_rmse_reasonable_1d 
+  RMSE = 0.6053
+PASSED
+tests/dpf/test_ledh_cubic_sensor.py::test_log_likelihood_finite PASSED
+tests/dpf/test_ledh_cubic_sensor.py::test_gradient_connected_and_finite 2026-02-21 21:27:06.390542: I metal_plugin/src/kernels/stateless_random_op.cc:282] Note the GPU implementation does not produce the same series as CPU implementation.
+  log_lik = -50.0767
+  d(ll)/d(sigma_W) = -9.936679579318595
+PASSED
+tests/dpf/test_ledh_cubic_sensor.py::test_weight_clipping 2026-02-21 21:27:20.108904: I metal_plugin/src/kernels/stateless_random_op.cc:282] Note the GPU implementation does not produce the same series as CPU implementation.
+  clip=30: log-lik=-32.18, min_ess=13.3
+  no clip: log-lik=-32.18, min_ess=13.3
+PASSED
+tests/dpf/test_ledh_cubic_sensor.py::test_both_resampling_methods 2026-02-21 21:27:24.825900: I metal_plugin/src/kernels/stateless_random_op.cc:282] Note the GPU implementation does not produce the same series as CPU implementation.
+  systematic: RMSE=0.6053, min_ess=13.3
+  ot_entropy: RMSE=1.1966, min_ess=9.0
+PASSED
+=============================== warnings summary ===============================
+======================== 8 passed, 3 warnings in 38.57s ========================

@@ -1,0 +1,20 @@
+model:
+  _target_: src.models.stochastic_volatility.StochasticVolatilityModel
+  alpha: 0.91
+  sigma: 1.0
+  beta: 0.5
+filter:
+  _target_: src.filters.particle.edh_flow.ExactDaumHuangFlow
+  n_particles: 500
+  n_lambda_steps: 29
+  integration_method: euler
+  n_threads: null
+seed: 42
+dtype: float64
+T: 500
+output_dir: outputs/stochastic_volatility/stochastic_volatility_edh_flow
+plot: true
+device: auto
+tf_log_level: 2
+verbose: true
+show_progress: true

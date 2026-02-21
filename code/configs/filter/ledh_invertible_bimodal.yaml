@@ -3,4 +3,4 @@ _target_: src.filters.particle.ledh_invertible_bimodal.LEDHInvertibleBimodal
 n_particles: 500
 n_lambda_steps: 29
 resample_threshold: 0.5
-flip_fraction: 1.0  # Fraction of particles eligible for sign-flip (1.0 = all)
+lookahead_steps: 2  # K=2 gives good signal-to-noise for Kitagawa

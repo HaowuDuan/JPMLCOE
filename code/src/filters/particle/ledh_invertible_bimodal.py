@@ -1,20 +1,23 @@
-"""LEDH Invertible Particle Flow Filter with bimodal sign-flip correction.
+"""LEDH Invertible Particle Flow Filter with look-ahead sign correction.
 
-Extends LEDHParticleFlowFilter with a post-flow Metropolis sign-flip step
+Extends LEDHParticleFlowFilter with a look-ahead sign correction step
 for models whose observation function has discrete symmetry (e.g. y = x^2/20).
 
 The standard LEDH flow derives from a Gaussian (unimodal) posterior approximation.
 When the true posterior is bimodal (e.g. both +x and -x produce the same observation),
-the flow herds all particles to a single mode. The sign-flip correction exploits the
-transition dynamics to stochastically reassign particles to the correct mode.
+the flow herds all particles to a single mode. The look-ahead correction uses future
+observations to determine the correct sign, exploiting the asymmetry of the transition
+dynamics f(x,t) != -f(-x,t).
 """
 
 import tensorflow as tf
 import numpy as np
+import time
 from typing import Optional, Callable, Dict, Any
 
 from .ledh_invertible import LEDHParticleFlowFilter
 from ...core.model_base import StateSpaceModel
+from ...core.types import FilterResult
 from ...utils.flow_params import compute_flow_params_batch
 from ...utils.distributions import compute_flow_weights
 from ...utils.linalg import safe_log_abs_det, safe_inv
@@ -24,19 +27,16 @@ from ...resampling.diagnosis import effective_sample_size as ess_tf
 
 class LEDHInvertibleBimodal(LEDHParticleFlowFilter):
     """
-    LEDH Invertible with post-flow sign-flip correction for bimodal posteriors.
+    LEDH Invertible with look-ahead sign correction for bimodal posteriors.
 
-    After the standard LEDH flow, each particle independently proposes flipping
-    its sign. The flip is accepted with probability:
+    After the standard LEDH flow, each particle's sign is evaluated by
+    propagating +eta_1 and -eta_1 deterministically through K future timesteps
+    and scoring against future observations. The sign that better predicts
+    future observations is selected.
 
-        flip_prob_i = p(-eta_1_i | x_{k-1,i}) / [p(eta_1_i | x_{k-1,i}) + p(-eta_1_i | x_{k-1,i})]
-
-    This exploits the fact that while h(x) = h(-x) (observation symmetry),
-    the transition f(x,t) is sign-sensitive, carrying information about the
-    correct mode.
-
-    The flip happens before weight computation, so compute_flow_weights
-    automatically accounts for the flipped positions.
+    This avoids the chicken-and-egg problem of the transition-based flip
+    (which depends on particles_prev being correct) by using future
+    observations as independent evidence.
     """
 
     def __init__(
@@ -50,16 +50,14 @@ class LEDHInvertibleBimodal(LEDHParticleFlowFilter):
         resampling_config: Optional[Dict[str, Any]] = None,
         weight_clip_range: Optional[float] = None,
         debug_mode: bool = False,
-        flip_fraction: float = 1.0,
+        lookahead_steps: int = 1,
         **filter_kwargs
     ):
         """
         Args:
             All args from LEDHParticleFlowFilter, plus:
-            flip_fraction: Fraction of particles eligible for sign-flip (0.0 to 1.0).
-                          1.0 = all particles can flip (default).
-                          0.5 = only half the particles are candidates.
-                          Reducing this adds a conservative bias toward the flow's mode.
+            lookahead_steps: Number of future observations to use for sign
+                           correction (K). 0 = disabled, 1-3 recommended.
         """
         super().__init__(
             model=model,
@@ -73,10 +71,72 @@ class LEDHInvertibleBimodal(LEDHParticleFlowFilter):
             debug_mode=debug_mode,
             **filter_kwargs
         )
-        self.flip_fraction = flip_fraction
+        self.lookahead_steps = lookahead_steps
 
-    def update(self, y: tf.Tensor):
-        """Update step: standard LEDH flow + sign-flip correction + weight computation."""
+    def filter(self, observations: np.ndarray,
+               initial_mean: Optional[np.ndarray] = None,
+               initial_cov: Optional[np.ndarray] = None,
+               random_seed: Optional[int] = None,
+               progress_callback: Optional[Callable[[int, int, float], None]] = None) -> FilterResult:
+        """Run filter with look-ahead sign correction.
+
+        Overrides parent to pass future observations and timestep index to update().
+        """
+        self.initialize(initial_mean, initial_cov, random_seed)
+        T = len(observations)
+
+        # Pre-convert observations to TF once
+        obs_tf = tf.constant(observations, dtype=self.dtype)
+
+        for t in range(T):
+            t0 = time.perf_counter()
+
+            # Set model time for Kitagawa's cos(1.2*t) term
+            self.predict(t=t + 1)
+
+            # Pass future observations for look-ahead (up to K steps)
+            if self.lookahead_steps > 0 and t + 1 < T:
+                y_future = obs_tf[t + 1: t + 1 + self.lookahead_steps]
+            else:
+                y_future = None
+            self.update(obs_tf[t], y_future=y_future, current_t=t + 1)
+
+            mean, cov = self._estimate_mean_cov()
+            self.means.append(mean)
+            self.covs.append(cov)
+            if progress_callback is not None:
+                progress_callback(t, T, time.perf_counter() - t0)
+
+        resampling_rate = len(self.resampled_at) / T if T > 0 else 0.0
+
+        # Convert accumulated TF tensors to numpy once
+        means_np = tf.stack(self.means).numpy()
+        covs_np = tf.stack(self.covs).numpy()
+        log_liks_tf = tf.stack(self.log_likelihoods) if self.log_likelihoods else None
+        ess_np = tf.stack(self.ess_history).numpy()
+        weights_np = tf.stack(self.weights_history).numpy()
+
+        return FilterResult(
+            means=means_np,
+            covs=covs_np,
+            log_likelihood=float(tf.reduce_sum(log_liks_tf).numpy()) if log_liks_tf is not None else None,
+            log_likelihoods=log_liks_tf.numpy() if log_liks_tf is not None else None,
+            ess=ess_np,
+            weights_history=weights_np,
+            resampled_at=self.resampled_at,
+            n_unique=np.array(self.n_unique_particles) if self.n_unique_particles else None,
+            metadata={
+                'filter_type': 'LEDHInvertibleBimodal',
+                'n_particles': self.n_particles,
+                'n_lambda_steps': self.n_lambda_steps,
+                'resampling_method': self.resampling_method_name,
+                'resampling_rate': resampling_rate,
+                'lookahead_steps': self.lookahead_steps
+            }
+        )
+
+    def update(self, y: tf.Tensor, y_future=None, current_t=None):
+        """Update step: standard LEDH flow + look-ahead sign correction + weight computation."""
         R = self.model.observation_noise_cov
 
         eta_1 = self.eta_0.value()
@@ -121,13 +181,14 @@ class LEDHInvertibleBimodal(LEDHParticleFlowFilter):
         log_theta = log_theta - max_log_theta
         theta = tf.exp(log_theta)
 
-        # --- Sign-flip correction ---
-        eta_1 = self._sign_flip(eta_1)
+        # --- Look-ahead sign correction ---
+        if y_future is not None and tf.shape(y_future)[0] > 0:
+            eta_1 = self._lookahead_sign_correction(eta_1, y_future, current_t)
 
         self.particles.assign(eta_1)
 
         # --- Weight computation (identical to parent) ---
-        weights_new = compute_flow_weights(
+        weights_new, log_lik = compute_flow_weights(
             eta_1=eta_1,
             eta_0=self.eta_0.value(),
             particles_prev=self.particles_prev.value(),
@@ -141,10 +202,7 @@ class LEDHInvertibleBimodal(LEDHParticleFlowFilter):
 
         self.weights_history.append(self.weights.value())
 
-        # Log-likelihood
-        log_likelihood = self.model.log_observation_prob_batch(y, eta_1)
-        max_ll = tf.reduce_max(log_likelihood)
-        log_lik = max_ll + tf.math.log(tf.reduce_mean(tf.exp(log_likelihood - max_ll)))
+        # Log-likelihood from importance-weighted estimate
         self.log_likelihoods.append(log_lik)
 
         # Update per-particle covariances via batched EKF
@@ -164,48 +222,80 @@ class LEDHInvertibleBimodal(LEDHParticleFlowFilter):
             n_unique = len(np.unique(particles_np, axis=0))
             self.n_unique_particles.append(n_unique)
 
-    def _sign_flip(self, eta_1: tf.Tensor) -> tf.Tensor:
+    def _lookahead_sign_correction(self, eta_1: tf.Tensor, y_future: tf.Tensor,
+                                   current_t: int) -> tf.Tensor:
+        """Score +eta_1 vs -eta_1 against future observations.
+
+        Propagates both sign candidates deterministically through the transition
+        dynamics for K steps and scores against actual future observations.
+        The sign with better predictive score is selected stochastically.
+
+        Args:
+            eta_1: Flowed particles at lambda=1, shape (N, state_dim)
+            y_future: Future observations, shape (K_avail, obs_dim)
+            current_t: Current timestep index (1-based, as used by model.t)
+
+        Returns:
+            eta_1 with signs corrected, shape (N, state_dim)
         """
-        Propose sign-flipping each particle based on transition probability.
+        K_avail = tf.shape(y_future)[0]
 
-        For each particle i:
-          p_plus  = N(eta_1_i; f(x_{k-1,i}), Q)
-          p_minus = N(-eta_1_i; f(x_{k-1,i}), Q)
-          flip_prob = p_minus / (p_plus + p_minus) = sigmoid(log_p_minus - log_p_plus)
+        # Two candidate trajectories: positive and negative sign
+        x_plus = eta_1       # (N, sd)
+        x_minus = -eta_1     # (N, sd)
 
-        With probability flip_prob, flip eta_1_i -> -eta_1_i.
-        """
-        # Transition mean and covariance
-        f_prev = self.model.state_transition_mean_batch(self.particles_prev.value())
-        Q = self.model.state_transition_cov_batch(self.particles_prev.value())
-        Q_inv = safe_inv(Q)
+        log_score_plus = tf.zeros(self.n_particles, dtype=self.dtype)
+        log_score_minus = tf.zeros(self.n_particles, dtype=self.dtype)
 
-        # Log transition probabilities (up to shared normalizing constant)
-        diff_plus = eta_1 - f_prev
-        diff_minus = -eta_1 - f_prev
+        # Save and restore model.t to avoid side effects
+        saved_t = getattr(self.model, 't', None)
 
-        log_p_plus = -0.5 * tf.reduce_sum(
-            diff_plus * tf.linalg.matvec(Q_inv, diff_plus), axis=1
-        )
-        log_p_minus = -0.5 * tf.reduce_sum(
-            diff_minus * tf.linalg.matvec(Q_inv, diff_minus), axis=1
-        )
+        Q = self.model.process_noise_cov        # (sd, sd)
+        R = self.model.observation_noise_cov     # (od, od)
 
-        # Flip probability via numerically stable sigmoid
-        flip_prob = tf.nn.sigmoid(log_p_minus - log_p_plus)
+        for k in range(self.lookahead_steps):
+            if k >= K_avail:
+                break
 
-        # Apply flip_fraction: only a subset of particles are candidates
-        if self.flip_fraction < 1.0:
-            # Mask out particles that aren't eligible
-            seed_mask = self._next_seed()
-            eligible = tf.cast(
-                tf.random.stateless_uniform([self.n_particles], seed=seed_mask, dtype=self.dtype)
-                < self.flip_fraction,
-                self.dtype
-            )
-            flip_prob = flip_prob * eligible
+            # Propagate one step: x_{t+k+1} = f(x_{t+k}, t+k+1)
+            t_future = current_t + k + 1
+            x_plus = self.model.state_transition_mean_batch(x_plus, t=t_future)
+            x_minus = self.model.state_transition_mean_batch(x_minus, t=t_future)
 
-        # Stochastic flip decision
+            # Predicted observations: h(x_{t+k+1})
+            y_pred_plus = self.model.observation_function_batch(x_plus)    # (N, od)
+            y_pred_minus = self.model.observation_function_batch(x_minus)  # (N, od)
+
+            # Predictive variance: H @ Q @ H^T + R per particle
+            H_plus = self.model.observation_jacobian_batch(x_plus)    # (N, od, sd)
+            H_minus = self.model.observation_jacobian_batch(x_minus)
+
+            HQHt_plus = tf.einsum('nij,jk,nlk->nil', H_plus, Q, H_plus)   # (N, od, od)
+            HQHt_minus = tf.einsum('nij,jk,nlk->nil', H_minus, Q, H_minus)
+            var_pred_plus = HQHt_plus + tf.expand_dims(R, 0)    # (N, od, od)
+            var_pred_minus = HQHt_minus + tf.expand_dims(R, 0)
+
+            # Score: log N(y_future[k]; y_pred, var_pred)
+            # For 1D obs: use diagonal elements directly
+            y_k = y_future[k]  # (od,)
+            diff_plus = y_k - y_pred_plus[:, 0]     # (N,) for 1D obs
+            diff_minus = y_k - y_pred_minus[:, 0]
+
+            vp = var_pred_plus[:, 0, 0]    # (N,)
+            vm = var_pred_minus[:, 0, 0]
+
+            log_score_plus += -0.5 * (diff_plus ** 2 / vp + tf.math.log(vp))
+            log_score_minus += -0.5 * (diff_minus ** 2 / vm + tf.math.log(vm))
+
+        # Restore model.t
+        if saved_t is not None:
+            self.model.t = saved_t
+
+        # Flip probability: sigmoid(log_score_minus - log_score_plus)
+        # If minus scores better, flip_prob > 0.5
+        flip_prob = tf.nn.sigmoid(log_score_minus - log_score_plus)
+
+        # Stochastic flip
         seed = self._next_seed()
         u = tf.random.stateless_uniform([self.n_particles], seed=seed, dtype=self.dtype)
         flip_mask = tf.cast(u < flip_prob, self.dtype)

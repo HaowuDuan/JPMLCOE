@@ -154,7 +154,10 @@ class ParameterHandler:
             constrained_value = constrained_params[name]
             
             # Log probability in constrained space
-            log_prob_constrained = spec.prior.log_prob(constrained_value)
+            # Cast to prior's dtype if needed (prior may be float32 from Hydra config)
+            prior_dtype = spec.prior.dtype
+            value_for_prior = tf.cast(constrained_value, prior_dtype)
+            log_prob_constrained = tf.cast(spec.prior.log_prob(value_for_prior), self.dtype)
             
             # Jacobian adjustment (forward log determinant)
             # This accounts for change of variables from unconstrained to constrained

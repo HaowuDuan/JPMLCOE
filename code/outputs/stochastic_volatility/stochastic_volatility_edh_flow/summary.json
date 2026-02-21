@@ -1,0 +1,43 @@
+{
+  "rmse": 2.582972252352335,
+  "log_likelihood": null,
+  "metadata": {
+    "filter_type": "ExactDaumHuangFlow",
+    "n_particles": 500,
+    "n_lambda_steps": 29,
+    "integration_method": "euler",
+    "performance": {
+      "wall_time_seconds": 33.272004790982464,
+      "time_per_timestep_ms": 66.54400958196493,
+      "peak_memory_mb": 21.225829124450684,
+      "memory_increase_mb": 64.125,
+      "start_memory_mb": 413.453125,
+      "end_memory_mb": 477.578125,
+      "num_timesteps": 500
+    }
+  },
+  "config": {
+    "model": {
+      "_target_": "src.models.stochastic_volatility.StochasticVolatilityModel",
+      "alpha": 0.91,
+      "sigma": 1.0,
+      "beta": 0.5
+    },
+    "filter": {
+      "_target_": "src.filters.particle.edh_flow.ExactDaumHuangFlow",
+      "n_particles": 500,
+      "n_lambda_steps": 29,
+      "integration_method": "euler",
+      "n_threads": null
+    },
+    "seed": 42,
+    "dtype": "float64",
+    "T": 500,
+    "output_dir": "outputs/stochastic_volatility/stochastic_volatility_edh_flow",
+    "plot": true,
+    "device": "auto",
+    "tf_log_level": 2,
+    "verbose": true,
+    "show_progress": true
+  }
+}

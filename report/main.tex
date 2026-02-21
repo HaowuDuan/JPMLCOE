@@ -49,7 +49,7 @@
 \newpage
 \section{Literature Review}
 
-\subsection{State-Space Modeling in Financial Markets: The Big Picture}
+\subsection{State-Space Modeling in Financial Markets: The big Picture}
 Financial systems are driven by latent factors that shape observable market data. Problems such as stochastic volatility, limit order book dynamics, or macroeconomic regime shifts are frequently cast as Hidden Markov Models (HMMs) or continuous state-space models (SSMs). In quantitative finance, Bayesian filtering and smoothing are key tools for recovering these hidden drivers. A central example is \textit{stochastic volatility} modeling, where asset volatility is a drifting latent state. Recent semi-parametric methods employ particle filters to estimate it without rigid parametric forms, yielding more accurate option pricing and risk management~\cite{feng2025semiparametric}. Discrete state-space models, particularly HMMs, excel at \textit{regime detection}. They treat market regimes (``bull'' vs.\ ``bear'', high vs.\ low momentum) as latent states, enabling traders to estimate real-time regime-shift probabilities and adapt allocations~\cite{catello2023hidden}. Filtering techniques also tackle microstructure noise in \textit{illiquid markets}. Particle filters, for instance, reconstruct the latent ``true'' mid-price of sparsely traded assets (e.g., corporate bonds) from irregular, noisy transaction records~\cite{gueant2018mid}. As a one-dimensional demonstration, let us first write down the state-space model,
 \begin{equation}
 \begin{split} \label{Eq:HMM}
@@ -60,9 +60,9 @@ Financial systems are driven by latent factors that shape observable market data
 where $k$ denotes the time step, $z_k$ is the observation, and $x_k$ is the unobserved latent state. The noise terms $w_k$ and $u_k$ are mutually and temporally uncorrelated. The function $f$ governs state evolution and $h$ maps the state to observations. In practice we observe only $z_k$, which may have the same or lower dimension than $x_k$ (the latter case is called partial observation and makes inference substantially harder due to information loss). Successful application of state-space models rests on two pillars:
 \begin{enumerate}
     \item  A well-specified model with accurate parameters — traditionally this means understanding the functional forms of $f$ and $h$ and estimating their parameters reliably
-    \item An effective inference algorithm that estimates the hidden state $x_k$ from the observation $z_k$ — here, a filtering algorithm.
+    \item An effective inference algorithm that estimate the hidden state $x_k$ from the observation $z_k$ — here, filtering algorithm.
     \end{enumerate}
-In recent years, neural networks have entered both parts of the equation. We can replace the conventional maps with learned versions: $f \to f_\theta$ and $h \to h_\theta$. Neural filtering algorithms have also emerged. We will first review the conventional numerical methods, then discuss possible ways for improvement leveraging neural networks.
+In recent years neural networks have entered both parts of the equation. We can replace the conventional maps with learned versions: $f \to f_\theta$ and $h \to h_\theta$. Neural filtering algorithms have also emerged. We will first review the conventional numerical methods then discuss what are the possible ways for improvement leveraging neural networks.
 
 % Financial systems are characterized by latent factors driving observable market data. Whether modeling stochastic volatility, limit order book dynamics, or macroeconomic regime shifts, the underlying problem is often formulated as a Hidden Markov Model (HMM) or a continuous State-Space Model (SSM). 
 
@@ -124,7 +124,7 @@ Once a reliable filtering algorithm is available, it can be used to estimate the
 \begin{equation}
     L(\theta) = -\sum_{k=1}^{T} \log \, p_\theta(z_k \mid z_{1:k-1})
 \end{equation}
-Since the logarithm is monotonically increasing, minimizing $L(\theta)$ maximizes the predictive density of each observation given past data~\cite{Särkkä2013BayesianFilteringAndSmoothing}. In a Bayesian setting, where parameters are given a prior $p(\theta)$, we instead minimize,
+Since the logarithm is monotonically increasing, minimizing $L(\theta)$ maximizes the predictive density of each observation given past data~\cite{Särkkä2013BayesianFilteringAndSmoothing}.In a Bayesian setting, where parameters are given a prior $p(\theta)$, we instead minimize,
 \begin{equation}
     L(\theta) = -\sum_{k=1}^{T} \log \, p_\theta(z_k \mid z_{1:k-1}) - \log p(\theta),
 \end{equation}
@@ -180,35 +180,35 @@ which corresponds to maximum a posteriori (MAP) estimation.
 % - The need for sequential inference (online learning) for risk management and algorithmic trading.
 
 
-\subsection{The Kalman Family and Semi-Exact Methods}
-For Linear-Gaussian systems, the Kalman Filter (KF) provides the optimal solution because the product of two Gaussian distributions stays Gaussian. However, financial data rarely satisfies these constraints. Extensions such as the Extended Kalman Filter (EKF) and Unscented Kalman Filter (UKF) utilize linearization and sigma-point approximations, respectively. Either way, for Gaussian distributions, we only need the mean and variance at time $k$, $m_k$ and $P_k$. 
+\subsection{The Kalman Family and semi-exact methods}
+For Linear-Gaussian systems, the Kalman Filter (KF) provides the optimal solution because the product of two Gaussian distribution stays as Gaussian. However, financial data rarely satisfies these constraints. Extensions such as the Extended Kalman Filter (EKF) and Unscented Kalman Filter (UKF) utilize linearization and sigma-point approximations, respectively. Either way, for Gaussian distribution, we only need the mean and variance at time $k$, $m_k$ and $P_k$. 
 \begin{equation}
 \begin{split}
 x_k =& f x_{k-1} + w_k, \quad w_k \sim \mathcal{N}(0, Q) \\
 z_k =& h x_k + v_k, \quad v_k \sim \mathcal{N}(0, R)
 \end{split}
 \end{equation}
-where $f$ and $h$ are constant in one dimension and matrices in higher dimension. When the kernel becomes non-linear, one essentially expands it around the last input. 
+where a and h are constant in one dimension and matrices in higher dimension. When the kernel becomes non-linear, one essentially expand it around the last input. 
 \begin{equation}
 \begin{split}
     f(x_{k-1}) &\approx \frac{\partial f(x)}{\partial x} \Big|_{x_{k-1}} \cdot x_{k-1} =f_{k} x_{k-1} \\
     h(x_{k-1}) &\approx \frac{\partial h(x)}{\partial x} \Big|_{x_{k}} \cdot x_{k} =h_{k} x_{k} \\
 \end{split}
 \end{equation}
-This essentially introduces time dependence into the kernels but does not change the Gaussian assumption. This works fine if the higher-order terms are unimportant. UKF uses sigma points to track the mean and variance and is able to capture some higher-order correlations, but it still assumes a Gaussian distribution. Appendix~\ref{APP:Kalman} includes all the details such as key derivations. The Kalman family mostly serves as a benchmark and has very limited application. Both EKF and UKF are methods to overcome the non-linearity in the problem, with more recent progress in this direction \cite{jiang2025new}. However, there are other difficulties as well, notably the curse of dimensionality. Attempts have been made to improve in this direction, notably the Cubature Kalman Filter (CKF)\cite{arasaratnam2009cubature} and Ensemble Kalman Filter (EnKF)\cite{evensen-2003-ensemble-kalman-filter,alghattas2024ensemble}. Here I do want to mention the latest progress on application of neural networks to the Kalman filter, known as KalmanNet\cite{DBLP:journals/corr/abs-2107-10043,mortada2025recursive}. This is a method that replaces the Kalman Gain computation with a learned neural network while keeping everything else from the standard KF flow intact. The key is to train the RNN to make predictions about the Kalman gain without knowing what the noise distribution is. It gets the noise from the input data. While KalmanNet borrows design from the Kalman filter, it can be applied to non-linear, non-Gaussian state space models. 
+essentially introduce time dependence into the kernels but do not change the Gaussian assumption. This works fine if the higher order term are unimportant. UFK use sigma point to track the mean and variance and was able to capture some higher order correlations but it still assume Gaussian distribution. Appendix.~\ref{APP:Kalman} includes all the details such as key derivation. Kalman family mostly serves as a bench mark and have very limited application. Both EKF and UFK are methods to overcome the non-linearity in the problem, with more recent progress in this direction \cite{jiang2025new}. However, there are other difficulties as well, notably the curse of dimension. Attempts has been made to improve in this direction, notably Cubature Kalman Filter (CKF)\cite{arasaratnam2009cubature} and Ensemble Kalman Filter (EnKF)\cite{evensen-2003-ensemble-kalman-filter,alghattas2024ensemble}. But here I do want to mention the latest progress on application of nerual network to kalman filter, known as KalmanNet\cite{DBLP:journals/corr/abs-2107-10043,mortada2025recursive}. This is a method that replaces the Kalman Gain computation with a learned neural network while keeping everything else from the standard KF flow intact. The key is to train the RNN to make predictions about the Kalman gain without knowing what the noise distribution is. It gets the noise from the input data. While KalmanNet borrowed design from Kalman filter, it can be applied to non-linear, non-gaussian state space models. 
 
-\subsection{Particle-Based Methods}
-Particle-based methods, also known as sequential Monte Carlo, are the focus of this project. They are less model-specific, and therefore more general. There are many different particle-based methods, but the bottom line is how to represent a complicated distribution efficiently. If we were to use particles, namely samples, to represent a distribution $p(x)$, we first need to discretize the phase space.
+\subsection{Particle based methods}
+Particle based methods, also known as sequential Monte Carlo are the focus of this project. It is less limited compared to other approaches. There are tons of different particle-based methods, but the bottom line is how to represent a complicated distribution efficiently. Here we first introduce the concept of importance sampling. {\color{red} Here I want to explain why we choose to use system dynamics as the proposal instead of more general approach. Then set the things straight, we only use the system dynamics here. As for particle weights, it should be corrected here that it is not an artifact of discretization alone.} If we were to use particles, namely, samples to represent a distribution $p(x)$, we first need to discretize the phase space. 
 \begin{equation}
     p(x)=\int dy\; p(y) \delta(y-x)
 \end{equation} 
-The discretized version is,
+discretized version is,
 \begin{equation}
     p(x)\propto \sum_i \Delta p(x_i) \delta_{x,x_i}= \sum_i \omega_i \delta_{x,x_i}
 \end{equation}
-where we have evenly sampled the phase space points and give them weights that realize the actual distribution. 
+where we have evenly sampled the phase space points and give them weights the realizes the actual distribution. 
 % where $n_i$ is the multiplicity of particle $x_i$. If we treat all the particle in the same footing, then multiplicity will be where we store the distribution, if we give the particle a weight $\omega^i$, then the multiplicity $\tilde n^i$ will be corrected such that $\tilde n^i \omega^i=n^i$. If we pick $\omega^i=n^i$, then particle multiplicity will be trivial. Particle filter methods corresponds to $\omega^i=n^i$ case, namely we don't have identical particles. 
-To put this in the context of sequential Monte Carlo, we demonstrate the so-called Bootstrap particle filter (BPF). At step $k$, we have the realization of the distribution $\{x^{(k-1)}_i,\omega^{(k-1)}_i\} \sim p(x_{k-1}|z_{1:k-1})$ as input. In the evolution/prediction step,
+To put this in the context of sequential Monte Carlo, we demonstrate the so-called Bootstrap particle filter (BPF), at step $k$, we have the realization of the distribution $\{x^{(k-1)}_i,\omega^{(k-1)}_i\} \sim p(x_{k-1}|z_{1:k-1})$ as input. In the evolution/prediction step,
 \begin{equation}
 \begin{split}
 \text{For } i = 1 \text{ to } N:& \\
@@ -216,7 +216,7 @@ To put this in the context of sequential Monte Carlo, we demonstrate the so-call
 \quad \tilde{w}_k^{(i)} &= w_{k-1}^{(i)} \quad \text{(weights unchanged in basic prediction)}
 \end{split}
 \end{equation}
-In the above step, the particles simply move based on physics, but their weights stay the same. However, we need to use the observation data to score each update
+In the above step, the particle simply moved based on physics but their weight stays the same. But we need to use the observation data to score each update
 \begin{equation}
 \begin{split}
 \text{For } i = 1 \text{ to } N:& \\
@@ -224,7 +224,7 @@ In the above step, the particles simply move based on physics, but their weights
 w_k^{(i)} &= \frac{\tilde{w}_k^{(i)}}{\sum_{j=1}^N \tilde{w}_k^{(j)}} \quad \text{(normalized weight)}
 \end{split}
 \end{equation}
-The major problem with this simple approach is that $p(z_k|x^{i})$ is most likely to be a small number. After a few steps, most of the weights will be so small due to multiplication of multiple small numbers that they become unimportant. The direct consequence is that the effective sample size of the distribution becomes small and our discretized representation becomes even more coarse-grained. This problem is known as particle weight collapse or particle degeneracy. The most straightforward way to deal with this is resampling, which is to create a different realization for the same distribution with more balanced particle samples. Resample particles with replacement according to weights to avoid degeneracy (also called particle depletion or weight collapse). High-weight particles get duplicated; low-weight particles die out. This step is typically performed when $N_{\text{eff}} < N_{\text{threshold}}$ (e.g., $N_{\text{threshold}} = N/2$). The most straightforward resampling method is multinomial resampling, namely, generating $N$ independent samples from the categorical distribution:
+The major problem with this simple approach is that $p(z_k|x^{i})$ are most likely to be a small number. After few steps, most of weights will be so small due to multiplication of multiple small number that they becomes unimportant. The direct consequence is that effective sample size of the distribution becomes small and our discretized representation becomes even coarse grained. This problem is known as particle weight collapse or particle degeneracy. The most straightforward way to deal with this is resampling, which is to create an different realization for the same distribution with more balanced particle sample. Resample particles with replacement according to weights to avoid degeneracy (also called particle depletion or weight collapse). High-weight particles get duplicated; low-weight particles die out. This step is typically performed when $N_{\text{eff}} < N_{\text{threshold}}$ (e.g., $N_{\text{threshold}} = N/2$). The most straightforward resampling method is Multinomial resampling, namely, generate $N$ independent samples from the categorical distribution:
 \begin{equation}
 \v{x}_t^{(i)} \sim \text{Categorical}(\{w_t^{(j)}\}_{j=1}^N), \quad i = 1, \ldots, N
 \end{equation}
@@ -236,25 +236,28 @@ Then select particle indices $j_i$ such that:
 \begin{equation}
 \sum_{k=1}^{j_i-1} w_t^{(k)} < u^{(i)} \leq \sum_{k=1}^{j_i} w_t^{(k)}
 \end{equation}
-Set $\v{x}_t^{(i)} = \v{x}_t^{(j_i)}$ and $w_t^{(i)} = 1/N$ for all $i$. The particles rely on the duplicates or multiplicity to mimic the underlying distribution. As a consequence, we have a sample impoverishment problem. Namely, to have more particles with non-trivial weights, we have to duplicate large-weight particles while killing the small-weight particles. After resampling, we set all particles to have equal weight and continue the process.
+Set $\v{x}_t^{(i)} = \v{x}_t^{(j_i)}$ and $w_t^{(i)} = 1/N$ for all $i$. The particles relying on the duplicates or multiplicity to mimic the underlying distribution. As a consequence, we have sample impoverishment problem. Namely, to have more particles with non-trivial weights, we have to duplicate large weight particles while kill the small weight particles. After resampling, we set all particle having equal weight and continues the process.
 
-Because all particles have equal weight, this means the weights carry no information about the distribution and we rely on multiplicity to represent the distribution right after each resampling. This is extremely inefficient and hints that using multiplicity should have been our first choice. Then the problem is very similar to numerical procedures to solve stochastic differential equations. Therefore, the prediction step stays the same because it doesn't touch the distribution, just changes the basis; it is the update step that is responsible for correcting the particles. Because there are no diverse weights anymore, the only way to do this is to move the particles again. This is what particle flow particle filter does. These are observation-guided evolution equations. When it comes to how, one has a good deal of freedom.
+Because all particles having equal weight, this means the weights carrying no information about the distribution and we rely on multiplicity to represent the distribution right after each resampling. This is extremely inefficient and hint that use multiplicity should've been the our first choice. Then the problem is very similar to numerical procedure to solve stochastic differential equations. Therefore, the prediction step stays the same because it doesn't touch the distribution, just change the basis, it is the update step that responsible to correct the particles. Because there is no diverse weight anymore, the only way to do this is to move the particles again. This is what particle flow particle filter  does. These are observation guided evolution equations. When it comes to how, one has a good deal of freedom. 
 
-\subsubsection{Flow and Kernel Flow}
+\subsubsection{Flow and kernal flow}
 
-Alternatively, we don't use weights to represent the distribution at all, namely setting the weights to be uniform. In the update step, we are still using the dynamics to evolve the particles, but in the update step, instead, we move the particles again based on the observation so that the "corrected" distribution is a better realization of the target probability. We will discuss four different ways to move particles. 
+Alternatively, we don't use weights to represent the distribution at all, namely setting the weight to be uniform. In the update step, we are still using the dynamics to evolve the particle, but in the update step, instead, we move the particles again based on the observation so that the "corrected" distribution is a better realization of the target probability. We will discuss four different ways to move particles. 
 
 \begin{enumerate}
-    \item \textbf{Exact Flow:} Exact Daum-Huang (EDH) flow and Local Exact Daum-Huang (LEDH) flow\cite{daum2010exact,daum2011particle,ding2012implementation} use deterministic PDEs to move the particles from prior to posterior. In practice, the algorithms use EKF or UKF to move the filter forward. However, this is not the same as assuming the distribution is Gaussian. If the particles are sampled from a non-Gaussian distribution, then after the Gaussian update, the distribution will still be non-Gaussian. The upside of the Gaussian assumption is that we avoid computing the score $\nabla \ln p$. However, the downside is that strongly nonlinear problems will break the flow. 
+    \item \textbf{Exact Flow:} Exact Daum-Huang (EDH) flow and Local Exact Daum-Huang (LEDH) flow\cite{daum2010exact,daum2011particle,ding2012implementation} are using deterministic PDE to move the particle from prior to posterior. In practice, the algorithms EKF or UKF to move the filter forward. However, this is not the same as assuming the distribution is Gaussian. If the particles is sampled from non-Gaussian distribution, then after Gaussian update, the distribution will still be non-Gaussian. The upside of gaussian assumption is that we avoided computing score $\nabla \ln p$. But the downside is that strong nonlinear problem will break the flow. 
     
-    \item \textbf{Stochastic Flow \cite{dai-new-2021}} Conceptually, the most straightforward way to generalize ODE is SDE. We still make Gaussian assumptions about the flow kernel but use stochastic differential equations to do the evolution. When it comes to stiff equations, the paper \cite{dai-stiffness-mitigation-2021} proposed using a differential equation to determine the optimal flow schedule instead of a straight line. 
+    \item \textbf{Stochastic Flow \cite{dai-new-2021}} Conceptually, the most straightforward way to generalize ODE is SDE. We still make Gaussian assumption about the flow kernel but use stochastic differential equations to do the evolution. When it comes to stiff equations, the paper \cite{dai-stiffness-mitigation-2021} proposed to use a differential equation to determine the optimal flow schedule instead of straightline. 
 
 
 
     
-    \item \textbf{Invertible Particle Flow-Particle Filter:} Particle flow equations have discretization errors, and they don't really transform the particles to the target probability. Think of the flow as a coordinate transformation; not only should you transform the map, but also account for the Jacobian. PF-PF re-introduces the weights back into the picture and uses the weight update to make adjustments to compensate for the effect of this Jacobian. Because the Jacobian is flow-specific, if the flow equation kernel is identical across particles, as in the case of EDH, then this Jacobian will make no contribution and will be canceled by normalization. In the case of particle-specific evolution, this Jacobian is highly non-trivial and will be important.
+    \item \textbf{Invertible Particle flow-Particle filter:} Particle flow equations have discretizations errors, and they don't really transform the particle to the target probability. Think of the flow as a coordinate transformation, not only you should transform the map but also have Jacobian. PF-PF re-introduce the weights back into the picture and use the weight update to make adjustment to compensate the effect of this Jacobian. Because Jacobian is flow specific, if the flow equation kernel is identical across particles, in the case of EDH, then this Jacobian will not contribution and will be canceled by normalization. In the case of particle specific evolution, this Jacobian is highly non-trivial and will be important.
+\end{enumerate}
+All above methods, on the implementation side, share one important feature. They use EKF/UKF to guide the flow. In appendix.~\ref{APP:Particle_flow}, we have shown how to use Gaussian approximation to derive a closed form solution to the evolution kernel but left out this important implementation details. All particles filters track the mean and empirical variances, and these are the real quantities that reflect the underlying state and uncertainty. Follow up works by different author might include their own custom adjustment. One confusing point I found is the interplay of empirical mean/covariance and EKF/UKF mean and covariance. To derive the evolution kernel, one don't need the parallel EKF to track the mean and variance at all, and this is what early implementation of EDH flow does. Later the authors started running a parallel EKF/UEK filter to track a less noisy mean and covariance. In \cite{ding2012implementation}, the author proposed the feedback mechanism to use the empirical mean but EKF covariance to determine the evolution kernel. At the end of the day, there is no one-fits-all solution. Most of the proposed fix are empirical adjustment. Given the underlying ground truth mean, one would like to stay close to the ground truth as possible, the gist of the fix is that one have to try to compare which mean is closer. Though, for highly non-linear system, empirical mean is most likely to be more reliable than EKF mean, given enough particle. In addition, the author of \cite{Li-Particle-Filtering-2017} claimed that they took their equation (10) and equation (11) from \cite{ding2012implementation} for linearization performed at intermediate flow time. This is probably a typo, as I found no such equation in \cite{ding2012implementation}. {\color{red} HMC for sampling in later follow up work by the author of \cite{Li-Particle-Filtering-2017}.}
 
-    \item \textbf{Kernel-Embedded Particle Flow Filter in an RKHS:\cite{Pulido2019,HuVanLeeuwen2021}:} Instead of moving particles with a certain schedule, we move the particles along the trajectory where the difference between the particle distribution and the target is decreasing as fast as possible. 
+\subsubsection{kernel Based methods}
+\textbf{kernel-embedded particle flow filter in an RK:\cite{Pulido2019,HuVanLeeuwen2021}:} Instead of moving particles with certain schedule, we move the particle along the trajectory where the difference between the particle distribution with the target is decreasing as fast as possible. 
 Define target posterior $\pi(x) := p(x_t | z_{1:t})$ and intermediate density $q_\lambda(x)$ at pseudo-time $\lambda \in [0,1]$. With $q_0 = p(x_t | z_{1:t-1})$ (prior), $q_1 = \pi$ (posterior).
 \begin{equation}
 \frac{dx_\lambda}{d\lambda} = v_\lambda(x_\lambda)
@@ -263,32 +266,69 @@ Choose velocity $v_\lambda$ to minimize KL divergence as fast as possible:
 \begin{equation}
 D_{KL}(q_\lambda \| \pi) = \int q_\lambda(x) \log \frac{q_\lambda(x)}{\pi(x)} dx
 \end{equation}
-we need to formulate the above equation into an optimization problem. However, the intuition of this method is clear: you want to evolve the point along a "straight" direction to the desired point. On the implementation side, 
+we need to formulate the above equation into an optimization problem. But the intuition of this method is clear, you want to evolve the point along a "straight" direction to the desire point. On the implementation side. 
 
-
-
-
-\end{enumerate}
   
 
 
 
-\subsubsection{Optimal Transport Resampling}
-Previously, we have discussed the sample impoverishment problem introduced by low-quality resampling. Therefore, we need to think about how to improve it. Before and after resampling, we are preserving the distribution or at least trying to. We need to come up with the best way to do it. In \cite{reich2013nonparametric}, the author proposed using optimal transport to do the resampling. An easy way to see this is that, before the resampling, we have $\{\omega_i, x_i\}$, and after the resampling, we have $\{\tilde\omega_i, \tilde x_i\}$. If we think of $x_i$ as basis vectors and $\omega_i$ as the coefficients, we are dealing with a linear transformation problem. The transformation will preserve the vector itself, or preserve the mean at least. One should not take this analogy too far. The key benefit is that OT resampling is deterministic instead of stochastic; this will avoid the sampling noise introduced by systematic resampling, therefore removing its contribution to the variance of the particles, namely increasing the quality of covariance estimation. However, this method limits the use of neural network architecture in the filtering algorithm. This method is not differentiable because it relies on solving a discrete Linear Programming (LP) problem to find the optimal transport plan. One just uses LP solvers like the Simplex algorithm or Interior Point methods. These algorithms don't need derivatives of the optimal solution with respect to inputs—they only need the cost matrix (particle distances) and constraints (matching weights). They work by walking along edges of the polytope or navigating through its interior. The key innovation of \cite{corenflos-differentiable-2021} is to introduce entropy regularization so that the optimal coupling $P^*$ is differentiable as a function of the cost matrix, therefore turning the whole resampling operation differentiable. The following is the loss function for the transport cost,
+\subsubsection{Optimal transport resampling}
+Previously, we have discussed the sample impoverishment problem introduced by low quality resampling. Therefore, we need to think about how to improve it. Before and after resampling, we are preserving the distribution or at latest trying to. We need to come up with the best way to do it. In\cite{reich2013nonparametric}, the author proposed to use Optimal transport to do the resampling. A easy way to see this is that, before the resampling, we have $\{\omega_i, x_i\}$, and after the resampling, we have $\{\tilde\omega_i, \tilde x_i\}$. If we think $x_i$ are basis vector and $\omega_i$ are the coefficient, we are dealing with a linear transformation problem. The transformation will preserve the vector itself, or preserve the mean at least. One should not take this analogy too far. The key benefit is that OT resampling is deterministic instead of stochastic, this will avoid the sampling noise introduced by systematic resampling therefore removing its contribution to the variance of the particle, namely increasing the quality of covariance estimation. But this method limit the use of neural network architecture in the filtering algorithm. This method is not differentiable because it relies on solving a discrete Linear Programming (LP) problem to find the optimal transport plan. One just uses LP solvers like the Simplex algorithm or Interior Point methods. These algorithms don't need derivatives of the optimal solution with respect to inputs—they only need the cost matrix (particle distances) and constraints (matching weights). They work by walking along edges of the poly-tope or navigating through its interior. The key innovation of \cite{corenflos-differentiable-2021} is to introduce an entropy regularization so that the optimal coupling $P^*$ is differentiable as function of the cost matrix therefore turning the whole resampling operation differentiable. The following is the loss function for the  transport cost,
 \begin{equation}
     W_{2, \epsilon}^2 (\alpha_N, \beta_N) = \min_{P \in S(a, b)} \sum_{i,j=1}^N p_{i,j} \left( c_{i,j} + \epsilon \log \frac{p_{i,j}}{a_i b_j} \right)
 \end{equation}
-Another key innovation is that by adding the entropy term $\epsilon \log \frac{p_{i,j}}{a_i b_j}$ instead of $\epsilon \log p_{i,j}$, the author made it possible to determine the transport plan from the result of the dual problem, which is $\mathcal{O}(N)$, instead of $\mathcal{O}(N^2)$ like \cite{reich2013nonparametric}, which opens the possibility for modeling more complicated systems with large numbers of particles.
+Another key innovation is that by adding the entropy term $\epsilon \log \frac{p_{i,j}}{a_i b_j}$ instead of $\epsilon \log p_{i,j}$, the author made it possible to determine the transport plan from the result of the dual problem, which is $\mathcal{O}(N)$, instead of $\mathcal{O}(N^2)$ like\cite{reich2013nonparametric}, which open the possibility for modeling more complicated system with large number of particles.
 
-More recently, people have also used neural networks to solve the Monge problem itself \cite{chaudhari2025gradnetot}. GradNetOT exploits Brenier's theorem, which says that under certain conditions (continuous densities, squared Euclidean cost), the Monge and Kantorovich problems are equivalent, and the unique transport map $T(x)$ is the gradient of a convex function $\phi(x)$, where $\phi(x)$ satisfies the Monge-Ampère equation
+More recently, people also used neural network to solve the Monge problem itself \cite{chaudhari2025gradnetot}.GradNetOT exploits Brenier's theorem, which says that under certain conditions (continuous densities, squared Euclidean cost), the Monge and Kantorovich problems are equivalent, and the unique transport map $T(x)$ is the gradient of a convex function $\phi(x)$, where $\phi(x)$ satisfies the Monge-Ampère equation
 \begin{equation}
     p(x) = q(\nabla\varphi(x)) \det(H_{\phi}(x))
 \end{equation}
-where $H_{\phi} = J_T$ is the $N \times N$ positive semi-definite Hessian of $\phi$. However, this architecture is not directly applicable to resampling because the transformation will push the continuous distribution $p(x)$ to the target distribution $q(y)$. We will discuss the possible ways to make it work.
+where $H_{\phi} = J_T$ is the $N \times N$ positive semi-definite Hessian of $\phi$. But this architecture is not directly applicable to resampling because the transformation will push the continuous distribution $p(x)$ to the target distribution $q(y)$. We will discuss the possible way to make it work.
 
-In addition, there are of course alternatives to OT resampling. A notable example is Particle Transformer\cite{Zhu2020TowardsDR,Lee2019SetTransformer}, where we replace the OT resampler with a Transformer mechanism (self-attention) to allow particles to interact with each other and re-weight them differentiably. To make this review more focused, we will not discuss it further. The key idea is that you require the transformer to output particles with equal weights. Therefore, it learns from the data to put particles into the right positions.
+In addition, there are of course alternatives to OT resampling. Notable example is Particle Transformer\cite{Zhu2020TowardsDR,Lee2019SetTransformer}, where we replaces the OT resampler with a Transformer mechanism (self-attention) to interact particles with each other and re-weight them differentiably. To make this review more focused, we will not discuss it further. The key idea is that you demand the transformer to output particles with equal weights. Therefore, it learn from the data to put particles into the right positions.
 
-Optimal transport resampling outperforms in certain scenarios, but its real power lies in that it makes the entire filtering architecture differentiable. One can easily use neural networks to model the dynamics or observation, which has been extensively discussed in \cite{chen2023overview}. I think there is no point in making a comprehensive review here as it is problem-specific and requires careful testing; there is no one-fits-all solution. This field is exploding and there are so many different architectures that one can try. As pointed out in Bonus Question 2, it would be nice if we didn't have to solve the optimal transport problem repeatedly, because each resampling is a different set of initial particles and weights. One way to deal with this problem is amortized optimization\cite{amos2022amortized}, where you train a model to predict solutions to optimization problems rather than solving each problem from scratch. Its application to the OT problem is known as Meta-OT \cite{amos2023meta}. The idea is actually very easy: when we run a filtering algorithm, we need to solve the resampling many times. Each time, we will have a transport schedule from the dual problem. We simply run the filter many times and record what kind of transport plan we will run into in such problems. Then we train a neural network to make predictions. 
+Optimal transport resampling out-perform in certain scenarios but it's real power lies in that it makes it possible for entire filtering architecture differentiable. Because one can easily use neural network to model the dynamics or observation, which has been extensively discussed in \cite{chen2023overview}. I think there is no point to make comprehensive review here as it is problem specific and require careful testing, there is no one-fits-all solution. This field is exploding and there are so many different architectures that one can try. As pointed out in the Bonus question 2, it will be nice that we don't have to solve the optimal transport problem repeatedly, because each resampling is a different set of initial particle and weights. One way to deal with this problem is amortized optimization\cite{amos2022amortized}, where you train a model to predict solutions to optimization problems rather than solving each problem from scratch. It's application to OT problem is known as Meta-OT \cite{amos2023meta}. The idea is actually very easy, when we run a filtering algorithm, we need to solve the resampling a lot of times. Each time, we will have a transport schedule, from the dual problem. We simply run filter a lot of times and record what kind of transport plan we will run into in such problems. Then we train neural network to make predictions.  
+
+\subsection{Hamiltonian Monte Carlo}
+The whole point of using optimal transport, specifically its differentiable implementation, is to make sure the entire process is differentiable. To make our discussion more focused, our filter will be the invertible particle flow particle filter \cite{Li-Particle-Filtering-2017}. Without a differentiable resampling algorithm, we are forced to use Markov Chain Monte Carlo \cite{Andrieu2010}. The idea is very simple, remember our goal is to find the best parameter set ${\theta}$, such that negative log-likelihood is minimized. If the system is not fully differentiable, then we can use random walk to propose moves in the parameter space $\theta_{i+1}=\theta_{i}+ w$, where $w$ is a random vector in the parameter space. As a result, we will get a new loss function $L(\theta_{i+1})$, we simply compute the difference $L(\theta_{i+1})-L(\theta_{i})=\Delta L$, if $\Delta L<0$, then we should accept the move. It is straightforward to incorporate prior distribution for $\theta$. The question is what to do when $\Delta L > 0$. Simply rejecting all uphill moves would trap the chain at the nearest local minimum. Instead, the Metropolis-Hastings algorithm\cite{Metropolis1953} accepts the proposed move with probability
+\begin{equation}
+    \alpha = \min\!\left(1,\; e^{-\Delta L}\right) = \min\!\left(1,\; \frac{p(\theta_{i+1} \mid z_{1:T})}{p(\theta_i \mid z_{1:T})}\right)
+\end{equation}
+where the second equality follows from $\Delta L = -\Delta \log p(\theta \mid z_{1:T})$. Even moves that increase the loss are accepted with probability $e^{-\Delta L}$, which allows the chain to escape shallow local optima. This acceptance rule guarantees detailed balance: if we define the transition probability from state $\theta_i$ to $\theta_j$ as $T(i\to j) = q(j|i)\,\alpha(i\to j)$, where $q$ is the proposal distribution, then $p(\theta_i) T(i\to j) = p(\theta_j) T(j\to i)$. Detailed balance in turn guarantees that the Markov chain converges to the correct target distribution, which in our case is the posterior $p(\theta \mid z_{1:T})$\cite{Neal-2012-MCMC-Hamiltonian-Dynamics-ARXIV-1206-1901v1}.
+
+The fundamental limitation of this random-walk Metropolis approach is that the proposal $w$ is independent of the local geometry of the posterior. In a $d$-dimensional parameter space, a randomly chosen direction is almost surely nearly orthogonal to any special direction (such as the gradient or the principal axes of the posterior). To maintain a reasonable acceptance rate, the step size must shrink as $\mathcal{O}(d^{-1/2})$, which means the chain explores the posterior very slowly in high dimensions. This motivates using gradient information to construct informed proposals.
+
+In the case of a fully differentiable pipeline, we can use Hamiltonian Monte Carlo\cite{Duane1987,Neal-2012-MCMC-Hamiltonian-Dynamics-ARXIV-1206-1901v1} to explore the parameter space. The idea is borrowed from classical mechanics. We introduce an auxiliary momentum variable $\v p$ of the same dimension as $\v \theta$ and define the Hamiltonian as the total energy,
+\begin{equation}
+    H(\v p,\v \theta)=\underbrace{\frac{1}{2} \v p^\top M^{-1} \v p}_{\text{kinetic energy } K(\v p)} + \underbrace{U(\v \theta)}_{\text{potential energy}}
+\end{equation}
+where $U(\v \theta) = -\log p(\v \theta \mid z_{1:T})$ is the negative log-posterior and $M$ is a mass matrix (often set to the identity). The corresponding Hamilton's equations,
+\begin{equation}
+    \frac{d\v \theta}{dt} = \frac{\partial H}{\partial \v p} = M^{-1}\v p, \qquad \frac{d\v p}{dt} = -\frac{\partial H}{\partial \v \theta} = -\nabla_{\v \theta} U(\v \theta)
+\end{equation}
+describe trajectories along which the total energy $H$ is exactly conserved. In practice, we integrate these equations numerically using the \textit{leapfrog} (St\"{o}rmer-Verlet) integrator: half-step momentum update, full-step position update, half-step momentum update. The leapfrog scheme is symplectic, meaning it preserves phase-space volume and approximately conserves the Hamiltonian up to discretization error.
+
+Each HMC iteration proceeds as follows. First, sample a fresh momentum $\v p \sim \mathcal{N}(0, M)$. Then simulate $L$ leapfrog steps starting from $(\v \theta_0, \v p_0)$ to obtain a proposal $(\v \theta^*, \v p^*)$. Finally, accept or reject with the Metropolis criterion,
+\begin{equation}
+    \alpha = \min\!\left(1,\; e^{-(H(\v p^*,\v \theta^*) - H(\v p_0,\v \theta_0))}\right)
+\end{equation}
+Because the leapfrog integrator approximately conserves $H$, the energy difference $\Delta H \approx 0$, and the acceptance probability is close to 1 even for proposals that are far from the current point in parameter space. This is the key advantage over random-walk Metropolis: the momentum variable carries the state along the energy contour, allowing large, directed moves through parameter space that would be extremely unlikely under a random walk. The price we pay is that each step requires computing $\nabla_{\v \theta} U$, which means differentiating through the entire filtering pipeline.
+
+\subsubsection{Connection and difference with SGD}
+Both Hamiltonian Monte Carlo and stochastic gradient descent use the gradient $\nabla_{\v \theta} U(\v \theta)$, but for fundamentally different purposes. SGD performs point estimation: it seeks a single best parameter $\v\theta^*$ (MLE or MAP) by iterating $\v \theta \leftarrow \v \theta - \eta \nabla U$. Each step uses a different random seed for the particle filter, making the gradient stochastic, but SGD tolerates this because the noise averages out over hundreds of steps. SGD always moves in the gradient direction, there is no accept/reject step.
+
+HMC, by contrast, performs posterior sampling: it characterizes the full distribution $p(\v \theta \mid z_{1:T})$, not just the mode. HMC requires a \textit{fixed} random seed for the particle filter so that the energy landscape $U(\v \theta)$ is a deterministic function, because the leapfrog integrator simulates Hamiltonian dynamics and assumes the gradient is a smooth, deterministic force field. If the landscape changed randomly at each evaluation, the trajectory would see contradictory forces and diverge.
+
+This leads to opposite gradient requirements. SGD needs gradients that are \textit{correct on average} (unbiased), and can tolerate high variance. HMC needs gradients that are \textit{smooth at every point}, and a single gradient cliff (where $|\nabla U|$ is enormous) can cause the leapfrog trajectory to explode. In the zero-temperature limit (infinitely sharp posterior concentrated at the mode), HMC's trajectory would trace out the same path as gradient descent. One can think of SGD as HMC without momentum coherence and without the acceptance correction that ensures the correct stationary distribution.
+
+\subsubsection{Implications for differentiable particle filters}
+When the filtering pipeline is fully differentiable (via soft or OT resampling), SGD or Adam can efficiently find the MAP point. When full posterior uncertainty is needed, HMC requires smooth gradients, and the choice of resampling strategy and filter type becomes critical. As we will see in Section 2.5, the tension between gradient quality (smoothness) and gradient information (low bias) is what drives the design of the differentiable particle filter pipeline.
+
+
+
+
+
+\subsection{Some further thoughts}
 
 \newpage
 \section{Problems and experiments}
@@ -314,7 +354,7 @@ Parameters:
 \item $Q = BB^T$: Process noise covariance
 \item $R = DD^T$: Observation noise covariance
 \end{itemize}
-
+This is the simplest benchmark model for filtering. 
 
 
 \item \textbf{Acoustic Tracking Full Model (4 targets, 25 sensors)}
@@ -331,8 +371,11 @@ Parameters:
 \item $V_{\text{true}} = \frac{1}{20} \text{diag}(V_{\text{single}}, \ldots, V_{\text{single}})$ (4 blocks)
 \item $V_{\text{filter}} = \text{diag}(\begin{bmatrix} 3 & 0 & 0.1 & 0 \\ 0 & 3 & 0 & 0.1 \\ 0.1 & 0 & 0.03 & 0 \\ 0 & 0.1 & 0 & 0.03 \end{bmatrix}, \ldots)$ (4 blocks)
 \item $\Psi = 10, d_0 = 0.1, \sigma_w = 0.1$
-\item Sensors: $5 \times 5$ grid on $[0, 40] \times [0, 40]$
+\item Sensors: $5 \times 5$ grid on $[0, 40] \times [0, 40]$. Basically evenly spread out in the whole area. 
 \end{itemize}
+
+
+
 
 \item \textbf{Range-Bearing Model}
 
@@ -404,8 +447,31 @@ Parameters:
 \item $\sigma_{\text{obs}} = 1.0$: Observation noise std
 \item $R = I_{n_y}$, where $n_y = 250$ (25\% observed)
 \end{itemize}
+\item Kitagawa Model(Model from \cite{Andrieu2010})
+\begin{equation}
+\begin{split}
+X_n &= \frac{X_{n-1}}{2} + 25 \frac{X_{n-1}}{1 + X_{n-1}^2} + 8 \cos(1.2n) + V_n \\
+Y_n &= \frac{X_n^2}{20} + W_n \\
+\end{split}
+\end{equation}
+where $ X_1 \sim \mathcal{N}(0, 5)$ and 
+$ V_n \sim \mathcal{N}(0, \sigma_V^2)$ \\
+$ W_n \sim \mathcal{N}(0, \sigma_W^2)$, where $\theta=(\sigma_v,\sigma_W)$ is our parameter. We only need to estimate the noise scale while the observation and dynamics are fixed.
+
+
 
 \end{enumerate}
+\subsection{Code organization and testing strategy}
+\subsubsection{Configuration management}
+We use Hydra to manage the configuration with yaml files. Hydra is a framework that allows flexible management of the configurations. We start with a default base configuration for model and filters. In practice, we can override the default configuration with new configurations easily and the output file will automatically save a copy of the overwritten version of the configuration. In this way, we can easily create new experiments while keep track of the parameters corresponding to individual experiment outcome.
+\subsubsection{Code base organization}
+
+\subsubsection{Testing}
+
+
+
+
+
 
 \newpage
 \subsection{Part I}
@@ -419,7 +485,7 @@ D = \begin{pmatrix} 10^{-8} & 0 \\ 0 & 10^{-8} \end{pmatrix} \\
 \mu_0 &= \begin{pmatrix} 0 \\ 0 \end{pmatrix}, \quad
 \Sigma_0 = \begin{pmatrix} 1 & 0 \\ 0 & 1 \end{pmatrix}
 \end{align*}
-where the observation noise is of the order $10^{-8}$, which leads to $R \sim 10^{-16}$.
+where the observation noise is of the order $10^{-8}$, which led to $R \sim 10^-{16}$.
 \begin{table}[H]
 \centering
 \caption{Comparison of Kalman Filter with Joseph Form vs. Standard Update}
@@ -443,26 +509,26 @@ Condition Number & $1.0$ (all timesteps) & $\infty$ (all timesteps) \\
 \hline
 \end{tabular}
 \end{table}
-Small observation noise will lead to numerical instability and an extremely large condition number in the updated covariance. In higher dimensions, small noise is not the only such scenario, but the argument for why the Joseph form will restore numerical stability stays the same. Let us first take a look at what small $R$ in 1-D looks like. With,
+Small observation noise will lead to numerical instability and extremely large condition number in the updated covariance. In higher dimension, small noise is not the only such scenario but the argument for why Joseph form will restore numerical stability stays the same. Let us first take a look at what small $R$ in 1-d looks like. With,
 \begin{equation}
    \lim_{R\rightarrow 0} K =  \lim_{R\rightarrow 0} \frac{P^- h}{h^2 P^- + R} =  \frac{1}{h}
 \end{equation}
-With the standard update: $P^+ = (1 - K h) P^- \approx 0$. However, with the Joseph form,
+With the standard update: $P^+ = (1 - K h) P^- \approx 0$. But with Joseph form, 
 \begin{equation}
     P^+ = (I - K h) P^- (I - K h) + K^2 R \sim \frac{R}{h^2}
 \end{equation}
-we see that $\frac{R}{h^2}$ basically has condition number one because the noise scale is an overall factor. This will legitimately restore numerical stability in higher dimensions due to $K^2 R \rightarrow K R K^T$. Let $H = I$, $R = \epsilon I$, $P^- = I$. Then $K \approx I$. The condition number for the residue is one.
+we have see that $\frac{R}{h^2}$ is basically conditional number one because the noise scale is overall factor. This will legitimately restore numerical instability in higher dimension due to $k^2 R \rightarrow K R K^T$. Let $H = I$, $R = \epsilon I$, $P^- = I$. Then $K \approx I$. The condition number for the residue is one.
 
 
 
 
-\subsubsection{KF, EKF, UKF Broken by Strongly Nonlinear Model}
+\subsubsection{KF, EKF, UKF broken by strong nonlinear model}
 We first use the Stochastic Volatility model,
 \begin{align}
 x_{t+1} &= 0.91 x_t +  w_t, \quad w_t \sim \mathcal{N}(0, 1) \\
 y_t &= 0.5 \exp(x_t/2) \cdot v_t, \quad v_t \sim \mathcal{N}(0, 1)
 \end{align}
-with the initial condition drawn from $N(0,\frac{\sigma^2}{1-\alpha^2})$, where $\alpha=0.91, \sigma=1$. The result shows that these two filters, though designed to handle non-linear problems, are completely broken by the Stochastic Volatility model. This is due to the fact that when trying to linearize the observation model, the noise term ensures that the mean is always zero. Even though we gave the filter an initial kick, it eventually converged to zero mean. Another issue is that the variance received zero update due to zero $h$. In addition, I also did an experiment on the range-bearing model,
+with the initial condition drawn from $N(0,\frac{\sigma^2}{1-\alpha^2})$, where $\alpha=0.91, \sigma=1$.  The result shows that these two filter, though designed to handle non-linear problems, are completely broken by the Stochastic Volatility model. This is due to the fact that when trying to linearize the observation model, the noise term made sure that the mean is always zero. Even though we gave the filer an initial kick, it eventually converged to the zero mean. Another issue is that the variance received zero update due to zero $h$. In addition, I also did experiment on range bearing model,
 
 
 \textbf{State Space:} $\mathbf{x}_t = [x_t, y_t]^\top \in \mathbb{R}^2$ (2D position)
@@ -516,14 +582,14 @@ where $r_t = \sqrt{(x_t - x_s)^2 + (y_t - y_s)^2}$ is the range.
 \includegraphics[width=0.8\linewidth]{rb_uekf.png}
     \caption{EKF and UKF result on range bearing model}
 \end{figure}
-we see that the range-bearing model works with UKF and EKF because we can get a reasonable Jacobian from the observation model.
+we see that range bearing model works with UKF and EKF because we get can get reasonable Jacobian from the observation model.
 
 
 
 
 
 
-\subsubsection{Particle Filter and Particle Degeneracy}
+\subsubsection{Particle filter and particle degeneracy}
 
 
 \begin{figure}[H]
@@ -540,12 +606,12 @@ we see that the range-bearing model works with UKF and EKF because we can get a 
     \caption{Effective sample size a function of time}
     \label{fig:placeholder}
 \end{figure}
-The red lines are the times where we did resampling. It turns out that the range-bearing model had very bad initialization, but the particle filter somehow managed to increase sample size at later times. This is likely due to the fact that particles were moved into the right position, so even with very few particles, it can track the distribution very well. However, a depleted sample size means that uncertainty estimation is unreliable. 
+The red lines are the times where we did resampling. It turns out that range bearing had very bad initialization but the particle filter somehow managed to increased sample size at later time. This is likely due to that particles were moved into the right position so even with very few particles, it can track the distribution very well. But a depleted sample size means that uncertainty estimation is unreliable. 
 
 \begin{figure}[H]
     \centering
 \includegraphics[width=0.8\linewidth]{particle3.png}
-    \caption{Weight distribution at three different times. It further demonstrates that bad initialization for the range-bearing model had collapsed weight distribution from the very beginning}
+    \caption{Weight distribution at three different time. It further demonstrate that bad initialization for range bearing model had collapsed weight distribution from the very beginning}
     \label{fig:placeholder}
 \end{figure}
 
@@ -557,8 +623,8 @@ The red lines are the times where we did resampling. It turns out that the range
     \label{fig:placeholder}
 \end{figure}
 
-\subsubsection{EDH (LEDH) Flow and Filter}
-My flow filter and invertible flow particle filter did not work for the acoustic tracking model or even the simplified acoustic tracking model. I could not reproduce the result from \cite{Li-Particle-Filtering-2017}. However, it works for the range-bearing model, so I include the performance for the range-bearing model here. It is similar to Table 1 from \cite{Li-Particle-Filtering-2017}. The performance of PF is the baseline, and all the flow and invertible filters outperform the Bootstrap particle filter. In addition, LEDH invertible has the best performance in terms of accuracy, but it is the slowest among all the filters.
+\subsubsection{EDH (LEDH) flow and filter}
+My flow filter and invertible flow particle filter did not work for acoustic tracking model or even simplified acoustic tracking model. I could not reproduce the result from \cite{Li-Particle-Filtering-2017}. But It works for range bearing model, so I include the performance for the range bearing model here. It is similar to the table 1 from \cite{Li-Particle-Filtering-2017}. The performance of PF is the baseline and all the flow and invertible filter will outperform Bootstrap particle filer. In addition, LEDH invertible has the best performance in terms of the accuracy but it is the slowest among all the filter.
 
 
 
@@ -596,30 +662,155 @@ LEDH Invertible   & 500  & 0.37 & 100 \\
 
 
 
-\subsubsection{Matrix Kernel Preventing Collapse}
+\subsubsection{Matrix kernel preventing collapse}
 \begin{figure}[H]
     \centering
 \includegraphics[width=0.5\linewidth]{figure3_reproduction.png}
-    \caption{We can see clearly that by switching to a matrix kernel, $x_{20}$ no longer collapses into one point}
+    \caption{We can see clearly that by switching to matrix kernel, $x_{20}$ no longer collapsed into one point}
     \label{fig:placeholder}
 \end{figure}
 \newpage
 \subsection{Part II}
-\subsubsection{Stochastic Flow}
+\subsubsection{Stochastic flow}
 
-My stochastic flow filter is not working well even for the Kalman filter, and I have not yet been able to find out what is going on. It only works when the noise is set to zero. 
+The stochastic particle flow filter of \cite{dai-new-2021} generalises the deterministic EDH flow from an ODE to a stochastic differential equation:
+\[
+  d\v{x} = \bigl[A(\lambda)\v{x} + b(\lambda)\bigr]\,d\lambda + \sqrt{Q}\,dW_\lambda,
+\]
+where $Q = \operatorname{diag}(q_1,\ldots,q_d)$ is a diagonal diffusion matrix. The drift includes a score correction (Corollary~2.1 of \cite{dai-new-2021}) so that the posterior is exact in the continuous-time limit for any choice of $Q$.
+
+\paragraph{Local correction for nonlinear observations.}
+The drift parameters $A(\lambda)$ and $b(\lambda)$ are derived under the assumption of a linear observation model $h(\v{x}) = H\v{x}$. In the pure global formulation---where $H$ is computed once at the prior mean $\bar\eta_0$ and the observation $z$ is used directly---this linear model is self-consistent and no additional correction is needed.
+
+However, in the re-linearisation framework (as in LEDH), one expands $h(\v{x})$ at an intermediate point $\eta$ during the flow. The first-order Taylor expansion
+\[
+  h(\v{x}) \approx h(\eta) + H(\eta)(\v{x} - \eta) = H(\eta)\v{x} + \underbrace{\bigl[h(\eta) - H(\eta)\,\eta\bigr]}_{e},
+\]
+naturally produces a zeroth-order residual $e = h(\eta) - H(\eta)\,\eta$ that accounts for the nonlinearity. In our local correction variant, we borrow this idea for the global formulation: compute $e_0 = h(\bar\eta_0) - H\bar\eta_0$ once, then replace $z$ with $z_{\mathrm{corr}} = z - e_0$ in both the deterministic drift and the score correction. For linear observations $e_0 = 0$ and the two formulations coincide.
+
+Empirically, this correction is essential for nonlinear models. On the range-bearing model, the uncorrected stochastic EDH diverges, while adding the local correction makes the filter work. The correction costs only one additional evaluation of $h(\bar\eta_0)$ per time step.
+
+\paragraph{Stiffness and the $\lambda$ schedule.}
+The drift matrix $A(\lambda)$ has eigenvalues that are most extreme near $\lambda = 0$, where the precision $M(\lambda) = P_0^{-1} + \lambda\,H^\top R^{-1} H$ is dominated by the anisotropic prior $P_0^{-1}$. As $\lambda \to 1$, measurement information regularises $M$ and the stiffness diminishes. With a sufficiently fine uniform grid (small $d\lambda$), the Euler--Maruyama integrator stays within the stability region even near $\lambda = 0$---a fine uniform schedule is not stressed by the stiff system.
+
+In practice, one can do better with a geometric (exponential) schedule: step sizes $\varepsilon_j = \varepsilon_1 q^{j-1}$ with ratio $q = 1.2$, which concentrates steps near $\lambda = 0$ where they are most needed and uses larger steps near $\lambda = 1$ where the system is well-conditioned. This simple engineering choice already resolves the practical stiffness issue without solving any optimisation problem.
+
+The companion paper \cite{dai-stiffness-mitigation-2021} goes further, proposing an optimal homotopy schedule $\beta^{*}(\lambda)$ that minimises the nuclear-norm condition number of $M$ via a boundary-value problem (BVP). We attempted to reproduce this but found both a sign error in the key formula and fundamental numerical issues.
+
+\paragraph{Setup.}
+Following \cite{dai-stiffness-mitigation-2021} (Remark~3.2), define the precision matrix
+\[
+  M(\beta) = P_0^{-1} + \beta\, H^\top R^{-1} H,
+\]
+with shorthands $J_{\mathrm{prior}} = P_0^{-1}$, $J_{\mathrm{meas}} = H^\top R^{-1} H$, and $\partial M / \partial\beta = J_{\mathrm{meas}}$.
+The nuclear-norm condition number is
+\[
+  \kappa_\nu(M) = \|M\|_\nu \, \|M^{-1}\|_\nu = \operatorname{tr}(M)\,\operatorname{tr}(M^{-1}),
+\]
+and the optimal schedule solves the BVP (Theorem~3.1, Eqs~26--27):
+\[
+  \ddot\beta = \mu\,\frac{\partial\kappa_\nu}{\partial\beta}, \qquad \beta(0)=0,\quad \beta(1)=1.
+\]
+
+\paragraph{Correct derivative of $\kappa_\nu$.}
+By the product rule and the matrix identity $dA^{-1}/d\theta = -A^{-1}(dA/d\theta)A^{-1}$ (Lemma~A.1 of the paper):
+\begin{align}
+  \frac{\partial\kappa_\nu}{\partial\beta}
+  &= \frac{\partial\operatorname{tr}(M)}{\partial\beta}\,\operatorname{tr}(M^{-1})
+     + \operatorname{tr}(M)\,\frac{\partial\operatorname{tr}(M^{-1})}{\partial\beta} \nonumber\\
+  &= \operatorname{tr}(J_{\mathrm{meas}})\,\operatorname{tr}(M^{-1})
+     \;\mathbf{-}\; \operatorname{tr}(M)\,\operatorname{tr}(M^{-1} J_{\mathrm{meas}}\, M^{-1}).
+  \label{eq:dkappa_correct}
+\end{align}
+The second term carries a \textbf{minus} sign. However, Eq~(28) of \cite{dai-stiffness-mitigation-2021}, after translating $\nabla_x\nabla_x^\top\!\log h = -J_{\mathrm{meas}}$, yields a \textbf{plus} sign instead.
+
+\paragraph{Verification.}
+We verify the sign in two independent ways.
+
+\emph{Finite differences.}
+Using central differences $\bigl(f(\beta+\varepsilon)-f(\beta-\varepsilon)\bigr)/(2\varepsilon)$ with $\varepsilon=10^{-7}$ and the paper's numerical example (Section~4), the finite-difference values match the minus-sign formula to relative error $<10^{-8}$ at every test point.
+
+\begin{table}[H]
+\centering
+\caption{Finite-difference verification of $\partial\kappa_\nu/\partial\beta$}
+\begin{tabular}{rrrrl}
+\toprule
+$\beta$ & Finite diff & Minus sign & Plus sign & FD matches \\
+\midrule
+0.00 & $-559{,}000.44$ & $-559{,}000.43$ & $+561{,}729.57$ & minus \\
+0.01 & $-3{,}762.72$ & $-3{,}762.72$ & $+3{,}991.69$ & minus \\
+0.10 & $-41.83$ & $-41.83$ & $+71.20$ & minus \\
+0.50 & $-0.31$ & $-0.31$ & $+9.59$ & minus \\
+1.00 & $+0.59$ & $+0.59$ & $+5.55$ & minus \\
+\bottomrule
+\end{tabular}
+\label{tab:fd_verification}
+\end{table}
+
+\emph{Isotropic sanity check.}
+For $M=(c+\beta)I$ with $J_{\mathrm{meas}}=I$, the condition number is $\kappa_\nu = n^2$ (constant), so $\partial\kappa_\nu/\partial\beta=0$. The minus-sign formula gives $n/(c+\beta) - n/(c+\beta)=0$, while the plus-sign formula gives $2n/(c+\beta)\neq 0$---incorrectly predicting a nonzero derivative for a constant function.
+
+\paragraph{BVP analysis.}
+Using the paper's parameters ($P_0 = \operatorname{diag}(1000,2)$, sensors at $(\pm 3.5, 0)$, $R=0.04I$, $\mu=0.2$):
+
+\begin{itemize}
+  \item \textbf{Paper sign (+):} Both terms in the plus-sign formula are strictly positive (traces of PSD matrices with PD $M$), so $\ddot\beta > 0$ everywhere and $\beta$ is strictly convex. A shooting scan over $\dot\beta(0) \in [-1, 2]$ gives $\beta(1) \geq 1.62$ for all initial velocities tested. The BVP has no solution.
+
+  \item \textbf{Correct sign ($-$):} $|\partial\kappa_\nu/\partial\beta| \approx 559{,}000$ at $\beta=0$ (caused by 500:1 anisotropy in $P_0$), making the raw BVP extremely stiff and intractable for shooting.
+\end{itemize}
+
+\paragraph{Log-$\kappa$ fix.}
+Replacing $\kappa_\nu$ with $\log\kappa_\nu$ in the objective gives
+\[
+  \ddot\beta = \mu\,\frac{\partial\log\kappa_\nu}{\partial\beta}
+  = \mu\,\frac{1}{\kappa_\nu}\frac{\partial\kappa_\nu}{\partial\beta}.
+\]
+At $\beta=0$: $\kappa_\nu = 502$, so the driving term drops from $559{,}000$ to $\approx 1{,}114$, making the BVP well-conditioned. Bisection shooting converges to $\dot\beta(0)^{*}=1.6947$, yielding $\beta(1) = 1.0000000$.
+
+\paragraph{The resulting schedule is nearly linear.}
+The optimal schedule from the $\log\kappa_\nu$ BVP deviates from linear by at most $\max|\beta^{*}-\lambda| = 0.0195$. Compare with the paper's Figure~2(b), which shows $\max|\beta^{*}-\lambda|\approx 0.14$ (seven times larger). The condition-number reduction is correspondingly modest:
+
+\begin{table}[H]
+\centering
+\caption{Condition number comparison: linear vs.\ optimal schedule}
+\begin{tabular}{rccc}
+\toprule
+$\lambda$ & $\kappa_\nu$(linear) & $\kappa_\nu$(optimal) & ratio \\
+\midrule
+0.01 & 43.3 & 31.6 & 0.73 \\
+0.05 & 11.1 & 9.4  & 0.85 \\
+0.10 & 6.9  & 6.3  & 0.91 \\
+0.50 & 4.0  & 4.0  & 1.00 \\
+\bottomrule
+\end{tabular}
+\label{tab:kappa_comparison}
+\end{table}
+
+This is not sufficient to reproduce the paper's Table~1 ($\operatorname{tr}(P)$: $1535 \to 1028$, a 33\% reduction).
+
+\paragraph{Summary.}
+\begin{enumerate}
+  \item Eq~(28) of \cite{dai-stiffness-mitigation-2021} has a sign error: the second term should be minus, not plus.
+  \item The plus-sign BVP has no solution for the paper's own numerical example.
+  \item The correct minus-sign BVP is numerically intractable due to $O(10^5)$ derivatives near $\beta=0$.
+  \item Replacing $\kappa_\nu$ with $\log\kappa_\nu$ makes the BVP solvable but yields a nearly linear schedule ($\max|\beta^{*}-\lambda|=0.02$), insufficient to reproduce the paper's reported results.
+  \item The paper's Figure~2 and Table~1 show a much more aggressive schedule that cannot be obtained from the nuclear-norm condition number as described in Eq~(28), with either sign. The authors likely used a different implementation than what the equation describes.
+\end{enumerate}
+
+Our code (\texttt{stochastic\_edh.py}) uses the $\log\kappa_\nu$ formulation with the correct minus sign, a Radau stiff solver, and grid-scan bracketing.
+
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\linewidth]{sde_kalman.png}
-    \caption{The current version of SDE filter, when diffusion scale is set to $0.001$}
-    \label{fig:placeholder}
+    \caption{The current version of the SDE filter, when diffusion scale is set to $0.001$}
+    \label{fig:sde_kalman}
 \end{figure}
 
 
 
 
 
-\subsubsection{Soft Resampling and OT Resampling}
+\subsubsection{Soft resampling and OT resampling}
 
 \begin{table}[htbp]
 \centering
@@ -645,19 +836,133 @@ Soft            & $\alpha=0.9$   & 1.175 & $-435.56$ & 1.27  & 2.54  & 0.368 \\
 \end{tabular}
 \label{tab:stochastic_volatility_resampling}
 \end{table}
-Here I only have the results at their face value, so I will not speculate why the results turned out this way. 
+Here I only have the result on their face value, so I will not speculate why the result turn out this way. 
 
 
+\subsection{Differentiable particle filter}
 
-\newpage
-\section{A Few Words of Reflection}
-This is a well-structured test, and I learned a lot from doing the background research, especially the knowledge I gained about Optimal Transport, which might actually turn out to be useful in the future. I now intend to learn about other applications of filtering and experiment with them more.
+The goal is to build a differentiable particle filter on kitagawa model,
+\begin{equation}
+\begin{split}
+X_n &= \frac{X_{n-1}}{2} + 25 \frac{X_{n-1}}{1 + X_{n-1}^2} + 8 \cos(1.2n) + V_n \\
+Y_n &= \frac{X_n^2}{20} + W_n \\
+\end{split}
+\end{equation}
+where $ X_1 \sim \mathcal{N}(0, 5)$ and 
+$ V_n \sim \mathcal{N}(0, \sigma_V^2)$.
+$ W_n \sim \mathcal{N}(0, \sigma_W^2)$, where $\theta=(\sigma_v,\sigma_W)$ is our parameter. One can clearly see that the key difficulty is the observation model, not because it is non-linear but it is bimodal. This means the observation is basically useless if we just plug in the filter we have used so far. Therefore, we take a three step approach. 
+\begin{enumerate}
+    \item We build a differentiable particle filter that works for easier model, this is mostly test the pipeline of differentiable particle filter 
+    \item we reproduce the PMCMC paper
+    \item we improve the ledh invertible particle flow particle filter and plug it into the dpf pipeline.
+\end{enumerate}
+We now discuss each step in detail. Step 1 requires building the differentiable pipeline itself and choosing between optimization (SGD) and sampling (HMC). Step 2 provides a gradient-free benchmark via PMCMC\cite{Andrieu2010}. Step 3 introduces Particle Gibbs to overcome the limitations discovered in steps 1 and 2.
 
-I didn't completely finish the test. I only included the experiments that directly relate to the question, even though I ran quite a few others. I simply ran out of time to write up the results properly.
-I appreciate the experience. It made me realize that I need to manage my time better when navigating multiple commitments. I put too much focus on reading background material and exploring ideas for using neural networks to improve filtering. In the end, I didn't have enough time left to debug the code, complete the experiments, or write tests that would actually catch numerical instability. During my academic years, I never had to write formal tests for my code, so this was by far the biggest challenge I've faced. My original plan was to first make things work, then go back and add tests to check the edge cases. Maybe that approach just doesn't work well when I'm adding tests after the fact.
-I will continue working on this project and force myself to write proper tests to debug the invertible flow code. Right now, I still cannot reproduce the results from \cite{Li-Particle-Filtering-2017}, because the acoustic tracking model breaks all of my EDH flow, EDH invertible, and their local counterparts.
+\subsubsection{SGD-based parameter estimation (Step 1)}
+The simplest way to test the differentiable particle filter pipeline is to use gradient-based optimization. Given the differentiable pipeline, we treat the negative log-posterior as a loss function and minimize it with Adam or SGD,
+\begin{equation}
+    \v \theta \leftarrow \v \theta - \eta \,\nabla_{\v \theta}\!\left[-\log p(z_{1:T} \mid \v\theta) - \log p(\v \theta)\right]
+\end{equation}
+where $\log p(z_{1:T}|\v\theta)$ is the log marginal likelihood from the particle filter. Each optimization step uses a different random seed for the particle filter, making the gradient stochastic, but SGD handles this naturally by averaging over hundreds of steps. This is the approach of PF-net\cite{Jonschkowski2018}, which introduced soft resampling specifically to give nonzero gradient through the resampling step. Corenflos et al.\cite{corenflos-differentiable-2021} later used OT resampling for the same purpose.
 
-Thank you for giving me this opportunity to do the test!
+SGD-based estimation finds the MAP point efficiently but provides no uncertainty quantification, it returns a single best estimate $\v\theta^*$ without characterizing how confident we should be in that estimate. We start with easier models (linear-Gaussian) to verify the pipeline works, then move to Kitagawa.
+
+{\color{red} Add MAP estimation results: convergence curves for linear-Gaussian and Kitagawa models, compare BPF vs LEDH.}
+
+\subsubsection{HMC through the particle filter (Step 1)}
+For full posterior estimation (uncertainty quantification), we use HMC on a deterministic likelihood surface by fixing the particle filter seed. This gives us the posterior distribution $p(\v \theta \mid z_{1:T})$, not just the mode. However, the particle filter's log-likelihood surface has features that make HMC challenging.
+
+\textbf{The differentiability-bias trade-off.} A common claim is that systematic resampling is ``not differentiable'' and therefore cannot be used in differentiable particle filters. This is misleading. Systematic resampling consists of computing cumulative weights, generating uniform points, finding indices via searchsorted, and gathering particles. The searchsorted step maps continuous weights to integer indices, a piecewise-constant function, so
+$$\frac{\partial I_k}{\partial w_j} = 0 \quad \text{almost everywhere}$$
+The code runs fine; TensorFlow computes a gradient through this, it is just zero. The gradient carries no information about how the resampling depends on weights, but there is no crash or error. Using \texttt{stop\_gradient} explicitly cuts all gradient through resampling, the effect is almost identical to the natural zero-gradient but more controlled.
+
+Soft resampling replaces the discrete index selection with a continuous relaxation. The weights are blended with a uniform distribution,
+\begin{equation}
+    \tilde{w}_i = \alpha \, w_i + (1-\alpha)/N
+\end{equation}
+so that $\partial \tilde{w}_i / \partial w_i = \alpha \neq 0$. OT Sinkhorn produces a differentiable transport plan $T_{ij}$ so that $x_i' = \sum_j T_{ij} x_j$. Both approaches give nonzero gradients through resampling, but at a cost.
+
+The critical distinction is that HMC is not SGD. SGD averages over many noisy gradient steps and tolerates high variance. HMC's leapfrog integrator simulates Hamiltonian dynamics and assumes the gradient is a smooth, deterministic force field. With \texttt{stop\_gradient}, the gradient is biased but smooth, giving a valid (if slightly wrong) Hamiltonian for the leapfrog to simulate. With soft resampling, the gradient through resampling of $N$ particles has high variance, causing leapfrog trajectories to accumulate noise at each step and diverge into extreme parameter regions. Therefore, soft or OT resampling is preferred for SGD (less bias), while systematic resampling with \texttt{stop\_gradient} is more stable for HMC (smoother energy surface).
+
+\textbf{The gradient cliff problem.} The observation log-likelihood for Gaussian noise is
+\begin{equation}
+    \log p(y \mid x, \sigma) = -\frac{1}{2}\log(2\pi\sigma^2) - \frac{(y-h(x))^2}{2\sigma^2}
+\end{equation}
+As $\sigma \to 0$, the $-\log \sigma$ term increases while the $(y-h(x))^2/\sigma^2$ term explodes. There is a narrow ridge where these balance, creating a sharp cliff in the log-likelihood surface. The gradient at the cliff edge is enormous, far too large for the leapfrog step size to handle. LEDH amplifies this problem: its 29-step Jacobian chain $\prod_{j=1}^{29} \det(I + \Delta\lambda\, A_j(\v\theta))$ is extremely sensitive to $\v\theta$, creating additional curvature that causes leapfrog divergence.
+
+{\color{red} Add experimental results: filter $\times$ resampling comparison table (acceptance rates, convergence, time/step). Currently BPF+systematic is the only working config for direct HMC.}
+
+This limitation, that only the simplest filter (BPF with systematic resampling) works with direct HMC, motivates steps 2 and 3.
+
+\subsubsection{PMMH: gradient-free benchmark (Step 2)}
+
+The Particle Marginal Metropolis-Hastings (PMMH) algorithm from \cite{Andrieu2010} takes a completely different approach: it replaces the intractable likelihood $p(z_{1:T}|\v\theta)$ with the particle filter's unbiased estimate $\hat{p}(z_{1:T}|\v\theta)$, then uses standard Metropolis-Hastings. At each iteration, we propose $\v\theta^*$ via random walk, run a particle filter with a fresh random seed to obtain $\hat{p}(z_{1:T}|\v\theta^*)$, and accept with probability
+\begin{equation}
+    \alpha = \min\!\left(1,\; \frac{\hat{p}(z_{1:T}|\v\theta^*)\, p(\v\theta^*)}{\hat{p}(z_{1:T}|\v\theta^{(i)})\, p(\v\theta^{(i)})}\right)
+\end{equation}
+The remarkable result (their Theorem 2) is that this leaves the correct posterior invariant for \textit{any} $N \geq 1$ particles. No gradients are needed, so gradient cliffs and resampling discontinuities are completely irrelevant.
+
+In their Section 3.1, they apply PMMH to exactly our Kitagawa model with $\sigma_V^2 = 10$, $\sigma_W^2 = 1$, using $N=5000$ particles, $T=500$ time steps, and 50,000 MCMC iterations with Inverse Gamma priors on the variances. The acceptance rate depends strongly on $N$: roughly 10\% at $N=100$, 50\% at $N=500$, and 80\% at $N=2000$ (for $T=100$). This is consistent with their Theorem 1, which shows that the variance of the likelihood estimate scales as $\mathcal{O}(T/N)$, doubling $T$ requires doubling $N$ to maintain the same acceptance rate.
+
+An important warning from their paper (p.~283): standard block-wise MCMC (updating latent states $x_{1:T}$ one block at a time, then updating $\v\theta$) ``tends to become trapped in a local mode of the multimodal posterior\ldots and results in an overestimation of the true value of $\sigma_V$.'' PMMH and Particle Gibbs did not have this trapping problem, suggesting that the difficulty we face with the Kitagawa model is partly a multimodality issue, not just a gradient cliff issue. The trade-off is that each PMMH step is cheap (one particle filter run, no gradient computation) but mixing is slow because the proposals are random walk.
+
+{\color{red} Add our PMMH reproduction results on Kitagawa model: posterior histograms, acceptance rates, comparison with their Fig.~3.}
+
+\subsubsection{Particle Gibbs: decoupling parameters and states (Step 3)}
+Steps 1 and 2 reveal three core problems: gradient cliffs when differentiating through the particle filter (Step 1), weight collapse from LEDH's accumulated Jacobian products (Step 1), and bimodality trapping for the Kitagawa observation model (Step 2). The key insight, also from \cite{Andrieu2010}, is that instead of marginalizing out the latent states $x_{0:T}$ (which requires differentiating through the particle filter), we can target the \textit{joint} posterior $p(\v\theta, x_{0:T} \mid z_{1:T})$ via Gibbs sampling, alternating between two steps.
+
+\textbf{$\v\theta$-step (HMC on a smooth surface).} Given a fixed trajectory $x_{0:T}$, the conditional posterior of $\v\theta$ is
+\begin{equation}
+    \log p(\v\theta \mid x_{0:T}, z_{1:T}) = \sum_{t=1}^{T} \log p(x_t \mid x_{t-1}, \v\theta) + \sum_{t=1}^{T} \log p(z_t \mid x_t, \v\theta) + \log p(\v\theta) + \text{const}
+\end{equation}
+Each term is a Gaussian log-density. No particle filter is involved, there is no resampling, no Jacobian accumulation, no weight collapse. For the Kitagawa model with $\v\theta = (\sigma_V, \sigma_W)$, this becomes
+\begin{equation}
+    \log p(\sigma_V, \sigma_W \mid x_{0:T}, z_{1:T}) = -T\log\sigma_V - \frac{1}{2\sigma_V^2}\sum_{t=1}^{T}\!\left(x_t - f(x_{t-1},t)\right)^2 -T\log\sigma_W - \frac{1}{2\sigma_W^2}\sum_{t=1}^{T}\!\left(z_t - \frac{x_t^2}{20}\right)^2 + \log p(\sigma_V, \sigma_W)
+\end{equation}
+where $f(x,t) = x/2 + 25x/(1+x^2) + 8\cos(1.2t)$. This is a smooth, cheap $\mathcal{O}(T)$ computation with exact gradients. HMC can use large step sizes and achieve 60--80\% acceptance on this surface, compared to 0--10\% when differentiating through the particle filter.
+
+\textbf{$x$-step (Conditional SMC).} We sample a new trajectory $x_{0:T} \sim p(x_{0:T} \mid \v\theta, z_{1:T})$ using a particle filter with fixed $\v\theta$. No gradients are needed, this is pure forward simulation. The standard approach is Conditional Sequential Monte Carlo (CSMC)\cite{Andrieu2010,Lindsten2014}, which pins one particle (the \textit{reference}) to the previous iteration's trajectory $x_{0:T}^*$ while letting $N-1$ free particles explore. At each time step, the reference particle follows the prescribed path deterministically, while free particles are propagated and weighted normally. At the final time step, a trajectory is sampled from the weighted particles and becomes the reference for the next Gibbs iteration.
+
+Reference pinning serves two purposes. First, it guarantees ergodicity, the chain can always ``stay put'' by selecting the reference trajectory. Second, for bimodal models like Kitagawa where $y = x^2/20$ admits both $+\sqrt{20y}$ and $-\sqrt{20y}$, the free particles can explore both modes while the reference anchors the sampler. Ancestor sampling\cite{Lindsten2014} further improves mixing by allowing the reference particle's history to ``detach'' and graft onto any other particle's past, dramatically reducing path degeneracy.
+
+The Gibbs decomposition solves all three problems identified in Steps 1 and 2:
+\begin{itemize}
+    \item Gradient cliffs from Step 1 are eliminated, the $\v\theta$-step is closed-form.
+    \item Weight collapse from LEDH is eliminated, no Jacobian accumulation in the $\v\theta$-step.
+    \item Bimodality trapping from Step 2 is addressed by CSMC reference pinning in the $x$-step.
+\end{itemize}
+The implementation proceeds in two phases. Phase 1 uses a bootstrap particle filter for the CSMC $x$-step, which is the simplest and validates the framework. Phase 2 replaces it with LEDH CSMC, where the flow is applied only to the $N-1$ free particles while the reference stays pinned, providing better proposals for challenging high-dimensional models. This is the ``improve LEDH and plug into DPF'' from the three-step plan above.
+
+{\color{red} Add PGibbs + HMC results: $\theta$-step acceptance rate on closed-form surface, CSMC trajectory diversity, comparison with direct HMC through PF and PMMH.}
+
+\subsubsection{Additional notes and practical considerations}
+
+\textbf{Leapfrog divergence.} The mechanism by which direct HMC fails is instructive. The leapfrog trajectory starts in a reasonable region, passes through the likelihood cliff near small noise values (where the log-density changes sign), and the enormous gradient launches the state into an extreme parameter region. The Metropolis acceptance correctly rejects such diverged proposals (with acceptance probability $e^{-\Delta H} \approx 0$), but the chain makes no progress. Two remedies exist: gradient clipping, which caps $|\nabla U|$ at a threshold $C$ (a practical hack that preserves detailed balance because the true energy is still used for acceptance), and NUTS (No U-Turn Sampler), which adaptively truncates the trajectory when it starts doubling back\cite{Neal-2012-MCMC-Hamiltonian-Dynamics-ARXIV-1206-1901v1}. Both are worth trying for particle filter likelihoods.
+
+\textbf{Seed handling.} HMC uses a \textit{fixed} seed for the particle filter, making the likelihood surface deterministic for gradient computation. PMMH uses a \textit{fresh} seed each evaluation, the stochasticity is part of the algorithm, not a bug. On rejection, PMMH keeps the old likelihood estimate rather than re-evaluating with new randomness.
+
+\textbf{Parameterization.} The PMCMC paper uses variances $\sigma^2$ with Inverse Gamma priors (conjugate for Gaussian variance), while our setup uses standard deviations $\sigma$ with an exponential bijector (log-space HMC). The gradient of $\log p(z|\sigma)$ with respect to $\log \sigma$ involves an extra chain rule factor of $\sigma$, which amplifies gradient magnitudes for large $\sigma$. Switching to a $\sigma^2$ parameterization might smooth the landscape.
+
+\textbf{Likelihood variance.} From Theorem 1 of \cite{Andrieu2010}, the variance of the particle filter's likelihood estimate scales as $\text{Var}(\hat{Z}^N/Z) \leq C \cdot T / N$. Doubling the number of time steps $T$ requires doubling the number of particles $N$ to maintain the same MCMC acceptance rate. For $T=100$, $N=1000$ should suffice; for $T=500$, they needed $N=5000$.
+
+{\color{red} Organize these notes further as needed. Some may be moved to appendix or removed.}
+
+
+% \newpage
+
+
+% \section{A few words of reflection}
+% This is a well-structured test and I learned a lot from doing the background research, especially the knowledge I gained about Optimal Transport, which might actually turn out to be useful in the future. I now intend to learn about other applications of filtering and experiment with them more.
+
+% I didn’t completely finish the test. I only included the experiments that directly relate to the question, even though I ran quite a few others. I simply ran out of time to write up the results properly.
+% I appreciate the experience. It made me realize that I need to manage my time better when navigating multiple commitments. I put too much focus on reading background material and exploring ideas for using neural networks to improve filtering. In the end, I didn’t have enough time left to debug the code, complete the experiments, or write tests that would actually catch numerical instability. During my academic years, I never had to write formal tests for my code, so this was by far the biggest challenge I’ve faced. My original plan was to first make things work, then go back and add tests to check the edge cases. Maybe that approach just doesn’t work well when I’m adding tests after the fact.
+% I will continue working on this project and force myself to write proper tests to debug the invertible flow code. Right now I still cannot reproduce the results from \cite{Li-Particle-Filtering-2017}, because the acoustic tracking model breaks all of my EDH flow, EDH invertible, and their local counterparts.
+
+% Thank you for giving me this opportunity to do the test!
+
+
+% \newpage
+% \appendix
 
 
 \newpage
@@ -678,7 +983,7 @@ we use the following initial condition,
 p(x_0) = \mathcal{N}(x_0 | m_0, P_0)
 \end{equation}
 
-For the Kalman filter, the noise and operators are both Gaussian, so the distributions stay Gaussian at all times. All we need to do is to keep track of the mean and variance of the prior distribution $p(x_k | y_{1:k})$. In the predict step, the goal is to compute $p(x_t | z_{1:t-1})$ from $p(x_{t-1} | z_{1:t-1})$.
+For Kalman filter, the noise and operators are both Gaussian, so the distributions stay at Gaussian at all times. All we need to do is to keep track of the mean and variance of the prior distribution $p(x_k | y_{1:k})$. In the predict step, the goal is to compute $p(x_t | z_{1:t-1})$ from $p(x_{t-1} | z_{1:t-1})$.
 Given $p(x_{t-1} | z_{1:t-1}) = \mathcal{N}(x_{t-1} | m_{t-1}, P_{t-1})$, we have:
 \begin{equation}
 p(x_t | z_{1:t-1}) = \int dx_{t-1} \, p(x_t | x_{t-1}) \, p(x_{t-1} | z_{1:t-1})
@@ -723,8 +1028,8 @@ Expanding the exponents:
 \begin{align}
 -\frac{1}{2}\left[\frac{(z_t - h x_t)^2}{R} + \frac{(x_t - m_t^-)^2}{P_t^-}\right] &= -\frac{1}{2}\left[\frac{z_t^2 - 2 z_t h x_t + h^2 x_t^2}{R} + \frac{x_t^2 - 2 x_t m_t^- + (m_t^-)^2}{P_t^-}\right]
 \end{align}
-Collecting terms in $x_t^2$ and $x_t$: $-\frac{1}{2}\left[\left(\frac{h^2}{R} + \frac{1}{P_t^-}\right) x_t^2 - 2\left(\frac{h z_t}{R} + \frac{m_t^-}{P_t^-}\right) x_t + \text{const}\right]$.
-This is a Gaussian in $x_t$. Completing the square, we have $\frac{1}{P_t} = \frac{h^2}{R} + \frac{1}{P_t^-}$. $P$ is the uncertainty, so the inverse of $P$ is like precision; by adding information about the measurement $\frac{h^2}{R}$, we get additional precision, which is exactly what we are aiming for. When $\frac{h^2}{R}=0$, namely large noise from observation, we say we can't trust the measurement and we should stick with the dynamics. We see that both mean and variance will receive no update. On the other hand, if $\frac{h^2}{R} \ll \frac{1}{P_t^-}$, then the observation will carry more weight and the result from dynamics should be disregarded.
+Collecting terms in $x_t^2$ and $x_t$:$-\frac{1}{2}\left[\left(\frac{h^2}{R} + \frac{1}{P_t^-}\right) x_t^2 - 2\left(\frac{h z_t}{R} + \frac{m_t^-}{P_t^-}\right) x_t + \text{const}\right]$. 
+This is a Gaussian in $x_t$. Completing the square, we have $\frac{1}{P_t} = \frac{h^2}{R} + \frac{1}{P_t^-}$. $P$ is the uncertainty so the inverse of $P$ is like precision, by adding information about the measurement $\frac{h^2}{R}$, we get additional precision which is exactly what we are aiming for. When $\frac{h^2}{R}=0$, namely large noise from observation, we say we can't trust the measurement and we should stick with the dynamics. We see that both mean and variance will receive no update. On the other hand, if $\frac{h^2}{R} \ll \frac{1}{P_t^-}$, then observation will carry more weight and the result from dynamics should be disregarded.
 The updated variance is
 \begin{align}
 P_t = \frac{R P_t^-}{h^2 P_t^- + R}
@@ -741,7 +1046,7 @@ After some algebra:
 \begin{equation}
 m_t = m_t^- + K_t (z_t - h m_t^-)
 \end{equation}
-where we denote the innovation $v_t=z_t-hm^-$, namely the difference between the real observation and the predicted observation from prior mean.
+where we denote the innovation $v_t=z_t-hm^-$, namely the different between the real observation with the predicted observation from prior mean.
 In summary, we get,
 \begin{equation}
 \boxed{
@@ -753,7 +1058,7 @@ P_t &= (1 - K_t h) P_t^-
 \end{aligned}
 }
 \end{equation}
-At this point, we can already see that what the filter does is to correct the distribution based on the observed data point. Essentially, we want the mean and covariance from the updated distribution at each time step. For higher dimensions, all we have to do is to promote the scalar recursive relation into matrices.  
+at this point, we can already see that what filter does is to correct the distribution based on the observed data point. Essentially, we want the mean and covariance from the updated distribution at each time step. For higher dimension, all we have to do is to promote the scalar recursive relation into matrices.  
 \textbf{Prediction Step:}
 \begin{align}
 \hat{\v{x}}_t^- &= \v{\hat F} \hat{\v{x}}_{t-1}^+ \\
@@ -765,7 +1070,7 @@ At this point, we can already see that what the filter does is to correct the di
 \hat{\v{x}}_t^+ &= \hat{\v{x}}_t^- + \v{K}_t (\v{z}_t - \v{H}\hat{\v{x}}_t^-) \\
 \v{\hat P}_t^+ &= (\v{I} - \v{K}_t \v{H}) \v{P}_t^-
 \end{align}
-We know that the Kalman filter requires linear models and Gaussian noise. However, this is very restrictive. For cases where the noises are Gaussian but models are non-linear, we have the Extended Kalman filter (EKF) and Unscented Kalman Filter (UKF). The idea for the extension is to somehow make approximations so that we can use the Kalman filter. EKF linearizes the models via first-order Taylor expansion around the current estimate.
+We know that Kalman filter requires linear models and Gaussian noise. But this is very restrictive. For the cases where the noises are Gaussian but models are non-linear, we have extended Kalman filter (EKF) and unscented Kalman Filter (UKF). The idea for the extension is somehow make approximation so that we can use Kalman filter. EKF linearizes the models via first-order Taylor expansion around current estimate.
 \begin{equation}
 \v{F}_t = \left.\frac{\partial f}{\partial \v{x}}\right|_{\v{x} = \hat{\v{x}}_{t-1}^+}, \quad
 \v{H}_t = \left.\frac{\partial h}{\partial \v{x}}\right|_{\v{x} = \hat{\v{x}}_t^-}
@@ -782,7 +1087,7 @@ Update using  $\v{H}_t$ and predicted measurement $\hat{\v{z}}_t^- = h(\hat{\v{x
 \v{\hat P}_t^+ &= (\v{I} - \v{K}_t \v{H}_t) \v{P}_t^-
 \end{align}
 
-However, there are strong limitations to this approach, namely: only first-order accurate; can diverge for strong nonlinearity; requires Jacobian computation (may be expensive or analytically intractable); assumes Gaussian noises. As for the UKF, it propagates uncertainty through nonlinear functions using \textbf{sigma points} (also called unscented points) - deterministically chosen samples that capture mean and covariance. Here we further introduce some definitions:
+However, there is strong limitations of this approach, namely, only first-order accurate; can diverge for strong nonlinearity; requires Jacobian computation (may be expensive or analytically intractable); assumes Gaussian noises. As for the UKF, propagate uncertainty through nonlinear functions using \textbf{sigma points} (also called unscented points) - deterministically chosen samples that capture mean and covariance. Here we further introduce some definition:
 \begin{itemize}
 \item $\v P_{zz,t}^{-}$ = predicted measurement covariance
 \item $\v P_{xz,t}^{-}$ = cross-covariance between state and measurement
@@ -891,10 +1196,11 @@ Update state mean and covariance:
 
 \section{Particle flow and particle filter}
 
+\subsection{Particle filter}
+{\color{red} Importance sampling, more general than Bootstrap particle filter}
+\subsection{Particle flow}\label{APP:Particle_flow}
 
-\subsection{Particle flow}
-
-Previously, we have discussed how after each resampling, the information of the distribution is concentrated on the multiplicity distribution of the particles, and the diversity of the particles has been lost. If we look at the particle methods, it's clear that we either use weights or multiplicity distribution to mimic the distribution. The culprit of the particle degeneracy is the consecutive multiplication of small numbers: $p(y_t | x_t^{(i)})$ will make a large number of particles irrelevant after a few steps. The observation was done independently and there is no way to control the value of $p(y_t | x_t^{(i)})$. In \cite{daum2010exact,daum2011particle}, the author proposed using the multiplicity to store the information of the distribution and invented an alternative evolution for the particles such that $p(y_t | x_t^{(i)})$ was never too small. The limitation of these two papers is that to solve the equation, which we will talk about later, they have to assume a linear or nearly linear observation model and dynamics with additive Gaussian noise. The evolution for the particles is a completely different equation than the underlying dynamics for the ground truth. Later, we will see methods that generalize the equation for more general noise distributions. Let us first derive the evolution equations. First, we have the prediction step: 
+Previously, we have discussed how after each resampling, the information of the distribution is concentrated on the multiplicity distribution of the particles, and the diversity of the particles have been lost. If we look at the particle methods, it's clearly that we either use weights or multiplicity distribution to mimic distribution. The culprit of the particle degeneracy is the consecutive multiplication of small numbers $p(y_t | x_t^{(i)})$ will make a large number of particles irrelevant after view steps. And the observation was done independently and there is no way to control the value of $p(y_t | x_t^{(i)})$. In \cite{daum2010exact,daum2011particle}, the author proposed to use the multiplicity to store the information of the distribution and invented an alternative evolution for the particles such that $p(y_t | x_t^{(i)})$ was never too small. The limitation of these two papers is that to solve the equation, which we will talk about later, they have to assume linear or nearly linearly observation model and dynamics with additive Gaussian noise. The evolution for the particles is complete different equation than underlying dynamics for the ground truth. Later, we will see the methods that generalize the equation for more general noise distribution. Let us first derive the evolution equations. First, we have the prediction step: 
 \begin{align}
 p(x_t | z_{1:t-1})=g(x_t)
 \end{align}
@@ -910,7 +1216,7 @@ The normalization will be handled implicitly by the particles. The difference be
 \begin{equation}
 \log p(x,\lambda) = \log g(x) + \lambda \log h(x)
 \end{equation}
-we always start with $\lambda=0$, and end with $\lambda=1$; therefore, we can ensure the particle flows to the desired position. By definition, the evolution is driven entirely by the observation model. This is where the limitation of the flow model comes in.
+we always start with $\lambda=0$, and end with $\lambda=1$, therefore we can assure the particle flows to the desired position. By definition, the evolution is driven entirely by the observation model. This is where the limitation of the flow model comes in.
 
 Assuming particles evolve in pseudo-time $\lambda$ according to the ordinary differential equation:
 \begin{equation}
@@ -931,7 +1237,6 @@ From the log-homotopy definition, we have $\frac{\partial \log p}{\partial \lamb
 \begin{equation}
 \boxed{\log h(x) = -\nabla \cdot f - (\nabla \log p) \cdot f}
 \end{equation}
-
 To solve this equation, we assume an affine flow ansatz:
 \begin{equation}
 f(x,\lambda) = A(\lambda)x + b(\lambda)
@@ -1010,12 +1315,14 @@ After algebraic manipulation, this simplifies to:
 \boxed{b(\lambda) = (I+2\lambda A)[(I+\lambda A)PH^T R^{-1}z + A\bar{\eta}_0]}
 \end{equation}
 
-The EDH flow equations are derived by requiring that Gaussian distributions remain Gaussian under the flow, that the flow satisfies the Fokker-Planck equation, and that the boundary conditions $p(x,0) = g(x)$ and $p(x,1) \propto g(x)h(x)$ are satisfied. The resulting solution provides an \textbf{exact} method for transporting particles from the prior to the posterior in the linear-Gaussian case, avoiding the weight degeneracy issues that plague standard particle filters. As for the LEDH, the difference is that each particle has its own equation. That is because the expansion of the model is taken at their individual location instead of the average position.
+The EDH flow equations are derived by requiring that Gaussian distributions remain Gaussian under the flow, that the flow satisfies the Fokker-Planck equation, and that the boundary conditions $p(x,0) = g(x)$ and $p(x,1) \propto g(x)h(x)$ are satisfied. The resulting solution provides an \textbf{exact} method for transporting particles from the prior to the posterior in the linear-Gaussian case, avoiding the weight degeneracy issues that plague standard particle filters. As for the LEDH, the difference is that each particle has their own equation. That is because the expansion of the model are taken at their individual location instead of the average position.
+
+\subsection{SDE}
+
+\subsection{Particle flow filter (kernel method)}
 
 
-\subsection{Particle Flow Filter (Kernel Method)}
-
-Our problem is the same as for the particle filter particle flow: move the particles to the desired location, without touching the weights, so that we get the target probability distribution $p(x_t | y_{1:t}) \propto p(y_t | x_t) p(x_t | y_{1:t-1})$. 
+Our problem is the same as particle filter particle flow, move the particles to the desired location, without touching the weights, so that we get the target probability distribution $p(x_t | y_{1:t}) \propto p(y_t | x_t) p(x_t | y_{1:t-1})$. 
 
 \subsubsection{Optimal Transport via Gradient Flow}
 
@@ -1027,7 +1334,7 @@ Choose velocity $v_\lambda$ to minimize KL divergence as fast as possible:
 \begin{equation}
 D_{KL}(q_\lambda \| \pi) = \int q_\lambda(x) \log \frac{q_\lambda(x)}{\pi(x)} dx
 \end{equation}
-we need to formulate the above equation into an optimization problem. However, the intuition of this method is clear: you want to evolve the point along a "straight" direction to the desired point. 
+we need to formulate the above equation into an optimization problem. But the intuition of this method is clear, you want to evolve the point along a "straight" direction to the desire point. 
 
 
 \subsubsection{Deriving Optimal Velocity via Kernel Restriction}
@@ -1048,7 +1355,7 @@ Using $\nabla_x q_\lambda = q_\lambda \nabla_x \log q_\lambda$ and integrating b
 \frac{d}{d\lambda} D_{KL} = -\int q_\lambda \left[\nabla_x \log \pi(x) \cdot v + \nabla_x \cdot v\right] dx 
 \end{equation}
 
-The derivative with respect to the evolution parameter gives the vector field along the trajectory. To make things computable, we restrict $v$ to functions generated by kernel $K(x,x')$. Any such function has the form:
+The derivative with respect to the evolution parameter gives the vector field along the trajectory. To make things computatble, we restrict $v$ to functions generated by kernel $K(x,x')$. Any such function has form:
 \begin{equation}
 v(x) = \int \alpha(x') K(x', x) dx'
 \end{equation}

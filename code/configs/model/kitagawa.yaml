@@ -5,7 +5,7 @@
 _target_: src.models.kitagawa.KitagawaModel
 
 # Noise parameters
-sigma_V: 10.0       # Process noise std (sqrt(Q))
+sigma_V: 3.162      # Process noise std (sqrt(Q)), Q=10 → sigma=sqrt(10)
 sigma_W: 1.0        # Observation noise std (sqrt(R))
 
 # Initial state distribution: X_0 ~ N(0, initial_var)

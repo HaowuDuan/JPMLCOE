@@ -1,0 +1,148 @@
+{
+  "summary": {
+    "sigma_range": {
+      "mean": 0.285847014577531,
+      "std": 0.0024386199664342993,
+      "median": 0.285413826212465,
+      "q5": 0.28300177500097323,
+      "q25": 0.28350036017505975,
+      "q75": 0.2883874164161133,
+      "q95": 0.2891187183722184,
+      "min": 0.2829023147517568,
+      "max": 0.2894965275397585
+    },
+    "sigma_bearing": {
+      "mean": 0.2899012986345001,
+      "std": 0.0015904151595658716,
+      "median": 0.2898773164024322,
+      "q5": 0.28797662236305954,
+      "q25": 0.2886283977101836,
+      "q75": 0.29085100916888823,
+      "q95": 0.2924494267776288,
+      "min": 0.28783895086180844,
+      "max": 0.29308964098779217
+    }
+  },
+  "diagnostics": {
+    "acceptance_rate": 0.9,
+    "final_step_size": 0.0012210523709654808,
+    "ess": {
+      "sigma_range": NaN,
+      "sigma_bearing": NaN
+    },
+    "rhat": {
+      "sigma_range": 0.6163725840064613,
+      "sigma_bearing": 0.6230412232832488
+    }
+  },
+  "metadata": {
+    "model_type": "RangeBearingModel",
+    "filter_type": "BootstrapPFHMC",
+    "sampler": "hmc",
+    "num_samples": 10,
+    "num_burnin": 15,
+    "num_leapfrog_steps": 5,
+    "num_observations": 50,
+    "timing": {
+      "step_times": [
+        25.94838224258274,
+        25.81194131076336,
+        25.896967601031065,
+        25.936698919162154,
+        25.98994426522404,
+        25.925161340273917,
+        25.925790646113455,
+        26.107800223864615,
+        25.901483020745218,
+        26.002493447624147,
+        25.8761992091313,
+        25.83949909824878,
+        25.9122816035524,
+        26.07145280763507,
+        25.99044330511242,
+        25.82176900282502,
+        26.05586713552475,
+        25.954321971163154,
+        25.893846601247787,
+        25.94128878414631,
+        25.991591781377792,
+        26.030176864936948,
+        25.826519302092493,
+        26.00005827844143,
+        26.05697086174041
+      ],
+      "total_time_seconds": 648.7089496245608,
+      "mean_step_time": 25.94835798498243,
+      "median_step_time": 25.94128878414631,
+      "min_step_time": 25.81194131076336,
+      "max_step_time": 26.107800223864615,
+      "burnin_time_seconds": 389.1365390410647,
+      "sampling_time_seconds": 259.5724105834961,
+      "mean_time_per_gradient_eval": 5.189671596996486
+    }
+  },
+  "true_params": {
+    "sigma_range": 0.1,
+    "sigma_bearing": 0.1
+  },
+  "config": {
+    "dtype": "float64",
+    "tf_log_level": 2,
+    "model": {
+      "_target_": "src.models.range_bearing.RangeBearingModel",
+      "sigma_range": 0.3,
+      "sigma_bearing": 0.3
+    },
+    "filter": {
+      "_target_": "src.filters.particle.bootstrap_pf_hmc.BootstrapPFHMC",
+      "n_particles": 500,
+      "resampling_method": "systematic",
+      "stop_gradient_resampling": true,
+      "eager_mode": false
+    },
+    "dpf": {
+      "sampler": "hmc",
+      "trainable_params": {
+        "sigma_range": {
+          "constraint": "positive",
+          "prior": {
+            "_target_": "tensorflow_probability.distributions.LogNormal",
+            "loc": -2.3,
+            "scale": 0.5
+          }
+        },
+        "sigma_bearing": {
+          "constraint": "positive",
+          "prior": {
+            "_target_": "tensorflow_probability.distributions.LogNormal",
+            "loc": -2.3,
+            "scale": 0.5
+          }
+        }
+      },
+      "hmc": {
+        "num_samples": 10,
+        "num_burnin": 15,
+        "step_size": 0.001,
+        "num_leapfrog_steps": 5,
+        "max_tree_depth": 10,
+        "adaptation_rate": 0.8,
+        "target_accept_prob": 0.9,
+        "seed": 42
+      }
+    },
+    "data": {
+      "T": 50,
+      "seed": 42,
+      "true_params": {
+        "sigma_range": 0.1,
+        "sigma_bearing": 0.1
+      }
+    }
+  },
+  "performance": {
+    "wall_time_seconds": 703.9438122455031,
+    "peak_memory_mb": 58.6938591003418,
+    "memory_increase_mb": 1216.125
+  }
+}

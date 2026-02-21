@@ -114,7 +114,7 @@ class KernelMappingPF:
         B = B * self.loc_matrix
 
         # Regularization for numerical stability
-        B = B + tf.eye(self.state_dim, dtype=self.dtype) * 1e-8
+        B = B + tf.eye(self.state_dim, dtype=self.dtype) * tf.constant(1e-8, dtype=self.dtype)
 
         return x_mean, B
 
@@ -155,7 +155,7 @@ class KernelMappingPF:
 
         # Kernel bandwidth diagonal (Eq 21): σ^(d)^2
         B_diag = tf.linalg.diag_part(B)
-        B_diag = tf.maximum(B_diag, 1e-8)
+        B_diag = tf.maximum(B_diag, tf.constant(1e-8, dtype=B_diag.dtype))
 
         # Bandwidth scale α (Paper recommends 1/N_p for matrix kernel)
         alpha = self.alpha if self.alpha is not None else (1.0 / self.n_particles)

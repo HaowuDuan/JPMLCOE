@@ -1,0 +1,49 @@
+{
+  "rmse": 1.1353447545104307,
+  "log_likelihood": -545.6040547159055,
+  "metadata": {
+    "filter_type": "ParticleFilterTF",
+    "n_particles": 1000,
+    "resampling_rate": 0.37,
+    "resampling_method": "soft",
+    "resampling_config": {
+      "alpha": 0.9
+    },
+    "performance": {
+      "wall_time_seconds": 2.2617700829869136,
+      "time_per_timestep_ms": 4.523540165973827,
+      "peak_memory_mb": 6.249153137207031,
+      "memory_increase_mb": 53.140625,
+      "start_memory_mb": 410.59375,
+      "end_memory_mb": 463.734375,
+      "num_timesteps": 500
+    }
+  },
+  "config": {
+    "model": {
+      "_target_": "src.models.stochastic_volatility.StochasticVolatilityModel",
+      "alpha": 0.91,
+      "sigma": 1.0,
+      "beta": 0.5
+    },
+    "filter": {
+      "_target_": "src.filters.particle.bootstrap_pf_tf.ParticleFilterTF",
+      "_recursive_": false,
+      "n_particles": 1000,
+      "resample_threshold": 0.5,
+      "resampling_method": "soft",
+      "resampling_config": {
+        "alpha": 0.9
+      }
+    },
+    "seed": 42,
+    "dtype": "float64",
+    "T": 500,
+    "output_dir": "outputs/stochastic_volatility/stochastic_volatility_pf_soft_alpha0.9",
+    "plot": true,
+    "device": "auto",
+    "tf_log_level": 2,
+    "verbose": true,
+    "show_progress": true
+  }
+}

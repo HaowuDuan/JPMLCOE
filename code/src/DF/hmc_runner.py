@@ -92,8 +92,6 @@ class DPFRunner:
         log_prior = self.param_handler.log_prior(constrained_params)
 
         nlp = -(log_likelihood + log_prior)
-        tf.print("  [nlp] ll=", log_likelihood, " prior=", log_prior,
-                 " nlp=", nlp, " q=", unconstrained_params)
         return nlp
 
     def _value_and_grad(self, q):
@@ -104,7 +102,13 @@ class DPFRunner:
         grad = tape.gradient(nlp, q)
         # Replace None/NaN gradient with zeros
         if grad is None:
+            tf.print("  [grad] WARNING: grad is None, using zeros")
             grad = tf.zeros_like(q)
+        n_bad = tf.reduce_sum(tf.cast(~tf.math.is_finite(grad), tf.int32))
+        tf.print("  [grad] nlp=", nlp, " |grad|=", tf.norm(grad),
+                 " grad=", grad, " q=", q, " n_bad=", n_bad)
+        if n_bad > 0:
+            tf.print("  [grad] WARNING: replacing", n_bad, "non-finite grads with zeros")
         grad = tf.where(tf.math.is_finite(grad), grad, tf.zeros_like(grad))
 
         if self.on_grad is not None:
@@ -180,6 +184,16 @@ class DPFRunner:
         print(f"Running {self.sampler.upper()}: {num_burnin} burn-in + {num_samples} sampling = {total_steps} total steps")
 
         current_state = self.param_handler.unconstrained_init
+
+        # One-time gradient diagnostic before HMC loop
+        with tf.GradientTape() as _tape:
+            _tape.watch(current_state)
+            _lp = target_log_prob_fn(current_state)
+        _grad = _tape.gradient(_lp, current_state)
+        print(f"  [grad check] lp={float(_lp.numpy()):.4f}, "
+              f"|grad|={float(tf.norm(_grad).numpy()) if _grad is not None else 'None'}, "
+              f"grad={_grad.numpy() if _grad is not None else 'None'}")
+
         kernel_results = adaptive_kernel.bootstrap_results(current_state)
 
         samples_list = []
@@ -220,6 +234,157 @@ class DPFRunner:
 
     # Backward compat
     run_hmc = run_inference
+
+    def run_map(
+        self,
+        observations: np.ndarray,
+        num_steps: int = 200,
+        learning_rate: float = 0.01,
+        optimizer: str = 'adam',
+        random_seed: bool = False,
+        seed: int = 42,
+        print_every: int = 10,
+    ) -> DPFResult:
+        """Find MAP estimate via Adam/SGD optimization.
+
+        Minimizes -log p(theta | y) = -log p(y|theta) - log p(theta).
+        Useful as a fast diagnostic to verify gradients point toward true params.
+
+        Args:
+            random_seed: If True, use a different PF seed each step (stochastic
+                gradient, averages over many steps). If False, use fixed seed
+                (deterministic surface, standard optimization).
+        """
+        dtype = getattr(self.base_model, 'dtype', tf.float32)
+        self._observations_tf = tf.constant(observations, dtype=dtype)
+
+        q = tf.Variable(self.param_handler.unconstrained_init, dtype=dtype)
+
+        if optimizer == 'adam':
+            opt = tf.keras.optimizers.Adam(learning_rate)
+        elif optimizer == 'sgd':
+            opt = tf.keras.optimizers.SGD(learning_rate)
+        else:
+            raise ValueError(f"Unknown optimizer: {optimizer}. Use 'adam' or 'sgd'.")
+
+        print(f"Running MAP ({optimizer}, lr={learning_rate}, steps={num_steps}, "
+              f"random_seed={random_seed})")
+
+        best_loss = float('inf')
+        best_q = q.numpy().copy()
+        loss_history = []
+        param_history = {name: [] for name in self.param_handler.param_names}
+        step_times = []
+
+        for step in range(num_steps):
+            t0 = time.perf_counter()
+
+            with tf.GradientTape() as tape:
+                constrained = self.param_handler.constrain(q)
+                self.diff_model.update_parameters(constrained)
+                pf_seed = tf.constant(
+                    [seed, step] if random_seed else [seed, 0],
+                    dtype=tf.int32,
+                )
+                ll = self.filter_obj.log_marginal_likelihood_tf(
+                    self._observations_tf, seed=pf_seed
+                )
+                lp = self.param_handler.log_prior(constrained)
+                loss = -(ll + lp)
+
+            grad = tape.gradient(loss, q)
+            if grad is None:
+                grad = tf.zeros_like(q)
+            grad = tf.where(tf.math.is_finite(grad), grad, tf.zeros_like(grad))
+            opt.apply_gradients([(grad, q)])
+
+            dt = time.perf_counter() - t0
+            step_times.append(dt)
+
+            loss_val = float(loss.numpy())
+            loss_history.append(loss_val)
+
+            constrained_now = self.param_handler.constrain(q)
+            for name, val in constrained_now.items():
+                param_history[name].append(float(val.numpy()))
+
+            if loss_val < best_loss:
+                best_loss = loss_val
+                best_q = q.numpy().copy()
+
+            if step % print_every == 0 or step == num_steps - 1:
+                param_str = ", ".join(
+                    f"{n}={float(v.numpy()):.4f}" for n, v in constrained_now.items()
+                )
+                grad_norm = float(tf.norm(grad).numpy())
+                avg_dt = np.mean(step_times[-10:])
+                eta = avg_dt * (num_steps - step - 1)
+                print(f"  [step {step}/{num_steps}] loss={loss_val:.2f} | "
+                      f"ll={float(ll.numpy()):.2f} | |grad|={grad_norm:.2f} | "
+                      f"{param_str} | {dt:.1f}s | ETA {eta:.0f}s")
+
+        # Build DPFResult from MAP point
+        best_constrained = self.param_handler.constrain(
+            tf.constant(best_q, dtype=dtype)
+        )
+        samples = {
+            name: np.array([float(val.numpy())])
+            for name, val in best_constrained.items()
+        }
+
+        summary = {}
+        for name in self.param_handler.param_names:
+            trace = np.array(param_history[name])
+            last_n = trace[-max(1, num_steps // 5):]
+            summary[name] = {
+                'mean': float(np.mean(last_n)),
+                'std': float(np.std(last_n)),
+                'median': float(np.median(last_n)),
+                'q5': float(np.percentile(last_n, 5)),
+                'q25': float(np.percentile(last_n, 25)),
+                'q75': float(np.percentile(last_n, 75)),
+                'q95': float(np.percentile(last_n, 95)),
+                'min': float(np.min(last_n)),
+                'max': float(np.max(last_n)),
+            }
+
+        step_times_arr = np.array(step_times)
+        diagnostics = {
+            'final_loss': best_loss,
+            'loss_history': loss_history,
+            'converged': bool(
+                np.std(loss_history[-max(1, num_steps // 10):]) < 1.0
+            ),
+        }
+
+        self.diff_model.restore_parameters()
+
+        print(f"MAP complete! Best loss={best_loss:.2f}")
+        for name, val in best_constrained.items():
+            print(f"  {name} = {float(val.numpy()):.4f}")
+
+        return DPFResult(
+            samples=samples,
+            summary=summary,
+            diagnostics=diagnostics,
+            metadata={
+                'model_type': self.base_model.__class__.__name__,
+                'filter_type': self.filter_class.__name__,
+                'sampler': 'map',
+                'optimizer': optimizer,
+                'learning_rate': learning_rate,
+                'num_steps': num_steps,
+                'random_seed': random_seed,
+                'num_observations': len(observations)
+                    if hasattr(observations, '__len__') else 0,
+                'timing': {
+                    'total_time_seconds': float(np.sum(step_times_arr)),
+                    'mean_step_time': float(np.mean(step_times_arr)),
+                    'step_times': step_times_arr.tolist(),
+                },
+                'param_history': param_history,
+            },
+        )
 
     def _run_custom_hmc(
         self,
@@ -450,7 +615,7 @@ class DPFRunner:
 
         ess_dict = {}
         for name, s in samples.items():
-            param_tf = tf.constant(s[np.newaxis, :], dtype=dtype)
+            param_tf = tf.constant(s[:, np.newaxis], dtype=dtype)
             ess = tfp.mcmc.effective_sample_size(param_tf)
             ess_dict[name] = float(ess.numpy()[0])
         diagnostics['ess'] = ess_dict

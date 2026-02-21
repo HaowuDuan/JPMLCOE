@@ -156,7 +156,7 @@ class ParticleFilterTF(ParticleFilterBase):
 
             # UPDATE: Compute weights
             log_obs_probs = self.model.log_observation_prob_batch(observations[t], particles)
-            log_weights = tf.math.log(weights + 1e-30) + log_obs_probs
+            log_weights = tf.math.log(weights + tf.constant(1e-30, dtype=weights.dtype)) + log_obs_probs
 
             # Log-likelihood
             log_lik = self._log_sum_exp(log_weights)

@@ -1,0 +1,45 @@
+{
+  "rmse": 11.800149938703683,
+  "log_likelihood": -196.15656796218548,
+  "metadata": {
+    "filter_type": "LEDHInvertibleBimodal",
+    "n_particles": 500,
+    "n_lambda_steps": 29,
+    "resampling_method": "systematic",
+    "resampling_rate": 0.59,
+    "lookahead_steps": 5,
+    "performance": {
+      "wall_time_seconds": 21.263144165975973,
+      "time_per_timestep_ms": 212.63144165975973,
+      "peak_memory_mb": 17.175602912902832,
+      "memory_increase_mb": 68.859375,
+      "start_memory_mb": 409.78125,
+      "end_memory_mb": 478.640625,
+      "num_timesteps": 100
+    }
+  },
+  "config": {
+    "model": {
+      "_target_": "src.models.kitagawa.KitagawaModel",
+      "sigma_V": 10.0,
+      "sigma_W": 1.0,
+      "initial_var": 5.0
+    },
+    "filter": {
+      "_target_": "src.filters.particle.ledh_invertible_bimodal.LEDHInvertibleBimodal",
+      "n_particles": 500,
+      "n_lambda_steps": 29,
+      "resample_threshold": 0.5,
+      "lookahead_steps": 5
+    },
+    "seed": 42,
+    "dtype": "float64",
+    "T": 100,
+    "output_dir": "outputs/kitagawa/kitagawa_ledh_invertible_bimodal_k5",
+    "plot": true,
+    "device": "auto",
+    "tf_log_level": 2,
+    "verbose": true,
+    "show_progress": true
+  }
+}

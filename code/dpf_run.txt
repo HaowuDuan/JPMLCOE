@@ -1,0 +1,2409 @@
+=== Running 24 DPF experiments ===
+
+========================================
+[1/24] linear_gaussian_ledh_hmc_sys
+========================================
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1771568943.645163 1687306 gpu_device.cc:2020] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 22322 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3090, pci bus id: 0000:01:00.0, compute capability: 8.6
+I0000 00:00:1771568943.864007 1687306 cuda_solvers.cc:175] Creating GpuSolver handles for stream 0x4797d060
+  [nlp] ll= -183.744675  prior= -1.99772573  nlp= 185.742401  q= [1.8545866]
+  [nlp] ll= -183.744675  prior= -1.99772573  nlp= 185.742401  q= [1.8545866]
+  [nlp] ll= -184.440506  prior= -2.0081017  nlp= 186.448608  q= [1.87195492]
+  [nlp] ll= -184.440506  prior= -2.0081017  nlp= 186.448608  q= [1.87195492]
+  [nlp] ll= -184.947952  prior= -2.01629305  nlp= 186.964249  q= [1.88563621]
+  [nlp] ll= -184.947952  prior= -2.01629305  nlp= 186.964249  q= [1.88563621]
+  [nlp] ll= -185.281189  prior= -2.02230406  nlp= 187.303497  q= [1.89566064]
+  [nlp] ll= -185.281189  prior= -2.02230406  nlp= 187.303497  q= [1.89566064]
+  [nlp] ll= -185.509735  prior= -2.02613735  nlp= 187.535873  q= [1.90204585]
+  [nlp] ll= -185.509735  prior= -2.02613735  nlp= 187.535873  q= [1.90204585]
+  [nlp] ll= -185.598801  prior= -2.0277915  nlp= 187.626587  q= [1.90479946]
+  [nlp] ll= -185.598801  prior= -2.0277915  nlp= 187.626587  q= [1.90479946]
+  [nlp] ll= -173.071564  prior= -1.83589542  nlp= 174.907455  q= [1.576617]
+  [nlp] ll= -173.071564  prior= -1.83589542  nlp= 174.907455  q= [1.576617]
+  [nlp] ll= -106.726715  prior= -1.31970024  nlp= 108.046417  q= [0.22909224]
+  [nlp] ll= -106.726715  prior= -1.31970024  nlp= 108.046417  q= [0.22909224]
+  [nlp] ll= 137.519012  prior= -4.71618509  nlp= -132.802826  q= [-2.7118597]
+  [nlp] ll= 137.519012  prior= -4.71618509  nlp= -132.802826  q= [-2.7118597]
+  [nlp] ll= -480.673065  prior= -31.5768108  nlp= 512.249878  q= [-7.83021307]
+  [nlp] ll= -480.673065  prior= -31.5768108  nlp= 512.249878  q= [-7.83021307]
+  [nlp] ll= -577.305847  prior= -17.5520306  nlp= 594.857849  q= [128.218094]
+  [nlp] ll= -577.305847  prior= -17.5520306  nlp= 594.857849  q= [128.218094]
+  [nlp] ll= -178.828278  prior= -1.92088628  nlp= 180.749161  q= [1.7244643]
+  [nlp] ll= -178.828278  prior= -1.92088628  nlp= 180.749161  q= [1.7244643]
+  [nlp] ll= -165.235367  prior= -1.7291137  nlp= 166.964478  q= [1.38238144]
+  [nlp] ll= -165.235367  prior= -1.7291137  nlp= 166.964478  q= [1.38238144]
+  [nlp] ll= -141.393173  prior= -1.48354971  nlp= 142.876724  q= [0.860271871]
+  [nlp] ll= -141.393173  prior= -1.48354971  nlp= 142.876724  q= [0.860271871]
+  [nlp] ll= -100.36174  prior= -1.3125248  nlp= 101.674263  q= [0.126499]
+  [nlp] ll= -100.36174  prior= -1.3125248  nlp= 101.674263  q= [0.126499]
+  [nlp] ll= -26.0532379  prior= -1.64821064  nlp= 27.7014484  q= [-0.880773127]
+  [nlp] ll= -26.0532379  prior= -1.64821064  nlp= 27.7014484  q= [-0.880773127]
+  [nlp] ll= -179.567093  prior= -1.93286204  nlp= 181.499954  q= [1.7449373]
+  [nlp] ll= -179.567093  prior= -1.93286204  nlp= 181.499954  q= [1.7449373]
+  [nlp] ll= -167.071854  prior= -1.75185513  nlp= 168.823715  q= [1.42474401]
+  [nlp] ll= -167.071854  prior= -1.75185513  nlp= 168.823715  q= [1.42474401]
+  [nlp] ll= -144.619507  prior= -1.51057363  nlp= 146.130081  q= [0.926948667]
+  [nlp] ll= -144.619507  prior= -1.51057363  nlp= 146.130081  q= [0.926948667]
+  [nlp] ll= -106.343414  prior= -1.31902337  nlp= 107.662437  q= [0.222223282]
+  [nlp] ll= -106.343414  prior= -1.31902337  nlp= 107.662437  q= [0.222223282]
+  [nlp] ll= -36.7141571  prior= -1.55531502  nlp= 38.2694702  q= [-0.747231483]
+  [nlp] ll= -36.7141571  prior= -1.55531502  nlp= 38.2694702  q= [-0.747231483]
+  [nlp] ll= -180.376312  prior= -1.9439373  nlp= 182.320251  q= [1.76380253]
+  [nlp] ll= -180.376312  prior= -1.9439373  nlp= 182.320251  q= [1.76380253]
+  [nlp] ll= -168.59343  prior= -1.77273321  nlp= 170.366165  q= [1.46311772]
+  [nlp] ll= -168.59343  prior= -1.77273321  nlp= 170.366165  q= [1.46311772]
+  [nlp] ll= -147.594696  prior= -1.53652501  nlp= 149.131226  q= [0.987840116]
+  [nlp] ll= -147.594696  prior= -1.53652501  nlp= 149.131226  q= [0.987840116]
+  [nlp] ll= -111.520218  prior= -1.32946301  nlp= 112.849678  q= [0.308296144]
+  [nlp] ll= -111.520218  prior= -1.32946301  nlp= 112.849678  q= [0.308296144]
+  [nlp] ll= -46.4465141  prior= -1.48604846  nlp= 47.9325638  q= [-0.628225446]
+  [nlp] ll= -46.4465141  prior= -1.48604846  nlp= 47.9325638  q= [-0.628225446]
+Creating true model: src.models.linear_gaussian.LinearGaussianModel
+Generating 100 time steps with true params: {'obs_noise_std': 1.0}
+Creating inference model
+Trainable params: ['obs_noise_std']
+
+Running HMC inference...
+Using HMC sampler (num_leapfrog_steps=5)
+Running HMC: 3 burn-in + 2 sampling = 5 total steps
+  [burn-in 1/3] 23.6s | accept=100% | step_size=0.1595 | obs_noise_std=2.0436 | ETA 95s
+  [burn-in 2/3] 23.4s | accept=50% | step_size=0.0649 | obs_noise_std=2.0436 | ETA 70s
+  [burn-in 3/3] 23.5s | accept=33% | step_size=0.0649 | obs_noise_std=2.0436 | ETA 47s
+  [sample 1/2] 23.5s | accept=25% | step_size=0.0649 | obs_noise_std=2.0436 | ETA 23s
+  [sample 2/2] 23.5s | accept=20% | step_size=0.0649 | obs_noise_std=2.0436 | ETA 0s
+HMC complete!
+
+============================================================
+DPF INFERENCE RESULTS
+============================================================
+
+  obs_noise_std:
+    True:           1.0
+    Posterior mean:  2.0436 +/- 0.0000
+    90% CI:         [2.0436, 2.0436]
+    True in 90% CI: NO
+
+Diagnostics:
+  Acceptance rate: 0.0%
+  Final step size: 0.064915
+  ESS: {'obs_noise_std': nan}
+  R-hat: {'obs_noise_std': nan}
+
+Performance:
+  Wall time: 160.1 seconds
+  Peak memory: 56.0 MB
+============================================================
+
+Results saved to /home/haowu/JPML/code/outputs/dpf/linear_gaussian_ledh_hmc_sys
+
+========================================
+[2/24] linear_gaussian_ledh_hmc_soft
+========================================
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1771569108.762063 1688703 gpu_device.cc:2020] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 22322 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3090, pci bus id: 0000:01:00.0, compute capability: 8.6
+I0000 00:00:1771569108.974684 1688703 cuda_solvers.cc:175] Creating GpuSolver handles for stream 0x2028cdf0
+  [nlp] ll= -183.538986  prior= -1.99772573  nlp= 185.536713  q= [1.8545866]
+  [nlp] ll= -183.538986  prior= -1.99772573  nlp= 185.536713  q= [1.8545866]
+  [nlp] ll= -184.105789  prior= -2.00809669  nlp= 186.113892  q= [1.87194645]
+  [nlp] ll= -184.105789  prior= -2.00809669  nlp= 186.113892  q= [1.87194645]
+  [nlp] ll= -184.674942  prior= -2.01629066  nlp= 186.691238  q= [1.88563251]
+  [nlp] ll= -184.674942  prior= -2.01629066  nlp= 186.691238  q= [1.88563251]
+  [nlp] ll= -185.074768  prior= -2.0223043  nlp= 187.097076  q= [1.89566088]
+  [nlp] ll= -185.074768  prior= -2.0223043  nlp= 187.097076  q= [1.89566088]
+  [nlp] ll= -185.335281  prior= -2.02613473  nlp= 187.36142  q= [1.9020412]
+  [nlp] ll= -185.335281  prior= -2.02613473  nlp= 187.36142  q= [1.9020412]
+  [nlp] ll= -185.340912  prior= -2.02777624  nlp= 187.368683  q= [1.90477431]
+  [nlp] ll= -185.340912  prior= -2.02777624  nlp= 187.368683  q= [1.90477431]
+  [nlp] ll= -170.204956  prior= -1.797261  nlp= 172.002213  q= [1.50762582]
+  [nlp] ll= -170.204956  prior= -1.797261  nlp= 172.002213  q= [1.50762582]
+  [nlp] ll= -85.2463684  prior= -1.32061267  nlp= 86.5669785  q= [-0.10146296]
+  [nlp] ll= -85.2463684  prior= -1.32061267  nlp= 86.5669785  q= [-0.10146296]
+  [nlp] ll= 208.849731  prior= -7.99372768  nlp= -200.856  q= [-3.74681568]
+  [nlp] ll= 208.849731  prior= -7.99372768  nlp= -200.856  q= [-3.74681568]
+  [nlp] ll= -173974848  prior= -34.7584457  nlp= 173974880  q= [-8.22657585]
+  [nlp] ll= -173974848  prior= -34.7584457  nlp= 173974880  q= [-8.22657585]
+  [nlp] ll= -1820.71814  prior= -167.649124  nlp= 1988.36731  q= [32225134]
+  [nlp] ll= -1820.71814  prior= -167.649124  nlp= 1988.36731  q= [32225134]
+  [nlp] ll= -177.681686  prior= -1.90582228  nlp= 179.587509  q= [1.69859755]
+  [nlp] ll= -177.681686  prior= -1.90582228  nlp= 179.587509  q= [1.69859755]
+  [nlp] ll= -161.540924  prior= -1.68437064  nlp= 163.225296  q= [1.29706538]
+  [nlp] ll= -161.540924  prior= -1.68437064  nlp= 163.225296  q= [1.29706538]
+  [nlp] ll= -131.968979  prior= -1.41719103  nlp= 133.386169  q= [0.675767958]
+  [nlp] ll= -131.968979  prior= -1.41719103  nlp= 133.386169  q= [0.675767958]
+  [nlp] ll= -77.4101944  prior= -1.33768773  nlp= 78.747879  q= [-0.213126957]
+  [nlp] ll= -77.4101944  prior= -1.33768773  nlp= 78.747879  q= [-0.213126957]
+  [nlp] ll= 24.2853851  prior= -2.24907637  nlp= -22.0363083  q= [-1.46075439]
+  [nlp] ll= 24.2853851  prior= -2.24907637  nlp= -22.0363083  q= [-1.46075439]
+  [nlp] ll= -178.577484  prior= -1.91889787  nlp= 180.496384  q= [1.7210573]
+  [nlp] ll= -178.577484  prior= -1.91889787  nlp= 180.496384  q= [1.7210573]
+  [nlp] ll= -163.48439  prior= -1.70841861  nlp= 165.19281  q= [1.34326673]
+  [nlp] ll= -163.48439  prior= -1.70841861  nlp= 165.19281  q= [1.34326673]
+  [nlp] ll= -135.778519  prior= -1.44190323  nlp= 137.220428  q= [0.748827457]
+  [nlp] ll= -135.778519  prior= -1.44190323  nlp= 137.220428  q= [0.748827457]
+  [nlp] ll= -84.861557  prior= -1.32122207  nlp= 86.1827774  q= [-0.106776953]
+  [nlp] ll= -84.861557  prior= -1.32122207  nlp= 86.1827774  q= [-0.106776953]
+  [nlp] ll= 10.8128386  prior= -2.06100845  nlp= -8.75183  q= [-1.30996859]
+  [nlp] ll= 10.8128386  prior= -2.06100845  nlp= -8.75183  q= [-1.30996859]
+  [nlp] ll= -179.289322  prior= -1.93099642  nlp= 181.220322  q= [1.7417531]
+  [nlp] ll= -179.289322  prior= -1.93099642  nlp= 181.220322  q= [1.7417531]
+  [nlp] ll= -165.298828  prior= -1.73079777  nlp= 167.029633  q= [1.38553989]
+  [nlp] ll= -165.298828  prior= -1.73079777  nlp= 167.029633  q= [1.38553989]
+  [nlp] ll= -139.224319  prior= -1.46618652  nlp= 140.690506  q= [0.815279782]
+  [nlp] ll= -139.224319  prior= -1.46618652  nlp= 140.690506  q= [0.815279782]
+  [nlp] ll= -91.4537659  prior= -1.31324804  nlp= 92.7670135  q= [-0.0109092]
+  [nlp] ll= -91.4537659  prior= -1.31324804  nlp= 92.7670135  q= [-0.0109092]
+  [nlp] ll= -1.04575038  prior= -1.91139495  nlp= 2.95714521  q= [-1.17449749]
+  [nlp] ll= -1.04575038  prior= -1.91139495  nlp= 2.95714521  q= [-1.17449749]
+Creating true model: src.models.linear_gaussian.LinearGaussianModel
+Generating 100 time steps with true params: {'obs_noise_std': 1.0}
+Creating inference model
+Trainable params: ['obs_noise_std']
+
+Running HMC inference...
+Using HMC sampler (num_leapfrog_steps=5)
+Running HMC: 3 burn-in + 2 sampling = 5 total steps
+  [burn-in 1/3] 23.9s | accept=100% | step_size=0.1725 | obs_noise_std=2.0435 | ETA 96s
+  [burn-in 2/3] 23.8s | accept=50% | step_size=0.0712 | obs_noise_std=2.0435 | ETA 72s
+  [burn-in 3/3] 23.8s | accept=33% | step_size=0.0712 | obs_noise_std=2.0435 | ETA 48s
+  [sample 1/2] 23.7s | accept=25% | step_size=0.0712 | obs_noise_std=2.0435 | ETA 24s
+  [sample 2/2] 23.8s | accept=20% | step_size=0.0712 | obs_noise_std=2.0435 | ETA 0s
+HMC complete!
+
+============================================================
+DPF INFERENCE RESULTS
+============================================================
+
+  obs_noise_std:
+    True:           1.0
+    Posterior mean:  2.0435 +/- 0.0000
+    90% CI:         [2.0435, 2.0435]
+    True in 90% CI: NO
+
+Diagnostics:
+  Acceptance rate: 0.0%
+  Final step size: 0.071215
+  ESS: {'obs_noise_std': nan}
+  R-hat: {'obs_noise_std': nan}
+
+Performance:
+  Wall time: 162.2 seconds
+  Peak memory: 56.7 MB
+============================================================
+
+Results saved to /home/haowu/JPML/code/outputs/dpf/linear_gaussian_ledh_hmc_soft
+
+========================================
+[3/24] linear_gaussian_ledh_hmc_ot
+========================================
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1771569276.049633 1690117 gpu_device.cc:2020] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 22322 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3090, pci bus id: 0000:01:00.0, compute capability: 8.6
+I0000 00:00:1771569276.268990 1690117 cuda_solvers.cc:175] Creating GpuSolver handles for stream 0x42b35190
+  [nlp] ll= -195.559418  prior= -1.99772573  nlp= 197.557144  q= [1.8545866]
+  [nlp] ll= -195.559418  prior= -1.99772573  nlp= 197.557144  q= [1.8545866]
+  [nlp] ll= -196.099487  prior= -2.00859284  nlp= 198.108078  q= [1.87277603]
+  [nlp] ll= -196.099487  prior= -2.00859284  nlp= 198.108078  q= [1.87277603]
+  [nlp] ll= -196.533707  prior= -2.01848769  nlp= 198.5522  q= [1.88929796]
+  [nlp] ll= -196.533707  prior= -2.01848769  nlp= 198.5522  q= [1.88929796]
+  [nlp] ll= -197.229935  prior= -2.02793264  nlp= 199.257874  q= [1.9050349]
+  [nlp] ll= -197.229935  prior= -2.02793264  nlp= 199.257874  q= [1.9050349]
+  [nlp] ll= -197.147888  prior= -2.0349803  nlp= 199.182861  q= [1.91675591]
+  [nlp] ll= -197.147888  prior= -2.0349803  nlp= 199.182861  q= [1.91675591]
+  [nlp] ll= -197.417786  prior= -2.03882337  nlp= 199.456604  q= [1.92314053]
+  [nlp] ll= -197.417786  prior= -2.03882337  nlp= 199.456604  q= [1.92314053]
+  [nlp] ll= -190.136566  prior= -1.87977648  nlp= 192.016342  q= [1.65355086]
+  [nlp] ll= -190.136566  prior= -1.87977648  nlp= 192.016342  q= [1.65355086]
+  [nlp] ll= -166.790741  prior= -1.48320186  nlp= 168.273941  q= [0.859388471]
+  [nlp] ll= -166.790741  prior= -1.48320186  nlp= 168.273941  q= [0.859388471]
+  [nlp] ll= -44.955986  prior= -1.5796411  nlp= 46.5356255  q= [-0.784554362]
+  [nlp] ll= -44.955986  prior= -1.5796411  nlp= 46.5356255  q= [-0.784554362]
+  [nlp] ll= 116.926445  prior= -9.81963062  nlp= -107.106812  q= [-4.21004677]
+  [nlp] ll= 116.926445  prior= -9.81963062  nlp= -107.106812  q= [-4.21004677]
+  [nlp] ll= -83.4839096  prior= -12.940567  nlp= 96.4244766  q= [-4.89891958]
+  [nlp] ll= -83.4839096  prior= -12.940567  nlp= 96.4244766  q= [-4.89891958]
+  [nlp] ll= -193.493683  prior= -1.95250154  nlp= 195.446182  q= [1.77834785]
+  [nlp] ll= -193.493683  prior= -1.95250154  nlp= 195.446182  q= [1.77834785]
+  [nlp] ll= -186.68898  prior= -1.82173085  nlp= 188.510712  q= [1.5514704]
+  [nlp] ll= -186.68898  prior= -1.82173085  nlp= 188.510712  q= [1.5514704]
+  [nlp] ll= -177.529724  prior= -1.64969933  nlp= 179.179428  q= [1.22884083]
+  [nlp] ll= -177.529724  prior= -1.64969933  nlp= 179.179428  q= [1.22884083]
+  [nlp] ll= -165.904572  prior= -1.48677349  nlp= 167.391342  q= [0.868426442]
+  [nlp] ll= -165.904572  prior= -1.48677349  nlp= 167.391342  q= [0.868426442]
+  [nlp] ll= -140.422089  prior= -1.33871174  nlp= 141.760803  q= [0.365653872]
+  [nlp] ll= -140.422089  prior= -1.33871174  nlp= 141.760803  q= [0.365653872]
+  [nlp] ll= -193.64415  prior= -1.9624083  nlp= 195.606552  q= [1.79512858]
+  [nlp] ll= -193.64415  prior= -1.9624083  nlp= 195.606552  q= [1.79512858]
+  [nlp] ll= -188.361832  prior= -1.83508134  nlp= 190.196915  q= [1.57517624]
+  [nlp] ll= -188.361832  prior= -1.83508134  nlp= 190.196915  q= [1.57517624]
+  [nlp] ll= -179.369156  prior= -1.69233084  nlp= 181.061493  q= [1.31245315]
+  [nlp] ll= -179.369156  prior= -1.69233084  nlp= 181.061493  q= [1.31245315]
+  [nlp] ll= -166.293518  prior= -1.48500502  nlp= 167.778519  q= [0.863960505]
+  [nlp] ll= -166.293518  prior= -1.48500502  nlp= 167.778519  q= [0.863960505]
+  [nlp] ll= -135.503922  prior= -1.32888281  nlp= 136.832809  q= [0.304280519]
+  [nlp] ll= -135.503922  prior= -1.32888281  nlp= 136.832809  q= [0.304280519]
+  [nlp] ll= -194.182022  prior= -1.97156155  nlp= 196.15358  q= [1.81059146]
+  [nlp] ll= -194.182022  prior= -1.97156155  nlp= 196.15358  q= [1.81059146]
+  [nlp] ll= -189.008881  prior= -1.85906458  nlp= 190.86795  q= [1.61741126]
+  [nlp] ll= -189.008881  prior= -1.85906458  nlp= 190.86795  q= [1.61741126]
+  [nlp] ll= -182.498734  prior= -1.72703791  nlp= 184.225769  q= [1.37848306]
+  [nlp] ll= -182.498734  prior= -1.72703791  nlp= 184.225769  q= [1.37848306]
+  [nlp] ll= -173.870621  prior= -1.58218193  nlp= 175.452805  q= [1.08914065]
+  [nlp] ll= -173.870621  prior= -1.58218193  nlp= 175.452805  q= [1.08914065]
+  [nlp] ll= -152.329514  prior= -1.38604784  nlp= 153.715561  q= [0.57240051]
+  [nlp] ll= -152.329514  prior= -1.38604784  nlp= 153.715561  q= [0.57240051]
+Creating true model: src.models.linear_gaussian.LinearGaussianModel
+Generating 100 time steps with true params: {'obs_noise_std': 1.0}
+Creating inference model
+Trainable params: ['obs_noise_std']
+
+Running HMC inference...
+Using HMC sampler (num_leapfrog_steps=5)
+Running HMC: 3 burn-in + 2 sampling = 5 total steps
+  [burn-in 1/3] 27.6s | accept=100% | step_size=0.1347 | obs_noise_std=2.0595 | ETA 110s
+  [burn-in 2/3] 30.7s | accept=50% | step_size=0.0532 | obs_noise_std=2.0595 | ETA 87s
+  [burn-in 3/3] 28.2s | accept=33% | step_size=0.0532 | obs_noise_std=2.0595 | ETA 58s
+  [sample 1/2] 28.1s | accept=25% | step_size=0.0532 | obs_noise_std=2.0595 | ETA 29s
+  [sample 2/2] 28.3s | accept=20% | step_size=0.0532 | obs_noise_std=2.0595 | ETA 0s
+HMC complete!
+
+============================================================
+DPF INFERENCE RESULTS
+============================================================
+
+  obs_noise_std:
+    True:           1.0
+    Posterior mean:  2.0595 +/- 0.0000
+    90% CI:         [2.0595, 2.0595]
+    True in 90% CI: NO
+
+Diagnostics:
+  Acceptance rate: 0.0%
+  Final step size: 0.053208
+  ESS: {'obs_noise_std': nan}
+  R-hat: {'obs_noise_std': nan}
+
+Performance:
+  Wall time: 190.9 seconds
+  Peak memory: 59.2 MB
+============================================================
+
+Results saved to /home/haowu/JPML/code/outputs/dpf/linear_gaussian_ledh_hmc_ot
+
+========================================
+[4/24] linear_gaussian_bpf_hmc_sys
+========================================
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1771569472.119315 1691737 gpu_device.cc:2020] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 22322 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3090, pci bus id: 0000:01:00.0, compute capability: 8.6
+I0000 00:00:1771569472.337058 1691737 cuda_solvers.cc:175] Creating GpuSolver handles for stream 0x15ce3c10
+  [nlp] ll= -202.900406  prior= -1.99772573  nlp= 204.898132  q= [1.8545866]
+  [nlp] ll= -202.900406  prior= -1.99772573  nlp= 204.898132  q= [1.8545866]
+  [nlp] ll= -203.372238  prior= -2.00860453  nlp= 205.380844  q= [1.8727951]
+  [nlp] ll= -203.372238  prior= -2.00860453  nlp= 205.380844  q= [1.8727951]
+  [nlp] ll= -203.759888  prior= -2.01834106  nlp= 205.778229  q= [1.8890537]
+  [nlp] ll= -203.759888  prior= -2.01834106  nlp= 205.778229  q= [1.8890537]
+  [nlp] ll= -204.125565  prior= -2.02689791  nlp= 206.152466  q= [1.90331244]
+  [nlp] ll= -204.125565  prior= -2.02689791  nlp= 206.152466  q= [1.90331244]
+  [nlp] ll= -204.259811  prior= -2.03427839  nlp= 206.294083  q= [1.91558945]
+  [nlp] ll= -204.259811  prior= -2.03427839  nlp= 206.294083  q= [1.91558945]
+  [nlp] ll= -204.632477  prior= -2.04047155  nlp= 206.672943  q= [1.92587709]
+  [nlp] ll= -204.632477  prior= -2.04047155  nlp= 206.672943  q= [1.92587709]
+  [nlp] ll= -204.275299  prior= -2.02972317  nlp= 206.305023  q= [1.90801406]
+  [nlp] ll= -204.275299  prior= -2.02972317  nlp= 206.305023  q= [1.90801406]
+  [nlp] ll= -199.900726  prior= -1.90202248  nlp= 201.80275  q= [1.69205213]
+  [nlp] ll= -199.900726  prior= -1.90202248  nlp= 201.80275  q= [1.69205213]
+  [nlp] ll= -191.790649  prior= -1.67936122  nlp= 193.470016  q= [1.2873317]
+  [nlp] ll= -191.790649  prior= -1.67936122  nlp= 193.470016  q= [1.2873317]
+  [nlp] ll= -184.509415  prior= -1.43452561  nlp= 185.943939  q= [0.727665901]
+  [nlp] ll= -184.509415  prior= -1.43452561  nlp= 185.943939  q= [0.727665901]
+  [nlp] ll= -185.253082  prior= -1.31163287  nlp= 186.564713  q= [0.095797956]
+  [nlp] ll= -185.253082  prior= -1.31163287  nlp= 186.564713  q= [0.095797956]
+  [nlp] ll= -187.377563  prior= -1.31673455  nlp= 188.694305  q= [-0.0623186976]
+  [nlp] ll= -187.377563  prior= -1.31673455  nlp= 188.694305  q= [-0.0623186976]
+  [nlp] ll= -186.195602  prior= -1.31261039  nlp= 187.508209  q= [0.00305166095]
+  [nlp] ll= -186.195602  prior= -1.31261039  nlp= 187.508209  q= [0.00305166095]
+  [nlp] ll= -183.855545  prior= -1.32529545  nlp= 185.180847  q= [0.27790153]
+  [nlp] ll= -183.855545  prior= -1.32529545  nlp= 185.180847  q= [0.27790153]
+  [nlp] ll= -184.250656  prior= -1.40313911  nlp= 185.653793  q= [0.631014824]
+  [nlp] ll= -184.250656  prior= -1.40313911  nlp= 185.653793  q= [0.631014824]
+  [nlp] ll= -186.207809  prior= -1.48659158  nlp= 187.694397  q= [0.867967844]
+  [nlp] ll= -186.207809  prior= -1.48659158  nlp= 187.694397  q= [0.867967844]
+  [nlp] ll= -183.667053  prior= -1.38541329  nlp= 185.05246  q= [0.57011795]
+  [nlp] ll= -183.667053  prior= -1.38541329  nlp= 185.05246  q= [0.57011795]
+  [nlp] ll= -184.277008  prior= -1.31515527  nlp= 185.592163  q= [0.175435126]
+  [nlp] ll= -184.277008  prior= -1.31515527  nlp= 185.592163  q= [0.175435126]
+  [nlp] ll= -187.097382  prior= -1.31736588  nlp= 188.414749  q= [-0.0694981664]
+  [nlp] ll= -187.097382  prior= -1.31736588  nlp= 188.414749  q= [-0.0694981664]
+  [nlp] ll= -188.254242  prior= -1.32004952  nlp= 189.574295  q= [-0.0963898525]
+  [nlp] ll= -188.254242  prior= -1.32004952  nlp= 189.574295  q= [-0.0963898525]
+  [nlp] ll= -185.115601  prior= -1.31215203  nlp= 186.42775  q= [0.115960367]
+  [nlp] ll= -185.115601  prior= -1.31215203  nlp= 186.42775  q= [0.115960367]
+  [nlp] ll= -185.623184  prior= -1.31149447  nlp= 186.934677  q= [0.0435223207]
+  [nlp] ll= -185.623184  prior= -1.31149447  nlp= 186.934677  q= [0.0435223207]
+  [nlp] ll= -184.145416  prior= -1.31445336  nlp= 185.459869  q= [0.164706692]
+  [nlp] ll= -184.145416  prior= -1.31445336  nlp= 185.459869  q= [0.164706692]
+  [nlp] ll= -183.354141  prior= -1.34873414  nlp= 184.702881  q= [0.418261647]
+  [nlp] ll= -183.354141  prior= -1.34873414  nlp= 184.702881  q= [0.418261647]
+  [nlp] ll= -184.462036  prior= -1.41574275  nlp= 185.877777  q= [0.671276689]
+  [nlp] ll= -184.462036  prior= -1.41574275  nlp= 185.877777  q= [0.671276689]
+  [nlp] ll= -184.866257  prior= -1.45582664  nlp= 186.322083  q= [0.787482619]
+  [nlp] ll= -184.866257  prior= -1.45582664  nlp= 186.322083  q= [0.787482619]
+Creating true model: src.models.linear_gaussian.LinearGaussianModel
+Generating 100 time steps with true params: {'obs_noise_std': 1.0}
+Creating inference model
+Trainable params: ['obs_noise_std']
+
+Running HMC inference...
+Using HMC sampler (num_leapfrog_steps=5)
+Running HMC: 3 burn-in + 2 sampling = 5 total steps
+  [burn-in 1/3] 1.0s | accept=100% | step_size=0.0996 | obs_noise_std=2.0619 | ETA 4s
+  [burn-in 2/3] 1.0s | accept=100% | step_size=0.1516 | obs_noise_std=0.7422 | ETA 3s
+  [burn-in 3/3] 1.0s | accept=100% | step_size=0.1516 | obs_noise_std=1.2185 | ETA 2s
+  [sample 1/2] 1.0s | accept=100% | step_size=0.1516 | obs_noise_std=0.7528 | ETA 1s
+  [sample 2/2] 1.0s | accept=100% | step_size=0.1516 | obs_noise_std=1.1625 | ETA 0s
+HMC complete!
+
+============================================================
+DPF INFERENCE RESULTS
+============================================================
+
+  obs_noise_std:
+    True:           1.0
+    Posterior mean:  0.9576 +/- 0.2048
+    90% CI:         [0.7733, 1.1420]
+    True in 90% CI: YES
+
+Diagnostics:
+  Acceptance rate: 100.0%
+  Final step size: 0.151573
+  ESS: {'obs_noise_std': nan}
+  R-hat: {'obs_noise_std': nan}
+
+Performance:
+  Wall time: 8.5 seconds
+  Peak memory: 4.3 MB
+============================================================
+
+Results saved to /home/haowu/JPML/code/outputs/dpf/linear_gaussian_bpf_hmc_sys
+
+========================================
+[5/24] linear_gaussian_bpf_hmc_soft
+========================================
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1771569484.751845 1692171 gpu_device.cc:2020] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 22322 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3090, pci bus id: 0000:01:00.0, compute capability: 8.6
+I0000 00:00:1771569484.967730 1692171 cuda_solvers.cc:175] Creating GpuSolver handles for stream 0xcada6c0
+  [nlp] ll= -202.888031  prior= -1.99772573  nlp= 204.885757  q= [1.8545866]
+  [nlp] ll= -202.888031  prior= -1.99772573  nlp= 204.885757  q= [1.8545866]
+  [nlp] ll= -203.314331  prior= -2.00857663  nlp= 205.322906  q= [1.87274897]
+  [nlp] ll= -203.314331  prior= -2.00857663  nlp= 205.322906  q= [1.87274897]
+  [nlp] ll= -203.937546  prior= -2.01820517  nlp= 205.95575  q= [1.88882637]
+  [nlp] ll= -203.937546  prior= -2.01820517  nlp= 205.95575  q= [1.88882637]
+  [nlp] ll= -204.115524  prior= -2.02660131  nlp= 206.14212  q= [1.9028182]
+  [nlp] ll= -204.115524  prior= -2.02660131  nlp= 206.14212  q= [1.9028182]
+  [nlp] ll= -204.497498  prior= -2.03375983  nlp= 206.53125  q= [1.91472709]
+  [nlp] ll= -204.497498  prior= -2.03375983  nlp= 206.53125  q= [1.91472709]
+  [nlp] ll= -204.283905  prior= -2.03967047  nlp= 206.323578  q= [1.92454672]
+  [nlp] ll= -204.283905  prior= -2.03967047  nlp= 206.323578  q= [1.92454672]
+  [nlp] ll= -201.0047  prior= -1.93901575  nlp= 202.94371  q= [1.75542724]
+  [nlp] ll= -201.0047  prior= -1.93901575  nlp= 202.94371  q= [1.75542724]
+  [nlp] ll= -186.95813  prior= -1.53381395  nlp= 188.491943  q= [0.981604457]
+  [nlp] ll= -186.95813  prior= -1.53381395  nlp= 188.491943  q= [0.981604457]
+  [nlp] ll= -190.099335  prior= -1.32818604  nlp= 191.427521  q= [-0.158378124]
+  [nlp] ll= -190.099335  prior= -1.32818604  nlp= 191.427521  q= [-0.158378124]
+  [nlp] ll= -210.883072  prior= -1.61346734  nlp= 212.496536  q= [-0.833510697]
+  [nlp] ll= -210.883072  prior= -1.61346734  nlp= 212.496536  q= [-0.833510697]
+  [nlp] ll= -200.919113  prior= -1.42469394  nlp= 202.343811  q= [-0.498853058]
+  [nlp] ll= -200.919113  prior= -1.42469394  nlp= 202.343811  q= [-0.498853058]
+  [nlp] ll= -201.189041  prior= -1.93755484  nlp= 203.126602  q= [1.75293887]
+  [nlp] ll= -201.189041  prior= -1.93755484  nlp= 203.126602  q= [1.75293887]
+  [nlp] ll= -195.151123  prior= -1.7798245  nlp= 196.930954  q= [1.47604692]
+  [nlp] ll= -195.151123  prior= -1.7798245  nlp= 196.930954  q= [1.47604692]
+  [nlp] ll= -188.81543  prior= -1.5879575  nlp= 190.403381  q= [1.10151267]
+  [nlp] ll= -188.81543  prior= -1.5879575  nlp= 190.403381  q= [1.10151267]
+  [nlp] ll= -183.924301  prior= -1.41005111  nlp= 185.334351  q= [0.653365791]
+  [nlp] ll= -183.924301  prior= -1.41005111  nlp= 185.334351  q= [0.653365791]
+  [nlp] ll= -184.072479  prior= -1.31540382  nlp= 185.387878  q= [0.178998798]
+  [nlp] ll= -184.072479  prior= -1.31540382  nlp= 185.387878  q= [0.178998798]
+  [nlp] ll= -186.49086  prior= -1.31181479  nlp= 187.802673  q= [0.104070537]
+  [nlp] ll= -186.49086  prior= -1.31181479  nlp= 187.802673  q= [0.104070537]
+  [nlp] ll= -185.688324  prior= -1.31140482  nlp= 186.999725  q= [0.0798734054]
+  [nlp] ll= -185.688324  prior= -1.31140482  nlp= 186.999725  q= [0.0798734054]
+  [nlp] ll= -185.566635  prior= -1.31182075  nlp= 186.878448  q= [0.104306728]
+  [nlp] ll= -185.566635  prior= -1.31182075  nlp= 186.878448  q= [0.104306728]
+  [nlp] ll= -184.215881  prior= -1.3152113  nlp= 185.531097  q= [0.176247567]
+  [nlp] ll= -184.215881  prior= -1.3152113  nlp= 185.531097  q= [0.176247567]
+  [nlp] ll= -182.93924  prior= -1.32559717  nlp= 184.264832  q= [0.280235529]
+  [nlp] ll= -182.93924  prior= -1.32559717  nlp= 184.264832  q= [0.280235529]
+  [nlp] ll= -183.576935  prior= -1.31829023  nlp= 184.895218  q= [0.214443892]
+  [nlp] ll= -183.576935  prior= -1.31829023  nlp= 184.895218  q= [0.214443892]
+  [nlp] ll= -184.958359  prior= -1.31505179  nlp= 186.273407  q= [0.173918456]
+  [nlp] ll= -184.958359  prior= -1.31505179  nlp= 186.273407  q= [0.173918456]
+  [nlp] ll= -184.703659  prior= -1.31522381  nlp= 186.01889  q= [0.176428124]
+  [nlp] ll= -184.703659  prior= -1.31522381  nlp= 186.01889  q= [0.176428124]
+  [nlp] ll= -182.803696  prior= -1.31817544  nlp= 184.121872  q= [0.213191092]
+  [nlp] ll= -182.803696  prior= -1.31817544  nlp= 184.121872  q= [0.213191092]
+  [nlp] ll= -184.261978  prior= -1.32478952  nlp= 185.586761  q= [0.273931533]
+  [nlp] ll= -184.261978  prior= -1.32478952  nlp= 185.586761  q= [0.273931533]
+Creating true model: src.models.linear_gaussian.LinearGaussianModel
+Generating 100 time steps with true params: {'obs_noise_std': 1.0}
+Creating inference model
+Trainable params: ['obs_noise_std']
+
+Running HMC inference...
+Using HMC sampler (num_leapfrog_steps=5)
+Running HMC: 3 burn-in + 2 sampling = 5 total steps
+  [burn-in 1/3] 1.1s | accept=100% | step_size=0.1725 | obs_noise_std=2.0608 | ETA 4s
+  [burn-in 2/3] 1.1s | accept=50% | step_size=0.0726 | obs_noise_std=2.0608 | ETA 3s
+  [burn-in 3/3] 1.1s | accept=67% | step_size=0.0726 | obs_noise_std=0.7866 | ETA 2s
+  [sample 1/2] 1.2s | accept=75% | step_size=0.0726 | obs_noise_std=0.8430 | ETA 1s
+  [sample 2/2] 1.1s | accept=60% | step_size=0.0726 | obs_noise_std=0.8430 | ETA 0s
+HMC complete!
+
+============================================================
+DPF INFERENCE RESULTS
+============================================================
+
+  obs_noise_std:
+    True:           1.0
+    Posterior mean:  0.8430 +/- 0.0000
+    90% CI:         [0.8430, 0.8430]
+    True in 90% CI: NO
+
+Diagnostics:
+  Acceptance rate: 50.0%
+  Final step size: 0.072588
+  ESS: {'obs_noise_std': nan}
+  R-hat: {'obs_noise_std': nan}
+
+Performance:
+  Wall time: 9.5 seconds
+  Peak memory: 5.0 MB
+============================================================
+
+Results saved to /home/haowu/JPML/code/outputs/dpf/linear_gaussian_bpf_hmc_soft
+
+========================================
+[6/24] linear_gaussian_bpf_hmc_ot
+========================================
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1771569498.374083 1692608 gpu_device.cc:2020] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 22322 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3090, pci bus id: 0000:01:00.0, compute capability: 8.6
+I0000 00:00:1771569498.591128 1692608 cuda_solvers.cc:175] Creating GpuSolver handles for stream 0x8f9d660
+  [nlp] ll= -230.706848  prior= -1.99772573  nlp= 232.704575  q= [1.8545866]
+  [nlp] ll= -230.706848  prior= -1.99772573  nlp= 232.704575  q= [1.8545866]
+  [nlp] ll= -230.602081  prior= -2.01031232  nlp= 232.612396  q= [1.87564993]
+  [nlp] ll= -230.602081  prior= -2.01031232  nlp= 232.612396  q= [1.87564993]
+  [nlp] ll= -229.880753  prior= -2.02105427  nlp= 231.90181  q= [1.89357746]
+  [nlp] ll= -229.880753  prior= -2.02105427  nlp= 231.90181  q= [1.89357746]
+  [nlp] ll= -229.88472  prior= -2.03179598  nlp= 231.916519  q= [1.91146219]
+  [nlp] ll= -229.88472  prior= -2.03179598  nlp= 231.916519  q= [1.91146219]
+  [nlp] ll= -230.934082  prior= -2.04018378  nlp= 232.974258  q= [1.92539907]
+  [nlp] ll= -230.934082  prior= -2.04018378  nlp= 232.974258  q= [1.92539907]
+  [nlp] ll= -230.552338  prior= -2.04476023  nlp= 232.597092  q= [1.93299317]
+  [nlp] ll= -230.552338  prior= -2.04476023  nlp= 232.597092  q= [1.93299317]
+  [nlp] ll= -230.442093  prior= -2.11652064  nlp= 232.558609  q= [2.05124331]
+  [nlp] ll= -230.442093  prior= -2.11652064  nlp= 232.558609  q= [2.05124331]
+  [nlp] ll= -230.669235  prior= -2.28392434  nlp= 232.953156  q= [2.32295442]
+  [nlp] ll= -230.669235  prior= -2.28392434  nlp= 232.953156  q= [2.32295442]
+  [nlp] ll= -230.215637  prior= -2.25408173  nlp= 232.469727  q= [2.27479792]
+  [nlp] ll= -230.215637  prior= -2.25408173  nlp= 232.469727  q= [2.27479792]
+  [nlp] ll= -243.254868  prior= -1.71877766  nlp= 244.973648  q= [1.36291599]
+  [nlp] ll= -243.254868  prior= -1.71877766  nlp= 244.973648  q= [1.36291599]
+  [nlp] ll= -286.023621  prior= -1.32733786  nlp= 287.350952  q= [0.293268085]
+  [nlp] ll= -286.023621  prior= -1.32733786  nlp= 287.350952  q= [0.293268085]
+  [nlp] ll= -232.621536  prior= -1.97394907  nlp= 234.59549  q= [1.81461859]
+  [nlp] ll= -232.621536  prior= -1.97394907  nlp= 234.59549  q= [1.81461859]
+  [nlp] ll= -233.42691  prior= -1.74893475  nlp= 235.175842  q= [1.41933811]
+  [nlp] ll= -233.42691  prior= -1.74893475  nlp= 235.175842  q= [1.41933811]
+  [nlp] ll= -251.801392  prior= -1.50952768  nlp= 253.310913  q= [0.924434423]
+  [nlp] ll= -251.801392  prior= -1.50952768  nlp= 253.310913  q= [0.924434423]
+  [nlp] ll= -274.242096  prior= -1.46227646  nlp= 275.704376  q= [0.804878116]
+  [nlp] ll= -274.242096  prior= -1.46227646  nlp= 275.704376  q= [0.804878116]
+  [nlp] ll= -254.248306  prior= -1.48045874  nlp= 255.72876  q= [0.852397084]
+  [nlp] ll= -254.248306  prior= -1.48045874  nlp= 255.72876  q= [0.852397084]
+  [nlp] ll= -231.419083  prior= -1.98729253  nlp= 233.406372  q= [1.83707833]
+  [nlp] ll= -231.419083  prior= -1.98729253  nlp= 233.406372  q= [1.83707833]
+  [nlp] ll= -231.262878  prior= -1.94502676  nlp= 233.207901  q= [1.76565504]
+  [nlp] ll= -231.262878  prior= -1.94502676  nlp= 233.207901  q= [1.76565504]
+  [nlp] ll= -234.155899  prior= -1.87553477  nlp= 236.031433  q= [1.64617372]
+  [nlp] ll= -234.155899  prior= -1.87553477  nlp= 236.031433  q= [1.64617372]
+  [nlp] ll= -237.682968  prior= -1.82370675  nlp= 239.506668  q= [1.55498791]
+  [nlp] ll= -237.682968  prior= -1.82370675  nlp= 239.506668  q= [1.55498791]
+  [nlp] ll= -249.663818  prior= -1.68676722  nlp= 251.350586  q= [1.30170846]
+  [nlp] ll= -249.663818  prior= -1.68676722  nlp= 251.350586  q= [1.30170846]
+  [nlp] ll= -230.521408  prior= -1.99962807  nlp= 232.521042  q= [1.85777426]
+  [nlp] ll= -230.521408  prior= -1.99962807  nlp= 232.521042  q= [1.85777426]
+  [nlp] ll= -251.9953  prior= -1.67613423  nlp= 253.671432  q= [1.28104]
+  [nlp] ll= -251.9953  prior= -1.67613423  nlp= 253.671432  q= [1.28104]
+  [nlp] ll= -273.769897  prior= -1.4474225  nlp= 275.217316  q= [0.764341056]
+  [nlp] ll= -273.769897  prior= -1.4474225  nlp= 275.217316  q= [0.764341056]
+  [nlp] ll= -294.993805  prior= -1.33460367  nlp= 296.3284  q= [0.341524452]
+  [nlp] ll= -294.993805  prior= -1.33460367  nlp= 296.3284  q= [0.341524452]
+  [nlp] ll= -278.837  prior= -1.32533538  nlp= 280.162354  q= [0.278211147]
+  [nlp] ll= -278.837  prior= -1.32533538  nlp= 280.162354  q= [0.278211147]
+Creating true model: src.models.linear_gaussian.LinearGaussianModel
+Generating 100 time steps with true params: {'obs_noise_std': 1.0}
+Creating inference model
+Trainable params: ['obs_noise_std']
+
+Running HMC inference...
+Using HMC sampler (num_leapfrog_steps=5)
+Running HMC: 3 burn-in + 2 sampling = 5 total steps
+  [burn-in 1/3] 5.9s | accept=100% | step_size=0.1725 | obs_noise_std=2.0681 | ETA 24s
+  [burn-in 2/3] 6.5s | accept=50% | step_size=0.0712 | obs_noise_std=2.0681 | ETA 19s
+  [burn-in 3/3] 8.0s | accept=33% | step_size=0.0712 | obs_noise_std=2.0681 | ETA 14s
+  [sample 1/2] 6.5s | accept=25% | step_size=0.0712 | obs_noise_std=2.0681 | ETA 7s
+  [sample 2/2] 8.6s | accept=20% | step_size=0.0712 | obs_noise_std=2.0681 | ETA 0s
+HMC complete!
+
+============================================================
+DPF INFERENCE RESULTS
+============================================================
+
+  obs_noise_std:
+    True:           1.0
+    Posterior mean:  2.0681 +/- 0.0000
+    90% CI:         [2.0681, 2.0681]
+    True in 90% CI: NO
+
+Diagnostics:
+  Acceptance rate: 0.0%
+  Final step size: 0.071215
+  ESS: {'obs_noise_std': nan}
+  R-hat: {'obs_noise_std': nan}
+
+Performance:
+  Wall time: 43.9 seconds
+  Peak memory: 7.2 MB
+============================================================
+
+Results saved to /home/haowu/JPML/code/outputs/dpf/linear_gaussian_bpf_hmc_ot
+
+========================================
+[7/24] cubic_sensor_ledh_hmc_sys
+========================================
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1771569546.392287 1693304 gpu_device.cc:2020] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 22322 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3090, pci bus id: 0000:01:00.0, compute capability: 8.6
+I0000 00:00:1771569548.758478 1693395 cuda_solvers.cc:175] Creating GpuSolver handles for stream 0x28301b50
+  [nlp] ll= -200.36824  prior= -5.82800817  nlp= 206.196243  q= [4.9932394 1.8545866]
+  [nlp] ll= -200.36824  prior= -5.82800817  nlp= 206.196243  q= [4.9932394 1.8545866]
+  [nlp] ll= -200.035477  prior= -5.83129263  nlp= 205.866776  q= [5.01233816 1.84372187]
+  [nlp] ll= -200.035477  prior= -5.83129263  nlp= 205.866776  q= [5.01233816 1.84372187]
+  [nlp] ll= -199.423019  prior= -5.83197689  nlp= 205.25499  q= [5.0312233 1.82868242]
+  [nlp] ll= -199.423019  prior= -5.83197689  nlp= 205.25499  q= [5.0312233 1.82868242]
+  [nlp] ll= -198.603241  prior= -5.83006668  nlp= 204.433304  q= [5.04989719 1.80944371]
+  [nlp] ll= -198.603241  prior= -5.83006668  nlp= 204.433304  q= [5.04989719 1.80944371]
+  [nlp] ll= -197.664078  prior= -5.82557249  nlp= 203.489655  q= [5.06836224 1.78598142]
+  [nlp] ll= -197.664078  prior= -5.82557249  nlp= 203.489655  q= [5.06836224 1.78598142]
+  [nlp] ll= -196.501617  prior= -5.81851482  nlp= 202.320129  q= [5.08662 1.75827336]
+  [nlp] ll= -196.501617  prior= -5.81851482  nlp= 202.320129  q= [5.08662 1.75827336]
+  [nlp] ll= -171.186356  prior= -5.57213736  nlp= 176.758499  q= [5.20093775 1.20276856]
+  [nlp] ll= -171.186356  prior= -5.57213736  nlp= 176.758499  q= [5.20093775 1.20276856]
+  [nlp] ll= -41.4837227  prior= -5.59184265  nlp= 47.0755653  q= [5.26227045 -0.850644588]
+  [nlp] ll= -41.4837227  prior= -5.59184265  nlp= 47.0755653  q= [5.26227045 -0.850644588]
+  [nlp] ll= -2266385.75  prior= -17.4022064  nlp= 2266403.25  q= [5.22443342 -5.0032]
+  [nlp] ll= -2266385.75  prior= -17.4022064  nlp= 2266403.25  q= [5.22443342 -5.0032]
+  [nlp] ll= -1386.79187  prior= -inf  nlp= inf  q= [-59080.125 420407.469]
+  [nlp] ll= -1386.79187  prior= -inf  nlp= inf  q= [-59080.125 420407.469]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan 840819.938]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan 840819.938]
+  [nlp] ll= -187.209335  prior= -5.63599396  nlp= 192.845337  q= [4.96757555 1.54635322]
+  [nlp] ll= -187.209335  prior= -5.63599396  nlp= 192.845337  q= [4.96757555 1.54635322]
+  [nlp] ll= -165.620834  prior= -5.3392477  nlp= 170.960083  q= [4.83833122 1.10344815]
+  [nlp] ll= -165.620834  prior= -5.3392477  nlp= 170.960083  q= [4.83833122 1.10344815]
+  [nlp] ll= -125.670692  prior= -5.0224514  nlp= 130.693146  q= [4.69944382 0.398551166]
+  [nlp] ll= -125.670692  prior= -5.0224514  nlp= 130.693146  q= [4.69944382 0.398551166]
+  [nlp] ll= -56.3430138  prior= -5.08035374  nlp= 61.4233665  q= [4.55090904 -0.619917572]
+  [nlp] ll= -56.3430138  prior= -5.08035374  nlp= 61.4233665  q= [4.55090904 -0.619917572]
+  [nlp] ll= 39.9889641  prior= -6.62880802  nlp= -33.360157  q= [4.38802338 -2.00322676]
+  [nlp] ll= 39.9889641  prior= -6.62880802  nlp= -33.360157  q= [4.38802338 -2.00322676]
+  [nlp] ll= 47.3290672  prior= -6.76697206  nlp= -40.5620956  q= [4.27459431 -2.10660911]
+  [nlp] ll= 47.3290672  prior= -6.76697206  nlp= -40.5620956  q= [4.27459431 -2.10660911]
+  [nlp] ll= 67.3107224  prior= -7.49556255  nlp= -59.8151588  q= [4.11283875 -2.48067904]
+  [nlp] ll= 67.3107224  prior= -7.49556255  nlp= -59.8151588  q= [4.11283875 -2.48067904]
+  [nlp] ll= 88.6824112  prior= -8.9298  nlp= -79.7526093  q= [3.88624072 -3.06176281]
+  [nlp] ll= 88.6824112  prior= -8.9298  nlp= -79.7526093  q= [3.88624072 -3.06176281]
+  [nlp] ll= 101.860199  prior= -10.9616985  nlp= -90.8985  q= [3.5726881 -3.72508621]
+  [nlp] ll= 101.860199  prior= -10.9616985  nlp= -90.8985  q= [3.5726881 -3.72508621]
+  [nlp] ll= 105.749969  prior= -13.0832338  nlp= -92.6667328  q= [3.0846839 -4.32992125]
+  [nlp] ll= 105.749969  prior= -13.0832338  nlp= -92.6667328  q= [3.0846839 -4.32992125]
+  [nlp] ll= 46.3244476  prior= -6.75155544  nlp= -39.5728912  q= [4.29529 -2.09310031]
+  [nlp] ll= 46.3244476  prior= -6.75155544  nlp= -39.5728912  q= [4.29529 -2.09310031]
+  [nlp] ll= 65.8428726  prior= -7.45859671  nlp= -58.3842773  q= [4.15458155 -2.45524836]
+  [nlp] ll= 65.8428726  prior= -7.45859671  nlp= -58.3842773  q= [4.15458155 -2.45524836]
+  [nlp] ll= 86.9096222  prior= -8.87513447  nlp= -78.0344849  q= [3.95077729 -3.0310266]
+  [nlp] ll= 86.9096222  prior= -8.87513447  nlp= -78.0344849  q= [3.95077729 -3.0310266]
+  [nlp] ll= 100.13958  prior= -10.9255829  nlp= -89.214  q= [3.66527748 -3.70043588]
+  [nlp] ll= 100.13958  prior= -10.9255829  nlp= -89.214  q= [3.66527748 -3.70043588]
+  [nlp] ll= 103.687668  prior= -12.9229412  nlp= -90.7647247  q= [3.27096534 -4.26589298]
+  [nlp] ll= 103.687668  prior= -12.9229412  nlp= -90.7647247  q= [3.27096534 -4.26589298]
+Creating true model: src.models.cubic_sensor.CubicSensorModel
+Generating 100 time steps with true params: {'sigma_V': 1.0, 'sigma_W': 1.0}
+Creating inference model
+Trainable params: ['sigma_V', 'sigma_W']
+
+Running HMC inference...
+Using HMC sampler (num_leapfrog_steps=5)
+Running HMC: 3 burn-in + 2 sampling = 5 total steps
+  [burn-in 1/3] 28.9s | accept=100% | step_size=0.1725 | sigma_V=5.0928, sigma_W=1.9173 | ETA 116s
+  [burn-in 2/3] 28.8s | accept=50% | step_size=0.0712 | sigma_V=5.0928, sigma_W=1.9173 | ETA 87s
+  [burn-in 3/3] 28.9s | accept=67% | step_size=0.0712 | sigma_V=4.4004, sigma_W=0.1265 | ETA 58s
+  [sample 1/2] 28.8s | accept=50% | step_size=0.0712 | sigma_V=4.4004, sigma_W=0.1265 | ETA 29s
+  [sample 2/2] 28.9s | accept=60% | step_size=0.0712 | sigma_V=3.3082, sigma_W=0.0139 | ETA 0s
+HMC complete!
+
+============================================================
+DPF INFERENCE RESULTS
+============================================================
+
+  sigma_V:
+    True:           1.0
+    Posterior mean:  3.8543 +/- 0.5461
+    90% CI:         [3.3628, 4.3458]
+    True in 90% CI: NO
+
+  sigma_W:
+    True:           1.0
+    Posterior mean:  0.0702 +/- 0.0563
+    90% CI:         [0.0196, 0.1209]
+    True in 90% CI: NO
+
+Diagnostics:
+  Acceptance rate: 50.0%
+  Final step size: 0.071215
+  ESS: {'sigma_V': nan, 'sigma_W': nan}
+  R-hat: {'sigma_V': nan, 'sigma_W': nan}
+
+Performance:
+  Wall time: 190.6 seconds
+  Peak memory: 59.4 MB
+============================================================
+
+Results saved to /home/haowu/JPML/code/outputs/dpf/cubic_sensor_ledh_hmc_sys
+
+========================================
+[8/24] cubic_sensor_ledh_hmc_soft
+========================================
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1771569742.336981 1694908 gpu_device.cc:2020] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 22322 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3090, pci bus id: 0000:01:00.0, compute capability: 8.6
+I0000 00:00:1771569744.712951 1695014 cuda_solvers.cc:175] Creating GpuSolver handles for stream 0x434f8f70
+  [nlp] ll= -200.112885  prior= -5.82800817  nlp= 205.940887  q= [4.9932394 1.8545866]
+  [nlp] ll= -200.112885  prior= -5.82800817  nlp= 205.940887  q= [4.9932394 1.8545866]
+  [nlp] ll= -199.836304  prior= -5.83130026  nlp= 205.667603  q= [5.01233912 1.8437345]
+  [nlp] ll= -199.836304  prior= -5.83130026  nlp= 205.667603  q= [5.01233912 1.8437345]
+  [nlp] ll= -199.286636  prior= -5.83200741  nlp= 205.118637  q= [5.03122807 1.82872915]
+  [nlp] ll= -199.286636  prior= -5.83200741  nlp= 205.118637  q= [5.03122807 1.82872915]
+  [nlp] ll= -198.478958  prior= -5.8301363  nlp= 204.309097  q= [5.04990816 1.80955255]
+  [nlp] ll= -198.478958  prior= -5.8301363  nlp= 204.309097  q= [5.04990816 1.80955255]
+  [nlp] ll= -197.414673  prior= -5.82569838  nlp= 203.240372  q= [5.06838083 1.78617835]
+  [nlp] ll= -197.414673  prior= -5.82569838  nlp= 203.240372  q= [5.06838083 1.78617835]
+  [nlp] ll= -196.426483  prior= -5.81870747  nlp= 202.245193  q= [5.08664894 1.75857615]
+  [nlp] ll= -196.426483  prior= -5.81870747  nlp= 202.245193  q= [5.08664894 1.75857615]
+  [nlp] ll= -182.116943  prior= -5.68258238  nlp= 187.79953  q= [5.18147039 1.43412042]
+  [nlp] ll= -182.116943  prior= -5.68258238  nlp= 187.79953  q= [5.18147039 1.43412042]
+  [nlp] ll= -117.301239  prior= -5.27856159  nlp= 122.579803  q= [5.24261618 0.253537536]
+  [nlp] ll= -117.301239  prior= -5.27856159  nlp= 122.579803  q= [5.24261618 0.253537536]
+  [nlp] ll= 37.3178253  prior= -7.24457455  nlp= -30.0732498  q= [5.27052 -2.08439159]
+  [nlp] ll= 37.3178253  prior= -7.24457455  nlp= -30.0732498  q= [5.27052 -2.08439159]
+  [nlp] ll= nan  prior= -18.7361469  nlp= nan  q= [5.12895536 -5.27293587]
+  [nlp] ll= nan  prior= -18.7361469  nlp= nan  q= [5.12895536 -5.27293587]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= -190.317657  prior= -5.69370365  nlp= 196.011368  q= [4.99841642 1.62040424]
+  [nlp] ll= -190.317657  prior= -5.69370365  nlp= 196.011368  q= [4.99841642 1.62040424]
+  [nlp] ll= -178.092117  prior= -5.49966621  nlp= 183.591782  q= [4.90444803 1.35581088]
+  [nlp] ll= -178.092117  prior= -5.49966621  nlp= 183.591782  q= [4.90444803 1.35581088]
+  [nlp] ll= -157.822052  prior= -5.25523663  nlp= 163.077286  q= [4.80492973 0.954691589]
+  [nlp] ll= -157.822052  prior= -5.25523663  nlp= 163.077286  q= [4.80492973 0.954691589]
+  [nlp] ll= -125.924889  prior= -5.02323437  nlp= 130.94812  q= [4.70010471 0.400782108]
+  [nlp] ll= -125.924889  prior= -5.02323437  nlp= 130.94812  q= [4.70010471 0.400782108]
+  [nlp] ll= -77.3213501  prior= -4.98469687  nlp= 82.3060455  q= [4.58988237 -0.328868151]
+  [nlp] ll= -77.3213501  prior= -4.98469687  nlp= 82.3060455  q= [4.58988237 -0.328868151]
+  [nlp] ll= -72.1938934  prior= -4.96818829  nlp= 77.1620789  q= [4.51794863 -0.399854898]
+  [nlp] ll= -72.1938934  prior= -4.96818829  nlp= 77.1620789  q= [4.51794863 -0.399854898]
+  [nlp] ll= -52.4425125  prior= -5.04859209  nlp= 57.4911041  q= [4.43887043 -0.672375381]
+  [nlp] ll= -52.4425125  prior= -5.04859209  nlp= 57.4911041  q= [4.43887043 -0.672375381]
+  [nlp] ll= -16.9283237  prior= -5.37765884  nlp= 22.3059826  q= [4.35136604 -1.15070868]
+  [nlp] ll= -16.9283237  prior= -5.37765884  nlp= 22.3059826  q= [4.35136604 -1.15070868]
+  [nlp] ll= 30.7019558  prior= -6.25059032  nlp= -24.4513664  q= [4.25201035 -1.83411479]
+  [nlp] ll= 30.7019558  prior= -6.25059032  nlp= -24.4513664  q= [4.25201035 -1.83411479]
+  [nlp] ll= 74.917  prior= -8.03913689  nlp= -66.877861  q= [4.13127422 -2.69428062]
+  [nlp] ll= 74.917  prior= -8.03913689  nlp= -66.877861  q= [4.13127422 -2.69428062]
+  [nlp] ll= 76.2241745  prior= -8.01126671  nlp= -68.2129059  q= [4.05729103 -2.69950485]
+  [nlp] ll= 76.2241745  prior= -8.01126671  nlp= -68.2129059  q= [4.05729103 -2.69950485]
+  [nlp] ll= 81.4446335  prior= -8.19592571  nlp= -73.2487106  q= [3.94114161 -2.79353786]
+  [nlp] ll= 81.4446335  prior= -8.19592571  nlp= -73.2487106  q= [3.94114161 -2.79353786]
+  [nlp] ll= 88.9951096  prior= -8.58679104  nlp= -80.4083176  q= [3.78056717 -2.9658711]
+  [nlp] ll= 88.9951096  prior= -8.58679104  nlp= -80.4083176  q= [3.78056717 -2.9658711]
+  [nlp] ll= 97.8978882  prior= -9.18057251  nlp= -88.7173157  q= [3.56938672 -3.20354438]
+  [nlp] ll= 97.8978882  prior= -9.18057251  nlp= -88.7173157  q= [3.56938672 -3.20354438]
+  [nlp] ll= 107.584061  prior= -9.9465189  nlp= -97.6375427  q= [3.29664922 -3.48594761]
+  [nlp] ll= 107.584061  prior= -9.9465189  nlp= -97.6375427  q= [3.29664922 -3.48594761]
+Creating true model: src.models.cubic_sensor.CubicSensorModel
+Generating 100 time steps with true params: {'sigma_V': 1.0, 'sigma_W': 1.0}
+Creating inference model
+Trainable params: ['sigma_V', 'sigma_W']
+
+Running HMC inference...
+Using HMC sampler (num_leapfrog_steps=5)
+Running HMC: 3 burn-in + 2 sampling = 5 total steps
+  [burn-in 1/3] 28.9s | accept=100% | step_size=0.1350 | sigma_V=5.0928, sigma_W=1.9175 | ETA 115s
+  [burn-in 2/3] 28.9s | accept=50% | step_size=0.0534 | sigma_V=5.0928, sigma_W=1.9175 | ETA 87s
+  [burn-in 3/3] 28.7s | accept=67% | step_size=0.0534 | sigma_V=4.6000, sigma_W=0.5422 | ETA 58s
+  [sample 1/2] 28.8s | accept=75% | step_size=0.0534 | sigma_V=4.1472, sigma_W=0.0654 | ETA 29s
+  [sample 2/2] 28.8s | accept=60% | step_size=0.0534 | sigma_V=4.1472, sigma_W=0.0654 | ETA 0s
+HMC complete!
+
+============================================================
+DPF INFERENCE RESULTS
+============================================================
+
+  sigma_V:
+    True:           1.0
+    Posterior mean:  4.1472 +/- 0.0000
+    90% CI:         [4.1472, 4.1472]
+    True in 90% CI: NO
+
+  sigma_W:
+    True:           1.0
+    Posterior mean:  0.0654 +/- 0.0000
+    90% CI:         [0.0654, 0.0654]
+    True in 90% CI: NO
+
+Diagnostics:
+  Acceptance rate: 50.0%
+  Final step size: 0.053381
+  ESS: {'sigma_V': nan, 'sigma_W': nan}
+  R-hat: {'sigma_V': nan, 'sigma_W': nan}
+
+Performance:
+  Wall time: 191.3 seconds
+  Peak memory: 60.1 MB
+============================================================
+
+Results saved to /home/haowu/JPML/code/outputs/dpf/cubic_sensor_ledh_hmc_soft
+
+========================================
+[9/24] cubic_sensor_ledh_hmc_ot
+========================================
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1771569938.936595 1696509 gpu_device.cc:2020] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 22322 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3090, pci bus id: 0000:01:00.0, compute capability: 8.6
+I0000 00:00:1771569941.279961 1696612 cuda_solvers.cc:175] Creating GpuSolver handles for stream 0xd4bb910
+  [nlp] ll= -201.492447  prior= -5.82800817  nlp= 207.32045  q= [4.9932394 1.8545866]
+  [nlp] ll= -201.492447  prior= -5.82800817  nlp= 207.32045  q= [4.9932394 1.8545866]
+  [nlp] ll= -201.084656  prior= -5.83130217  nlp= 206.915955  q= [5.01233149 1.84374392]
+  [nlp] ll= -201.084656  prior= -5.83130217  nlp= 206.915955  q= [5.01233149 1.84374392]
+  [nlp] ll= -200.50592  prior= -5.83201551  nlp= 206.337936  q= [5.03119755 1.82876956]
+  [nlp] ll= -200.50592  prior= -5.83201551  nlp= 206.337936  q= [5.03119755 1.82876956]
+  [nlp] ll= -199.859634  prior= -5.8301568  nlp= 205.689789  q= [5.04983854 1.80964673]
+  [nlp] ll= -199.859634  prior= -5.8301568  nlp= 205.689789  q= [5.04983854 1.80964673]
+  [nlp] ll= -198.757156  prior= -5.82573795  nlp= 204.582901  q= [5.06825495 1.78635406]
+  [nlp] ll= -198.757156  prior= -5.82573795  nlp= 204.582901  q= [5.06825495 1.78635406]
+  [nlp] ll= -197.642075  prior= -5.81877136  nlp= 203.460846  q= [5.08644962 1.75885689]
+  [nlp] ll= -197.642075  prior= -5.81877136  nlp= 203.460846  q= [5.08644962 1.75885689]
+  [nlp] ll= -173.250626  prior= -5.57444525  nlp= 178.825073  q= [5.19860411 1.2097888]
+  [nlp] ll= -173.250626  prior= -5.57444525  nlp= 178.825073  q= [5.19860411 1.2097888]
+  [nlp] ll= -51.9956627  prior= -5.55270529  nlp= 57.5483665  q= [5.25030756 -0.803748131]
+  [nlp] ll= -51.9956627  prior= -5.55270529  nlp= 57.5483665  q= [5.25030756 -0.803748131]
+  [nlp] ll= nan  prior= -16.7008934  nlp= nan  q= [5.24224806 -4.85865068]
+  [nlp] ll= nan  prior= -16.7008934  nlp= nan  q= [5.24224806 -4.85865068]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= -188.398666  prior= -5.63666  nlp= 194.035324  q= [4.96703672 1.54803336]
+  [nlp] ll= -188.398666  prior= -5.63666  nlp= 194.035324  q= [4.96703672 1.54803336]
+  [nlp] ll= -167.745132  prior= -5.34162521  nlp= 173.086761  q= [4.83645821 1.1105783]
+  [nlp] ll= -167.745132  prior= -5.34162521  nlp= 173.086761  q= [4.83645821 1.1105783]
+  [nlp] ll= -129.306671  prior= -5.02383137  nlp= 134.330505  q= [4.69513893 0.416923761]
+  [nlp] ll= -129.306671  prior= -5.02383137  nlp= 134.330505  q= [4.69513893 0.416923761]
+  [nlp] ll= nan  prior= -5.05561829  nlp= nan  q= [4.54249573 -0.579883575]
+  [nlp] ll= nan  prior= -5.05561829  nlp= nan  q= [4.54249573 -0.579883575]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= -194.773193  prior= -5.72915125  nlp= 200.50235  q= [4.98949623 1.68991661]
+  [nlp] ll= -194.773193  prior= -5.72915125  nlp= 200.50235  q= [4.98949623 1.68991661]
+  [nlp] ll= -181.947449  prior= -5.51248884  nlp= 187.45993  q= [4.88119555 1.40249097]
+  [nlp] ll= -181.947449  prior= -5.51248884  nlp= 187.45993  q= [4.88119555 1.40249097]
+  [nlp] ll= -155.338669  prior= -5.20155525  nlp= 160.540222  q= [4.761724 0.879442692]
+  [nlp] ll= -155.338669  prior= -5.20155525  nlp= 160.540222  q= [4.761724 0.879442692]
+  [nlp] ll= -109.153603  prior= -4.95319366  nlp= 114.106796  q= [4.63166809 0.0826256871]
+  [nlp] ll= -109.153603  prior= -4.95319366  nlp= 114.106796  q= [4.63166809 0.0826256871]
+  [nlp] ll= nan  prior= -5.33729076  nlp= nan  q= [4.48850918 -1.03059793]
+  [nlp] ll= nan  prior= -5.33729076  nlp= nan  q= [4.48850918 -1.03059793]
+  [nlp] ll= -195.382416  prior= -5.74757671  nlp= 201.12999  q= [5.01019239 1.70342553]
+  [nlp] ll= -195.382416  prior= -5.74757671  nlp= 201.12999  q= [5.01019239 1.70342553]
+  [nlp] ll= -183.295013  prior= -5.54888821  nlp= 188.843903  q= [4.92260695 1.43032825]
+  [nlp] ll= -183.295013  prior= -5.54888821  nlp= 188.843903  q= [4.92260695 1.43032825]
+  [nlp] ll= -157.839584  prior= -5.25200796  nlp= 163.091599  q= [4.82390118 0.923486769]
+  [nlp] ll= -157.839584  prior= -5.25200796  nlp= 163.091599  q= [4.82390118 0.923486769]
+  [nlp] ll= -113.381302  prior= -4.99906731  nlp= 118.380371  q= [4.71466684 0.146083474]
+  [nlp] ll= -113.381302  prior= -4.99906731  nlp= 118.380371  q= [4.71466684 0.146083474]
+  [nlp] ll= nan  prior= -5.32269049  nlp= nan  q= [4.59551382 -0.946737528]
+  [nlp] ll= nan  prior= -5.32269049  nlp= nan  q= [4.59551382 -0.946737528]
+Creating true model: src.models.cubic_sensor.CubicSensorModel
+Generating 100 time steps with true params: {'sigma_V': 1.0, 'sigma_W': 1.0}
+Creating inference model
+Trainable params: ['sigma_V', 'sigma_W']
+
+Running HMC inference...
+Using HMC sampler (num_leapfrog_steps=5)
+Running HMC: 3 burn-in + 2 sampling = 5 total steps
+  [burn-in 1/3] 31.6s | accept=100% | step_size=0.1725 | sigma_V=5.0926, sigma_W=1.9178 | ETA 126s
+  [burn-in 2/3] 30.2s | accept=50% | step_size=0.0712 | sigma_V=5.0926, sigma_W=1.9178 | ETA 93s
+  [burn-in 3/3] 30.7s | accept=33% | step_size=0.0712 | sigma_V=5.0926, sigma_W=1.9178 | ETA 62s
+  [sample 1/2] 31.4s | accept=25% | step_size=0.0712 | sigma_V=5.0926, sigma_W=1.9178 | ETA 31s
+  [sample 2/2] 31.5s | accept=20% | step_size=0.0712 | sigma_V=5.0926, sigma_W=1.9178 | ETA 0s
+HMC complete!
+
+============================================================
+DPF INFERENCE RESULTS
+============================================================
+
+  sigma_V:
+    True:           1.0
+    Posterior mean:  5.0926 +/- 0.0000
+    90% CI:         [5.0926, 5.0926]
+    True in 90% CI: NO
+
+  sigma_W:
+    True:           1.0
+    Posterior mean:  1.9178 +/- 0.0000
+    90% CI:         [1.9178, 1.9178]
+    True in 90% CI: NO
+
+Diagnostics:
+  Acceptance rate: 0.0%
+  Final step size: 0.071215
+  ESS: {'sigma_V': nan, 'sigma_W': nan}
+  R-hat: {'sigma_V': nan, 'sigma_W': nan}
+
+Performance:
+  Wall time: 206.0 seconds
+  Peak memory: 62.5 MB
+============================================================
+
+Results saved to /home/haowu/JPML/code/outputs/dpf/cubic_sensor_ledh_hmc_ot
+
+========================================
+[10/24] cubic_sensor_bpf_hmc_sys
+========================================
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1771570150.272867 1698225 gpu_device.cc:2020] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 22322 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3090, pci bus id: 0000:01:00.0, compute capability: 8.6
+  [nlp] ll= -317.953583  prior= -5.82800817  nlp= 323.781586  q= [4.9932394 1.8545866]
+  [nlp] ll= -317.953583  prior= -5.82800817  nlp= 323.781586  q= [4.9932394 1.8545866]
+  [nlp] ll= -318.318878  prior= -5.83191347  nlp= 324.150787  q= [5.01156378 1.84542775]
+  [nlp] ll= -318.318878  prior= -5.83191347  nlp= 324.150787  q= [5.01156378 1.84542775]
+  [nlp] ll= -318.910645  prior= -5.83443785  nlp= 324.745087  q= [5.02806 1.83553159]
+  [nlp] ll= -318.910645  prior= -5.83443785  nlp= 324.745087  q= [5.02806 1.83553159]
+  [nlp] ll= -318.2258  prior= -5.83559418  nlp= 324.061401  q= [5.0427289 1.82490826]
+  [nlp] ll= -318.2258  prior= -5.83559418  nlp= 324.061401  q= [5.0427289 1.82490826]
+  [nlp] ll= -319.014984  prior= -5.83538485  nlp= 324.850372  q= [5.05559778 1.8135258]
+  [nlp] ll= -319.014984  prior= -5.83538485  nlp= 324.850372  q= [5.05559778 1.8135258]
+  [nlp] ll= -318.913544  prior= -5.83384514  nlp= 324.747375  q= [5.0666976 1.80140793]
+  [nlp] ll= -318.913544  prior= -5.83384514  nlp= 324.747375  q= [5.0666976 1.80140793]
+  [nlp] ll= -317.243774  prior= -5.7776413  nlp= 323.021423  q= [4.97693777 1.78378177]
+  [nlp] ll= -317.243774  prior= -5.7776413  nlp= 323.021423  q= [4.97693777 1.78378177]
+  [nlp] ll= -305.227081  prior= -5.36084366  nlp= 310.587921  q= [4.41959143 1.57148349]
+  [nlp] ll= -305.227081  prior= -5.36084366  nlp= 310.587921  q= [4.41959143 1.57148349]
+  [nlp] ll= -280.037354  prior= -4.55139494  nlp= 284.588745  q= [3.36915493 1.1769942]
+  [nlp] ll= -280.037354  prior= -4.55139494  nlp= 284.588745  q= [3.36915493 1.1769942]
+  [nlp] ll= -235.349503  prior= -3.3121748  nlp= 238.661682  q= [1.71559584 0.608729362]
+  [nlp] ll= -235.349503  prior= -3.3121748  nlp= 238.661682  q= [1.71559584 0.608729362]
+  [nlp] ll= -283.201111  prior= -2.78311634  nlp= 285.984222  q= [-0.575631738 -0.12706387]
+  [nlp] ll= -283.201111  prior= -2.78311634  nlp= 285.984222  q= [-0.575631738 -0.12706387]
+  [nlp] ll= -325.15744  prior= -6.26701689  nlp= 331.424469  q= [5.12735844 2.4592557]
+  [nlp] ll= -325.15744  prior= -6.26701689  nlp= 331.424469  q= [5.12735844 2.4592557]
+  [nlp] ll= -397.512177  prior= -9.28522491  nlp= 406.797394  q= [9.60666084 4.45009327]
+  [nlp] ll= -397.512177  prior= -9.28522491  nlp= 406.797394  q= [9.60666084 4.45009327]
+  [nlp] ll= -437.986908  prior= -11.1692915  nlp= 449.156189  q= [13.3736591 5.94591236]
+  [nlp] ll= -437.986908  prior= -11.1692915  nlp= 449.156189  q= [13.3736591 5.94591236]
+  [nlp] ll= -464.442963  prior= -12.4415016  nlp= 476.88446  q= [16.6126652 7.01062918]
+  [nlp] ll= -464.442963  prior= -12.4415016  nlp= 476.88446  q= [16.6126652 7.01062918]
+  [nlp] ll= -483.585663  prior= -13.3242416  nlp= 496.909912  q= [19.4212437 7.6877985]
+  [nlp] ll= -483.585663  prior= -13.3242416  nlp= 496.909912  q= [19.4212437 7.6877985]
+  [nlp] ll= -331.279205  prior= -6.6386919  nlp= 337.917908  q= [5.21154261 2.99106741]
+  [nlp] ll= -331.279205  prior= -6.6386919  nlp= 337.917908  q= [5.21154261 2.99106741]
+  [nlp] ll= -406.188049  prior= -9.89917278  nlp= 416.087219  q= [9.8113308 5.51339149]
+  [nlp] ll= -406.188049  prior= -9.89917278  nlp= 416.087219  q= [9.8113308 5.51339149]
+  [nlp] ll= -448.94278  prior= -11.9617767  nlp= 460.904541  q= [13.726244 7.57151556]
+  [nlp] ll= -448.94278  prior= -11.9617767  nlp= 460.904541  q= [13.726244 7.57151556]
+  [nlp] ll= -477.742554  prior= -13.4125051  nlp= 491.15506  q= [17.1348362 9.24518871]
+  [nlp] ll= -477.742554  prior= -13.4125051  nlp= 491.15506  q= [17.1348362 9.24518871]
+  [nlp] ll= -499.72229  prior= -14.4889965  nlp= 514.211304  q= [20.127737 10.5842991]
+  [nlp] ll= -499.72229  prior= -14.4889965  nlp= 514.211304  q= [20.127737 10.5842991]
+  [nlp] ll= -332.89743  prior= -6.70836258  nlp= 339.605804  q= [5.28911591 3.04170227]
+  [nlp] ll= -332.89743  prior= -6.70836258  nlp= 339.605804  q= [5.28911591 3.04170227]
+  [nlp] ll= -408.826141  prior= -10.0067358  nlp= 418.832886  q= [10.0091896 5.60003614]
+  [nlp] ll= -408.826141  prior= -10.0067358  nlp= 418.832886  q= [10.0091896 5.60003614]
+  [nlp] ll= -451.878815  prior= -12.0974636  nlp= 463.976288  q= [14.0433769 7.70459652]
+  [nlp] ll= -451.878815  prior= -12.0974636  nlp= 463.976288  q= [14.0433769 7.70459652]
+  [nlp] ll= -481.750275  prior= -13.5743713  nlp= 495.324646  q= [17.5788136 9.42794132]
+  [nlp] ll= -481.750275  prior= -13.5743713  nlp= 495.324646  q= [17.5788136 9.42794132]
+  [nlp] ll= -502.863647  prior= -14.6779671  nlp= 517.541626  q= [20.7102242 10.8205242]
+  [nlp] ll= -502.863647  prior= -14.6779671  nlp= 517.541626  q= [20.7102242 10.8205242]
+Creating true model: src.models.cubic_sensor.CubicSensorModel
+Generating 100 time steps with true params: {'sigma_V': 1.0, 'sigma_W': 1.0}
+Creating inference model
+Trainable params: ['sigma_V', 'sigma_W']
+
+Running HMC inference...
+Using HMC sampler (num_leapfrog_steps=5)
+Running HMC: 3 burn-in + 2 sampling = 5 total steps
+  [burn-in 1/3] 1.0s | accept=100% | step_size=0.1612 | sigma_V=5.0730, sigma_W=1.9542 | ETA 4s
+  [burn-in 2/3] 1.0s | accept=100% | step_size=0.2669 | sigma_V=0.4462, sigma_W=0.6316 | ETA 3s
+  [burn-in 3/3] 1.0s | accept=67% | step_size=0.2669 | sigma_V=0.4462, sigma_W=0.6316 | ETA 2s
+  [sample 1/2] 1.0s | accept=50% | step_size=0.2669 | sigma_V=0.4462, sigma_W=0.6316 | ETA 1s
+  [sample 2/2] 1.0s | accept=40% | step_size=0.2669 | sigma_V=0.4462, sigma_W=0.6316 | ETA 0s
+HMC complete!
+
+============================================================
+DPF INFERENCE RESULTS
+============================================================
+
+  sigma_V:
+    True:           1.0
+    Posterior mean:  0.4462 +/- 0.0000
+    90% CI:         [0.4462, 0.4462]
+    True in 90% CI: NO
+
+  sigma_W:
+    True:           1.0
+    Posterior mean:  0.6316 +/- 0.0000
+    90% CI:         [0.6316, 0.6316]
+    True in 90% CI: NO
+
+Diagnostics:
+  Acceptance rate: 0.0%
+  Final step size: 0.266929
+  ESS: {'sigma_V': nan, 'sigma_W': nan}
+  R-hat: {'sigma_V': nan, 'sigma_W': nan}
+
+Performance:
+  Wall time: 8.2 seconds
+  Peak memory: 3.5 MB
+============================================================
+
+Results saved to /home/haowu/JPML/code/outputs/dpf/cubic_sensor_bpf_hmc_sys
+
+========================================
+[11/24] cubic_sensor_bpf_hmc_soft
+========================================
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1771570162.850168 1698665 gpu_device.cc:2020] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 22322 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3090, pci bus id: 0000:01:00.0, compute capability: 8.6
+  [nlp] ll= -318.270538  prior= -5.82800817  nlp= 324.098541  q= [4.9932394 1.8545866]
+  [nlp] ll= -318.270538  prior= -5.82800817  nlp= 324.098541  q= [4.9932394 1.8545866]
+  [nlp] ll= -318.794647  prior= -5.83191  nlp= 324.626556  q= [5.01157 1.8454175]
+  [nlp] ll= -318.794647  prior= -5.83191  nlp= 324.626556  q= [5.01157 1.8454175]
+  [nlp] ll= -317.207764  prior= -5.83450079  nlp= 323.042267  q= [5.0282383 1.83548462]
+  [nlp] ll= -317.207764  prior= -5.83450079  nlp= 323.042267  q= [5.0282383 1.83548462]
+  [nlp] ll= -317.988373  prior= -5.83569336  nlp= 323.824066  q= [5.04313612 1.8247267]
+  [nlp] ll= -317.988373  prior= -5.83569336  nlp= 323.824066  q= [5.04313612 1.8247267]
+  [nlp] ll= -318.212799  prior= -5.83548546  nlp= 324.048279  q= [5.05623484 1.81314933]
+  [nlp] ll= -318.212799  prior= -5.83548546  nlp= 324.048279  q= [5.05623484 1.81314933]
+  [nlp] ll= -318.106812  prior= -5.83387184  nlp= 323.940674  q= [5.0675478 1.80072391]
+  [nlp] ll= -318.106812  prior= -5.83387184  nlp= 323.940674  q= [5.0675478 1.80072391]
+  [nlp] ll= -315.213043  prior= -5.74122143  nlp= 320.954254  q= [4.9269352 1.76557505]
+  [nlp] ll= -315.213043  prior= -5.74122143  nlp= 320.954254  q= [4.9269352 1.76557505]
+  [nlp] ll= -300.094971  prior= -5.20154381  nlp= 305.296509  q= [4.21250248 1.48970151]
+  [nlp] ll= -300.094971  prior= -5.20154381  nlp= 305.296509  q= [4.21250248 1.48970151]
+  [nlp] ll= -271.24762  prior= -4.25527382  nlp= 275.502899  q= [3.02685213 0.985159]
+  [nlp] ll= -271.24762  prior= -4.25527382  nlp= 275.502899  q= [3.02685213 0.985159]
+  [nlp] ll= -220.67775  prior= -2.94528317  nlp= 223.623032  q= [1.16855764 0.278108597]
+  [nlp] ll= -220.67775  prior= -2.94528317  nlp= 223.623032  q= [1.16855764 0.278108597]
+  [nlp] ll= -4445.57422  prior= -3.93362045  nlp= 4449.50781  q= [-1.63424325 -0.533267438]
+  [nlp] ll= -4445.57422  prior= -3.93362045  nlp= 4449.50781  q= [-1.63424325 -0.533267438]
+  [nlp] ll= -315.962  prior= -5.67853069  nlp= 321.640533  q= [4.90507412 1.67745054]
+  [nlp] ll= -315.962  prior= -5.67853069  nlp= 321.640533  q= [4.90507412 1.67745054]
+  [nlp] ll= -309.478882  prior= -5.45398474  nlp= 314.932861  q= [4.64824343 1.5187211]
+  [nlp] ll= -309.478882  prior= -5.45398474  nlp= 314.932861  q= [4.64824343 1.5187211]
+  [nlp] ll= -302.272675  prior= -5.16668415  nlp= 307.439362  q= [4.31332779 1.32115471]
+  [nlp] ll= -302.272675  prior= -5.16668415  nlp= 307.439362  q= [4.31332779 1.32115471]
+  [nlp] ll= -290.585938  prior= -4.82096386  nlp= 295.406891  q= [3.90028334 1.09005]
+  [nlp] ll= -290.585938  prior= -4.82096386  nlp= 295.406891  q= [3.90028334 1.09005]
+  [nlp] ll= -277.51944  prior= -4.38258171  nlp= 281.902  q= [3.34536934 0.824038804]
+  [nlp] ll= -277.51944  prior= -4.38258171  nlp= 281.902  q= [3.34536934 0.824038804]
+  [nlp] ll= -274.663452  prior= -4.29511213  nlp= 278.958557  q= [3.18395305 0.849742651]
+  [nlp] ll= -274.663452  prior= -4.29511213  nlp= 278.958557  q= [3.18395305 0.849742651]
+  [nlp] ll= -265.412628  prior= -4.10650158  nlp= 269.519135  q= [2.87642074 0.848840177]
+  [nlp] ll= -265.412628  prior= -4.10650158  nlp= 269.519135  q= [2.87642074 0.848840177]
+  [nlp] ll= -254.422012  prior= -3.81103945  nlp= 258.233063  q= [2.42209578 0.813595653]
+  [nlp] ll= -254.422012  prior= -3.81103945  nlp= 258.233063  q= [2.42209578 0.813595653]
+  [nlp] ll= -238.266434  prior= -3.41376758  nlp= 241.680206  q= [1.81538308 0.741603136]
+  [nlp] ll= -238.266434  prior= -3.41376758  nlp= 241.680206  q= [1.81538308 0.741603136]
+  [nlp] ll= -221.987274  prior= -2.99415565  nlp= 224.98143  q= [1.10508275 0.635547578]
+  [nlp] ll= -221.987274  prior= -2.99415565  nlp= 224.98143  q= [1.10508275 0.635547578]
+  [nlp] ll= -274.122192  prior= -4.31296206  nlp= 278.43515  q= [3.20464873 0.863251626]
+  [nlp] ll= -274.122192  prior= -4.31296206  nlp= 278.43515  q= [3.20464873 0.863251626]
+  [nlp] ll= -269.258942  prior= -4.17498207  nlp= 273.433929  q= [2.97460699 0.869270921]
+  [nlp] ll= -269.258942  prior= -4.17498207  nlp= 273.433929  q= [2.97460699 0.869270921]
+  [nlp] ll= -260.947845  prior= -3.95496178  nlp= 264.902802  q= [2.63434196 0.844795585]
+  [nlp] ll= -260.947845  prior= -3.95496178  nlp= 264.902802  q= [2.63434196 0.844795585]
+  [nlp] ll= -246.762497  prior= -3.63177514  nlp= 250.394272  q= [2.14785385 0.788087249]
+  [nlp] ll= -246.762497  prior= -3.63177514  nlp= 250.394272  q= [2.14785385 0.788087249]
+  [nlp] ll= -230.511932  prior= -3.22456217  nlp= 233.736496  q= [1.51417947 0.695528865]
+  [nlp] ll= -230.511932  prior= -3.22456217  nlp= 233.736496  q= [1.51417947 0.695528865]
+Creating true model: src.models.cubic_sensor.CubicSensorModel
+Generating 100 time steps with true params: {'sigma_V': 1.0, 'sigma_W': 1.0}
+Creating inference model
+Trainable params: ['sigma_V', 'sigma_W']
+
+Running HMC inference...
+Using HMC sampler (num_leapfrog_steps=5)
+Running HMC: 3 burn-in + 2 sampling = 5 total steps
+  [burn-in 1/3] 1.1s | accept=100% | step_size=0.1725 | sigma_V=5.0738, sigma_W=1.9536 | ETA 4s
+  [burn-in 2/3] 1.1s | accept=50% | step_size=0.0712 | sigma_V=5.0738, sigma_W=1.9536 | ETA 3s
+  [burn-in 3/3] 1.1s | accept=67% | step_size=0.0712 | sigma_V=3.3800, sigma_W=1.1877 | ETA 2s
+  [sample 1/2] 1.1s | accept=50% | step_size=0.0712 | sigma_V=3.3800, sigma_W=1.1877 | ETA 1s
+  [sample 2/2] 1.1s | accept=60% | step_size=0.0712 | sigma_V=1.7130, sigma_W=1.1002 | ETA 0s
+HMC complete!
+
+============================================================
+DPF INFERENCE RESULTS
+============================================================
+
+  sigma_V:
+    True:           1.0
+    Posterior mean:  2.5465 +/- 0.8335
+    90% CI:         [1.7964, 3.2967]
+    True in 90% CI: NO
+
+  sigma_W:
+    True:           1.0
+    Posterior mean:  1.1440 +/- 0.0438
+    90% CI:         [1.1046, 1.1834]
+    True in 90% CI: NO
+
+Diagnostics:
+  Acceptance rate: 50.0%
+  Final step size: 0.071215
+  ESS: {'sigma_V': nan, 'sigma_W': nan}
+  R-hat: {'sigma_V': nan, 'sigma_W': nan}
+
+Performance:
+  Wall time: 9.0 seconds
+  Peak memory: 4.0 MB
+============================================================
+
+Results saved to /home/haowu/JPML/code/outputs/dpf/cubic_sensor_bpf_hmc_soft
+
+========================================
+[12/24] cubic_sensor_bpf_hmc_ot
+========================================
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1771570176.293222 1699113 gpu_device.cc:2020] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 22322 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3090, pci bus id: 0000:01:00.0, compute capability: 8.6
+  [nlp] ll= -326.91626  prior= -5.82800817  nlp= 332.744263  q= [4.9932394 1.8545866]
+  [nlp] ll= -326.91626  prior= -5.82800817  nlp= 332.744263  q= [4.9932394 1.8545866]
+  [nlp] ll= -327.222626  prior= -5.8326354  nlp= 333.055267  q= [5.01285124 1.84553623]
+  [nlp] ll= -327.222626  prior= -5.8326354  nlp= 333.055267  q= [5.01285124 1.84553623]
+  [nlp] ll= -327.100952  prior= -5.83660936  nlp= 332.937561  q= [5.03163528 1.83611906]
+  [nlp] ll= -327.100952  prior= -5.83660936  nlp= 332.937561  q= [5.03163528 1.83611906]
+  [nlp] ll= -327.367157  prior= -5.83995676  nlp= 333.207123  q= [5.04988956 1.82611942]
+  [nlp] ll= -327.367157  prior= -5.83995676  nlp= 333.207123  q= [5.04988956 1.82611942]
+  [nlp] ll= -327.581024  prior= -5.84007931  nlp= 333.421112  q= [5.06272793 1.81533217]
+  [nlp] ll= -327.581024  prior= -5.84007931  nlp= 333.421112  q= [5.06272793 1.81533217]
+  [nlp] ll= -327.604675  prior= -5.83728027  nlp= 333.441956  q= [5.07138 1.80319536]
+  [nlp] ll= -327.604675  prior= -5.83728027  nlp= 333.441956  q= [5.07138 1.80319536]
+  [nlp] ll= -327.861969  prior= -5.85525  nlp= 333.717224  q= [5.07319069 1.83193266]
+  [nlp] ll= -327.861969  prior= -5.85525  nlp= 333.717224  q= [5.07319069 1.83193266]
+  [nlp] ll= -332.235077  prior= -5.92691517  nlp= 338.162  q= [5.50907135 1.58327293]
+  [nlp] ll= -332.235077  prior= -5.92691517  nlp= 338.162  q= [5.50907135 1.58327293]
+  [nlp] ll= -338.226532  prior= -5.94914341  nlp= 344.17569  q= [6.09383202 1.0984211]
+  [nlp] ll= -338.226532  prior= -5.94914341  nlp= 344.17569  q= [6.09383202 1.0984211]
+  [nlp] ll= -354.970581  prior= -6.43890953  nlp= 361.409485  q= [7.52712631 0.808159411]
+  [nlp] ll= -354.970581  prior= -6.43890953  nlp= 361.409485  q= [7.52712631 0.808159411]
+  [nlp] ll= -367.241547  prior= -6.78757858  nlp= 374.029114  q= [8.66796684 0.538087666]
+  [nlp] ll= -367.241547  prior= -6.78757858  nlp= 374.029114  q= [8.66796684 0.538087666]
+  [nlp] ll= -324.932556  prior= -5.70075178  nlp= 330.633301  q= [4.93316936 1.69080555]
+  [nlp] ll= -324.932556  prior= -5.70075178  nlp= 330.633301  q= [4.93316936 1.69080555]
+  [nlp] ll= -320.875824  prior= -5.52193975  nlp= 326.397766  q= [4.72654915 1.56620455]
+  [nlp] ll= -320.875824  prior= -5.52193975  nlp= 326.397766  q= [4.72654915 1.56620455]
+  [nlp] ll= -316.581207  prior= -5.31759071  nlp= 321.898804  q= [4.50419474 1.41018248]
+  [nlp] ll= -316.581207  prior= -5.31759071  nlp= 321.898804  q= [4.50419474 1.41018248]
+  [nlp] ll= -310.138885  prior= -5.00127268  nlp= 315.140167  q= [4.13134193 1.19371414]
+  [nlp] ll= -310.138885  prior= -5.00127268  nlp= 315.140167  q= [4.13134193 1.19371414]
+  [nlp] ll= -307.069977  prior= -4.78126907  nlp= 311.851257  q= [3.88144207 1.02671504]
+  [nlp] ll= -307.069977  prior= -4.78126907  nlp= 311.851257  q= [3.88144207 1.02671504]
+  [nlp] ll= -306.982727  prior= -4.80264473  nlp= 311.78537  q= [3.8804996 1.07494724]
+  [nlp] ll= -306.982727  prior= -4.80264473  nlp= 311.78537  q= [3.8804996 1.07494724]
+  [nlp] ll= -308.19809  prior= -4.88005066  nlp= 313.078125  q= [3.9398818 1.16677153]
+  [nlp] ll= -308.19809  prior= -4.88005066  nlp= 313.078125  q= [3.9398818 1.16677153]
+  [nlp] ll= -314.393921  prior= -5.20985222  nlp= 319.60376  q= [4.39015722 1.32337761]
+  [nlp] ll= -314.393921  prior= -5.20985222  nlp= 319.60376  q= [4.39015722 1.32337761]
+  [nlp] ll= -321.02356  prior= -5.50437737  nlp= 326.527924  q= [4.76611376 1.49756217]
+  [nlp] ll= -321.02356  prior= -5.50437737  nlp= 326.527924  q= [4.76611376 1.49756217]
+  [nlp] ll= -328.832123  prior= -5.84004307  nlp= 334.67218  q= [5.23135948 1.67029297]
+  [nlp] ll= -328.832123  prior= -5.84004307  nlp= 334.67218  q= [5.23135948 1.67029297]
+  [nlp] ll= -307.684113  prior= -4.82074451  nlp= 312.504852  q= [3.90119529 1.08845627]
+  [nlp] ll= -307.684113  prior= -4.82074451  nlp= 312.504852  q= [3.90119529 1.08845627]
+  [nlp] ll= -310.340057  prior= -4.97369289  nlp= 315.313751  q= [4.2259059 1.02307367]
+  [nlp] ll= -310.340057  prior= -4.97369289  nlp= 315.313751  q= [4.2259059 1.02307367]
+  [nlp] ll= -323.51532  prior= -5.39539433  nlp= 328.910706  q= [5.06407785 0.970467269]
+  [nlp] ll= -323.51532  prior= -5.39539433  nlp= 328.910706  q= [5.06407785 0.970467269]
+  [nlp] ll= -332.771179  prior= -5.73355055  nlp= 338.50473  q= [5.76358509 0.959827662]
+  [nlp] ll= -332.771179  prior= -5.73355055  nlp= 338.50473  q= [5.76358509 0.959827662]
+  [nlp] ll= -340.209351  prior= -5.94514322  nlp= 346.15448  q= [6.23572588 0.944837689]
+  [nlp] ll= -340.209351  prior= -5.94514322  nlp= 346.15448  q= [6.23572588 0.944837689]
+Creating true model: src.models.cubic_sensor.CubicSensorModel
+Generating 100 time steps with true params: {'sigma_V': 1.0, 'sigma_W': 1.0}
+Creating inference model
+Trainable params: ['sigma_V', 'sigma_W']
+
+Running HMC inference...
+Using HMC sampler (num_leapfrog_steps=5)
+Running HMC: 3 burn-in + 2 sampling = 5 total steps
+  [burn-in 1/3] 12.5s | accept=100% | step_size=0.1725 | sigma_V=5.0776, sigma_W=1.9557 | ETA 50s
+  [burn-in 2/3] 12.5s | accept=50% | step_size=0.0712 | sigma_V=5.0776, sigma_W=1.9557 | ETA 38s
+  [burn-in 3/3] 12.5s | accept=67% | step_size=0.0712 | sigma_V=3.9019, sigma_W=1.3329 | ETA 25s
+  [sample 1/2] 12.6s | accept=50% | step_size=0.0712 | sigma_V=3.9019, sigma_W=1.3329 | ETA 13s
+  [sample 2/2] 12.7s | accept=40% | step_size=0.0712 | sigma_V=3.9019, sigma_W=1.3329 | ETA 0s
+HMC complete!
+
+============================================================
+DPF INFERENCE RESULTS
+============================================================
+
+  sigma_V:
+    True:           1.0
+    Posterior mean:  3.9019 +/- 0.0000
+    90% CI:         [3.9019, 3.9019]
+    True in 90% CI: NO
+
+  sigma_W:
+    True:           1.0
+    Posterior mean:  1.3329 +/- 0.0000
+    90% CI:         [1.3329, 1.3329]
+    True in 90% CI: NO
+
+Diagnostics:
+  Acceptance rate: 0.0%
+  Final step size: 0.071215
+  ESS: {'sigma_V': nan, 'sigma_W': nan}
+  R-hat: {'sigma_V': nan, 'sigma_W': nan}
+
+Performance:
+  Wall time: 72.0 seconds
+  Peak memory: 6.6 MB
+============================================================
+
+Results saved to /home/haowu/JPML/code/outputs/dpf/cubic_sensor_bpf_hmc_ot
+
+========================================
+[13/24] kitagawa_ledh_hmc_sys
+========================================
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1771570252.709050 1700000 gpu_device.cc:2020] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 22322 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3090, pci bus id: 0000:01:00.0, compute capability: 8.6
+I0000 00:00:1771570255.144004 1700102 cuda_solvers.cc:175] Creating GpuSolver handles for stream 0x3f905420
+  [nlp] ll= -219.978424  prior= -4.79346752  nlp= 224.771896  q= [4.9932394 1.8545866]
+  [nlp] ll= -219.978424  prior= -4.79346752  nlp= 224.771896  q= [4.9932394 1.8545866]
+  [nlp] ll= -258.26236  prior= -5.41665077  nlp= 263.679016  q= [5.38587761 3.06670451]
+  [nlp] ll= -258.26236  prior= -5.41665077  nlp= 263.679016  q= [5.38587761 3.06670451]
+  [nlp] ll= -287.017029  prior= -6.03592396  nlp= 293.052948  q= [5.80377865 4.30051422]
+  [nlp] ll= -287.017029  prior= -6.03592396  nlp= 293.052948  q= [5.80377865 4.30051422]
+  [nlp] ll= -307.40976  prior= -6.59968519  nlp= 314.00943  q= [6.2226634 5.53290701]
+  [nlp] ll= -307.40976  prior= -6.59968519  nlp= 314.00943  q= [6.2226634 5.53290701]
+  [nlp] ll= -322.456573  prior= -7.11023045  nlp= 329.566803  q= [6.64184189 6.76368713]
+  [nlp] ll= -322.456573  prior= -7.11023045  nlp= 329.566803  q= [6.64184189 6.76368713]
+  [nlp] ll= nan  prior= -1516.59778  nlp= nan  q= [-25.0455799 -6.30634403]
+  [nlp] ll= nan  prior= -1516.59778  nlp= nan  q= [-25.0455799 -6.30634403]
+  [nlp] ll= -365.185913  prior= -8.72930908  nlp= 373.915222  q= [7.94584846 11.4443216]
+  [nlp] ll= -365.185913  prior= -8.72930908  nlp= 373.915222  q= [7.94584846 11.4443216]
+  [nlp] ll= -415.092224  prior= -11.2336979  nlp= 426.325928  q= [10.8992062 21.0282822]
+  [nlp] ll= -415.092224  prior= -11.2336979  nlp= 426.325928  q= [10.8992062 21.0282822]
+  [nlp] ll= -448.664062  prior= -13.2626781  nlp= 461.926727  q= [13.8511181 30.6090755]
+  [nlp] ll= -448.664062  prior= -13.2626781  nlp= 461.926727  q= [13.8511181 30.6090755]
+  [nlp] ll= -468.032623  prior= -517.312073  nlp= 985.344727  q= [-13.6027393 38.9886055]
+  [nlp] ll= -468.032623  prior= -517.312073  nlp= 985.344727  q= [-13.6027393 38.9886055]
+  [nlp] ll= -484.339874  prior= -3763.38452  nlp= 4247.72461  q= [-41.0067 47.3664246]
+  [nlp] ll= -484.339874  prior= -3763.38452  nlp= 4247.72461  q= [-41.0067 47.3664246]
+  [nlp] ll= -248.330475  prior= -5.2330904  nlp= 253.563568  q= [5.24273348 2.70196676]
+  [nlp] ll= -248.330475  prior= -5.2330904  nlp= 253.563568  q= [5.24273348 2.70196676]
+  [nlp] ll= -271.197449  prior= -5.69235039  nlp= 276.889801  q= [5.4933567 3.57305336]
+  [nlp] ll= -271.197449  prior= -5.69235039  nlp= 276.889801  q= [5.4933567 3.57305336]
+  [nlp] ll= -292.637604  prior= -6.1904211  nlp= 298.828033  q= [5.82829809 4.59494877]
+  [nlp] ll= -292.637604  prior= -6.1904211  nlp= 298.828033  q= [5.82829809 4.59494877]
+  [nlp] ll= -310.708923  prior= -6.66678333  nlp= 317.375702  q= [6.16350222 5.65426064]
+  [nlp] ll= -310.708923  prior= -6.66678333  nlp= 317.375702  q= [6.16350222 5.65426064]
+  [nlp] ll= -323.054016  prior= -7.10308313  nlp= 330.157104  q= [6.50000954 6.71306324]
+  [nlp] ll= -323.054016  prior= -7.10308313  nlp= 330.157104  q= [6.50000954 6.71306324]
+  [nlp] ll= -249.524918  prior= -5.24266195  nlp= 254.767578  q= [5.24537945 2.71868372]
+  [nlp] ll= -249.524918  prior= -5.24266195  nlp= 254.767578  q= [5.24537945 2.71868372]
+  [nlp] ll= -275.658264  prior= -5.76708221  nlp= 281.425354  q= [5.44626713 3.679739]
+  [nlp] ll= -275.658264  prior= -5.76708221  nlp= 281.425354  q= [5.44626713 3.679739]
+  [nlp] ll= -294.552  prior= -6.25436497  nlp= 300.806366  q= [5.64643955 4.64220476]
+  [nlp] ll= -294.552  prior= -6.25436497  nlp= 300.806366  q= [5.64643955 4.64220476]
+  [nlp] ll= -310.012054  prior= -6.69491386  nlp= 316.70697  q= [5.86767101 5.60682]
+  [nlp] ll= -310.012054  prior= -6.69491386  nlp= 316.70697  q= [5.86767101 5.60682]
+  [nlp] ll= -1362.39331  prior= -264.282593  nlp= 1626.6759  q= [128015.914 64512.8242]
+  [nlp] ll= -1362.39331  prior= -264.282593  nlp= 1626.6759  q= [128015.914 64512.8242]
+  [nlp] ll= -249.983841  prior= -5.24291325  nlp= 255.226761  q= [5.24781799 2.7202754]
+  [nlp] ll= -249.983841  prior= -5.24291325  nlp= 255.226761  q= [5.24781799 2.7202754]
+  [nlp] ll= -327.586487  prior= -7.26737499  nlp= 334.853851  q= [6.82995176 7.17549849]
+  [nlp] ll= -327.586487  prior= -7.26737499  nlp= 334.853851  q= [6.82995176 7.17549849]
+  [nlp] ll= -366.501862  prior= -8.79570389  nlp= 375.297577  q= [8.41027641 11.6282177]
+  [nlp] ll= -366.501862  prior= -8.79570389  nlp= 375.297577  q= [8.41027641 11.6282177]
+  [nlp] ll= -392.636017  prior= -10.0815821  nlp= 402.71759  q= [9.99064827 16.080452]
+  [nlp] ll= -392.636017  prior= -10.0815821  nlp= 402.71759  q= [9.99064827 16.080452]
+  [nlp] ll= -413.228058  prior= -11.2013931  nlp= 424.429443  q= [11.4188156 20.5147247]
+  [nlp] ll= -413.228058  prior= -11.2013931  nlp= 424.429443  q= [11.4188156 20.5147247]
+Creating true model: src.models.kitagawa.KitagawaModel
+Generating 100 time steps with true params: {'sigma_V': 10.0, 'sigma_W': 1.0}
+Creating inference model
+Trainable params: ['sigma_V', 'sigma_W']
+
+Running HMC inference...
+Using HMC sampler (num_leapfrog_steps=5)
+Running HMC: 3 burn-in + 2 sampling = 5 total steps
+  [burn-in 1/3] 28.1s | accept=0% | step_size=0.0280 | sigma_V=5.0000, sigma_W=2.0000 | ETA 112s
+  [burn-in 2/3] 28.1s | accept=0% | step_size=0.0084 | sigma_V=5.0000, sigma_W=2.0000 | ETA 84s
+  [burn-in 3/3] 28.0s | accept=0% | step_size=0.0084 | sigma_V=5.0000, sigma_W=2.0000 | ETA 56s
+  [sample 1/2] 28.1s | accept=0% | step_size=0.0084 | sigma_V=5.0000, sigma_W=2.0000 | ETA 28s
+  [sample 2/2] 28.2s | accept=0% | step_size=0.0084 | sigma_V=5.0000, sigma_W=2.0000 | ETA 0s
+HMC complete!
+
+============================================================
+DPF INFERENCE RESULTS
+============================================================
+
+  sigma_V:
+    True:           10.0
+    Posterior mean:  5.0000 +/- 0.0000
+    90% CI:         [5.0000, 5.0000]
+    True in 90% CI: NO
+
+  sigma_W:
+    True:           1.0
+    Posterior mean:  2.0000 +/- 0.0000
+    90% CI:         [2.0000, 2.0000]
+    True in 90% CI: NO
+
+Diagnostics:
+  Acceptance rate: 0.0%
+  Final step size: 0.008391
+  ESS: {'sigma_V': nan, 'sigma_W': nan}
+  R-hat: {'sigma_V': nan, 'sigma_W': nan}
+
+Performance:
+  Wall time: 185.5 seconds
+  Peak memory: 57.8 MB
+============================================================
+
+Results saved to /home/haowu/JPML/code/outputs/dpf/kitagawa_ledh_hmc_sys
+
+========================================
+[14/24] kitagawa_ledh_hmc_soft
+========================================
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1771570443.520851 1701543 gpu_device.cc:2020] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 22322 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3090, pci bus id: 0000:01:00.0, compute capability: 8.6
+I0000 00:00:1771570445.920044 1701656 cuda_solvers.cc:175] Creating GpuSolver handles for stream 0x38b057f0
+  [nlp] ll= -217.921265  prior= -4.79346752  nlp= 222.714737  q= [4.9932394 1.8545866]
+  [nlp] ll= -217.921265  prior= -4.79346752  nlp= 222.714737  q= [4.9932394 1.8545866]
+  [nlp] ll= -427.281586  prior= -116.228851  nlp= 543.510437  q= [-5.04026222 18.7503395]
+  [nlp] ll= -427.281586  prior= -116.228851  nlp= 543.510437  q= [-5.04026222 18.7503395]
+  [nlp] ll= -460.973267  prior= -614.595947  nlp= 1075.56921  q= [-15.0708408 35.6459885]
+  [nlp] ll= -460.973267  prior= -614.595947  nlp= 1075.56921  q= [-15.0708408 35.6459885]
+  [nlp] ll= -493.452393  prior= -1513.86743  nlp= 2007.31982  q= [-25.094471 52.5414085]
+  [nlp] ll= -493.452393  prior= -1513.86743  nlp= 2007.31982  q= [-25.094471 52.5414085]
+  [nlp] ll= -519.030945  prior= -2812.96436  nlp= 3331.99536  q= [-35.1071434 69.4366455]
+  [nlp] ll= -519.030945  prior= -2812.96436  nlp= 3331.99536  q= [-35.1071434 69.4366455]
+  [nlp] ll= -539.717163  prior= -4509.98  nlp= 5049.69727  q= [-45.1048508 86.3317413]
+  [nlp] ll= -539.717163  prior= -4509.98  nlp= 5049.69727  q= [-45.1048508 86.3317413]
+  [nlp] ll= -582.84729  prior= -11610.8574  nlp= 12193.7051  q= [-73.8340912 134.462662]
+  [nlp] ll= -582.84729  prior= -11610.8574  nlp= 12193.7051  q= [-73.8340912 134.462662]
+  [nlp] ll= -650.853943  prior= -inf  nlp= inf  q= [-152.422546 267.070129]
+  [nlp] ll= -650.853943  prior= -inf  nlp= inf  q= [-152.422546 267.070129]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan 399.677307]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan 399.677307]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= -416.574188  prior= -46.9692078  nlp= 463.543396  q= [-2.09760475 13.7437506]
+  [nlp] ll= -416.574188  prior= -46.9692078  nlp= 463.543396  q= [-2.09760475 13.7437506]
+  [nlp] ll= -438.907562  prior= -274.4328  nlp= 713.340332  q= [-9.20609474 25.6327972]
+  [nlp] ll= -438.907562  prior= -274.4328  nlp= 713.340332  q= [-9.20609474 25.6327972]
+  [nlp] ll= -464.957825  prior= -704.103882  nlp= 1169.06177  q= [-16.3113441 37.5216827]
+  [nlp] ll= -464.957825  prior= -704.103882  nlp= 1169.06177  q= [-16.3113441 37.5216827]
+  [nlp] ll= -488.013336  prior= -1334.79773  nlp= 1822.81104  q= [-23.4113522 49.410408]
+  [nlp] ll= -488.013336  prior= -1334.79773  nlp= 1822.81104  q= [-23.4113522 49.410408]
+  [nlp] ll= -507.443939  prior= -2165.95068  nlp= 2673.39453  q= [-30.5041199 61.2990036]
+  [nlp] ll= -507.443939  prior= -2165.95068  nlp= 2673.39453  q= [-30.5041199 61.2990036]
+  [nlp] ll= -416.76886  prior= -46.9292259  nlp= 463.69809  q= [-2.09495831 13.7604675]
+  [nlp] ll= -416.76886  prior= -46.9292259  nlp= 463.69809  q= [-2.09495831 13.7604675]
+  [nlp] ll= -438.980042  prior= -273.872528  nlp= 712.852539  q= [-9.19379425 25.6663513]
+  [nlp] ll= -438.980042  prior= -273.872528  nlp= 712.852539  q= [-9.19379425 25.6663513]
+  [nlp] ll= -465.065338  prior= -702.476929  nlp= 1167.54224  q= [-16.2893944 37.5720749]
+  [nlp] ll= -465.065338  prior= -702.476929  nlp= 1167.54224  q= [-16.2893944 37.5720749]
+  [nlp] ll= -488.132812  prior= -1331.55713  nlp= 1819.69  q= [-23.3797588 49.4776382]
+  [nlp] ll= -488.132812  prior= -1331.55713  nlp= 1819.69  q= [-23.3797588 49.4776382]
+  [nlp] ll= -507.570038  prior= -2160.55127  nlp= 2668.12134  q= [-30.4628906 61.3830719]
+  [nlp] ll= -507.570038  prior= -2160.55127  nlp= 2668.12134  q= [-30.4628906 61.3830719]
+  [nlp] ll= -416.816467  prior= -46.8887787  nlp= 463.705261  q= [-2.09252024 13.7620592]
+  [nlp] ll= -416.816467  prior= -46.8887787  nlp= 463.705261  q= [-2.09252024 13.7620592]
+  [nlp] ll= -438.989594  prior= -273.091248  nlp= 712.080811  q= [-9.17677689 25.6695061]
+  [nlp] ll= -438.989594  prior= -273.091248  nlp= 712.080811  q= [-9.17677689 25.6695061]
+  [nlp] ll= -465.075195  prior= -700.13031  nlp= 1165.20557  q= [-16.2578011 37.5767899]
+  [nlp] ll= -465.075195  prior= -700.13031  nlp= 1165.20557  q= [-16.2578011 37.5767899]
+  [nlp] ll= -488.143951  prior= -1326.82056  nlp= 1814.96448  q= [-23.3336 49.4839172]
+  [nlp] ll= -488.143951  prior= -1326.82056  nlp= 1814.96448  q= [-23.3336 49.4839172]
+  [nlp] ll= -507.581787  prior= -2152.60303  nlp= 2660.18481  q= [-30.4021797 61.3909111]
+  [nlp] ll= -507.581787  prior= -2152.60303  nlp= 2660.18481  q= [-30.4021797 61.3909111]
+Creating true model: src.models.kitagawa.KitagawaModel
+Generating 100 time steps with true params: {'sigma_V': 10.0, 'sigma_W': 1.0}
+Creating inference model
+Trainable params: ['sigma_V', 'sigma_W']
+
+Running HMC inference...
+Using HMC sampler (num_leapfrog_steps=5)
+Running HMC: 3 burn-in + 2 sampling = 5 total steps
+  [burn-in 1/3] 27.9s | accept=0% | step_size=0.0280 | sigma_V=5.0000, sigma_W=2.0000 | ETA 112s
+  [burn-in 2/3] 28.0s | accept=0% | step_size=0.0084 | sigma_V=5.0000, sigma_W=2.0000 | ETA 84s
+  [burn-in 3/3] 28.0s | accept=0% | step_size=0.0084 | sigma_V=5.0000, sigma_W=2.0000 | ETA 56s
+  [sample 1/2] 28.0s | accept=0% | step_size=0.0084 | sigma_V=5.0000, sigma_W=2.0000 | ETA 28s
+  [sample 2/2] 27.9s | accept=0% | step_size=0.0084 | sigma_V=5.0000, sigma_W=2.0000 | ETA 0s
+HMC complete!
+
+============================================================
+DPF INFERENCE RESULTS
+============================================================
+
+  sigma_V:
+    True:           10.0
+    Posterior mean:  5.0000 +/- 0.0000
+    90% CI:         [5.0000, 5.0000]
+    True in 90% CI: NO
+
+  sigma_W:
+    True:           1.0
+    Posterior mean:  2.0000 +/- 0.0000
+    90% CI:         [2.0000, 2.0000]
+    True in 90% CI: NO
+
+Diagnostics:
+  Acceptance rate: 0.0%
+  Final step size: 0.008391
+  ESS: {'sigma_V': nan, 'sigma_W': nan}
+  R-hat: {'sigma_V': nan, 'sigma_W': nan}
+
+Performance:
+  Wall time: 184.8 seconds
+  Peak memory: 58.4 MB
+============================================================
+
+Results saved to /home/haowu/JPML/code/outputs/dpf/kitagawa_ledh_hmc_soft
+
+========================================
+[15/24] kitagawa_ledh_hmc_ot
+========================================
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1771570633.615875 1703124 gpu_device.cc:2020] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 22322 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3090, pci bus id: 0000:01:00.0, compute capability: 8.6
+I0000 00:00:1771570636.016833 1703233 cuda_solvers.cc:175] Creating GpuSolver handles for stream 0x37736750
+  [nlp] ll= -215.508835  prior= -4.79346752  nlp= 220.302307  q= [4.9932394 1.8545866]
+  [nlp] ll= -215.508835  prior= -4.79346752  nlp= 220.302307  q= [4.9932394 1.8545866]
+  [nlp] ll= -724.527771  prior= -inf  nlp= inf  q= [-328.593536 558.828674]
+  [nlp] ll= -724.527771  prior= -inf  nlp= inf  q= [-328.593536 558.828674]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan 1115.80273]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan 1115.80273]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= -930.163  prior= -inf  nlp= inf  q= [-2611.70166 4370.69629]
+  [nlp] ll= -930.163  prior= -inf  nlp= inf  q= [-2611.70166 4370.69629]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan 8739.53809]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan 8739.53809]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= -689.624634  prior= -inf  nlp= inf  q= [-229.889496 393.976257]
+  [nlp] ll= -689.624634  prior= -inf  nlp= inf  q= [-229.889496 393.976257]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan 786.0979]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan 786.0979]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= -689.628662  prior= -inf  nlp= inf  q= [-229.886841 393.992981]
+  [nlp] ll= -689.628662  prior= -inf  nlp= inf  q= [-229.886841 393.992981]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan 786.131348]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan 786.131348]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= -689.629333  prior= -inf  nlp= inf  q= [-229.884399 393.994537]
+  [nlp] ll= -689.629333  prior= -inf  nlp= inf  q= [-229.884399 393.994537]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan 786.13446]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan 786.13446]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+Creating true model: src.models.kitagawa.KitagawaModel
+Generating 100 time steps with true params: {'sigma_V': 10.0, 'sigma_W': 1.0}
+Creating inference model
+Trainable params: ['sigma_V', 'sigma_W']
+
+Running HMC inference...
+Using HMC sampler (num_leapfrog_steps=5)
+Running HMC: 3 burn-in + 2 sampling = 5 total steps
+  [burn-in 1/3] 28.4s | accept=0% | step_size=0.0280 | sigma_V=5.0000, sigma_W=2.0000 | ETA 114s
+  [burn-in 2/3] 28.4s | accept=0% | step_size=0.0084 | sigma_V=5.0000, sigma_W=2.0000 | ETA 85s
+  [burn-in 3/3] 28.5s | accept=0% | step_size=0.0084 | sigma_V=5.0000, sigma_W=2.0000 | ETA 57s
+  [sample 1/2] 28.6s | accept=0% | step_size=0.0084 | sigma_V=5.0000, sigma_W=2.0000 | ETA 28s
+  [sample 2/2] 28.4s | accept=0% | step_size=0.0084 | sigma_V=5.0000, sigma_W=2.0000 | ETA 0s
+HMC complete!
+
+============================================================
+DPF INFERENCE RESULTS
+============================================================
+
+  sigma_V:
+    True:           10.0
+    Posterior mean:  5.0000 +/- 0.0000
+    90% CI:         [5.0000, 5.0000]
+    True in 90% CI: NO
+
+  sigma_W:
+    True:           1.0
+    Posterior mean:  2.0000 +/- 0.0000
+    90% CI:         [2.0000, 2.0000]
+    True in 90% CI: NO
+
+Diagnostics:
+  Acceptance rate: 0.0%
+  Final step size: 0.008391
+  ESS: {'sigma_V': nan, 'sigma_W': nan}
+  R-hat: {'sigma_V': nan, 'sigma_W': nan}
+
+Performance:
+  Wall time: 193.0 seconds
+  Peak memory: 60.9 MB
+============================================================
+
+Results saved to /home/haowu/JPML/code/outputs/dpf/kitagawa_ledh_hmc_ot
+
+========================================
+[16/24] kitagawa_bpf_hmc_sys
+========================================
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1771570832.018131 1704772 gpu_device.cc:2020] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 22322 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3090, pci bus id: 0000:01:00.0, compute capability: 8.6
+  [nlp] ll= -539.160156  prior= -4.79346752  nlp= 543.953613  q= [4.9932394 1.8545866]
+  [nlp] ll= -539.160156  prior= -4.79346752  nlp= 543.953613  q= [4.9932394 1.8545866]
+  [nlp] ll= -536.746338  prior= -4.7829051  nlp= 541.529236  q= [5.01732 1.85117197]
+  [nlp] ll= -536.746338  prior= -4.7829051  nlp= 541.529236  q= [5.01732 1.85117197]
+  [nlp] ll= -533.813171  prior= -4.77550459  nlp= 538.588684  q= [5.0509491 1.85835087]
+  [nlp] ll= -533.813171  prior= -4.77550459  nlp= 538.588684  q= [5.0509491 1.85835087]
+  [nlp] ll= -526.063538  prior= -4.77127409  nlp= 530.834839  q= [5.09434891 1.87587237]
+  [nlp] ll= -526.063538  prior= -4.77127409  nlp= 530.834839  q= [5.09434891 1.87587237]
+  [nlp] ll= -518.573181  prior= -4.77033615  nlp= 523.343506  q= [5.14700222 1.90313458]
+  [nlp] ll= -518.573181  prior= -4.77033615  nlp= 523.343506  q= [5.14700222 1.90313458]
+  [nlp] ll= -507.36557  prior= -4.77273655  nlp= 512.138306  q= [5.2086916 1.93950534]
+  [nlp] ll= -507.36557  prior= -4.77273655  nlp= 512.138306  q= [5.2086916 1.93950534]
+  [nlp] ll= -401.213715  prior= -5.30258369  nlp= 406.516296  q= [6.63625383 3.24230909]
+  [nlp] ll= -401.213715  prior= -5.30258369  nlp= 406.516296  q= [6.63625383 3.24230909]
+  [nlp] ll= -386.814301  prior= -6.07549953  nlp= 392.889801  q= [8.66297436 4.64858389]
+  [nlp] ll= -386.814301  prior= -6.07549953  nlp= 392.889801  q= [8.66297436 4.64858389]
+  [nlp] ll= -390.323639  prior= -6.90159845  nlp= 397.22525  q= [10.7098694 5.94589615]
+  [nlp] ll= -390.323639  prior= -6.90159845  nlp= 397.22525  q= [10.7098694 5.94589615]
+  [nlp] ll= -396.11792  prior= -7.69717121  nlp= 403.815094  q= [12.7095146 7.12497234]
+  [nlp] ll= -396.11792  prior= -7.69717121  nlp= 403.815094  q= [12.7095146 7.12497234]
+  [nlp] ll= -401.479065  prior= -8.44210052  nlp= 409.921173  q= [14.6656075 8.19057369]
+  [nlp] ll= -401.479065  prior= -8.44210052  nlp= 409.921173  q= [14.6656075 8.19057369]
+  [nlp] ll= -399.273895  prior= -8.1267  nlp= 407.400604  q= [14.1312571 7.61331]
+  [nlp] ll= -399.273895  prior= -8.1267  nlp= 407.400604  q= [14.1312571 7.61331]
+  [nlp] ll= -395.374451  prior= -7.65005398  nlp= 403.024506  q= [13.4818859 6.72199726]
+  [nlp] ll= -395.374451  prior= -7.65005398  nlp= 403.024506  q= [13.4818859 6.72199726]
+  [nlp] ll= -390.355072  prior= -6.96034  nlp= 397.315399  q= [12.6645813 5.49757576]
+  [nlp] ll= -390.355072  prior= -6.96034  nlp= 397.315399  q= [12.6645813 5.49757576]
+  [nlp] ll= -383.270325  prior= -5.99028873  nlp= 389.26062  q= [11.7669258 3.91112113]
+  [nlp] ll= -383.270325  prior= -5.99028873  nlp= 389.26062  q= [11.7669258 3.91112113]
+  [nlp] ll= -374.104614  prior= -4.67203331  nlp= 378.776642  q= [10.7356682 1.96124256]
+  [nlp] ll= -374.104614  prior= -4.67203331  nlp= 378.776642  q= [10.7356682 1.96124256]
+  [nlp] ll= -374.646545  prior= -4.59214497  nlp= 379.238678  q= [10.2548475 1.92015171]
+  [nlp] ll= -374.646545  prior= -4.59214497  nlp= 379.238678  q= [10.2548475 1.92015171]
+  [nlp] ll= -373.562134  prior= -4.32292652  nlp= 377.885071  q= [9.84684 1.52979374]
+  [nlp] ll= -373.562134  prior= -4.32292652  nlp= 377.885071  q= [9.84684 1.52979374]
+  [nlp] ll= -374.408325  prior= -3.96994305  nlp= 378.378265  q= [9.77359486 0.808356166]
+  [nlp] ll= -374.408325  prior= -3.96994305  nlp= 378.378265  q= [9.77359486 0.808356166]
+  [nlp] ll= -376.6698  prior= -3.87469387  nlp= 380.544495  q= [10.3108301 0.147366464]
+  [nlp] ll= -376.6698  prior= -3.87469387  nlp= 380.544495  q= [10.3108301 0.147366464]
+  [nlp] ll= -373.132385  prior= -3.96119118  nlp= 377.093567  q= [10.7987022 0.390861154]
+  [nlp] ll= -373.132385  prior= -3.96119118  nlp= 377.093567  q= [10.7987022 0.390861154]
+  [nlp] ll= -372.419067  prior= -4.03322411  nlp= 376.452301  q= [10.334403 0.823753357]
+  [nlp] ll= -372.419067  prior= -4.03322411  nlp= 376.452301  q= [10.334403 0.823753357]
+  [nlp] ll= -372.333282  prior= -4.23180914  nlp= 376.565094  q= [10.4003916 1.25058866]
+  [nlp] ll= -372.333282  prior= -4.23180914  nlp= 376.565094  q= [10.4003916 1.25058866]
+  [nlp] ll= -373.753967  prior= -4.37410116  nlp= 378.128082  q= [10.6077585 1.47474802]
+  [nlp] ll= -373.753967  prior= -4.37410116  nlp= 378.128082  q= [10.6077585 1.47474802]
+  [nlp] ll= -372.607147  prior= -4.32487106  nlp= 376.932  q= [10.6612434 1.37194622]
+  [nlp] ll= -372.607147  prior= -4.32487106  nlp= 376.932  q= [10.6612434 1.37194622]
+  [nlp] ll= -370.748444  prior= -4.12977505  nlp= 374.878204  q= [10.6368322 0.975934923]
+  [nlp] ll= -370.748444  prior= -4.12977505  nlp= 374.878204  q= [10.6368322 0.975934923]
+Creating true model: src.models.kitagawa.KitagawaModel
+Generating 100 time steps with true params: {'sigma_V': 10.0, 'sigma_W': 1.0}
+Creating inference model
+Trainable params: ['sigma_V', 'sigma_W']
+
+Running HMC inference...
+Using HMC sampler (num_leapfrog_steps=5)
+Running HMC: 3 burn-in + 2 sampling = 5 total steps
+  [burn-in 1/3] 1.1s | accept=100% | step_size=0.1725 | sigma_V=5.2141, sigma_W=2.0738 | ETA 4s
+  [burn-in 2/3] 1.0s | accept=100% | step_size=0.2892 | sigma_V=14.6656, sigma_W=8.1909 | ETA 3s
+  [burn-in 3/3] 1.0s | accept=100% | step_size=0.2892 | sigma_V=10.7357, sigma_W=2.0929 | ETA 2s
+  [sample 1/2] 1.1s | accept=100% | step_size=0.2892 | sigma_V=10.7987, sigma_W=0.9076 | ETA 1s
+  [sample 2/2] 1.1s | accept=100% | step_size=0.2892 | sigma_V=10.6369, sigma_W=1.2957 | ETA 0s
+HMC complete!
+
+============================================================
+DPF INFERENCE RESULTS
+============================================================
+
+  sigma_V:
+    True:           10.0
+    Posterior mean:  10.7178 +/- 0.0809
+    90% CI:         [10.6449, 10.7906]
+    True in 90% CI: NO
+
+  sigma_W:
+    True:           1.0
+    Posterior mean:  1.1016 +/- 0.1941
+    90% CI:         [0.9270, 1.2763]
+    True in 90% CI: YES
+
+Diagnostics:
+  Acceptance rate: 100.0%
+  Final step size: 0.289221
+  ESS: {'sigma_V': nan, 'sigma_W': nan}
+  R-hat: {'sigma_V': nan, 'sigma_W': nan}
+
+Performance:
+  Wall time: 8.4 seconds
+  Peak memory: 3.5 MB
+============================================================
+
+Results saved to /home/haowu/JPML/code/outputs/dpf/kitagawa_bpf_hmc_sys
+
+========================================
+[17/24] kitagawa_bpf_hmc_soft
+========================================
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1771570844.815865 1705197 gpu_device.cc:2020] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 22322 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3090, pci bus id: 0000:01:00.0, compute capability: 8.6
+  [nlp] ll= -536.262329  prior= -4.79346752  nlp= 541.055786  q= [4.9932394 1.8545866]
+  [nlp] ll= -536.262329  prior= -4.79346752  nlp= 541.055786  q= [4.9932394 1.8545866]
+  [nlp] ll= -538.438416  prior= -4.77936649  nlp= 543.217773  q= [5.02274752 1.84842932]
+  [nlp] ll= -538.438416  prior= -4.77936649  nlp= 543.217773  q= [5.02274752 1.84842932]
+  [nlp] ll= -513.328064  prior= -4.76829195  nlp= 518.096375  q= [5.06242037 1.85284531]
+  [nlp] ll= -513.328064  prior= -4.76829195  nlp= 518.096375  q= [5.06242037 1.85284531]
+  [nlp] ll= -510.168945  prior= -4.75966072  nlp= 514.928589  q= [5.11119747 1.86581111]
+  [nlp] ll= -510.168945  prior= -4.75966072  nlp= 514.928589  q= [5.11119747 1.86581111]
+  [nlp] ll= -517.042358  prior= -4.74831  nlp= 521.790649  q= [5.1864934 1.88738072]
+  [nlp] ll= -517.042358  prior= -4.74831  nlp= 521.790649  q= [5.1864934 1.88738072]
+  [nlp] ll= -481.303955  prior= -4.73314857  nlp= 486.037109  q= [5.29735899 1.91802967]
+  [nlp] ll= -481.303955  prior= -4.73314857  nlp= 486.037109  q= [5.29735899 1.91802967]
+  [nlp] ll= -506.26712  prior= -4.77776194  nlp= 511.044891  q= [5.09755278 1.88848865]
+  [nlp] ll= -506.26712  prior= -4.77776194  nlp= 511.044891  q= [5.09755278 1.88848865]
+  [nlp] ll= -499.962646  prior= -4.7799449  nlp= 504.742584  q= [5.2776885 1.98592019]
+  [nlp] ll= -499.962646  prior= -4.7799449  nlp= 504.742584  q= [5.2776885 1.98592019]
+  [nlp] ll= -462.810577  prior= -4.8197403  nlp= 467.63031  q= [5.48461485 2.14435649]
+  [nlp] ll= -462.810577  prior= -4.8197403  nlp= 467.63031  q= [5.48461485 2.14435649]
+  [nlp] ll= -449.298431  prior= -4.88810635  nlp= 454.186523  q= [5.70966625 2.34111309]
+  [nlp] ll= -449.298431  prior= -4.88810635  nlp= 454.186523  q= [5.70966625 2.34111309]
+  [nlp] ll= -422.826385  prior= -4.97914553  nlp= 427.805542  q= [5.96001673 2.56741881]
+  [nlp] ll= -422.826385  prior= -4.97914553  nlp= 427.805542  q= [5.96001673 2.56741881]
+  [nlp] ll= -418.349121  prior= -4.96596527  nlp= 423.315094  q= [5.90291214 2.52936029]
+  [nlp] ll= -418.349121  prior= -4.96596527  nlp= 423.315094  q= [5.90291214 2.52936029]
+  [nlp] ll= -421.621033  prior= -4.94919109  nlp= 426.570221  q= [5.93154573 2.51094198]
+  [nlp] ll= -421.621033  prior= -4.94919109  nlp= 426.570221  q= [5.93154573 2.51094198]
+  [nlp] ll= -452.341095  prior= -4.93561888  nlp= 457.276703  q= [6.01158285 2.51201606]
+  [nlp] ll= -452.341095  prior= -4.93561888  nlp= 457.276703  q= [6.01158285 2.51201606]
+  [nlp] ll= -570.523254  prior= -5.95279884  nlp= 576.476074  q= [3.68195152 2.56194139]
+  [nlp] ll= -570.523254  prior= -5.95279884  nlp= 576.476074  q= [3.68195152 2.56194139]
+  [nlp] ll= -1022.07819  prior= -9.74092388  nlp= 1031.81909  q= [1.50243092 2.72592068]
+  [nlp] ll= -1022.07819  prior= -9.74092388  nlp= 1031.81909  q= [1.50243092 2.72592068]
+  [nlp] ll= -423.970245  prior= -5.00617504  nlp= 428.97641  q= [5.91365957 2.59725237]
+  [nlp] ll= -423.970245  prior= -5.00617504  nlp= 428.97641  q= [5.91365957 2.59725237]
+  [nlp] ll= -426.808472  prior= -5.04778957  nlp= 431.856262  q= [5.86641836 2.64978719]
+  [nlp] ll= -426.808472  prior= -5.04778957  nlp= 431.856262  q= [5.86641836 2.64978719]
+  [nlp] ll= -444.957428  prior= -5.17095661  nlp= 450.128387  q= [5.51933193 2.72472215]
+  [nlp] ll= -444.957428  prior= -5.17095661  nlp= 450.128387  q= [5.51933193 2.72472215]
+  [nlp] ll= -536.202271  prior= -5.84942102  nlp= 542.051697  q= [4.06392956 2.83682179]
+  [nlp] ll= -536.202271  prior= -5.84942102  nlp= 542.051697  q= [4.06392956 2.83682179]
+  [nlp] ll= -683.701782  prior= -7.31541777  nlp= 691.017212  q= [2.70697331 3.03649426]
+  [nlp] ll= -683.701782  prior= -7.31541777  nlp= 691.017212  q= [2.70697331 3.03649426]
+  [nlp] ll= -427.665802  prior= -5.00835609  nlp= 432.674164  q= [5.92356253 2.60371637]
+  [nlp] ll= -427.665802  prior= -5.00835609  nlp= 432.674164  q= [5.92356253 2.60371637]
+  [nlp] ll= -444.394867  prior= -5.11571264  nlp= 449.51059  q= [5.59235477 2.66436863]
+  [nlp] ll= -444.394867  prior= -5.11571264  nlp= 449.51059  q= [5.59235477 2.66436863]
+  [nlp] ll= -441.668976  prior= -5.27628517  nlp= 446.945251  q= [5.21772194 2.75931859]
+  [nlp] ll= -441.668976  prior= -5.27628517  nlp= 446.945251  q= [5.21772194 2.75931859]
+  [nlp] ll= -459.504578  prior= -5.45486498  nlp= 464.959442  q= [4.9183917 2.8834362]
+  [nlp] ll= -459.504578  prior= -5.45486498  nlp= 464.959442  q= [4.9183917 2.8834362]
+  [nlp] ll= -453.247894  prior= -5.49092674  nlp= 458.738831  q= [5.10181713 3.04755187]
+  [nlp] ll= -453.247894  prior= -5.49092674  nlp= 458.738831  q= [5.10181713 3.04755187]
+Creating true model: src.models.kitagawa.KitagawaModel
+Generating 100 time steps with true params: {'sigma_V': 10.0, 'sigma_W': 1.0}
+Creating inference model
+Trainable params: ['sigma_V', 'sigma_W']
+
+Running HMC inference...
+Using HMC sampler (num_leapfrog_steps=5)
+Running HMC: 3 burn-in + 2 sampling = 5 total steps
+  [burn-in 1/3] 1.2s | accept=0% | step_size=0.0280 | sigma_V=5.0000, sigma_W=2.0000 | ETA 5s
+  [burn-in 2/3] 1.1s | accept=50% | step_size=0.0341 | sigma_V=5.9626, sigma_W=2.6414 | ETA 3s
+  [burn-in 3/3] 1.1s | accept=33% | step_size=0.0341 | sigma_V=5.9626, sigma_W=2.6414 | ETA 2s
+  [sample 1/2] 1.1s | accept=25% | step_size=0.0341 | sigma_V=5.9626, sigma_W=2.6414 | ETA 1s
+  [sample 2/2] 1.1s | accept=20% | step_size=0.0341 | sigma_V=5.9626, sigma_W=2.6414 | ETA 0s
+HMC complete!
+
+============================================================
+DPF INFERENCE RESULTS
+============================================================
+
+  sigma_V:
+    True:           10.0
+    Posterior mean:  5.9626 +/- 0.0000
+    90% CI:         [5.9626, 5.9626]
+    True in 90% CI: NO
+
+  sigma_W:
+    True:           1.0
+    Posterior mean:  2.6414 +/- 0.0000
+    90% CI:         [2.6414, 2.6414]
+    True in 90% CI: NO
+
+Diagnostics:
+  Acceptance rate: 0.0%
+  Final step size: 0.034077
+  ESS: {'sigma_V': nan, 'sigma_W': nan}
+  R-hat: {'sigma_V': nan, 'sigma_W': nan}
+
+Performance:
+  Wall time: 9.3 seconds
+  Peak memory: 4.1 MB
+============================================================
+
+Results saved to /home/haowu/JPML/code/outputs/dpf/kitagawa_bpf_hmc_soft
+
+========================================
+[18/24] kitagawa_bpf_hmc_ot
+========================================
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1771570858.519554 1705641 gpu_device.cc:2020] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 22322 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3090, pci bus id: 0000:01:00.0, compute capability: 8.6
+  [nlp] ll= -682.43335  prior= -4.79346752  nlp= 687.226807  q= [4.9932394 1.8545866]
+  [nlp] ll= -682.43335  prior= -4.79346752  nlp= 687.226807  q= [4.9932394 1.8545866]
+  [nlp] ll= -804.755127  prior= -4.79081583  nlp= 809.545959  q= [5.00879717 1.85939777]
+  [nlp] ll= -804.755127  prior= -4.79081583  nlp= 809.545959  q= [5.00879717 1.85939777]
+  [nlp] ll= -776.065674  prior= -4.80289698  nlp= 780.868591  q= [5.04743147 1.90207434]
+  [nlp] ll= -776.065674  prior= -4.80289698  nlp= 780.868591  q= [5.04743147 1.90207434]
+  [nlp] ll= -559.69342  prior= -4.83348942  nlp= 564.526917  q= [5.0964613 1.98030794]
+  [nlp] ll= -559.69342  prior= -4.83348942  nlp= 564.526917  q= [5.0964613 1.98030794]
+  [nlp] ll= -494.605896  prior= -4.87613344  nlp= 499.482025  q= [5.14260197 2.07521248]
+  [nlp] ll= -494.605896  prior= -4.87613344  nlp= 499.482025  q= [5.14260197 2.07521248]
+  [nlp] ll= -666.712646  prior= -4.92007542  nlp= 671.632751  q= [5.20191622 2.17741656]
+  [nlp] ll= -666.712646  prior= -4.92007542  nlp= 671.632751  q= [5.20191622 2.17741656]
+  [nlp] ll= -736.984314  prior= -4.86742783  nlp= 741.851746  q= [4.98812819 1.97452223]
+  [nlp] ll= -736.984314  prior= -4.86742783  nlp= 741.851746  q= [4.98812819 1.97452223]
+  [nlp] ll= -624.755432  prior= -4.99590588  nlp= 629.751343  q= [5.21910429 2.30867457]
+  [nlp] ll= -624.755432  prior= -4.99590588  nlp= 629.751343  q= [5.21910429 2.30867457]
+  [nlp] ll= -404.365936  prior= -5.22201443  nlp= 409.587952  q= [5.50612593 2.80178738]
+  [nlp] ll= -404.365936  prior= -5.22201443  nlp= 409.587952  q= [5.50612593 2.80178738]
+  [nlp] ll= -419.689636  prior= -5.46880484  nlp= 425.158447  q= [5.77447939 3.30639744]
+  [nlp] ll= -419.689636  prior= -5.46880484  nlp= 425.158447  q= [5.77447939 3.30639744]
+  [nlp] ll= -407.216949  prior= -5.69544315  nlp= 412.912384  q= [6.21210098 3.82130051]
+  [nlp] ll= -407.216949  prior= -5.69544315  nlp= 412.912384  q= [6.21210098 3.82130051]
+  [nlp] ll= -780.530762  prior= -4.79766  nlp= 785.32843  q= [4.97723579 1.85199177]
+  [nlp] ll= -780.530762  prior= -4.79766  nlp= 785.32843  q= [4.97723579 1.85199177]
+  [nlp] ll= -785.727722  prior= -4.81105328  nlp= 790.538757  q= [4.97496271 1.87304103]
+  [nlp] ll= -785.727722  prior= -4.81105328  nlp= 790.538757  q= [4.97496271 1.87304103]
+  [nlp] ll= -673.023743  prior= -4.83579731  nlp= 677.859558  q= [4.98065567 1.91769814]
+  [nlp] ll= -673.023743  prior= -4.83579731  nlp= 677.859558  q= [4.98065567 1.91769814]
+  [nlp] ll= -548.735901  prior= -4.87071228  nlp= 553.606628  q= [4.99150324 1.98193169]
+  [nlp] ll= -548.735901  prior= -4.87071228  nlp= 553.606628  q= [4.99150324 1.98193169]
+  [nlp] ll= -492.172913  prior= -4.91303778  nlp= 497.085938  q= [5.00163174 2.05740428]
+  [nlp] ll= -492.172913  prior= -4.91303778  nlp= 497.085938  q= [5.00163174 2.05740428]
+  [nlp] ll= -486.465  prior= -4.92136955  nlp= 491.386353  q= [4.99152231 2.06515026]
+  [nlp] ll= -486.465  prior= -4.92136955  nlp= 491.386353  q= [4.99152231 2.06515026]
+  [nlp] ll= -483.840546  prior= -4.93204212  nlp= 488.772583  q= [4.9860363 2.07939124]
+  [nlp] ll= -483.840546  prior= -4.93204212  nlp= 488.772583  q= [4.9860363 2.07939124]
+  [nlp] ll= -472.922211  prior= -4.94362497  nlp= 477.865845  q= [4.98764 2.09924436]
+  [nlp] ll= -472.922211  prior= -4.94362497  nlp= 477.865845  q= [4.98764 2.09924436]
+  [nlp] ll= -576.941345  prior= -4.95674658  nlp= 581.898071  q= [4.99440241 2.12457323]
+  [nlp] ll= -576.941345  prior= -4.95674658  nlp= 581.898071  q= [4.99440241 2.12457323]
+  [nlp] ll= -543.003784  prior= -4.97927713  nlp= 547.983032  q= [4.99491549 2.16151786]
+  [nlp] ll= -543.003784  prior= -4.97927713  nlp= 547.983032  q= [4.99491549 2.16151786]
+  [nlp] ll= -494.531494  prior= -4.92147255  nlp= 499.452972  q= [4.99396372 2.06674385]
+  [nlp] ll= -494.531494  prior= -4.92147255  nlp= 499.452972  q= [4.99396372 2.06674385]
+  [nlp] ll= -494.08313  prior= -4.93241119  nlp= 499.015533  q= [4.99176693 2.08334541]
+  [nlp] ll= -494.08313  prior= -4.93241119  nlp= 499.015533  q= [4.99176693 2.08334541]
+  [nlp] ll= -474.185516  prior= -4.94481659  nlp= 479.130341  q= [4.99335146 2.10451841]
+  [nlp] ll= -474.185516  prior= -4.94481659  nlp= 479.130341  q= [4.99335146 2.10451841]
+  [nlp] ll= -701.040894  prior= -4.95849276  nlp= 705.99939  q= [4.9977212 2.12934089]
+  [nlp] ll= -701.040894  prior= -4.95849276  nlp= 705.99939  q= [4.9977212 2.12934089]
+  [nlp] ll= -464.155823  prior= -4.97908401  nlp= 469.134918  q= [5.01178551 2.17091608]
+  [nlp] ll= -464.155823  prior= -4.97908401  nlp= 469.134918  q= [5.01178551 2.17091608]
+Creating true model: src.models.kitagawa.KitagawaModel
+Generating 100 time steps with true params: {'sigma_V': 10.0, 'sigma_W': 1.0}
+Creating inference model
+Trainable params: ['sigma_V', 'sigma_W']
+
+Running HMC inference...
+Using HMC sampler (num_leapfrog_steps=5)
+Running HMC: 3 burn-in + 2 sampling = 5 total steps
+  [burn-in 1/3] 13.3s | accept=0% | step_size=0.0280 | sigma_V=5.0000, sigma_W=2.0000 | ETA 53s
+  [burn-in 2/3] 13.0s | accept=0% | step_size=0.0084 | sigma_V=5.0000, sigma_W=2.0000 | ETA 39s
+  [burn-in 3/3] 13.3s | accept=33% | step_size=0.0084 | sigma_V=5.0083, sigma_W=2.1777 | ETA 26s
+  [sample 1/2] 13.3s | accept=25% | step_size=0.0084 | sigma_V=5.0083, sigma_W=2.1777 | ETA 13s
+  [sample 2/2] 13.4s | accept=40% | step_size=0.0084 | sigma_V=5.0184, sigma_W=2.2789 | ETA 0s
+HMC complete!
+
+============================================================
+DPF INFERENCE RESULTS
+============================================================
+
+  sigma_V:
+    True:           10.0
+    Posterior mean:  5.0134 +/- 0.0050
+    90% CI:         [5.0088, 5.0179]
+    True in 90% CI: NO
+
+  sigma_W:
+    True:           1.0
+    Posterior mean:  2.2283 +/- 0.0506
+    90% CI:         [2.1827, 2.2739]
+    True in 90% CI: NO
+
+Diagnostics:
+  Acceptance rate: 50.0%
+  Final step size: 0.008400
+  ESS: {'sigma_V': nan, 'sigma_W': nan}
+  R-hat: {'sigma_V': nan, 'sigma_W': nan}
+
+Performance:
+  Wall time: 75.6 seconds
+  Peak memory: 6.6 MB
+============================================================
+
+Results saved to /home/haowu/JPML/code/outputs/dpf/kitagawa_bpf_hmc_ot
+
+========================================
+[19/24] range_bearing_ledh_hmc_sys
+========================================
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1771570938.583879 1706550 gpu_device.cc:2020] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 22322 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3090, pci bus id: 0000:01:00.0, compute capability: 8.6
+I0000 00:00:1771570938.787772 1706654 cuda_solvers.cc:175] Creating GpuSolver handles for stream 0x1ee7cd80
+  [nlp] ll= 24.9268436  prior= -5.549191  nlp= -19.3776531  q= [-1.0502255 -1.0502255]
+  [nlp] ll= 24.9268436  prior= -5.549191  nlp= -19.3776531  q= [-1.0502255 -1.0502255]
+  [nlp] ll= 24.937542  prior= -5.56002426  nlp= -19.3775177  q= [-1.03495443 -1.06285715]
+  [nlp] ll= 24.937542  prior= -5.56002426  nlp= -19.3775177  q= [-1.03495443 -1.06285715]
+  [nlp] ll= 26.303  prior= -5.51105  nlp= -20.7919502  q= [-1.02754045 -1.08319843]
+  [nlp] ll= 26.303  prior= -5.51105  nlp= -20.7919502  q= [-1.02754045 -1.08319843]
+  [nlp] ll= 28.4643135  prior= -5.40299034  nlp= -23.0613232  q= [-1.02800107 -1.11125159]
+  [nlp] ll= 28.4643135  prior= -5.40299034  nlp= -23.0613232  q= [-1.02800107 -1.11125159]
+  [nlp] ll= 30.7766323  prior= -5.23765  nlp= -25.5389824  q= [-1.0363276 -1.14702225]
+  [nlp] ll= 30.7766323  prior= -5.23765  nlp= -25.5389824  q= [-1.0363276 -1.14702225]
+  [nlp] ll= 36.1342125  prior= -5.01821136  nlp= -31.1160011  q= [-1.05248058 -1.19045019]
+  [nlp] ll= 36.1342125  prior= -5.01821136  nlp= -31.1160011  q= [-1.05248058 -1.19045019]
+  [nlp] ll= 194.149612  prior= -0.610502  nlp= -193.539108  q= [-2.08051515 -2.26392436]
+  [nlp] ll= 194.149612  prior= -0.610502  nlp= -193.539108  q= [-2.08051515 -2.26392436]
+  [nlp] ll= 845.717712  prior= -48.163456  nlp= -797.55426  q= [-5.73094845 -5.77289963]
+  [nlp] ll= 845.717712  prior= -48.163456  nlp= -797.55426  q= [-5.73094845 -5.77289963]
+  [nlp] ll= -2.22020845e+15  prior= -426.424316  nlp= 2.22020845e+15  q= [-11.6147251 -13.5348635]
+  [nlp] ll= -2.22020845e+15  prior= -426.424316  nlp= 2.22020845e+15  q= [-11.6147251 -13.5348635]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= 82.2121048  prior= -2.99866581  nlp= -79.2134399  q= [-1.36613381 -1.49061048]
+  [nlp] ll= 82.2121048  prior= -2.99866581  nlp= -79.2134399  q= [-1.36613381 -1.49061048]
+  [nlp] ll= 189.524506  prior= -0.615348  nlp= -188.909164  q= [-2.0900178 -2.18486929]
+  [nlp] ll= 189.524506  prior= -0.615348  nlp= -188.909164  q= [-2.0900178 -2.18486929]
+  [nlp] ll= 379.406128  prior= -4.4154973  nlp= -374.990631  q= [-3.26129389 -3.28286552]
+  [nlp] ll= 379.406128  prior= -4.4154973  nlp= -374.990631  q= [-3.26129389 -3.28286552]
+  [nlp] ll= 702.065796  prior= -27.695137  nlp= -674.370667  q= [-4.91111183 -4.9003253]
+  [nlp] ll= 702.065796  prior= -27.695137  nlp= -674.370667  q= [-4.91111183 -4.9003253]
+  [nlp] ll= 833.424133  prior= -87.5751724  nlp= -745.848938  q= [-6.96396351 -6.96904373]
+  [nlp] ll= 833.424133  prior= -87.5751724  nlp= -745.848938  q= [-6.96396351 -6.96904373]
+  [nlp] ll= 69.8286743  prior= -3.47352171  nlp= -66.3551559  q= [-1.34367418 -1.34872723]
+  [nlp] ll= 69.8286743  prior= -3.47352171  nlp= -66.3551559  q= [-1.34367418 -1.34872723]
+  [nlp] ll= 165.969421  prior= -0.87441206  nlp= -165.095016  q= [-2.04421568 -1.8991878]
+  [nlp] ll= 165.969421  prior= -0.87441206  nlp= -165.095016  q= [-2.04421568 -1.8991878]
+  [nlp] ll= 335.506683  prior= -2.80883646  nlp= -332.697845  q= [-3.18998718 -2.84247494]
+  [nlp] ll= 335.506683  prior= -2.80883646  nlp= -332.697845  q= [-3.18998718 -2.84247494]
+  [nlp] ll= 625.309265  prior= -20.8142014  nlp= -604.495056  q= [-4.82004261 -4.24346638]
+  [nlp] ll= 625.309265  prior= -20.8142014  nlp= -604.495056  q= [-4.82004261 -4.24346638]
+  [nlp] ll= 864.96875  prior= -71.8602295  nlp= -793.108521  q= [-6.84918499 -6.17240953]
+  [nlp] ll= 864.96875  prior= -71.8602295  nlp= -793.108521  q= [-6.84918499 -6.17240953]
+  [nlp] ll= 67.9432907  prior= -3.57998228  nlp= -64.3633118  q= [-1.32297826 -1.33521831]
+  [nlp] ll= 67.9432907  prior= -3.57998228  nlp= -64.3633118  q= [-1.32297826 -1.33521831]
+  [nlp] ll= 160.333588  prior= -0.943673253  nlp= -159.389908  q= [-2.00396252 -1.87333536]
+  [nlp] ll= 160.333588  prior= -0.943673253  nlp= -159.389908  q= [-2.00396252 -1.87333536]
+  [nlp] ll= 326.681396  prior= -2.51172209  nlp= -324.169678  q= [-3.12650132 -2.80487132]
+  [nlp] ll= 326.681396  prior= -2.51172209  nlp= -324.169678  q= [-3.12650132 -2.80487132]
+  [nlp] ll= 610.946167  prior= -19.5007877  nlp= -591.445374  q= [-4.72958755 -4.18834066]
+  [nlp] ll= 610.946167  prior= -19.5007877  nlp= -591.445374  q= [-4.72958755 -4.18834066]
+  [nlp] ll= 871.68335  prior= -68.7780151  nlp= -802.905334  q= [-6.73716259 -6.10265541]
+  [nlp] ll= 871.68335  prior= -68.7780151  nlp= -802.905334  q= [-6.73716259 -6.10265541]
+Creating true model: src.models.range_bearing.RangeBearingModel
+Generating 100 time steps with true params: {'sigma_range': 0.1, 'sigma_bearing': 0.1}
+Creating inference model
+Trainable params: ['sigma_range', 'sigma_bearing']
+
+Running HMC inference...
+Using HMC sampler (num_leapfrog_steps=5)
+Running HMC: 3 burn-in + 2 sampling = 5 total steps
+  [burn-in 1/3] 87.1s | accept=100% | step_size=0.1725 | sigma_range=0.2994, sigma_bearing=0.2655 | ETA 348s
+  [burn-in 2/3] 88.1s | accept=50% | step_size=0.0712 | sigma_range=0.2994, sigma_bearing=0.2655 | ETA 263s
+  [burn-in 3/3] 87.6s | accept=33% | step_size=0.0712 | sigma_range=0.2994, sigma_bearing=0.2655 | ETA 175s
+  [sample 1/2] 87.7s | accept=25% | step_size=0.0712 | sigma_range=0.2994, sigma_bearing=0.2655 | ETA 88s
+  [sample 2/2] 87.6s | accept=20% | step_size=0.0712 | sigma_range=0.2994, sigma_bearing=0.2655 | ETA 0s
+HMC complete!
+
+============================================================
+DPF INFERENCE RESULTS
+============================================================
+
+  sigma_range:
+    True:           0.1
+    Posterior mean:  0.2994 +/- 0.0000
+    90% CI:         [0.2994, 0.2994]
+    True in 90% CI: NO
+
+  sigma_bearing:
+    True:           0.1
+    Posterior mean:  0.2655 +/- 0.0000
+    90% CI:         [0.2655, 0.2655]
+    True in 90% CI: NO
+
+Diagnostics:
+  Acceptance rate: 0.0%
+  Final step size: 0.071215
+  ESS: {'sigma_range': nan, 'sigma_bearing': nan}
+  R-hat: {'sigma_range': nan, 'sigma_bearing': nan}
+
+Performance:
+  Wall time: 550.2 seconds
+  Peak memory: 122.4 MB
+============================================================
+
+Results saved to /home/haowu/JPML/code/outputs/dpf/range_bearing_ledh_hmc_sys
+
+========================================
+[20/24] range_bearing_ledh_hmc_soft
+========================================
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1771571496.059258 1709761 gpu_device.cc:2020] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 22322 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3090, pci bus id: 0000:01:00.0, compute capability: 8.6
+I0000 00:00:1771571496.263235 1709854 cuda_solvers.cc:175] Creating GpuSolver handles for stream 0x36e4d260
+  [nlp] ll= 25.9539452  prior= -5.549191  nlp= -20.4047546  q= [-1.0502255 -1.0502255]
+  [nlp] ll= 25.9539452  prior= -5.549191  nlp= -20.4047546  q= [-1.0502255 -1.0502255]
+  [nlp] ll= 25.872036  prior= -5.55984259  nlp= -20.3121929  q= [-1.03496456 -1.06289387]
+  [nlp] ll= 25.872036  prior= -5.55984259  nlp= -20.3121929  q= [-1.03496456 -1.06289387]
+  [nlp] ll= 26.163475  prior= -5.51037121  nlp= -20.6531029  q= [-1.02759767 -1.08331656]
+  [nlp] ll= 26.163475  prior= -5.51037121  nlp= -20.6531029  q= [-1.02759767 -1.08331656]
+  [nlp] ll= 28.8383293  prior= -5.40166283  nlp= -23.4366665  q= [-1.02811635 -1.11148381]
+  [nlp] ll= 28.8383293  prior= -5.40166283  nlp= -23.4366665  q= [-1.02811635 -1.11148381]
+  [nlp] ll= 31.9716797  prior= -5.23551607  nlp= -26.7361641  q= [-1.03653 -1.1473881]
+  [nlp] ll= 31.9716797  prior= -5.23551607  nlp= -26.7361641  q= [-1.03653 -1.1473881]
+  [nlp] ll= 36.6290169  prior= -5.0149765  nlp= -31.6140404  q= [-1.05281138 -1.19100022]
+  [nlp] ll= 36.6290169  prior= -5.0149765  nlp= -31.6140404  q= [-1.05281138 -1.19100022]
+  [nlp] ll= 194.639465  prior= -0.608329892  nlp= -194.031128  q= [-2.08392 -2.25681686]
+  [nlp] ll= 194.639465  prior= -0.608329892  nlp= -194.031128  q= [-2.08392 -2.25681686]
+  [nlp] ll= 805.218384  prior= -41.1454849  nlp= -764.072876  q= [-5.53406906 -5.43995476]
+  [nlp] ll= 805.218384  prior= -41.1454849  nlp= -764.072876  q= [-5.53406906 -5.43995476]
+  [nlp] ll= -2.21857894e+09  prior= -274.426239  nlp= 2.2185792e+09  q= [-10.8823767 -10.2579956]
+  [nlp] ll= -2.21857894e+09  prior= -274.426239  nlp= 2.2185792e+09  q= [-10.8823767 -10.2579956]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= 82.7546539  prior= -2.99807787  nlp= -79.7565765  q= [-1.3669883 -1.489856]
+  [nlp] ll= 82.7546539  prior= -2.99807787  nlp= -79.7565765  q= [-1.3669883 -1.489856]
+  [nlp] ll= 188.233932  prior= -0.623837233  nlp= -187.610092  q= [-2.08296084 -2.17182326]
+  [nlp] ll= 188.233932  prior= -0.623837233  nlp= -187.610092  q= [-2.08296084 -2.17182326]
+  [nlp] ll= 369.161194  prior= -3.97448  nlp= -365.186707  q= [-3.21148062 -3.21539474]
+  [nlp] ll= 369.161194  prior= -3.97448  nlp= -365.186707  q= [-3.21148062 -3.21539474]
+  [nlp] ll= 672.219177  prior= -24.6247  nlp= -647.594482  q= [-4.80013704 -4.70611048]
+  [nlp] ll= 672.219177  prior= -24.6247  nlp= -647.594482  q= [-4.80013704 -4.70611048]
+  [nlp] ll= 869.27887  prior= -79.0602875  nlp= -790.218567  q= [-6.79898214 -6.66489887]
+  [nlp] ll= 869.27887  prior= -79.0602875  nlp= -790.218567  q= [-6.79898214 -6.66489887]
+  [nlp] ll= 70.7643814  prior= -3.47320271  nlp= -67.2911758  q= [-1.34452868 -1.34797275]
+  [nlp] ll= 70.7643814  prior= -3.47320271  nlp= -67.2911758  q= [-1.34452868 -1.34797275]
+  [nlp] ll= 165.083084  prior= -0.887758851  nlp= -164.195328  q= [-2.03969884 -1.89174104]
+  [nlp] ll= 165.083084  prior= -0.887758851  nlp= -164.195328  q= [-2.03969884 -1.89174104]
+  [nlp] ll= 327.435577  prior= -2.56905699  nlp= -324.866516  q= [-3.14561868 -2.80170727]
+  [nlp] ll= 327.435577  prior= -2.56905699  nlp= -324.866516  q= [-3.14561868 -2.80170727]
+  [nlp] ll= 600.38208  prior= -18.6979675  nlp= -581.684082  q= [-4.71209955 -4.1020422]
+  [nlp] ll= 600.38208  prior= -18.6979675  nlp= -581.684082  q= [-4.71209955 -4.1020422]
+  [nlp] ll= 865.305176  prior= -65.0925903  nlp= -800.212585  q= [-6.68343163 -5.9179883]
+  [nlp] ll= 865.305176  prior= -65.0925903  nlp= -800.212585  q= [-6.68343163 -5.9179883]
+  [nlp] ll= 68.2830353  prior= -3.57964253  nlp= -64.703392  q= [-1.32383275 -1.33446383]
+  [nlp] ll= 68.2830353  prior= -3.57964253  nlp= -64.703392  q= [-1.32383275 -1.33446383]
+  [nlp] ll= 159.729187  prior= -0.960548162  nlp= -158.768646  q= [-1.99828768 -1.86509395]
+  [nlp] ll= 159.729187  prior= -0.960548162  nlp= -158.768646  q= [-1.99828768 -1.86509395]
+  [nlp] ll= 319.071594  prior= -2.28394198  nlp= -316.787659  q= [-3.08118868 -2.76303673]
+  [nlp] ll= 319.071594  prior= -2.28394198  nlp= -316.787659  q= [-3.08118868 -2.76303673]
+  [nlp] ll= 586.04248  prior= -17.4499435  nlp= -568.592529  q= [-4.62124825 -4.04672623]
+  [nlp] ll= 586.04248  prior= -17.4499435  nlp= -568.592529  q= [-4.62124825 -4.04672623]
+  [nlp] ll= 864.024963  prior= -62.1562271  nlp= -801.868713  q= [-6.57244396 -5.84700823]
+  [nlp] ll= 864.024963  prior= -62.1562271  nlp= -801.868713  q= [-6.57244396 -5.84700823]
+Creating true model: src.models.range_bearing.RangeBearingModel
+Generating 100 time steps with true params: {'sigma_range': 0.1, 'sigma_bearing': 0.1}
+Creating inference model
+Trainable params: ['sigma_range', 'sigma_bearing']
+
+Running HMC inference...
+Using HMC sampler (num_leapfrog_steps=5)
+Running HMC: 3 burn-in + 2 sampling = 5 total steps
+  [burn-in 1/3] 86.3s | accept=100% | step_size=0.1725 | sigma_range=0.2993, sigma_bearing=0.2654 | ETA 345s
+  [burn-in 2/3] 86.8s | accept=50% | step_size=0.0712 | sigma_range=0.2993, sigma_bearing=0.2654 | ETA 260s
+  [burn-in 3/3] 86.5s | accept=33% | step_size=0.0712 | sigma_range=0.2993, sigma_bearing=0.2654 | ETA 173s
+  [sample 1/2] 85.9s | accept=25% | step_size=0.0712 | sigma_range=0.2993, sigma_bearing=0.2654 | ETA 86s
+  [sample 2/2] 86.4s | accept=20% | step_size=0.0712 | sigma_range=0.2993, sigma_bearing=0.2654 | ETA 0s
+HMC complete!
+
+============================================================
+DPF INFERENCE RESULTS
+============================================================
+
+  sigma_range:
+    True:           0.1
+    Posterior mean:  0.2993 +/- 0.0000
+    90% CI:         [0.2993, 0.2993]
+    True in 90% CI: NO
+
+  sigma_bearing:
+    True:           0.1
+    Posterior mean:  0.2654 +/- 0.0000
+    90% CI:         [0.2654, 0.2654]
+    True in 90% CI: NO
+
+Diagnostics:
+  Acceptance rate: 0.0%
+  Final step size: 0.071215
+  ESS: {'sigma_range': nan, 'sigma_bearing': nan}
+  R-hat: {'sigma_range': nan, 'sigma_bearing': nan}
+
+Performance:
+  Wall time: 543.0 seconds
+  Peak memory: 123.3 MB
+============================================================
+
+Results saved to /home/haowu/JPML/code/outputs/dpf/range_bearing_ledh_hmc_soft
+
+========================================
+[21/24] range_bearing_ledh_hmc_ot
+========================================
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1771572046.279507 1712970 gpu_device.cc:2020] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 22322 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3090, pci bus id: 0000:01:00.0, compute capability: 8.6
+I0000 00:00:1771572046.484167 1713062 cuda_solvers.cc:175] Creating GpuSolver handles for stream 0x24970ae0
+  [nlp] ll= -516.140442  prior= -5.549191  nlp= 521.689636  q= [-1.0502255 -1.0502255]
+  [nlp] ll= -516.140442  prior= -5.549191  nlp= 521.689636  q= [-1.0502255 -1.0502255]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+  [nlp] ll= nan  prior= nan  nlp= nan  q= [nan nan]
+Creating true model: src.models.range_bearing.RangeBearingModel
+Generating 100 time steps with true params: {'sigma_range': 0.1, 'sigma_bearing': 0.1}
+Creating inference model
+Trainable params: ['sigma_range', 'sigma_bearing']
+
+Running HMC inference...
+Using HMC sampler (num_leapfrog_steps=5)
+Running HMC: 3 burn-in + 2 sampling = 5 total steps
+  [burn-in 1/3] 85.8s | accept=0% | step_size=0.0280 | sigma_range=0.3000, sigma_bearing=0.3000 | ETA 343s
+  [burn-in 2/3] 86.1s | accept=0% | step_size=0.0084 | sigma_range=0.3000, sigma_bearing=0.3000 | ETA 258s
+  [burn-in 3/3] 86.2s | accept=0% | step_size=0.0084 | sigma_range=0.3000, sigma_bearing=0.3000 | ETA 172s
+  [sample 1/2] 86.2s | accept=0% | step_size=0.0084 | sigma_range=0.3000, sigma_bearing=0.3000 | ETA 86s
+  [sample 2/2] 85.7s | accept=0% | step_size=0.0084 | sigma_range=0.3000, sigma_bearing=0.3000 | ETA 0s
+HMC complete!
+
+============================================================
+DPF INFERENCE RESULTS
+============================================================
+
+  sigma_range:
+    True:           0.1
+    Posterior mean:  0.3000 +/- 0.0000
+    90% CI:         [0.3000, 0.3000]
+    True in 90% CI: NO
+
+  sigma_bearing:
+    True:           0.1
+    Posterior mean:  0.3000 +/- 0.0000
+    90% CI:         [0.3000, 0.3000]
+    True in 90% CI: NO
+
+Diagnostics:
+  Acceptance rate: 0.0%
+  Final step size: 0.008391
+  ESS: {'sigma_range': nan, 'sigma_bearing': nan}
+  R-hat: {'sigma_range': nan, 'sigma_bearing': nan}
+
+Performance:
+  Wall time: 546.8 seconds
+  Peak memory: 125.5 MB
+============================================================
+
+Results saved to /home/haowu/JPML/code/outputs/dpf/range_bearing_ledh_hmc_ot
+
+========================================
+[22/24] range_bearing_bpf_hmc_sys
+========================================
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1771572600.521857 1716161 gpu_device.cc:2020] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 22322 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3090, pci bus id: 0000:01:00.0, compute capability: 8.6
+I0000 00:00:1771572600.728276 1716255 cuda_solvers.cc:175] Creating GpuSolver handles for stream 0x45bac0d0
+  [nlp] ll= 1.5775528  prior= -5.549191  nlp= 3.9716382  q= [-1.0502255 -1.0502255]
+  [nlp] ll= 1.5775528  prior= -5.549191  nlp= 3.9716382  q= [-1.0502255 -1.0502255]
+  [nlp] ll= 2.43135548  prior= -5.56757832  nlp= 3.13622284  q= [-1.0337646 -1.06212187]
+  [nlp] ll= 2.43135548  prior= -5.56757832  nlp= 3.13622284  q= [-1.0337646 -1.06212187]
+  [nlp] ll= 1.65368605  prior= -5.5405674  nlp= 3.88688135  q= [-1.02295113 -1.0802536]
+  [nlp] ll= 1.65368605  prior= -5.5405674  nlp= 3.88688135  q= [-1.02295113 -1.0802536]
+  [nlp] ll= 3.43073511  prior= -5.46917057  nlp= 2.03843546  q= [-1.0176568 -1.10460138]
+  [nlp] ll= 3.43073511  prior= -5.46917057  nlp= 2.03843546  q= [-1.0176568 -1.10460138]
+  [nlp] ll= 4.71559811  prior= -5.35452  nlp= 0.638921738  q= [-1.01790714 -1.13510251]
+  [nlp] ll= 4.71559811  prior= -5.35452  nlp= 0.638921738  q= [-1.01790714 -1.13510251]
+  [nlp] ll= 7.50149775  prior= -5.19869566  nlp= -2.30280209  q= [-1.02379549 -1.17151046]
+  [nlp] ll= 7.50149775  prior= -5.19869566  nlp= -2.30280209  q= [-1.02379549 -1.17151046]
+  [nlp] ll= 77.5306625  prior= -1.26204956  nlp= -76.2686157  q= [-1.70564628 -1.96570921]
+  [nlp] ll= 77.5306625  prior= -1.26204956  nlp= -76.2686157  q= [-1.70564628 -1.96570921]
+  [nlp] ll= -34.7503433  prior= -4.79832  nlp= 39.5486641  q= [-3.30614114 -3.33443499]
+  [nlp] ll= -34.7503433  prior= -4.79832  nlp= 39.5486641  q= [-3.30614114 -3.33443499]
+  [nlp] ll= -130.730072  prior= -19.4705029  nlp= 150.200577  q= [-3.55625272 1.32924414]
+  [nlp] ll= -130.730072  prior= -19.4705029  nlp= 150.200577  q= [-3.55625272 1.32924414]
+  [nlp] ll= -219.110413  prior= -31.6799374  nlp= 250.790344  q= [-3.03092027 4.37963]
+  [nlp] ll= -219.110413  prior= -31.6799374  nlp= 250.790344  q= [-3.03092027 4.37963]
+  [nlp] ll= -253.122223  prior= -38.1759338  nlp= 291.298157  q= [-1.71469915 6.66911411]
+  [nlp] ll= -253.122223  prior= -38.1759338  nlp= 291.298157  q= [-1.71469915 6.66911411]
+  [nlp] ll= 37.4067  prior= -3.45798016  nlp= -33.948719  q= [-1.27847362 -1.42409396]
+  [nlp] ll= 37.4067  prior= -3.45798016  nlp= -33.948719  q= [-1.27847362 -1.42409396]
+  [nlp] ll= 78.5474243  prior= -1.15436816  nlp= -77.3930588  q= [-1.78322661 -1.93550193]
+  [nlp] ll= 78.5474243  prior= -1.15436816  nlp= -77.3930588  q= [-1.78322661 -1.93550193]
+  [nlp] ll= 84.5913925  prior= -0.768368244  nlp= -83.8230209  q= [-2.42004776 -2.56661034]
+  [nlp] ll= 84.5913925  prior= -0.768368244  nlp= -83.8230209  q= [-2.42004776 -2.56661034]
+  [nlp] ll= 33.2922249  prior= -2.76535082  nlp= -30.5268745  q= [-3.00733089 -3.05020595]
+  [nlp] ll= 33.2922249  prior= -2.76535082  nlp= -30.5268745  q= [-3.00733089 -3.05020595]
+  [nlp] ll= 20.9712257  prior= -4.30515814  nlp= -16.6660671  q= [-3.42617416 -3.05316567]
+  [nlp] ll= 20.9712257  prior= -4.30515814  nlp= -16.6660671  q= [-3.42617416 -3.05316567]
+  [nlp] ll= 47.6180115  prior= -3.49831486  nlp= -44.1196976  q= [-3.40665054 -2.75776696]
+  [nlp] ll= 47.6180115  prior= -3.49831486  nlp= -44.1196976  q= [-3.40665054 -2.75776696]
+  [nlp] ll= 67.5277481  prior= -2.37899446  nlp= -65.1487503  q= [-3.24019146 -2.16369605]
+  [nlp] ll= 67.5277481  prior= -2.37899446  nlp= -65.1487503  q= [-3.24019146 -2.16369605]
+  [nlp] ll= 59.9320564  prior= -2.13703847  nlp= -57.7950172  q= [-2.91921878 -1.60040438]
+  [nlp] ll= 59.9320564  prior= -2.13703847  nlp= -57.7950172  q= [-2.91921878 -1.60040438]
+  [nlp] ll= 55.0386581  prior= -2.50266886  nlp= -52.5359879  q= [-2.45287895 -1.21680975]
+  [nlp] ll= 55.0386581  prior= -2.50266886  nlp= -52.5359879  q= [-2.45287895 -1.21680975]
+  [nlp] ll= 45.8894463  prior= -2.96028614  nlp= -42.9291611  q= [-1.95231593 -1.11912394]
+  [nlp] ll= 45.8894463  prior= -2.96028614  nlp= -42.9291611  q= [-1.95231593 -1.11912394]
+  [nlp] ll= 54.0415115  prior= -2.51404285  nlp= -51.5274696  q= [-2.06716299 -1.21410739]
+  [nlp] ll= 54.0415115  prior= -2.51404285  nlp= -51.5274696  q= [-2.06716299 -1.21410739]
+  [nlp] ll= 75.7875214  prior= -1.33092046  nlp= -74.456604  q= [-2.25364661 -1.59859848]
+  [nlp] ll= 75.7875214  prior= -1.33092046  nlp= -74.456604  q= [-2.25364661 -1.59859848]
+  [nlp] ll= 89.6831436  prior= -0.62730813  nlp= -89.0558319  q= [-2.45418286 -2.19291282]
+  [nlp] ll= 89.6831436  prior= -0.62730813  nlp= -89.0558319  q= [-2.45418286 -2.19291282]
+  [nlp] ll= 70.883049  prior= -1.28570652  nlp= -69.5973434  q= [-2.59787798 -2.79250026]
+  [nlp] ll= 70.883049  prior= -1.28570652  nlp= -69.5973434  q= [-2.59787798 -2.79250026]
+  [nlp] ll= 39.3028412  prior= -2.26899409  nlp= -37.0338478  q= [-2.68669629 -3.11809301]
+  [nlp] ll= 39.3028412  prior= -2.26899409  nlp= -37.0338478  q= [-2.68669629 -3.11809301]
+Creating true model: src.models.range_bearing.RangeBearingModel
+Generating 100 time steps with true params: {'sigma_range': 0.1, 'sigma_bearing': 0.1}
+Creating inference model
+Trainable params: ['sigma_range', 'sigma_bearing']
+
+Running HMC inference...
+Using HMC sampler (num_leapfrog_steps=5)
+Running HMC: 3 burn-in + 2 sampling = 5 total steps
+  [burn-in 1/3] 45.6s | accept=100% | step_size=0.1725 | sigma_range=0.3069, sigma_bearing=0.2699 | ETA 182s
+  [burn-in 2/3] 45.7s | accept=50% | step_size=0.0712 | sigma_range=0.3069, sigma_bearing=0.2699 | ETA 137s
+  [burn-in 3/3] 45.4s | accept=67% | step_size=0.0712 | sigma_range=0.0320, sigma_bearing=0.0461 | ETA 91s
+  [sample 1/2] 45.4s | accept=75% | step_size=0.0712 | sigma_range=0.1327, sigma_bearing=0.2826 | ETA 46s
+  [sample 2/2] 45.4s | accept=60% | step_size=0.0712 | sigma_range=0.1327, sigma_bearing=0.2826 | ETA 0s
+HMC complete!
+
+============================================================
+DPF INFERENCE RESULTS
+============================================================
+
+  sigma_range:
+    True:           0.1
+    Posterior mean:  0.1327 +/- 0.0000
+    90% CI:         [0.1327, 0.1327]
+    True in 90% CI: NO
+
+  sigma_bearing:
+    True:           0.1
+    Posterior mean:  0.2826 +/- 0.0000
+    90% CI:         [0.2826, 0.2826]
+    True in 90% CI: NO
+
+Diagnostics:
+  Acceptance rate: 50.0%
+  Final step size: 0.071215
+  ESS: {'sigma_range': nan, 'sigma_bearing': nan}
+  R-hat: {'sigma_range': nan, 'sigma_bearing': nan}
+
+Performance:
+  Wall time: 282.0 seconds
+  Peak memory: 58.6 MB
+============================================================
+
+Results saved to /home/haowu/JPML/code/outputs/dpf/range_bearing_bpf_hmc_sys
+
+========================================
+[23/24] range_bearing_bpf_hmc_soft
+========================================
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1771572887.897712 1718359 gpu_device.cc:2020] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 22322 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3090, pci bus id: 0000:01:00.0, compute capability: 8.6
+I0000 00:00:1771572888.102445 1718471 cuda_solvers.cc:175] Creating GpuSolver handles for stream 0x448aa640
+  [nlp] ll= 1.5013051  prior= -5.549191  nlp= 4.04788589  q= [-1.0502255 -1.0502255]
+  [nlp] ll= 1.5013051  prior= -5.549191  nlp= 4.04788589  q= [-1.0502255 -1.0502255]
+  [nlp] ll= 1.41463423  prior= -5.56690931  nlp= 4.15227509  q= [-1.03387523 -1.06218171]
+  [nlp] ll= 1.41463423  prior= -5.56690931  nlp= 4.15227509  q= [-1.03387523 -1.06218171]
+  [nlp] ll= 2.72786188  prior= -5.53842926  nlp= 2.81056738  q= [-1.02330017 -1.08044887]
+  [nlp] ll= 2.72786188  prior= -5.53842926  nlp= 2.81056738  q= [-1.02330017 -1.08044887]
+  [nlp] ll= 2.74255514  prior= -5.46400261  nlp= 2.72144747  q= [-1.0185349 -1.10504222]
+  [nlp] ll= 2.74255514  prior= -5.46400261  nlp= 2.72144747  q= [-1.0185349 -1.10504222]
+  [nlp] ll= 6.04238319  prior= -5.34562588  nlp= -0.696757317  q= [-1.01949203 -1.13579905]
+  [nlp] ll= 6.04238319  prior= -5.34562588  nlp= -0.696757317  q= [-1.01949203 -1.13579905]
+  [nlp] ll= 8.52727318  prior= -5.18425131  nlp= -3.34302187  q= [-1.02629673 -1.17276597]
+  [nlp] ll= 8.52727318  prior= -5.18425131  nlp= -3.34302187  q= [-1.02629673 -1.17276597]
+  [nlp] ll= 81.009613  prior= -1.14993596  nlp= -79.8596802  q= [-1.74448562 -2.00462627]
+  [nlp] ll= 81.009613  prior= -1.14993596  nlp= -79.8596802  q= [-1.74448562 -2.00462627]
+  [nlp] ll= -81.719986  prior= -5.60196  nlp= 87.3219452  q= [-3.37543535 -3.45310688]
+  [nlp] ll= -81.719986  prior= -5.60196  nlp= 87.3219452  q= [-3.37543535 -3.45310688]
+  [nlp] ll= -209.374176  prior= -24.9088593  nlp= 234.283035  q= [-0.386974812 1.8647871]
+  [nlp] ll= -209.374176  prior= -24.9088593  nlp= 234.283035  q= [-0.386974812 1.8647871]
+  [nlp] ll= -374.990204  prior= -46.6643524  nlp= 421.654541  q= [0.618803501 5.80016232]
+  [nlp] ll= -374.990204  prior= -46.6643524  nlp= 421.654541  q= [0.618803501 5.80016232]
+  [nlp] ll= -371.112457  prior= -50.0958939  nlp= 421.208344  q= [-0.195441186 9.14642429]
+  [nlp] ll= -371.112457  prior= -50.0958939  nlp= 421.208344  q= [-0.195441186 9.14642429]
+  [nlp] ll= 36.7630959  prior= -3.40778208  nlp= -33.3553123  q= [-1.28716528 -1.43176544]
+  [nlp] ll= 36.7630959  prior= -3.40778208  nlp= -33.3553123  q= [-1.28716528 -1.43176544]
+  [nlp] ll= 80.416  prior= -1.11127818  nlp= -79.3047256  q= [-1.79732847 -1.95264244]
+  [nlp] ll= 80.416  prior= -1.11127818  nlp= -79.3047256  q= [-1.79732847 -1.95264244]
+  [nlp] ll= 87.628  prior= -0.810469389  nlp= -86.8175278  q= [-2.44856334 -2.58696365]
+  [nlp] ll= 87.628  prior= -0.810469389  nlp= -86.8175278  q= [-2.44856334 -2.58696365]
+  [nlp] ll= 20.779789  prior= -2.9117012  nlp= -17.8680878  q= [-3.06229949 -3.04509187]
+  [nlp] ll= 20.779789  prior= -2.9117012  nlp= -17.8680878  q= [-3.06229949 -3.04509187]
+  [nlp] ll= 30.8188114  prior= -3.36723161  nlp= -27.45158  q= [-3.31126094 -2.88598037]
+  [nlp] ll= 30.8188114  prior= -3.36723161  nlp= -27.45158  q= [-3.31126094 -2.88598037]
+  [nlp] ll= 49.1725311  prior= -2.50922179  nlp= -46.663311  q= [-3.22226453 -2.60193944]
+  [nlp] ll= 49.1725311  prior= -2.50922179  nlp= -46.663311  q= [-3.22226453 -2.60193944]
+  [nlp] ll= 74.8737564  prior= -1.48286819  nlp= -73.3908844  q= [-2.92465305 -2.01771903]
+  [nlp] ll= 74.8737564  prior= -1.48286819  nlp= -73.3908844  q= [-2.92465305 -2.01771903]
+  [nlp] ll= 71.1125183  prior= -1.58501959  nlp= -69.5275  q= [-2.4221611 -1.51369095]
+  [nlp] ll= 71.1125183  prior= -1.58501959  nlp= -69.5275  q= [-2.4221611 -1.51369095]
+  [nlp] ll= 52.0614319  prior= -2.60112476  nlp= -49.4603081  q= [-1.88199317 -1.24453974]
+  [nlp] ll= 52.0614319  prior= -2.60112476  nlp= -49.4603081  q= [-1.88199317 -1.24453974]
+  [nlp] ll= 37.9738  prior= -3.38782263  nlp= -34.5859795  q= [-1.46689224 -1.26364064]
+  [nlp] ll= 37.9738  prior= -3.38782263  nlp= -34.5859795  q= [-1.46689224 -1.26364064]
+  [nlp] ll= 59.5947151  prior= -2.41717649  nlp= -57.1775398  q= [-3.2015686 -2.5884304]
+  [nlp] ll= 59.5947151  prior= -2.41717649  nlp= -57.1775398  q= [-3.2015686 -2.5884304]
+  [nlp] ll= 76.9723511  prior= -1.42072392  nlp= -75.5516281  q= [-2.91036153 -2.05003786]
+  [nlp] ll= 76.9723511  prior= -1.42072392  nlp= -75.5516281  q= [-2.91036153 -2.05003786]
+  [nlp] ll= 73.2489471  prior= -1.41562903  nlp= -71.8333206  q= [-2.45774698 -1.59247077]
+  [nlp] ll= 73.2489471  prior= -1.41562903  nlp= -71.8333206  q= [-2.45774698 -1.59247077]
+  [nlp] ll= 59.0945549  prior= -2.1834054  nlp= -56.9111481  q= [-1.96485543 -1.34249759]
+  [nlp] ll= 59.0945549  prior= -2.1834054  nlp= -56.9111481  q= [-1.96485543 -1.34249759]
+  [nlp] ll= 48.5332  prior= -2.80427051  nlp= -45.7289276  q= [-1.56363785 -1.36932194]
+  [nlp] ll= 48.5332  prior= -2.80427051  nlp= -45.7289276  q= [-1.56363785 -1.36932194]
+Creating true model: src.models.range_bearing.RangeBearingModel
+Generating 100 time steps with true params: {'sigma_range': 0.1, 'sigma_bearing': 0.1}
+Creating inference model
+Trainable params: ['sigma_range', 'sigma_bearing']
+
+Running HMC inference...
+Using HMC sampler (num_leapfrog_steps=5)
+Running HMC: 3 burn-in + 2 sampling = 5 total steps
+  [burn-in 1/3] 45.4s | accept=100% | step_size=0.1725 | sigma_range=0.3063, sigma_bearing=0.2697 | ETA 182s
+  [burn-in 2/3] 45.4s | accept=50% | step_size=0.0712 | sigma_range=0.3063, sigma_bearing=0.2697 | ETA 136s
+  [burn-in 3/3] 45.6s | accept=67% | step_size=0.0712 | sigma_range=0.0358, sigma_bearing=0.0543 | ETA 91s
+  [sample 1/2] 45.5s | accept=50% | step_size=0.0712 | sigma_range=0.0358, sigma_bearing=0.0543 | ETA 45s
+  [sample 2/2] 45.8s | accept=60% | step_size=0.0712 | sigma_range=0.1901, sigma_bearing=0.2266 | ETA 0s
+HMC complete!
+
+============================================================
+DPF INFERENCE RESULTS
+============================================================
+
+  sigma_range:
+    True:           0.1
+    Posterior mean:  0.1130 +/- 0.0771
+    90% CI:         [0.0435, 0.1824]
+    True in 90% CI: YES
+
+  sigma_bearing:
+    True:           0.1
+    Posterior mean:  0.1404 +/- 0.0861
+    90% CI:         [0.0629, 0.2179]
+    True in 90% CI: YES
+
+Diagnostics:
+  Acceptance rate: 50.0%
+  Final step size: 0.071215
+  ESS: {'sigma_range': nan, 'sigma_bearing': nan}
+  R-hat: {'sigma_range': nan, 'sigma_bearing': nan}
+
+Performance:
+  Wall time: 281.9 seconds
+  Peak memory: 59.3 MB
+============================================================
+
+Results saved to /home/haowu/JPML/code/outputs/dpf/range_bearing_bpf_hmc_soft
+
+========================================
+[24/24] range_bearing_bpf_hmc_ot
+========================================
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1771573175.160472 1720574 gpu_device.cc:2020] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 22322 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3090, pci bus id: 0000:01:00.0, compute capability: 8.6
+I0000 00:00:1771573175.366123 1720679 cuda_solvers.cc:175] Creating GpuSolver handles for stream 0x213ffa40
+  [nlp] ll= -989.726562  prior= -5.549191  nlp= 995.275757  q= [-1.0502255 -1.0502255]
+  [nlp] ll= -989.726562  prior= -5.549191  nlp= 995.275757  q= [-1.0502255 -1.0502255]
+  [nlp] ll= -632.636169  prior= -5.74918318  nlp= 638.385376  q= [-0.996960461 -1.05329061]
+  [nlp] ll= -632.636169  prior= -5.74918318  nlp= 638.385376  q= [-0.996960461 -1.05329061]
+  [nlp] ll= -680.432739  prior= -5.94891262  nlp= 686.381653  q= [-0.940497041 -1.06172013]
+  [nlp] ll= -680.432739  prior= -5.94891262  nlp= 686.381653  q= [-0.940497041 -1.06172013]
+  [nlp] ll= -751.675476  prior= -6.36128426  nlp= 758.036743  q= [-0.849874 -1.0558269]
+  [nlp] ll= -751.675476  prior= -6.36128426  nlp= 758.036743  q= [-0.849874 -1.0558269]
+  [nlp] ll= -576.893  prior= -6.92338181  nlp= 583.816406  q= [-0.732254148 -1.04856873]
+  [nlp] ll= -576.893  prior= -6.92338181  nlp= 583.816406  q= [-0.732254148 -1.04856873]
+  [nlp] ll= -659.541321  prior= -7.50889778  nlp= 667.050232  q= [-0.613254189 -1.04465854]
+  [nlp] ll= -659.541321  prior= -7.50889778  nlp= 667.050232  q= [-0.613254189 -1.04465854]
+  [nlp] ll= -219.01326  prior= -26.1032295  nlp= 245.116486  q= [2.9448123 -1.37623119]
+  [nlp] ll= -219.01326  prior= -26.1032295  nlp= 245.116486  q= [2.9448123 -1.37623119]
+  [nlp] ll= -303.449371  prior= -39.2524376  nlp= 342.701813  q= [5.73826218 -0.65530622]
+  [nlp] ll= -303.449371  prior= -39.2524376  nlp= 342.701813  q= [5.73826218 -0.65530622]
+  [nlp] ll= -371.375977  prior= -40.8749542  nlp= 412.250916  q= [7.94625854 -2.08209848]
+  [nlp] ll= -371.375977  prior= -40.8749542  nlp= 412.250916  q= [7.94625854 -2.08209848]
+  [nlp] ll= -347.169617  prior= -45.0454063  nlp= 392.215027  q= [9.68773937 -1.739784]
+  [nlp] ll= -347.169617  prior= -45.0454063  nlp= 392.215027  q= [9.68773937 -1.739784]
+  [nlp] ll= -446.610443  prior= -59.1250877  nlp= 505.735535  q= [11.0797758 0.698005438]
+  [nlp] ll= -446.610443  prior= -59.1250877  nlp= 505.735535  q= [11.0797758 0.698005438]
+  [nlp] ll= -396.007416  prior= -45.5164795  nlp= 441.523895  q= [10.1712036 -2.17122269]
+  [nlp] ll= -396.007416  prior= -45.5164795  nlp= 441.523895  q= [10.1712036 -2.17122269]
+  [nlp] ll= -731.357  prior= -108.519684  nlp= 839.876709  q= [8.85028362 26.7879105]
+  [nlp] ll= -731.357  prior= -108.519684  nlp= 839.876709  q= [8.85028362 26.7879105]
+  [nlp] ll= -772.06311  prior= -120.648186  nlp= 892.711304  q= [6.41447496 55.3626709]
+  [nlp] ll= -772.06311  prior= -120.648186  nlp= 892.711304  q= [6.41447496 55.3626709]
+  [nlp] ll= -729.757385  prior= -117.357666  nlp= 847.115051  q= [2.46664071 83.7467728]
+  [nlp] ll= -729.757385  prior= -117.357666  nlp= 847.115051  q= [2.46664071 83.7467728]
+  [nlp] ll= -30124.3887  prior= -107.822144  nlp= 30232.2109  q= [-3.72343326 112.003143]
+  [nlp] ll= -30124.3887  prior= -107.822144  nlp= 30232.2109  q= [-3.72343326 112.003143]
+  [nlp] ll= -335.143677  prior= -46.4640884  nlp= 381.607758  q= [10.2624187 -1.59499764]
+  [nlp] ll= -335.143677  prior= -46.4640884  nlp= 381.607758  q= [10.2624187 -1.59499764]
+  [nlp] ll= -363.431335  prior= -48.0965347  nlp= 411.527863  q= [8.49223137 -0.303664684]
+  [nlp] ll= -363.431335  prior= -48.0965347  nlp= 411.527863  q= [8.49223137 -0.303664684]
+  [nlp] ll= -512.759399  prior= -49.6057739  nlp= 562.365173  q= [5.58478165 -5.04398346]
+  [nlp] ll= -512.759399  prior= -49.6057739  nlp= 562.365173  q= [5.58478165 -5.04398346]
+  [nlp] ll= -311.892303  prior= -30.243576  nlp= 342.135864  q= [1.05733824 1.30347443]
+  [nlp] ll= -311.892303  prior= -30.243576  nlp= 342.135864  q= [1.05733824 1.30347443]
+  [nlp] ll= -703.944153  prior= -23.7598343  nlp= 727.704  q= [-0.903830171 2.11607623]
+  [nlp] ll= -703.944153  prior= -23.7598343  nlp= 727.704  q= [-0.903830171 2.11607623]
+  [nlp] ll= -333.306458  prior= -46.7551498  nlp= 380.061615  q= [10.3464699 -1.54013419]
+  [nlp] ll= -333.306458  prior= -46.7551498  nlp= 380.061615  q= [10.3464699 -1.54013419]
+  [nlp] ll= -319.825104  prior= -44.9200783  nlp= 364.745178  q= [8.73431587 -1.09195113]
+  [nlp] ll= -319.825104  prior= -44.9200783  nlp= 364.745178  q= [8.73431587 -1.09195113]
+  [nlp] ll= -42896.9727  prior= -103.677475  nlp= 43000.6484  q= [5.836133 -8.14865208]
+  [nlp] ll= -42896.9727  prior= -103.677475  nlp= 43000.6484  q= [5.836133 -8.14865208]
+  [nlp] ll= -1148.72729  prior= -274.962219  nlp= 1423.68945  q= [1.37384605 7125.44531]
+  [nlp] ll= -1148.72729  prior= -274.962219  nlp= 1423.68945  q= [1.37384605 7125.44531]
+  [nlp] ll= -1570.50073  prior= -295.971771  nlp= 1866.47253  q= [-0.632691145 14259.0371]
+  [nlp] ll= -1570.50073  prior= -295.971771  nlp= 1866.47253  q= [-0.632691145 14259.0371]
+Creating true model: src.models.range_bearing.RangeBearingModel
+Generating 100 time steps with true params: {'sigma_range': 0.1, 'sigma_bearing': 0.1}
+Creating inference model
+Trainable params: ['sigma_range', 'sigma_bearing']
+
+Running HMC inference...
+Using HMC sampler (num_leapfrog_steps=5)
+Running HMC: 3 burn-in + 2 sampling = 5 total steps
+  [burn-in 1/3] 63.2s | accept=100% | step_size=0.1725 | sigma_range=0.4328, sigma_bearing=0.3014 | ETA 253s
+  [burn-in 2/3] 50.1s | accept=100% | step_size=0.2892 | sigma_range=11.0798, sigma_bearing=1.1019 | ETA 170s
+  [burn-in 3/3] 49.7s | accept=67% | step_size=0.2892 | sigma_range=11.0798, sigma_bearing=1.1019 | ETA 109s
+  [sample 1/2] 54.0s | accept=50% | step_size=0.2892 | sigma_range=11.0798, sigma_bearing=1.1019 | ETA 54s
+  [sample 2/2] 54.2s | accept=40% | step_size=0.2892 | sigma_range=11.0798, sigma_bearing=1.1019 | ETA 0s
+HMC complete!
+
+============================================================
+DPF INFERENCE RESULTS
+============================================================
+
+  sigma_range:
+    True:           0.1
+    Posterior mean:  11.0798 +/- 0.0000
+    90% CI:         [11.0798, 11.0798]
+    True in 90% CI: NO
+
+  sigma_bearing:
+    True:           0.1
+    Posterior mean:  1.1019 +/- 0.0000
+    90% CI:         [1.1019, 1.1019]
+    True in 90% CI: NO
+
+Diagnostics:
+  Acceptance rate: 0.0%
+  Final step size: 0.289221
+  ESS: {'sigma_range': nan, 'sigma_bearing': nan}
+  R-hat: {'sigma_range': nan, 'sigma_bearing': nan}
+
+Performance:
+  Wall time: 333.0 seconds
+  Peak memory: 61.7 MB
+============================================================
+
+Results saved to /home/haowu/JPML/code/outputs/dpf/range_bearing_bpf_hmc_ot
+
+=== All 24 experiments complete ===

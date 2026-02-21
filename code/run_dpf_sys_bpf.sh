@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
-# Run all DPF experiments with systematic resampling.
-# Usage: bash run_dpf_sys.sh
+# Run BPF experiments with systematic resampling only.
+# Usage: bash run_dpf_sys_bpf.sh
 
 set -e
 cd "$(cd "$(dirname "$0")" && pwd)"
 
 EXPERIMENTS=(
-    linear_gaussian_bpf_hmc_sys
-    cubic_sensor_bpf_hmc_sys
-    kitagawa_bpf_hmc_sys
-    range_bearing_bpf_hmc_sys
+    hmc/linear_gaussian/bpf_sys
+    hmc/cubic_sensor/bpf_sys
+    hmc/kitagawa/bpf_sys
+    hmc/range_bearing/bpf_sys
 )
 
 TOTAL=${#EXPERIMENTS[@]}

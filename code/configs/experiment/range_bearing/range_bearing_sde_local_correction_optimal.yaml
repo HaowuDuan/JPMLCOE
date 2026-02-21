@@ -11,7 +11,8 @@ defaults:
 T: 100
 seed: 42
 plot: true
-diffusion_scale: 0.00
-n_lambda_steps: 29
-schedule_mu: 1.0
 output_dir: outputs/range_bearing/range_bearing_sde_local_correction_optimal
+
+# Override filter parameters
+filter:
+  schedule_mu: 1.0

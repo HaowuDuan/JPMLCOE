@@ -173,7 +173,7 @@ class ExtendedKalmanFilter(Filter):
 
         # Conditionally update based on H norm
         mean_updated, cov_updated = tf.cond(
-            H_norm > 1e-10,
+            H_norm > tf.constant(1e-10, dtype=H_norm.dtype),
             update_state,
             no_update
         )

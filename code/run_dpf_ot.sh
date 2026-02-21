@@ -6,14 +6,14 @@ set -e
 cd "$(cd "$(dirname "$0")" && pwd)"
 
 EXPERIMENTS=(
-    linear_gaussian_ledh_hmc_ot
-    linear_gaussian_bpf_hmc_ot
-    cubic_sensor_ledh_hmc_ot
-    cubic_sensor_bpf_hmc_ot
-    kitagawa_ledh_hmc_ot
-    kitagawa_bpf_hmc_ot
-    range_bearing_ledh_hmc_ot
-    range_bearing_bpf_hmc_ot
+    hmc/linear_gaussian/ledh_ot
+    hmc/linear_gaussian/bpf_ot
+    hmc/cubic_sensor/ledh_ot
+    hmc/cubic_sensor/bpf_ot
+    hmc/kitagawa/ledh_ot
+    hmc/kitagawa/bpf_ot
+    hmc/range_bearing/ledh_ot
+    hmc/range_bearing/bpf_ot
 )
 
 TOTAL=${#EXPERIMENTS[@]}

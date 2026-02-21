@@ -1,0 +1,40 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.12.12, pytest-9.0.2, pluggy-1.6.0 -- /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/.venv/bin/python
+cachedir: .pytest_cache
+rootdir: /Users/haowuduan/Documents/githubrepos/JPMLCOE/code
+configfile: pytest.ini
+plugins: hydra-core-1.3.2
+collecting ... collected 12 items
+
+tests/test_resampling.py::TestSystematicResample::test_unbiased_selection_frequency 
+  Weights:     [0.5 0.3 0.2]
+  Frequencies: [0.50116667 0.2995     0.19933333]
+  Diff:        [0.00116667 0.0005     0.00066667]
+PASSED
+tests/test_resampling.py::TestSystematicResample::test_uniform_weights_all_selected PASSED
+tests/test_resampling.py::TestSystematicResample::test_degenerate_weights_single_particle PASSED
+tests/test_resampling.py::TestSystematicResample::test_output_weights_uniform PASSED
+tests/test_resampling.py::TestSoftResample::test_alpha_one_matches_systematic PASSED
+tests/test_resampling.py::TestSoftResample::test_alpha_zero_no_shuffling PASSED
+tests/test_resampling.py::TestSoftResample::test_output_weights_sum_to_one PASSED
+tests/test_resampling.py::TestOTEntropyResample::test_output_weights_finite_and_sum_to_one PASSED
+tests/test_resampling.py::TestOTEntropyResample::test_uniform_weights_particles_unchanged 
+  Max particle displacement with uniform weights: 0.832730
+PASSED
+tests/test_resampling.py::TestExtremeWeights::test_extreme_weight_ratio_no_crash[systematic] PASSED
+tests/test_resampling.py::TestExtremeWeights::test_extreme_weight_ratio_no_crash[soft] PASSED
+tests/test_resampling.py::TestExtremeWeights::test_extreme_weight_ratio_no_crash[ot_entropy] PASSED
+
+=============================== warnings summary ===============================
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: Type google._upb._message.MessageMapContainer uses PyType_Spec with a metaclass that has custom tp_new. This is deprecated and will no longer be allowed in Python 3.14.
+
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: Type google._upb._message.ScalarMapContainer uses PyType_Spec with a metaclass that has custom tp_new. This is deprecated and will no longer be allowed in Python 3.14.
+
+.venv/lib/python3.12/site-packages/keras/src/export/tf2onnx_lib.py:8
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/.venv/lib/python3.12/site-packages/keras/src/export/tf2onnx_lib.py:8: FutureWarning: In the future `np.object` will be defined as the corresponding NumPy scalar.
+    if not hasattr(np, "object"):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================= 12 passed, 3 warnings in 26.59s ========================

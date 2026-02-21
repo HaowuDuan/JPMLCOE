@@ -1,0 +1,50 @@
+{
+  "rmse": 2.70941785674109,
+  "log_likelihood": null,
+  "metadata": {
+    "filter_type": "KernelMappingPF",
+    "kernel_type": "scalar",
+    "n_particles": 20,
+    "mean_iterations": 96.38,
+    "total_iterations": 48190,
+    "n_integration_steps": 1,
+    "performance": {
+      "wall_time_seconds": 224.92978166599642,
+      "time_per_timestep_ms": 449.85956333199283,
+      "peak_memory_mb": 296.7831621170044,
+      "memory_increase_mb": 416.109375,
+      "start_memory_mb": 413.703125,
+      "end_memory_mb": 829.8125,
+      "num_timesteps": 500
+    }
+  },
+  "config": {
+    "model": {
+      "_target_": "src.models.stochastic_volatility.StochasticVolatilityModel",
+      "alpha": 0.91,
+      "sigma": 1.0,
+      "beta": 0.5
+    },
+    "filter": {
+      "_target_": "src.filters.particle.kernel_flow.KernelMappingPF",
+      "n_particles": 20,
+      "kernel_type": "scalar",
+      "max_iter": 2000,
+      "initial_dt": 0.05,
+      "convergence_tol": 0.01,
+      "alpha": null,
+      "localization_radius": 4.0,
+      "use_preconditioner": true,
+      "adaptive_dt": true
+    },
+    "seed": 42,
+    "dtype": "float64",
+    "T": 500,
+    "output_dir": "outputs/stochastic_volatility/stochastic_volatility_kernel_scalar",
+    "plot": true,
+    "device": "auto",
+    "tf_log_level": 2,
+    "verbose": true,
+    "show_progress": true
+  }
+}

@@ -51,8 +51,8 @@ class SDELocalCorrection(StochasticEDHFlow):
         z_corrected = observation - e_0
 
         # --- Precompute score correction quantities (constant over λ) ---
-        q = self.diffusion_scale
-        if q > 0:
+        if self._has_diffusion:
+            Q_tf = tf.constant(self.Q_diag, dtype=self.dtype)
             P_inv = safe_inv(P)
             H_T_R_inv_H = tf.transpose(H_fixed) @ R_inv @ H_fixed
             P_inv_eta = tf.linalg.matvec(P_inv, eta_bar_0)
@@ -84,12 +84,12 @@ class SDELocalCorrection(StochasticEDHFlow):
                 z_corrected, P, R, R_inv, eta_bar_0, self.state_dim
             )
 
-            # Score correction
-            if q > 0:
+            # Score correction (diagonal Q)
+            if self._has_diffusion:
                 correction_A = P_inv + homotopy_param * H_T_R_inv_H
                 correction_b = P_inv_eta + homotopy_param * H_T_R_inv_y
-                A = A - (q / 2) * correction_A
-                b = b + (q / 2) * correction_b
+                A = A - tf.expand_dims(Q_tf, 1) / 2 * correction_A
+                b = b + (Q_tf / 2) * correction_b
 
             # Euler step
             particles_flow = euler_step(
@@ -97,14 +97,14 @@ class SDELocalCorrection(StochasticEDHFlow):
                 step_size, A, b
             )
 
-            # SDE noise
-            if q > 0:
+            # SDE noise: √(Q_diag · dλ) · dW
+            if self._has_diffusion:
                 seed = self._next_seed()
                 noise = tf.random.stateless_normal(
                     tf.shape(particles_flow), seed=seed,
                     dtype=particles_flow.dtype
                 )
-                particles_flow = particles_flow + noise * tf.sqrt(q * d_lambda)
+                particles_flow = particles_flow + noise * tf.sqrt(Q_tf * d_lambda)
 
         # --- Finalize ---
         self.particles.assign(particles_flow)

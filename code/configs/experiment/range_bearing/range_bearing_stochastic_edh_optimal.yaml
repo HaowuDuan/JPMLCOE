@@ -11,7 +11,9 @@ defaults:
 T: 100
 seed: 42
 plot: true
-diffusion_scale: 0.00
-schedule_mu: 1.0
-n_lambda_steps: 100
 output_dir: outputs/range_bearing/range_bearing_stochastic_edh_optimal
+
+# Override filter parameters
+filter:
+  schedule_mu: 1.0
+  n_lambda_steps: 100

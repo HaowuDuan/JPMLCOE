@@ -114,7 +114,7 @@ class BootstrapPFHMC(ParticleFilterTF):
                 # --- Weight ---
                 y = observations[t]
                 log_obs = model.log_observation_prob_batch(y, particles)
-                log_weights = tf.math.log(weights + 1e-30) + log_obs
+                log_weights = tf.math.log(weights + tf.constant(1e-30, dtype=weights.dtype)) + log_obs
 
                 # --- Log-likelihood ---
                 log_lik_t = tf.reduce_logsumexp(log_weights)
@@ -226,7 +226,7 @@ class BootstrapPFHMC(ParticleFilterTF):
             # Weight
             y = observations[t]
             log_obs = self.model.log_observation_prob_batch(y, particles)
-            log_weights = tf.math.log(weights + 1e-30) + log_obs
+            log_weights = tf.math.log(weights + tf.constant(1e-30, dtype=weights.dtype)) + log_obs
 
             # Log-likelihood
             log_lik_t = tf.reduce_logsumexp(log_weights)

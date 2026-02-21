@@ -255,7 +255,7 @@ class EDHParticleFlowFilter:
         eta_1 = self.particles.value()
 
         # Compute weights using shared utility (already TensorFlow compatible)
-        weights_new = compute_flow_weights(
+        weights_new, log_lik = compute_flow_weights(
             eta_1=eta_1,
             eta_0=self.eta_0.value(),
             particles_prev=self.particles_prev.value(),
@@ -270,9 +270,6 @@ class EDHParticleFlowFilter:
         # Store TF tensors — convert to numpy once in filter()
         self.weights_history.append(self.weights.value())
 
-        # Log-likelihood using batch method
-        log_likelihood = self.model.log_observation_prob_batch(y, eta_1)
-
         # ESS and resampling
         ess = ess_tf(self.weights.value())
         self.ess_history.append(ess)
@@ -285,9 +282,7 @@ class EDHParticleFlowFilter:
             unique_particles = len(np.unique(particles_np, axis=0))
             self.n_unique_particles.append(unique_particles)
 
-        # Log-likelihood for model evidence
-        max_ll = tf.reduce_max(log_likelihood)
-        log_lik = max_ll + tf.math.log(tf.reduce_mean(tf.exp(log_likelihood - max_ll)))
+        # Log-likelihood from importance-weighted estimate
         self.log_likelihoods.append(log_lik)
 
         # Line 26: Update global filter (EKF needs numpy)

@@ -1,0 +1,47 @@
+dtype: float64
+tf_log_level: 2
+model:
+  _target_: src.models.range_bearing.RangeBearingModel
+  sigma_range: 0.3
+  sigma_bearing: 0.3
+filter:
+  _target_: src.filters.particle.bootstrap_pf_hmc.BootstrapPFHMC
+  n_particles: 500
+  resampling_method: soft
+  resampling_config:
+    alpha: 0.5
+  stop_gradient_resampling: false
+  hmc_resampling_method: soft
+  hmc_resampling_config:
+    alpha: 0.5
+  eager_mode: false
+dpf:
+  sampler: hmc
+  trainable_params:
+    sigma_range:
+      constraint: positive
+      prior:
+        _target_: tensorflow_probability.distributions.LogNormal
+        loc: -2.3
+        scale: 0.5
+    sigma_bearing:
+      constraint: positive
+      prior:
+        _target_: tensorflow_probability.distributions.LogNormal
+        loc: -2.3
+        scale: 0.5
+  hmc:
+    num_samples: 10
+    num_burnin: 15
+    step_size: 0.001
+    num_leapfrog_steps: 5
+    max_tree_depth: 10
+    adaptation_rate: 0.8
+    target_accept_prob: 0.9
+    seed: 42
+data:
+  T: 50
+  seed: 42
+  true_params:
+    sigma_range: 0.1
+    sigma_bearing: 0.1

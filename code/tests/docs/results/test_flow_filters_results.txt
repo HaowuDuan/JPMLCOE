@@ -1,0 +1,1279 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.12.12, pytest-9.0.2, pluggy-1.6.0 -- /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/.venv/bin/python
+cachedir: .pytest_cache
+rootdir: /Users/haowuduan/Documents/githubrepos/JPMLCOE/code
+configfile: pytest.ini
+plugins: hydra-core-1.3.2
+collecting ... collected 38 items
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_mean_converges_to_kalman[kernel_flow] 
+  kernel_flow vs KF posterior mean (N=500, T=50):
+    Max absolute error:  0.5285
+    Mean absolute error: 0.1062
+PASSED
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_mean_converges_to_kalman[ledh_flow] 
+  ledh_flow vs KF posterior mean (N=500, T=50):
+    Max absolute error:  0.1506
+    Mean absolute error: 0.0409
+PASSED
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_mean_converges_to_kalman[ledh_invertible] 
+  ledh_invertible vs KF posterior mean (N=500, T=50):
+    Max absolute error:  0.3160
+    Mean absolute error: 0.0911
+PASSED
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_mean_converges_to_kalman[ledh_bimodal] 
+  ledh_bimodal vs KF posterior mean (N=500, T=50):
+    Max absolute error:  0.3160
+    Mean absolute error: 0.0911
+PASSED
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_covariance_convergence[kernel_flow] 
+  kernel_flow vs KF avg tr(cov) (N=500):
+    KF avg tr:   2.6206
+    Flow avg tr: 3.4798
+    Rel error:   0.3278
+PASSED
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_covariance_convergence[ledh_flow] 
+  ledh_flow vs KF avg tr(cov) (N=500):
+    KF avg tr:   2.6206
+    Flow avg tr: 2.8375
+    Rel error:   0.0827
+PASSED
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_covariance_convergence[ledh_invertible] 
+  ledh_invertible vs KF avg tr(cov) (N=500):
+    KF avg tr:   2.6206
+    Flow avg tr: 2.3520
+    Rel error:   0.1025
+PASSED
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_covariance_convergence[ledh_bimodal] 
+  ledh_bimodal vs KF avg tr(cov) (N=500):
+    KF avg tr:   2.6206
+    Flow avg tr: 2.3520
+    Rel error:   0.1025
+PASSED
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_flow_filters_outperform_bootstrap 
+  MSE comparison at N=200:
+    BPF MSE: 0.0404
+    kernel_flow MSE: 0.0307 (ratio vs BPF: 0.76)
+    ledh_flow MSE: 0.0148 (ratio vs BPF: 0.36)
+    ledh_invertible MSE: 0.0368 (ratio vs BPF: 0.91)
+    ledh_bimodal MSE: 0.0368 (ratio vs BPF: 0.91)
+PASSED
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_kernel_flow_equal_weights PASSED
+tests/test_flow_filters.py::TestLEDHWeightHealth::test_no_nan_inf[ledh_invertible] PASSED
+tests/test_flow_filters.py::TestLEDHWeightHealth::test_no_nan_inf[ledh_bimodal] PASSED
+tests/test_flow_filters.py::TestLEDHWeightHealth::test_jacobian_uniformity_linear_gaussian[ledh_invertible] 
+  ledh_invertible Jacobian uniformity (linear-Gaussian, t=0):
+    ESS/N: 0.8015
+    max_w: 0.025601
+    min_w: 0.000618
+    cv(w): 0.497697
+PASSED
+tests/test_flow_filters.py::TestLEDHWeightHealth::test_jacobian_uniformity_linear_gaussian[ledh_bimodal] 
+  ledh_bimodal Jacobian uniformity (linear-Gaussian, t=0):
+    ESS/N: 0.8015
+    max_w: 0.025601
+    min_w: 0.000618
+    cv(w): 0.497697
+PASSED
+tests/test_flow_filters.py::TestLEDHWeightHealth::test_ess_stays_healthy[ledh_invertible] 
+  ledh_invertible ESS health (N=200, T=50):
+    Avg ESS/N: 0.6043
+    Min ESS:   10.3
+PASSED
+tests/test_flow_filters.py::TestLEDHWeightHealth::test_ess_stays_healthy[ledh_bimodal] 
+  ledh_bimodal ESS health (N=200, T=50):
+    Avg ESS/N: 0.6043
+    Min ESS:   10.3
+PASSED
+tests/test_flow_filters.py::TestFlowHealth::test_no_nan_inf_particles[kernel_flow] PASSED
+tests/test_flow_filters.py::TestFlowHealth::test_no_nan_inf_particles[ledh_flow] PASSED
+tests/test_flow_filters.py::TestFlowHealth::test_no_nan_inf_particles[ledh_invertible] PASSED
+tests/test_flow_filters.py::TestFlowHealth::test_no_nan_inf_particles[ledh_bimodal] PASSED
+tests/test_flow_filters.py::TestFlowHealth::test_particle_spread_bounded[kernel_flow] 
+  kernel_flow particle spread (N=100):
+    Max tr(cov): 2.1338
+    Min tr(cov): 1.459653
+PASSED
+tests/test_flow_filters.py::TestFlowHealth::test_particle_spread_bounded[ledh_flow] 
+  ledh_flow particle spread (N=100):
+    Max tr(cov): 3.7355
+    Min tr(cov): 1.808484
+PASSED
+tests/test_flow_filters.py::TestFlowHealth::test_particle_spread_bounded[ledh_invertible] 
+  ledh_invertible particle spread (N=100):
+    Max tr(cov): 3.3915
+    Min tr(cov): 1.127988
+PASSED
+tests/test_flow_filters.py::TestFlowHealth::test_particle_spread_bounded[ledh_bimodal] 
+  ledh_bimodal particle spread (N=100):
+    Max tr(cov): 3.3915
+    Min tr(cov): 1.127988
+PASSED
+tests/test_flow_filters.py::TestFlowHealth::test_log_likelihood_finite[ledh_invertible] 
+  ledh_invertible log_likelihood: -73.4378
+PASSED
+tests/test_flow_filters.py::TestFlowHealth::test_log_likelihood_finite[ledh_bimodal] 
+  ledh_bimodal log_likelihood: -73.4378
+PASSED
+tests/test_flow_filters.py::TestFlowMatrixStability::test_A_eigenvalues_nonpositive_during_flow 
+  LEDH flow A-matrix max eigenvalue: 0.000000
+PASSED
+tests/test_flow_filters.py::TestFlowEdgeCases::test_few_particles_no_crash[kernel_flow] 
+  kernel_flow N=10: completed without crash
+PASSED
+tests/test_flow_filters.py::TestFlowEdgeCases::test_few_particles_no_crash[ledh_flow] 
+  ledh_flow N=10: completed without crash
+PASSED
+tests/test_flow_filters.py::TestFlowEdgeCases::test_few_particles_no_crash[ledh_invertible] 
+  ledh_invertible N=10: completed without crash
+PASSED
+tests/test_flow_filters.py::TestFlowEdgeCases::test_few_particles_no_crash[ledh_bimodal] 
+  ledh_bimodal N=10: completed without crash
+PASSED
+tests/test_flow_filters.py::TestFlowEdgeCases::test_single_lambda_step_no_crash[ledh_invertible] 
+  ledh_invertible n_lambda_steps=1: completed without crash
+PASSED
+tests/test_flow_filters.py::TestFlowEdgeCases::test_single_lambda_step_no_crash[ledh_bimodal] 
+  ledh_bimodal n_lambda_steps=1: completed without crash
+PASSED
+tests/test_flow_filters.py::TestFlowEdgeCases::test_informative_observation_no_crash[kernel_flow] 
+  kernel_flow tight R: completed without NaN
+PASSED
+tests/test_flow_filters.py::TestFlowEdgeCases::test_informative_observation_no_crash[ledh_flow] 
+  ledh_flow tight R: completed without NaN
+PASSED
+tests/test_flow_filters.py::TestFlowEdgeCases::test_informative_observation_no_crash[ledh_invertible] 
+  ledh_invertible tight R: completed without NaN
+PASSED
+tests/test_flow_filters.py::TestFlowEdgeCases::test_informative_observation_no_crash[ledh_bimodal] 
+  ledh_bimodal tight R: completed without NaN
+PASSED
+tests/test_flow_filters.py::TestBimodalFilter::test_bimodal_maintains_particle_spread 
+  Kitagawa model bimodal comparison:
+    Standard LEDH avg tr(cov): 150.4847
+    Bimodal LEDH avg tr(cov):  48.4799
+PASSED
+
+=============================== warnings summary ===============================
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: Type google._upb._message.MessageMapContainer uses PyType_Spec with a metaclass that has custom tp_new. This is deprecated and will no longer be allowed in Python 3.14.
+
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: Type google._upb._message.ScalarMapContainer uses PyType_Spec with a metaclass that has custom tp_new. This is deprecated and will no longer be allowed in Python 3.14.
+
+.venv/lib/python3.12/site-packages/keras/src/export/tf2onnx_lib.py:8
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/.venv/lib/python3.12/site-packages/keras/src/export/tf2onnx_lib.py:8: FutureWarning: In the future `np.object` will be defined as the corresponding NumPy scalar.
+    if not hasattr(np, "object"):
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_mean_converges_to_kalman[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 4.34e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_mean_converges_to_kalman[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 5.82e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_mean_converges_to_kalman[kernel_flow]
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_covariance_convergence[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.35e-02
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_mean_converges_to_kalman[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.71e-02
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_mean_converges_to_kalman[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.13e-02
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_mean_converges_to_kalman[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 5.18e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_mean_converges_to_kalman[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.83e-02
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_mean_converges_to_kalman[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.36e-02
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_mean_converges_to_kalman[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.23e-02
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_mean_converges_to_kalman[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.60e-02
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_mean_converges_to_kalman[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.63e-02
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_mean_converges_to_kalman[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 8.92e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_mean_converges_to_kalman[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 4.52e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_mean_converges_to_kalman[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 6.66e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_mean_converges_to_kalman[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.24e-02
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_mean_converges_to_kalman[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 7.77e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_mean_converges_to_kalman[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.30e-02
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_mean_converges_to_kalman[kernel_flow]
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_covariance_convergence[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.04e-02
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_mean_converges_to_kalman[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.45e-02
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_mean_converges_to_kalman[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.49e-02
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_mean_converges_to_kalman[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.13e-02
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_mean_converges_to_kalman[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 6.55e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_mean_converges_to_kalman[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 7.16e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_mean_converges_to_kalman[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 7.38e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_mean_converges_to_kalman[kernel_flow]
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_flow_filters_outperform_bootstrap
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 5.01e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_mean_converges_to_kalman[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.25e-02
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_mean_converges_to_kalman[kernel_flow]
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_covariance_convergence[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 5.88e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_mean_converges_to_kalman[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 9.56e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_mean_converges_to_kalman[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.21e-02
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_mean_converges_to_kalman[kernel_flow]
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_covariance_convergence[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.39e-02
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_mean_converges_to_kalman[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 4.54e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_mean_converges_to_kalman[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 8.66e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_mean_converges_to_kalman[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 7.39e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_mean_converges_to_kalman[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 7.64e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_mean_converges_to_kalman[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 5.81e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_mean_converges_to_kalman[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 9.88e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_mean_converges_to_kalman[kernel_flow]
+tests/test_flow_filters.py::TestFlowEdgeCases::test_informative_observation_no_crash[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.29e-02
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_mean_converges_to_kalman[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.59e-02
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_mean_converges_to_kalman[kernel_flow]
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_covariance_convergence[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.22e-02
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_mean_converges_to_kalman[kernel_flow]
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_covariance_convergence[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.53e-02
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_mean_converges_to_kalman[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 7.57e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_mean_converges_to_kalman[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 7.74e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_mean_converges_to_kalman[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 4.87e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_mean_converges_to_kalman[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 5.58e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_mean_converges_to_kalman[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 6.05e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_covariance_convergence[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 4.41e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_covariance_convergence[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 6.04e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_covariance_convergence[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.87e-02
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_covariance_convergence[kernel_flow]
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_flow_filters_outperform_bootstrap
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.08e-02
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_covariance_convergence[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 5.24e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_covariance_convergence[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.84e-02
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_covariance_convergence[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.17e-02
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_covariance_convergence[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.72e-02
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_covariance_convergence[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.74e-02
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_covariance_convergence[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 7.98e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_covariance_convergence[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 5.79e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_covariance_convergence[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 6.63e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_covariance_convergence[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.30e-02
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_covariance_convergence[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 7.68e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_covariance_convergence[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.54e-02
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_covariance_convergence[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.07e-02
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_covariance_convergence[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.40e-02
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_covariance_convergence[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.12e-02
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_covariance_convergence[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 5.51e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_covariance_convergence[kernel_flow]
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_flow_filters_outperform_bootstrap
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 7.03e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_covariance_convergence[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 8.45e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_covariance_convergence[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 5.56e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_covariance_convergence[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 7.76e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_covariance_convergence[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 9.26e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_covariance_convergence[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.43e-02
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_covariance_convergence[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.14e-02
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_covariance_convergence[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.41e-02
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_covariance_convergence[kernel_flow]
+tests/test_flow_filters.py::TestFlowHealth::test_no_nan_inf_particles[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 5.28e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_covariance_convergence[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 7.60e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_covariance_convergence[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 7.79e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_covariance_convergence[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 7.05e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_covariance_convergence[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.05e-02
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_covariance_convergence[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.79e-02
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_covariance_convergence[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.65e-02
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_covariance_convergence[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 9.62e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_covariance_convergence[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.26e-02
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_covariance_convergence[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 6.52e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_covariance_convergence[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 7.58e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_covariance_convergence[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 5.46e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_posterior_covariance_convergence[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 6.45e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_flow_filters_outperform_bootstrap
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.70e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_flow_filters_outperform_bootstrap
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.26e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_flow_filters_outperform_bootstrap
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 5.39e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_flow_filters_outperform_bootstrap
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 4.97e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_flow_filters_outperform_bootstrap
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 4.35e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_flow_filters_outperform_bootstrap
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.90e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_flow_filters_outperform_bootstrap
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 5.16e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_flow_filters_outperform_bootstrap
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 5.06e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_flow_filters_outperform_bootstrap
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 4.76e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_flow_filters_outperform_bootstrap
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.06e-02
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_flow_filters_outperform_bootstrap
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 6.06e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_flow_filters_outperform_bootstrap
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 3.79e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_flow_filters_outperform_bootstrap
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.72e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_flow_filters_outperform_bootstrap
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 4.05e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_flow_filters_outperform_bootstrap
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 3.60e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_flow_filters_outperform_bootstrap
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 9.06e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_flow_filters_outperform_bootstrap
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 5.30e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_flow_filters_outperform_bootstrap
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 4.75e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_flow_filters_outperform_bootstrap
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 5.40e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_flow_filters_outperform_bootstrap
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 7.75e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_flow_filters_outperform_bootstrap
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.62e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_flow_filters_outperform_bootstrap
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.93e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_flow_filters_outperform_bootstrap
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 3.71e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_flow_filters_outperform_bootstrap
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.80e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_flow_filters_outperform_bootstrap
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 6.01e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_flow_filters_outperform_bootstrap
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 3.63e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_flow_filters_outperform_bootstrap
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 4.11e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_flow_filters_outperform_bootstrap
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 5.19e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_flow_filters_outperform_bootstrap
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 4.73e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_flow_filters_outperform_bootstrap
+tests/test_flow_filters.py::TestFlowHealth::test_particle_spread_bounded[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.75e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_flow_filters_outperform_bootstrap
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 3.42e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_flow_filters_outperform_bootstrap
+tests/test_flow_filters.py::TestFlowHealth::test_particle_spread_bounded[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 4.45e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_flow_filters_outperform_bootstrap
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 3.78e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_flow_filters_outperform_bootstrap
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 3.10e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_flow_filters_outperform_bootstrap
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.98e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_flow_filters_outperform_bootstrap
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 8.02e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_flow_filters_outperform_bootstrap
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 6.29e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_flow_filters_outperform_bootstrap
+tests/test_flow_filters.py::TestFlowHealth::test_particle_spread_bounded[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 3.74e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_flow_filters_outperform_bootstrap
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 4.94e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_flow_filters_outperform_bootstrap
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 4.85e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_flow_filters_outperform_bootstrap
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 3.27e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_flow_filters_outperform_bootstrap
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.37e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_flow_filters_outperform_bootstrap
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 3.20e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_flow_filters_outperform_bootstrap
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 3.19e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_kernel_flow_equal_weights
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 3.69e-04
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_kernel_flow_equal_weights
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.36e-04
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_kernel_flow_equal_weights
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 9.82e-05
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_kernel_flow_equal_weights
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.77e-04
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_kernel_flow_equal_weights
+tests/test_flow_filters.py::TestFlowEdgeCases::test_few_particles_no_crash[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.44e-04
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_kernel_flow_equal_weights
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 3.06e-04
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_kernel_flow_equal_weights
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.10e-04
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_kernel_flow_equal_weights
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 7.01e-04
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_kernel_flow_equal_weights
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.60e-04
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_kernel_flow_equal_weights
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.68e-04
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_kernel_flow_equal_weights
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 3.59e-04
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_kernel_flow_equal_weights
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.65e-04
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_kernel_flow_equal_weights
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.10e-04
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_kernel_flow_equal_weights
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.28e-04
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_kernel_flow_equal_weights
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.62e-04
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_kernel_flow_equal_weights
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.30e-04
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_kernel_flow_equal_weights
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.25e-04
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_kernel_flow_equal_weights
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.06e-04
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_kernel_flow_equal_weights
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 5.58e-04
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_kernel_flow_equal_weights
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.42e-04
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_kernel_flow_equal_weights
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.18e-04
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_kernel_flow_equal_weights
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 3.00e-04
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_kernel_flow_equal_weights
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 4.88e-04
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_kernel_flow_equal_weights
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.62e-04
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_kernel_flow_equal_weights
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.39e-04
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_kernel_flow_equal_weights
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.36e-04
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_kernel_flow_equal_weights
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.59e-04
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_kernel_flow_equal_weights
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.74e-04
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_kernel_flow_equal_weights
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.59e-04
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_kernel_flow_equal_weights
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.45e-04
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_kernel_flow_equal_weights
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.77e-04
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_kernel_flow_equal_weights
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 4.98e-04
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_kernel_flow_equal_weights
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 3.53e-04
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_kernel_flow_equal_weights
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.50e-04
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_kernel_flow_equal_weights
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.05e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_kernel_flow_equal_weights
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 9.37e-05
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_kernel_flow_equal_weights
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.29e-04
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_kernel_flow_equal_weights
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 4.37e-04
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_kernel_flow_equal_weights
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 4.27e-04
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_kernel_flow_equal_weights
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.11e-04
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_kernel_flow_equal_weights
+tests/test_flow_filters.py::TestFlowEdgeCases::test_few_particles_no_crash[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.07e-04
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_kernel_flow_equal_weights
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 9.77e-05
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_kernel_flow_equal_weights
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 3.11e-04
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_kernel_flow_equal_weights
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 3.28e-04
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_kernel_flow_equal_weights
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.16e-04
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_kernel_flow_equal_weights
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 4.15e-04
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowFilterCorrectness::test_kernel_flow_equal_weights
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.17e-04
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_no_nan_inf_particles[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.27e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_no_nan_inf_particles[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.33e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_no_nan_inf_particles[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.78e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_no_nan_inf_particles[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 3.17e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_no_nan_inf_particles[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.19e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_no_nan_inf_particles[kernel_flow]
+tests/test_flow_filters.py::TestFlowHealth::test_particle_spread_bounded[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.33e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_no_nan_inf_particles[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.95e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_no_nan_inf_particles[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.60e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_no_nan_inf_particles[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.87e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_no_nan_inf_particles[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 4.18e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_no_nan_inf_particles[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.51e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_no_nan_inf_particles[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.30e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_no_nan_inf_particles[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.09e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_no_nan_inf_particles[kernel_flow]
+tests/test_flow_filters.py::TestFlowHealth::test_particle_spread_bounded[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.80e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_no_nan_inf_particles[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.85e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_no_nan_inf_particles[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.64e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_no_nan_inf_particles[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 3.56e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_no_nan_inf_particles[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.29e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_no_nan_inf_particles[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.03e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_no_nan_inf_particles[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.73e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_no_nan_inf_particles[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 3.30e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_no_nan_inf_particles[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.92e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_no_nan_inf_particles[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.75e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_no_nan_inf_particles[kernel_flow]
+tests/test_flow_filters.py::TestFlowHealth::test_particle_spread_bounded[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.40e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_no_nan_inf_particles[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.61e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_no_nan_inf_particles[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.67e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_no_nan_inf_particles[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.90e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_no_nan_inf_particles[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.25e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_no_nan_inf_particles[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.40e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_no_nan_inf_particles[kernel_flow]
+tests/test_flow_filters.py::TestFlowHealth::test_particle_spread_bounded[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.54e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_no_nan_inf_particles[kernel_flow]
+tests/test_flow_filters.py::TestFlowHealth::test_particle_spread_bounded[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.84e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_no_nan_inf_particles[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.99e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_no_nan_inf_particles[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.23e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_no_nan_inf_particles[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.52e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_no_nan_inf_particles[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 4.10e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_no_nan_inf_particles[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.87e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_no_nan_inf_particles[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.41e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_no_nan_inf_particles[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.46e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_no_nan_inf_particles[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 8.02e-04
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_no_nan_inf_particles[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.49e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_no_nan_inf_particles[kernel_flow]
+tests/test_flow_filters.py::TestFlowHealth::test_particle_spread_bounded[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.59e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_no_nan_inf_particles[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.23e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_particle_spread_bounded[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.74e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_particle_spread_bounded[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.02e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_particle_spread_bounded[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 3.25e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_particle_spread_bounded[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.69e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_particle_spread_bounded[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.82e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_particle_spread_bounded[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 3.13e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_particle_spread_bounded[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.61e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_particle_spread_bounded[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 5.29e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_particle_spread_bounded[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.55e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_particle_spread_bounded[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.59e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_particle_spread_bounded[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 3.87e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_particle_spread_bounded[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 9.07e-04
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_particle_spread_bounded[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.07e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_particle_spread_bounded[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.63e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_particle_spread_bounded[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.44e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_particle_spread_bounded[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 4.91e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_particle_spread_bounded[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.35e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_particle_spread_bounded[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.71e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_particle_spread_bounded[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.34e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_particle_spread_bounded[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 3.89e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_particle_spread_bounded[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.68e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_particle_spread_bounded[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.45e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_particle_spread_bounded[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.12e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_particle_spread_bounded[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.68e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_particle_spread_bounded[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 8.71e-04
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_particle_spread_bounded[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.37e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_particle_spread_bounded[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.54e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_particle_spread_bounded[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.64e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_particle_spread_bounded[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.13e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_particle_spread_bounded[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 4.33e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_particle_spread_bounded[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 9.28e-04
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_particle_spread_bounded[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 4.09e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_particle_spread_bounded[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.67e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_particle_spread_bounded[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.31e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_particle_spread_bounded[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.18e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_particle_spread_bounded[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.20e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowHealth::test_particle_spread_bounded[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.97e-03
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowEdgeCases::test_few_particles_no_crash[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.34e-04
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowEdgeCases::test_few_particles_no_crash[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.05e-04
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowEdgeCases::test_few_particles_no_crash[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.99e-04
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowEdgeCases::test_few_particles_no_crash[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.56e-04
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowEdgeCases::test_few_particles_no_crash[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 6.35e-05
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowEdgeCases::test_few_particles_no_crash[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 1.14e-04
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowEdgeCases::test_few_particles_no_crash[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 9.99e-05
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowEdgeCases::test_few_particles_no_crash[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 5.79e-04
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowEdgeCases::test_informative_observation_no_crash[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 6.11e-02
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowEdgeCases::test_informative_observation_no_crash[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 2.63e-02
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowEdgeCases::test_informative_observation_no_crash[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 3.58e-02
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowEdgeCases::test_informative_observation_no_crash[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 4.05e-02
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowEdgeCases::test_informative_observation_no_crash[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 7.48e-02
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowEdgeCases::test_informative_observation_no_crash[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 3.69e-02
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowEdgeCases::test_informative_observation_no_crash[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 3.21e-02
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowEdgeCases::test_informative_observation_no_crash[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 3.95e-02
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+tests/test_flow_filters.py::TestFlowEdgeCases::test_informative_observation_no_crash[kernel_flow]
+  /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/tests/../src/filters/particle/kernel_flow.py:252: UserWarning: PFF did not converge in 200 iterations. Final flow magnitude: 9.43e-02
+    warnings.warn(f"PFF did not converge in {self.max_iter} iterations. "
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================= 38 passed, 297 warnings in 565.90s (0:09:25) =================

@@ -1,0 +1,123 @@
+{
+  "summary": {
+    "sigma_V": {
+      "mean": 9.321137695832158,
+      "std": 0.581461866849431,
+      "median": 9.617190022343085,
+      "q5": 8.619570043156454,
+      "q25": 9.062956700572734,
+      "q75": 9.727344854347045,
+      "q95": 9.815468719950214,
+      "min": 8.508723378802383,
+      "max": 9.837499686351007
+    },
+    "sigma_W": {
+      "mean": 13.17906472265819,
+      "std": 0.511188546622412,
+      "median": 12.994888365062064,
+      "q5": 12.69865103380751,
+      "q25": 12.830312069920645,
+      "q75": 13.435729196597674,
+      "q95": 13.78840186182616,
+      "min": 12.665735774779225,
+      "max": 13.876570028133282
+    }
+  },
+  "diagnostics": {
+    "acceptance_rate": 0.7333333333333334,
+    "final_step_size": 0.7192755047888388,
+    "ess": {
+      "sigma_V": NaN,
+      "sigma_W": NaN
+    },
+    "rhat": {
+      "sigma_V": NaN,
+      "sigma_W": NaN
+    }
+  },
+  "metadata": {
+    "model_type": "KitagawaModel",
+    "filter_type": "BootstrapConditionalSMC",
+    "sampler": "pgibbs",
+    "theta_sampler": "hmc",
+    "num_samples": 3,
+    "num_burnin": 2,
+    "num_observations": 100,
+    "timing": {
+      "total_time_seconds": 462.2286482816562,
+      "mean_step_time": 92.44572965633124,
+      "step_times": [
+        92.03538897261024,
+        92.93522450421005,
+        94.63965055905282,
+        92.41259153839201,
+        90.20579270739108
+      ]
+    }
+  },
+  "true_params": {
+    "sigma_V": 10.0,
+    "sigma_W": 1.0
+  },
+  "config": {
+    "dtype": "float64",
+    "tf_log_level": 2,
+    "model": {
+      "_target_": "src.models.kitagawa.KitagawaModel",
+      "sigma_V": 5.0,
+      "sigma_W": 2.0,
+      "initial_var": 5.0
+    },
+    "filter": {
+      "_target_": "src.filters.particle.conditional_smc.BootstrapConditionalSMC",
+      "n_particles": 1000,
+      "resample_threshold": 0.5,
+      "ancestor_sampling": true
+    },
+    "dpf": {
+      "sampler": "pgibbs",
+      "trainable_params": {
+        "sigma_V": {
+          "constraint": "positive",
+          "prior": {
+            "_target_": "tensorflow_probability.distributions.LogNormal",
+            "loc": 2.3,
+            "scale": 0.5
+          }
+        },
+        "sigma_W": {
+          "constraint": "positive",
+          "prior": {
+            "_target_": "tensorflow_probability.distributions.LogNormal",
+            "loc": 0.0,
+            "scale": 1.0
+          }
+        }
+      },
+      "pgibbs": {
+        "theta_sampler": "hmc",
+        "num_samples": 3,
+        "num_burnin": 2,
+        "hmc_steps_per_iter": 5,
+        "hmc_step_size": 0.05,
+        "hmc_num_leapfrog": 10,
+        "target_accept_prob": 0.8,
+        "grad_clip_norm": 100.0,
+        "seed": 42
+      }
+    },
+    "data": {
+      "T": 100,
+      "seed": 42,
+      "true_params": {
+        "sigma_V": 10.0,
+        "sigma_W": 1.0
+      }
+    }
+  },
+  "performance": {
+    "wall_time_seconds": 462.80734742060304,
+    "peak_memory_mb": 2.448831558227539,
+    "memory_increase_mb": 175.703125
+  }
+}
