@@ -131,9 +131,12 @@ class BootstrapConditionalSMC:
                 x_ref_t[tf.newaxis, :]
             ], axis=0)
 
-            # 3. Weight (bootstrap: just the likelihood)
+            # 3. Weight: w_t ∝ w_{t-1} * p(y_t | x_t)
             log_obs = self.model.log_observation_prob_batch(y_t, particles)
-            weights = tf.nn.softmax(log_obs)
+            log_w = tf.math.log(
+                tf.maximum(weights, tf.constant(1e-300, dtype=self.dtype))
+            ) + log_obs
+            weights = tf.nn.softmax(log_w)
 
             particles_history.append(tf.identity(particles))
 

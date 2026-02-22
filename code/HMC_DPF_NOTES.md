@@ -996,6 +996,64 @@ For **low-dimensional** problems ($d \leq 5$), MH works fine:
 
 ---
 
+### PGibbs σ-Stalling: Variance Drift from Poor Initialization
+
+#### Observed symptom
+
+Running PGibbs + MH on Kitagawa with initial guesses σ_V=2, σ_W=2 (true: σ_V=3.162, σ_W=1.0), the chain drifts monotonically upward past burn-in:
+
+```
+[sample 71/470]  sigma_V=12.13, sigma_W=5.63  | theta_accept=72%
+[sample 80/470]  sigma_V=12.26, sigma_W=5.55  | theta_accept=74%
+[sample 90/470]  sigma_V=12.89, sigma_W=5.52  | theta_accept=72%
+```
+
+The 72% acceptance rate looks healthy, but the parameters are at 4× the true values and still climbing. This is not slow convergence — it is a stable wrong equilibrium.
+
+#### Root cause: prior-sampled initial trajectory
+
+When `init_filter_class` is not provided, `PGibbsRunner._initialize_trajectory()` samples the initial trajectory $x_{0:T}$ from the prior — purely from $p(x_0)$ and $p(x_t \mid x_{t-1}, \theta_\text{init})$ with no conditioning on observations $y_{1:T}$.
+
+This creates a positive feedback loop:
+
+1. **Prior trajectory has huge observation residuals.** Since $x_t$ is independent of $y_t$, the residuals $(y_t - x_t^2/20)$ are enormous.
+
+2. **θ-step inflates σ_W.** The closed-form posterior for σ_W given fixed x is:
+   $$\log p(\sigma_W \mid x, y) \ni -T \log \sigma_W - \frac{1}{2\sigma_W^2} \sum_t (y_t - x_t^2/20)^2$$
+   When the sum of squared residuals is huge, larger σ_W reduces the Mahalanobis term faster than the log-determinant penalty grows. MH accepts the increase.
+
+3. **CSMC produces diffuse trajectories.** With inflated σ_W, the observation weights $p(y_t \mid x_t) = \mathcal{N}(y_t; x_t^2/20, \sigma_W^2)$ become nearly flat — weights don't discriminate between particles. The CSMC trajectory barely improves over the reference.
+
+4. **θ-step inflates σ_V.** The new trajectory (still bad) has large transition residuals. The same logic applies: larger σ_V absorbs the residuals. σ_V climbs.
+
+5. **Self-reinforcing equilibrium.** With σ_V ≈ 13, the CSMC's bootstrap proposal $\mathcal{N}(f(x_{t-1}), 169)$ is so diffuse that particles go everywhere. With σ_W ≈ 5.5, the observation likelihood is nearly flat ($\text{var} = 30.25$). The CSMC is essentially drawing from the prior, which reinforces the large σ estimates.
+
+This is a **stable fixed point** of the Gibbs sampler: the trajectory is consistent with large σ, and large σ is consistent with the trajectory. Ergodicity guarantees the chain will eventually escape, but the mixing time can be astronomically long.
+
+#### Why HMC does not fix this
+
+Both MH and HMC condition on the same fixed trajectory $x_{0:T}$ in the θ-step. HMC would find the mode of $p(\theta \mid x, y)$ faster (gradient-guided), but that mode is at large σ when $x$ has large residuals. The Gibbs decomposition is the bottleneck — no θ-sampler can overcome a bad trajectory.
+
+#### Why PMMH does not have this problem
+
+PMMH proposes $\theta^*$ and runs a **fresh particle filter** to estimate $p(y \mid \theta^*)$. The PF integrates out $x$: the likelihood estimate reflects how well $\theta^*$ explains the **observations**, not some fixed trajectory.
+
+If σ_V = 13, the PF's bootstrap particles spread out wildly and most miss the observations → $\hat{p}(y \mid \theta^*) \approx 0$ → proposal rejected. PMMH has a **built-in correction**: the marginal likelihood naturally penalizes inflated variance.
+
+The tradeoff:
+- **PMMH**: robust to initialization (integrates out $x$), expensive per step (full PF each iteration)
+- **PGibbs**: cheap per step (closed-form θ-step), fragile to initialization (conditions on $x$)
+
+#### Fix: BPF-initialized trajectory
+
+Initialize the trajectory by running a bootstrap PF with the initial parameter guesses, then sampling one trajectory from the particle genealogy. This gives a trajectory that is at least consistent with the observations under the initial parameters.
+
+The initial parameters (σ_V=2, σ_W=2) don't need to be accurate — they just need to be reasonable enough that the BPF produces a trajectory where $x_t$ tracks $y_t$. The first CSMC sweep then improves this trajectory, and the feedback loop runs in the right direction (toward the truth, not away from it).
+
+In `run_dpf_experiment.py`, pass `init_filter_class=ParticleFilterTF` and `init_filter_kwargs={'n_particles': N}` when constructing `PGibbsRunner`.
+
+---
+
 ## Resampling Gradient Mechanisms: Why OT Requires Graph Mode
 
 ### The three resampling methods handle gradients differently

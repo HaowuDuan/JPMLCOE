@@ -167,3 +167,49 @@ Even when a PMMH proposal is rejected, the N particles generated for that propos
 | Resampling | Stratified | Systematic |
 
 The paper uses 5x more data, 10x more particles, 17x more iterations, and exact conjugate θ-updates. Our LEDH CSMC x-step should produce better proposals than their bootstrap CSMC, partially compensating for fewer particles.
+
+---
+
+## What "Conjugate IG" Actually Means
+
+The paper's PG sampler updates σ_V² and σ_W² by **sampling directly** from the posterior — no MH, no HMC, no accept/reject. Here's why that works.
+
+### The trick: IG prior × Gaussian likelihood = IG posterior
+
+The Inverse-Gamma (IG) distribution is the "matching" prior for the variance of a Gaussian. When you multiply them, the result is another IG — just with updated numbers. That's all "conjugate" means: **the math simplifies so the answer is a known distribution you can sample from directly**.
+
+### Step-by-step for σ_V²
+
+**Prior:** We believe σ_V² comes from IG(α₀, β₀) with α₀ = β₀ = 0.01 (vague — we barely constrain it).
+
+**Data:** Given a trajectory x₀, x₁, ..., x_T, we can compute the transition residuals — how far each state is from what the dynamics predicted:
+
+    e_t = x_t − f(x_{t−1})    for t = 1, ..., T
+
+These residuals are Gaussian with variance σ_V² (by definition of the model).
+
+**Posterior:** The IG prior "absorbs" the Gaussian likelihood and stays IG:
+
+    σ_V² | trajectory  ~  IG(α₀ + T/2,  β₀ + ½ Σ e_t²)
+
+That's it. The posterior shape parameter is α₀ + T/2 (prior shape + half the data points), and the posterior rate is β₀ + ½ Σ e_t² (prior rate + half the sum of squared residuals).
+
+To sample: just call `invgamma.rvs(a = α₀ + T/2, scale = β₀ + ½ Σ e_t²)`. One line. Done.
+
+### Same for σ_W²
+
+Observation residuals:
+
+    r_t = y_t − x_t² / 20    for t = 1, ..., T
+
+Posterior:
+
+    σ_W² | trajectory, observations  ~  IG(α₀ + T/2,  β₀ + ½ Σ r_t²)
+
+### Why we can't do this
+
+We parameterize as σ_V and σ_W (std devs, not variances) with LogNormal priors. LogNormal is NOT conjugate to Gaussian — the math doesn't simplify to a known distribution. So we have to use MH or HMC to approximately sample from the theta-posterior, which is slower and requires tuning (step size, proposal std, etc.).
+
+### Could we switch to conjugate?
+
+Yes. If we reparameterized to σ² with IG priors, the theta-step would be instant and exact. The trade-off: IG priors on variance are less intuitive than LogNormal priors on std dev, and we'd lose the ability to use HMC for theta (though we wouldn't need it). For the Kitagawa model specifically, this would be a strict improvement.

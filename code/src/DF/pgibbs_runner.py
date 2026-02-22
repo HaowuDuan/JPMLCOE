@@ -280,7 +280,6 @@ class PGibbsRunner:
             from ..core.types import FilterResult
             result = init_filter.filter(
                 observations.numpy() if isinstance(observations, tf.Tensor) else observations,
-                random_seed=seed,
             )
             # Use the filtered means as initial trajectory
             # (T, sd) for means, prepend x_0 = mu_0
