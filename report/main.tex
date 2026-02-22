@@ -188,17 +188,17 @@ x_k =& f x_{k-1} + w_k, \quad w_k \sim \mathcal{N}(0, Q) \\
 z_k =& h x_k + v_k, \quad v_k \sim \mathcal{N}(0, R)
 \end{split}
 \end{equation}
-where a and h are constant in one dimension and matrices in higher dimension. When the kernel becomes non-linear, one essentially expand it around the last input. 
+where $f$ and $h$ are constant in one dimension and matrices in higher dimension. When the kernel becomes non-linear, one essentially expand it around the last input. 
 \begin{equation}
 \begin{split}
     f(x_{k-1}) &\approx \frac{\partial f(x)}{\partial x} \Big|_{x_{k-1}} \cdot x_{k-1} =f_{k} x_{k-1} \\
     h(x_{k-1}) &\approx \frac{\partial h(x)}{\partial x} \Big|_{x_{k}} \cdot x_{k} =h_{k} x_{k} \\
 \end{split}
 \end{equation}
-essentially introduce time dependence into the kernels but do not change the Gaussian assumption. This works fine if the higher order term are unimportant. UFK use sigma point to track the mean and variance and was able to capture some higher order correlations but it still assume Gaussian distribution. Appendix.~\ref{APP:Kalman} includes all the details such as key derivation. Kalman family mostly serves as a bench mark and have very limited application. Both EKF and UFK are methods to overcome the non-linearity in the problem, with more recent progress in this direction \cite{jiang2025new}. However, there are other difficulties as well, notably the curse of dimension. Attempts has been made to improve in this direction, notably Cubature Kalman Filter (CKF)\cite{arasaratnam2009cubature} and Ensemble Kalman Filter (EnKF)\cite{evensen-2003-ensemble-kalman-filter,alghattas2024ensemble}. But here I do want to mention the latest progress on application of nerual network to kalman filter, known as KalmanNet\cite{DBLP:journals/corr/abs-2107-10043,mortada2025recursive}. This is a method that replaces the Kalman Gain computation with a learned neural network while keeping everything else from the standard KF flow intact. The key is to train the RNN to make predictions about the Kalman gain without knowing what the noise distribution is. It gets the noise from the input data. While KalmanNet borrowed design from Kalman filter, it can be applied to non-linear, non-gaussian state space models. 
+essentially introduce time dependence into the kernels but do not change the Gaussian assumption. This works fine if the higher order term are unimportant. UKF use sigma point to track the mean and variance and was able to capture some higher order correlations but it still assume Gaussian distribution. Appendix.~\ref{APP:Kalman} includes all the details such as key derivation. Kalman family mostly serves as a bench mark and have very limited application. Both EKF and UKF are methods to overcome the non-linearity in the problem, with more recent progress in this direction \cite{jiang2025new}. However, there are other difficulties as well, notably the curse of dimension. Attempts has been made to improve in this direction, notably Cubature Kalman Filter (CKF)\cite{arasaratnam2009cubature} and Ensemble Kalman Filter (EnKF)\cite{evensen-2003-ensemble-kalman-filter,alghattas2024ensemble}. But here I do want to mention the latest progress on application of nerual network to kalman filter, known as KalmanNet\cite{DBLP:journals/corr/abs-2107-10043,mortada2025recursive}. This is a method that replaces the Kalman Gain computation with a learned neural network while keeping everything else from the standard KF flow intact. The key is to train the RNN to make predictions about the Kalman gain without knowing what the noise distribution is. It gets the noise from the input data. While KalmanNet borrowed design from Kalman filter, it can be applied to non-linear, non-gaussian state space models. 
 
 \subsection{Particle based methods}
-Particle based methods, also known as sequential Monte Carlo are the focus of this project. It is less limited compared to other approaches. There are tons of different particle-based methods, but the bottom line is how to represent a complicated distribution efficiently. Here we first introduce the concept of importance sampling. {\color{red} Here I want to explain why we choose to use system dynamics as the proposal instead of more general approach. Then set the things straight, we only use the system dynamics here. As for particle weights, it should be corrected here that it is not an artifact of discretization alone.} If we were to use particles, namely, samples to represent a distribution $p(x)$, we first need to discretize the phase space. 
+Particle based methods, also known as sequential Monte Carlo are the focus of this project. It is less limited compared to other approaches. There are tons of different particle-based methods, but the bottom line is how to represent a complicated distribution efficiently. Here we first introduce the concept of importance sampling. If we were to use particles, namely, samples to represent a distribution $p(x)$, we first need to discretize the phase space. 
 \begin{equation}
     p(x)=\int dy\; p(y) \delta(y-x)
 \end{equation} 
@@ -518,7 +518,7 @@ D = \begin{pmatrix} 10^{-8} & 0 \\ 0 & 10^{-8} \end{pmatrix} \\
 \mu_0 &= \begin{pmatrix} 0 \\ 0 \end{pmatrix}, \quad
 \Sigma_0 = \begin{pmatrix} 1 & 0 \\ 0 & 1 \end{pmatrix}
 \end{align*}
-where the observation noise is of the order $10^{-8}$, which led to $R \sim 10^-{16}$.
+where the observation noise is of the order $10^{-8}$, which led to $R \sim 10^{-16}$.
 \begin{table}[H]
 \centering
 \caption{Comparison of Kalman Filter with Joseph Form vs. Standard Update}
@@ -605,17 +605,17 @@ H(\mathbf{x}_t) = \frac{\partial h}{\partial \mathbf{x}} \bigg|_{\mathbf{x}_t} =
 \end{equation}
 where $r_t = \sqrt{(x_t - x_s)^2 + (y_t - y_s)^2}$ is the range.
 
-% \begin{figure}[H]
-%     \centering
-% \includegraphics[width=0.8\linewidth]{sto_uekf2.png}
-%     \caption{EKF and UKF result on stochastic volatility model}
-% \end{figure}
-% \begin{figure}[H]
-%     \centering
-% \includegraphics[width=0.8\linewidth]{rb_uekf.png}
-%     \caption{EKF and UKF result on range bearing model}
-% \end{figure}
-we see that range bearing model works with UKF and EKF because we get can get reasonable Jacobian from the observation model.
+\begin{figure}[H]
+    \centering
+\includegraphics[width=0.8\linewidth]{sto_uekf2.png}
+    \caption{EKF and UKF result on stochastic volatility model}
+\end{figure}
+\begin{figure}[H]
+    \centering
+\includegraphics[width=0.8\linewidth]{rb_uekf.png}
+    \caption{EKF and UKF result on range bearing model}
+\end{figure}
+we see that range bearing model works with UKF and EKF because we can get reasonable Jacobian from the observation model.
 
 
 
@@ -625,36 +625,36 @@ we see that range bearing model works with UKF and EKF because we get can get re
 \subsubsection{Particle filter and particle degeneracy}
 
 
-% \begin{figure}[H]
-%     \centering
-% \includegraphics[width=0.8\linewidth]{particle.png}
-%     \caption{We see that particle filter tracking the means of both models pretty well}
-%     \label{fig:placeholder}
-% \end{figure}
+\begin{figure}[H]
+    \centering
+\includegraphics[width=0.8\linewidth]{particle.png}
+    \caption{We see that particle filter tracking the means of both models pretty well}
+    \label{fig:particle_tracking}
+\end{figure}
 
 
-% \begin{figure}[H]
-%     \centering
-% \includegraphics[width=0.8\linewidth]{particle2.png}
-%     \caption{Effective sample size a function of time}
-%     \label{fig:placeholder}
-% \end{figure}
+\begin{figure}[H]
+    \centering
+\includegraphics[width=0.8\linewidth]{particle2.png}
+    \caption{Effective sample size a function of time}
+    \label{fig:ess_time}
+\end{figure}
 The red lines are the times where we did resampling. It turns out that range bearing had very bad initialization but the particle filter somehow managed to increased sample size at later time. This is likely due to that particles were moved into the right position so even with very few particles, it can track the distribution very well. But a depleted sample size means that uncertainty estimation is unreliable. 
 
-% \begin{figure}[H]
-%     \centering
-% \includegraphics[width=0.8\linewidth]{particle3.png}
-%     \caption{Weight distribution at three different time. It further demonstrate that bad initialization for range bearing model had collapsed weight distribution from the very beginning}
-%     \label{fig:placeholder}
-% \end{figure}
+\begin{figure}[H]
+    \centering
+\includegraphics[width=0.8\linewidth]{particle3.png}
+    \caption{Weight distribution at three different time. It further demonstrate that bad initialization for range bearing model had collapsed weight distribution from the very beginning}
+    \label{fig:weight_distribution}
+\end{figure}
 
 
-% \begin{figure}[H]
-%     \centering
-% \includegraphics[width=0.8\linewidth]{particle4.png}
-%     \caption{Particle diversity for the Stochastic Volatility model is reasonable.  }
-%     \label{fig:placeholder}
-% \end{figure}
+\begin{figure}[H]
+    \centering
+\includegraphics[width=0.8\linewidth]{particle4.png}
+    \caption{Particle diversity for the Stochastic Volatility model is reasonable.}
+    \label{fig:particle_diversity}
+\end{figure}
 
 \subsubsection{EDH (LEDH) flow and filter}
 Table~\ref{tab:range_bearing_comparison} compares all five filters on the range-bearing model. The LEDH invertible filter achieves the best RMSE while the bootstrap PF requires the most particles. Table~\ref{tab:acoustic_tracking_comparison} shows results on the acoustic tracking model (4 targets, 25 sensors), a higher-dimensional problem where the global EDH filters struggle due to the linearisation approximation. The LEDH variants, which re-linearise at each particle, significantly outperform their global counterparts, with LEDH invertible again achieving the best RMSE.
@@ -788,12 +788,12 @@ Kernel (matrix) & 20   & ---  & 500 \\
 \end{table}
 
 \subsubsection{Matrix kernel preventing collapse}
-% \begin{figure}[H]
-%     \centering
-% \includegraphics[width=0.5\linewidth]{figure3_reproduction.png}
-%     \caption{We can see clearly that by switching to matrix kernel, $x_{20}$ no longer collapsed into one point}
-%     \label{fig:placeholder}
-% \end{figure}
+\begin{figure}[H]
+    \centering
+\includegraphics[width=0.5\linewidth]{figure3_reproduction.png}
+    \caption{We can see clearly that by switching to matrix kernel, $x_{20}$ no longer collapsed into one point}
+    \label{fig:matrix_kernel}
+\end{figure}
 
 \subsection{Filter comparison}
 Overall, there is no one-fits-all filter option. When the model is non-linear but with additive noise, then flow based approach would work with carefully tuned hyper parameters. As you can see, there is a lot of freedom to adjust the flow equation implementation. With multiplicative noise, I cannot say for certain, but I would expect most of the expansion approach would fail because the observation is not useful at all, for flow evolution. 
@@ -828,9 +828,8 @@ Under global linearization ($H$ fixed at $\bar\eta_0$), $p(\v{x},\lambda)$ is Ga
 \]
 is a single linear function of $\v{x}$ shared by all particles---consistent with the Fokker--Planck equation.
 
-If one were to re-linearise at each particle $\v{x}_i$ (as LEDH does for ODE flows), particle~$i$ would use its own $H_i$, giving it its own precision $M_i(\lambda)$, mean $m_i(\lambda)$, and score $-M_i(\v{x} - m_i)$. No single density has all of these as its score simultaneously---the Fokker--Planck equation cannot be satisfied. The particles would no longer be samples from a coherent density, and the theoretical guarantee that the flow preserves the homotopy path breaks down. This is why stochastic particle flows in the literature universally use global linearization, while the local (LEDH) variant is restricted to deterministic flows. Given this fact, in the code base, we can directly inherit the structure of EDH with small override to the flow parameter. For strong non-linear model, we need to add local corrections to the flow parameters, or re-linearize at the intermediate time. But for Stochastic flow, re-linearize is not possible, we cannot update the observation coefficient, but it turns out adding local correction will help stabilize the flow a lot. 
+If one were to re-linearise at each particle $\v{x}_i$ (as LEDH does for ODE flows), particle~$i$ would use its own $H_i$, giving it its own precision $M_i(\lambda)$, mean $m_i(\lambda)$, and score $-M_i(\v{x} - m_i)$. No single density has all of these as its score simultaneously---the Fokker--Planck equation cannot be satisfied. The particles would no longer be samples from a coherent density, and the theoretical guarantee that the flow preserves the homotopy path breaks down. This is why stochastic particle flows in the literature universally use global linearization, while the local (LEDH) variant is restricted to deterministic flows. Given this fact, in the code base, we can directly inherit the structure of EDH with small override to the flow parameter. For strong non-linear model, we need to add local corrections to the flow parameters, or re-linearize at the intermediate time. But for Stochastic flow, re-linearize is not possible, we cannot update the observation coefficient, but it turns out adding local correction will help stabilize the flow. 
 
-\paragraph{Local correction for nonlinear observations.}
 The drift parameters $A(\lambda)$ and $b(\lambda)$ are derived under the assumption of a linear observation model $h(\v{x}) = H\v{x}$. In the pure global formulation---where $H$ is computed once at the prior mean $\bar\eta_0$ and the observation $z$ is used directly---this linear model is self-consistent and no additional correction is needed.
 
 However, in the re-linearisation framework (as in LEDH), one expands $h(\v{x})$ at an intermediate point $\eta$ during the flow. The first-order Taylor expansion
@@ -839,26 +838,24 @@ However, in the re-linearisation framework (as in LEDH), one expands $h(\v{x})$ 
 \]
 naturally produces a zeroth-order residual $e = h(\eta) - H(\eta)\,\eta$ that accounts for the nonlinearity. In our local correction variant, we borrow this idea for the global formulation: compute $e_0 = h(\bar\eta_0) - H\bar\eta_0$ once, then replace $z$ with $z_{\mathrm{corr}} = z - e_0$ in both the deterministic drift and the score correction. For linear observations $e_0 = 0$ and the two formulations coincide.
 
-Empirically, this correction is essential for nonlinear models. On the range-bearing model, the uncorrected stochastic EDH diverges, while adding the local correction makes the filter work. The correction costs only one additional evaluation of $h(\bar\eta_0)$ per time step.
+Empirically, this correction is essential for nonlinear models. On the range-bearing model, the uncorrected stochastic EDH diverges, while adding the local correction makes the filter work (Figures~\ref{fig:rb_sde} and~\ref{fig:rb_sde_local}). The correction costs only one additional evaluation of $h(\bar\eta_0)$ per time step.
+As for stiffness mitigation,  the drift matrix $A(\lambda)$ has eigenvalues that are most extreme near $\lambda = 0$, where the precision $M(\lambda) = P_0^{-1} + \lambda\,H^\top R^{-1} H$ is dominated by the anisotropic prior $P_0^{-1}$. As $\lambda \to 1$, measurement information regularizes $M$ and the stiffness diminishes. With a sufficiently fine uniform grid (small $d\lambda$), the Euler--Maruyama integrator stays within the stability region even near $\lambda = 0$---a fine uniform schedule is not stressed by the stiff system.
 
-\paragraph{Stiffness and the $\lambda$ schedule.}
-The drift matrix $A(\lambda)$ has eigenvalues that are most extreme near $\lambda = 0$, where the precision $M(\lambda) = P_0^{-1} + \lambda\,H^\top R^{-1} H$ is dominated by the anisotropic prior $P_0^{-1}$. As $\lambda \to 1$, measurement information regularizes $M$ and the stiffness diminishes. With a sufficiently fine uniform grid (small $d\lambda$), the Euler--Maruyama integrator stays within the stability region even near $\lambda = 0$---a fine uniform schedule is not stressed by the stiff system.
+In practice, one can do better with a geometric (exponential) schedule: step sizes $\varepsilon_j = \varepsilon_1 q^{j-1}$ with ratio $q = 1.2$, which concentrates steps near $\lambda = 0$ where they are most needed and uses larger steps near $\lambda = 1$ where the system is well-conditioned. This simple engineering choice already resolves the practical stiffness issue without solving any optimization problem. I spent sometime to test and reproduce the result of the stiffness mitigation paper but could not reproduce. The filter itself works fine, but I find the usefulness of the method proposed by the author is limited, and the stiffness in the example can be mitigated by fine uniform step size. One thing I did not try is to switch the integration scheme. We evaluate our parameter after we update the step counts, follow the pseudocode from \cite{ding2012implementation}. As we know the first step has strong stiffness problem, this could be the reason why I could not reproduce the paper. 
 
-In practice, one can do better with a geometric (exponential) schedule: step sizes $\varepsilon_j = \varepsilon_1 q^{j-1}$ with ratio $q = 1.2$, which concentrates steps near $\lambda = 0$ where they are most needed and uses larger steps near $\lambda = 1$ where the system is well-conditioned. This simple engineering choice already resolves the practical stiffness issue without solving any optimization problem. I spent sometime to test and reproduce the result of the stiffness mitigation paper but could not reproduce. The filter itself works fine, but I find the usefulness of the method proposed by the author is limited, and the stiffness in the example can be mitigated by fine uniform step size. But it is something to keep in mind if we ran into a problem with stiffness issue, we can try this methods. A successful stochastic flow filter is equivalent to edh flow filter. As we shown, adding local correction is a much bigger effect. In addition, one thing we did not try is to switch the integration scheme. We evaluate our parameter after we update the step counts, follow the pseudocode from \cite{ding2012implementation}. As we know the first step has strong stiffness problem, this could be the reason why I could not reproduce the paper. But I should spend more time on differentiable particle filter pipeline. This will be a quick confirmation when we have time.
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.9\textwidth]{rb_sde.png}
+  \caption{Stochastic EDH flow on the range-bearing model (global linearization, no local correction).}
+  \label{fig:rb_sde}
+\end{figure}
 
-% \begin{figure}[htbp]
-%   \centering
-%   \includegraphics[width=0.9\textwidth]{rb_sde.png}
-%   \caption{Stochastic EDH flow on the range-bearing model (global linearization, no local correction).}
-%   \label{fig:rb_sde}
-% \end{figure}
-%
-% \begin{figure}[htbp]
-%   \centering
-%   \includegraphics[width=0.9\textwidth]{rb_sde_local.png}
-%   \caption{Stochastic EDH flow on the range-bearing model with local correction ($e_0 = h(\bar\eta_0) - H\bar\eta_0$).}
-%   \label{fig:rb_sde_local}
-% \end{figure}
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.9\textwidth]{rb_sde_local.png}
+  \caption{Stochastic EDH flow on the range-bearing model with local correction ($e_0 = h(\bar\eta_0) - H\bar\eta_0$).}
+  \label{fig:rb_sde_local}
+\end{figure}
 
 
 \clearpage
@@ -939,19 +936,19 @@ LEDH Bimodal ($K\!=\!1$) & 500 & \textbf{11.57} & $-205.4$ & 18.9 \\
 \end{table}
 
 Three observations stand out. First, all standard filters (BPF, EDH, LEDH) converge to RMSE $\approx 19$--$21$ regardless of method. The problem is structural: the observation $y = x^2/20$ provides zero sign information, so every filter tracks the magnitude correctly but guesses the sign at chance ($\approx 50\%$). 
-% \begin{figure}[htbp]
-%   \centering
-%   \includegraphics[width=0.9\textwidth]{kitagawa_ledh_1e4.png}
-%   \caption{LEDH invertible filter on the Kitagawa model with 10,000 particles.}
-%   \label{fig:kitagawa_ledh_1e4}
-% \end{figure}
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.9\textwidth]{kitagawa_ledh_1e4.png}
+  \caption{LEDH invertible filter on the Kitagawa model with 10,000 particles.}
+  \label{fig:kitagawa_ledh_1e4}
+\end{figure}
 Second, increasing particles by $20\times$ (from 500 to 10,000) gives less than 1\% RMSE improvement, confirming that the bottleneck is not sample size but the bimodal posterior.Third, the LEDH bimodal filter with a 1-step look-ahead correction (using the next observation $y_{t+1}$ to disambiguate sign via the asymmetric transition dynamics $f(x) \neq f(-x)$) breaks through to RMSE 11.57, a 42\% improvement. 
-% \begin{figure}[htbp]
-%   \centering
-%   \includegraphics[width=0.9\textwidth]{kitagawa_k1.png}
-%   \caption{LEDH bimodal filter with 1-step look-ahead correction ($k=1$) on the Kitagawa model.}
-%   \label{fig:kitagawa_k1}
-% \end{figure}
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.9\textwidth]{kitagawa_k1.png}
+  \caption{LEDH bimodal filter with 1-step look-ahead correction ($k=1$) on the Kitagawa model.}
+  \label{fig:kitagawa_k1}
+\end{figure}
 The key insight is that while a single observation $y_t$ cannot distinguish $+x$ from $-x$ (since $h(x) = x^2/20$ is an even function), the \emph{next} observation $y_{t+1}$ can, indirectly. For each flowed particle $\eta_1$, we propagate both signs one step forward through the transition:
 \begin{equation}
 x_{t+1}^{+} = f(+\eta_1,\, t\!+\!1), \qquad x_{t+1}^{-} = f(-\eta_1,\, t\!+\!1),
@@ -1063,6 +1060,13 @@ Systematic resampling with detached gradients satisfies (1) but not (2): the bia
 
 The conditional resampling threshold is a further source of discontinuity affects all filters that resample conditionally. Most particle filters resample only when the effective sample size drops below a threshold, $N_{\text{eff}} < N/2$. During HMC's leapfrog integration, each step perturbs $\theta$ slightly, changing the particle weights and hence the ESS. When the ESS crosses the threshold at some time step $t$, the filter switches from no resampling to full resampling (or vice versa), and the log-likelihood jumps discontinuously. In the experiment for cubic sensor model, we observe exactly this phenomenon: shrinking step size for systematic and soft resampling and stable step size for OT Sinkhorn resampling.
 
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.9\textwidth]{stepsize_resampling.png}
+  \caption{HMC step size evolution on the cubic sensor model for three resampling methods. Systematic and soft resampling exhibit step size collapse due to the \texttt{tf.cond} threshold discontinuity, while OT Sinkhorn maintains a stable step size.}
+  \label{fig:stepsize_resampling}
+\end{figure}
+
 For systematic and soft resampling, this jump is large: the resampled particle set (with duplicated high-weight and killed low-weight particles) differs substantially from the unresampled set. The Hamiltonian error $\Delta H \gg 1$, the proposal is rejected, and adaptive step-size tuning shrinks the step size. Since the threshold can be crossed at any scale of perturbation, the step size collapses toward zero.
 
 For OT Sinkhorn resampling, this jump is negligible. When ESS is near the threshold, the weights are close to uniform, and the transport matrix is close to the identity: $T \approx I$, so $x_i' = \sum_j T_{ij} x_j \approx x_i$. Crossing the threshold causes almost no change in the output particles, preserving the Hamiltonian. This is a strong practical argument for fully differentiable resampling: it eliminates the threshold discontinuity by construction.
@@ -1076,7 +1080,6 @@ For OT Sinkhorn resampling, this jump is negligible. When ESS is near the thresh
 
 \subsection{Workflow and current status of DPF pipeline}
 
-\textbf{How the components fit together.}
 The differentiable filtering module (\texttt{src/DF/}) provides three runners, each implementing a different inference strategy:
 \begin{itemize}
     \item \texttt{DPFRunner}: HMC on the particle filter's log-likelihood. A \texttt{DifferentiableModel} wraps the state-space model, and a \texttt{ParameterHandler} manages bijector transforms between constrained and unconstrained space. Parameters flow as plain tensors: unconstrained $\to$ bijector $\to$ \texttt{setattr} on the model $\to$ filter $\to$ \texttt{log\_marginal\_likelihood\_tf}. \texttt{tf.GradientTape} differentiates through the entire chain. The particle filter seed is fixed, making the likelihood surface deterministic.

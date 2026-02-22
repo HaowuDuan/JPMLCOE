@@ -1,0 +1,410 @@
+=== Running 6 DPF experiments ===
+
+========================================
+[1/6] hmc/linear_gaussian/ledh_sys
+========================================
+Creating true model: src.models.linear_gaussian.LinearGaussianModel
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1771640923.245676 1911970 gpu_device.cc:2020] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 22322 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3090, pci bus id: 0000:01:00.0, compute capability: 8.6
+Generating 50 time steps with true params: {'obs_noise_std': 1.0}
+I0000 00:00:1771640923.456377 1911970 cuda_solvers.cc:175] Creating GpuSolver handles for stream 0x35568bc0
+Creating inference model
+Trainable params: ['obs_noise_std']
+
+Running HMC inference...
+Using HMC sampler (num_leapfrog_steps=5)
+Running HMC: 100 burn-in + 200 sampling = 300 total steps
+  [grad check] lp=-92.8956, |grad|=15.719373082396936, grad=[-15.71937308]
+  [burn-in 1/100] 7.1s | accept=100% | step_size=0.0120 | obs_noise_std=1.9994 | ETA 2118s
+  [burn-in 2/100] 7.0s | accept=50% | step_size=0.0126 | obs_noise_std=1.9994 | ETA 2104s
+  [burn-in 3/100] 7.1s | accept=67% | step_size=0.0160 | obs_noise_std=1.9998 | ETA 2103s
+  [burn-in 4/100] 7.1s | accept=75% | step_size=0.0220 | obs_noise_std=1.8594 | ETA 2098s
+  [burn-in 5/100] 7.1s | accept=80% | step_size=0.0306 | obs_noise_std=1.7631 | ETA 2092s
+  [burn-in 6/100] 7.1s | accept=83% | step_size=0.0321 | obs_noise_std=1.6797 | ETA 2085s
+  [burn-in 7/100] 7.1s | accept=86% | step_size=0.0446 | obs_noise_std=1.6568 | ETA 2079s
+  [burn-in 8/100] 7.1s | accept=88% | step_size=0.0362 | obs_noise_std=1.3053 | ETA 2073s
+  [burn-in 9/100] 7.2s | accept=89% | step_size=0.0455 | obs_noise_std=0.9398 | ETA 2068s
+  [burn-in 10/100] 7.1s | accept=80% | step_size=0.0076 | obs_noise_std=0.9398 | ETA 2061s
+  [burn-in 11/100] 7.1s | accept=73% | step_size=0.0086 | obs_noise_std=0.9398 | ETA 2054s
+  [burn-in 12/100] 7.1s | accept=75% | step_size=0.0035 | obs_noise_std=0.8906 | ETA 2049s
+  [burn-in 13/100] 7.1s | accept=77% | step_size=0.0048 | obs_noise_std=0.8867 | ETA 2041s
+  [burn-in 14/100] 7.1s | accept=79% | step_size=0.0032 | obs_noise_std=0.8713 | ETA 2035s
+  [burn-in 15/100] 7.1s | accept=80% | step_size=0.0044 | obs_noise_std=0.8752 | ETA 2027s
+  [burn-in 16/100] 7.1s | accept=75% | step_size=0.0035 | obs_noise_std=0.8752 | ETA 2020s
+  [burn-in 17/100] 7.1s | accept=76% | step_size=0.0035 | obs_noise_std=0.8693 | ETA 2012s
+  [burn-in 18/100] 7.1s | accept=78% | step_size=0.0047 | obs_noise_std=0.8687 | ETA 2004s
+  [burn-in 19/100] 7.1s | accept=79% | step_size=0.0054 | obs_noise_std=0.8597 | ETA 1997s
+  [burn-in 20/100] 7.2s | accept=80% | step_size=0.0062 | obs_noise_std=0.8387 | ETA 1992s
+  [burn-in 21/100] 7.1s | accept=81% | step_size=0.0051 | obs_noise_std=0.8279 | ETA 1986s
+  [burn-in 22/100] 7.1s | accept=82% | step_size=0.0053 | obs_noise_std=0.8063 | ETA 1977s
+  [burn-in 23/100] 7.1s | accept=83% | step_size=0.0058 | obs_noise_std=0.8100 | ETA 1970s
+  [burn-in 24/100] 7.1s | accept=83% | step_size=0.0078 | obs_noise_std=0.8114 | ETA 1963s
+  [burn-in 25/100] 7.1s | accept=80% | step_size=0.0062 | obs_noise_std=0.8114 | ETA 1956s
+  [burn-in 26/100] 7.1s | accept=77% | step_size=0.0063 | obs_noise_std=0.8114 | ETA 1948s
+  [burn-in 27/100] 7.1s | accept=78% | step_size=0.0042 | obs_noise_std=0.8028 | ETA 1942s
+  [burn-in 28/100] 7.1s | accept=79% | step_size=0.0039 | obs_noise_std=0.7889 | ETA 1936s
+  [burn-in 29/100] 7.1s | accept=79% | step_size=0.0052 | obs_noise_std=0.7971 | ETA 1928s
+  [burn-in 30/100] 7.1s | accept=80% | step_size=0.0035 | obs_noise_std=0.8044 | ETA 1918s
+  [burn-in 31/100] 7.1s | accept=81% | step_size=0.0047 | obs_noise_std=0.7956 | ETA 1909s
+  [burn-in 32/100] 7.1s | accept=81% | step_size=0.0062 | obs_noise_std=0.8198 | ETA 1903s
+  [burn-in 33/100] 7.1s | accept=79% | step_size=0.0031 | obs_noise_std=0.8198 | ETA 1897s
+  [burn-in 34/100] 7.1s | accept=79% | step_size=0.0019 | obs_noise_std=0.8165 | ETA 1890s
+  [burn-in 35/100] 7.1s | accept=80% | step_size=0.0025 | obs_noise_std=0.8158 | ETA 1883s
+  [burn-in 36/100] 7.1s | accept=81% | step_size=0.0013 | obs_noise_std=0.8038 | ETA 1876s
+  [burn-in 37/100] 7.1s | accept=81% | step_size=0.0017 | obs_noise_std=0.8012 | ETA 1868s
+  [burn-in 38/100] 7.1s | accept=82% | step_size=0.0022 | obs_noise_std=0.8037 | ETA 1860s
+  [burn-in 39/100] 7.1s | accept=82% | step_size=0.0026 | obs_noise_std=0.8122 | ETA 1853s
+  [burn-in 40/100] 7.1s | accept=82% | step_size=0.0033 | obs_noise_std=0.8120 | ETA 1847s
+  [burn-in 41/100] 7.1s | accept=83% | step_size=0.0043 | obs_noise_std=0.8100 | ETA 1841s
+  [burn-in 42/100] 7.1s | accept=83% | step_size=0.0052 | obs_noise_std=0.8007 | ETA 1834s
+  [burn-in 43/100] 7.3s | accept=84% | step_size=0.0067 | obs_noise_std=0.7968 | ETA 1831s
+  [burn-in 44/100] 7.1s | accept=84% | step_size=0.0062 | obs_noise_std=0.8021 | ETA 1823s
+  [burn-in 45/100] 7.1s | accept=84% | step_size=0.0079 | obs_noise_std=0.7950 | ETA 1817s
+  [burn-in 46/100] 7.2s | accept=85% | step_size=0.0101 | obs_noise_std=0.8087 | ETA 1812s
+  [burn-in 47/100] 7.2s | accept=85% | step_size=0.0129 | obs_noise_std=0.8307 | ETA 1807s
+  [burn-in 48/100] 7.1s | accept=85% | step_size=0.0079 | obs_noise_std=0.8073 | ETA 1799s
+  [burn-in 49/100] 7.1s | accept=86% | step_size=0.0091 | obs_noise_std=0.7736 | ETA 1794s
+  [burn-in 50/100] 7.2s | accept=86% | step_size=0.0103 | obs_noise_std=0.7644 | ETA 1787s
+  [burn-in 51/100] 7.1s | accept=84% | step_size=0.0075 | obs_noise_std=0.7644 | ETA 1779s
+  [burn-in 52/100] 7.2s | accept=86% | step_size=0.0070 | obs_noise_std=0.7512 | ETA 1774s
+  [burn-in 53/100] 7.1s | accept=86% | step_size=0.0088 | obs_noise_std=0.7638 | ETA 1763s
+  [burn-in 54/100] 7.2s | accept=86% | step_size=0.0075 | obs_noise_std=0.7249 | ETA 1758s
+  [burn-in 55/100] 7.1s | accept=84% | step_size=0.0046 | obs_noise_std=0.7249 | ETA 1750s
+  [burn-in 56/100] 7.1s | accept=84% | step_size=0.0046 | obs_noise_std=0.7189 | ETA 1741s
+  [burn-in 57/100] 7.1s | accept=84% | step_size=0.0051 | obs_noise_std=0.7108 | ETA 1732s
+  [burn-in 58/100] 7.1s | accept=82% | step_size=0.0048 | obs_noise_std=0.7108 | ETA 1727s
+  [burn-in 59/100] 7.1s | accept=82% | step_size=0.0061 | obs_noise_std=0.7311 | ETA 1719s
+  [burn-in 60/100] 7.1s | accept=84% | step_size=0.0076 | obs_noise_std=0.7631 | ETA 1712s
+  [burn-in 61/100] 7.1s | accept=86% | step_size=0.0053 | obs_noise_std=0.7651 | ETA 1706s
+  [burn-in 62/100] 7.2s | accept=86% | step_size=0.0066 | obs_noise_std=0.7594 | ETA 1699s
+  [burn-in 63/100] 7.1s | accept=86% | step_size=0.0062 | obs_noise_std=0.7678 | ETA 1691s
+  [burn-in 64/100] 7.1s | accept=86% | step_size=0.0073 | obs_noise_std=0.7653 | ETA 1683s
+  [burn-in 65/100] 7.2s | accept=86% | step_size=0.0091 | obs_noise_std=0.7714 | ETA 1677s
+  [burn-in 66/100] 7.2s | accept=88% | step_size=0.0112 | obs_noise_std=0.7792 | ETA 1671s
+  [burn-in 67/100] 7.1s | accept=88% | step_size=0.0075 | obs_noise_std=0.7325 | ETA 1664s
+  [burn-in 68/100] 7.2s | accept=88% | step_size=0.0072 | obs_noise_std=0.7160 | ETA 1657s
+  [burn-in 69/100] 7.2s | accept=88% | step_size=0.0077 | obs_noise_std=0.6945 | ETA 1652s
+  [burn-in 70/100] 7.2s | accept=88% | step_size=0.0095 | obs_noise_std=0.7204 | ETA 1645s
+  [burn-in 71/100] 7.1s | accept=88% | step_size=0.0117 | obs_noise_std=0.7274 | ETA 1638s
+  [burn-in 72/100] 7.2s | accept=88% | step_size=0.0144 | obs_noise_std=0.7707 | ETA 1631s
+  [burn-in 73/100] 7.2s | accept=88% | step_size=0.0176 | obs_noise_std=0.8046 | ETA 1625s
+  [burn-in 74/100] 7.1s | accept=88% | step_size=0.0216 | obs_noise_std=0.7916 | ETA 1618s
+  [burn-in 75/100] 7.2s | accept=90% | step_size=0.0263 | obs_noise_std=0.8260 | ETA 1610s
+  [burn-in 76/100] 7.2s | accept=92% | step_size=0.0131 | obs_noise_std=0.7253 | ETA 1603s
+  [burn-in 77/100] 7.2s | accept=92% | step_size=0.0089 | obs_noise_std=0.7041 | ETA 1597s
+  [burn-in 78/100] 7.1s | accept=90% | step_size=0.0064 | obs_noise_std=0.7041 | ETA 1590s
+  [burn-in 79/100] 7.1s | accept=90% | step_size=0.0077 | obs_noise_std=0.7091 | ETA 1580s
+  [burn-in 80/100] 7.2s | accept=90% | step_size=0.0078 | obs_noise_std=0.6970 | ETA 1573s
+  [burn-in 81/100] 7.1s | accept=90% | step_size=0.0078 | obs_noise_std=0.6926 | ETA 1565s
+  [burn-in 82/100] 7.2s | accept=90% | step_size=0.0078 | obs_noise_std=0.6917 | ETA 1558s
+  [burn-in 83/100] 7.2s | accept=92% | step_size=0.0078 | obs_noise_std=0.6922 | ETA 1551s
+  [burn-in 84/100] 7.1s | accept=92% | step_size=0.0078 | obs_noise_std=0.6838 | ETA 1544s
+  [burn-in 85/100] 7.1s | accept=90% | step_size=0.0078 | obs_noise_std=0.6838 | ETA 1537s
+  [burn-in 86/100] 7.2s | accept=90% | step_size=0.0078 | obs_noise_std=0.7119 | ETA 1529s
+  [burn-in 87/100] 7.1s | accept=90% | step_size=0.0078 | obs_noise_std=0.7118 | ETA 1521s
+  [burn-in 88/100] 7.1s | accept=90% | step_size=0.0078 | obs_noise_std=0.6886 | ETA 1514s
+  [burn-in 89/100] 7.1s | accept=88% | step_size=0.0078 | obs_noise_std=0.6886 | ETA 1505s
+  [burn-in 90/100] 7.1s | accept=88% | step_size=0.0078 | obs_noise_std=0.6804 | ETA 1496s
+  [burn-in 91/100] 7.2s | accept=88% | step_size=0.0078 | obs_noise_std=0.6641 | ETA 1490s
+  [burn-in 92/100] 7.1s | accept=88% | step_size=0.0078 | obs_noise_std=0.6545 | ETA 1481s
+  [burn-in 93/100] 7.1s | accept=88% | step_size=0.0078 | obs_noise_std=0.6422 | ETA 1473s
+  [burn-in 94/100] 7.1s | accept=88% | step_size=0.0078 | obs_noise_std=0.6134 | ETA 1465s
+  [burn-in 95/100] 7.1s | accept=88% | step_size=0.0078 | obs_noise_std=0.6243 | ETA 1457s
+  [burn-in 96/100] 7.1s | accept=88% | step_size=0.0078 | obs_noise_std=0.6283 | ETA 1449s
+  [burn-in 97/100] 7.1s | accept=88% | step_size=0.0078 | obs_noise_std=0.6216 | ETA 1441s
+  [burn-in 98/100] 7.1s | accept=88% | step_size=0.0078 | obs_noise_std=0.6309 | ETA 1434s
+  [burn-in 99/100] 7.1s | accept=88% | step_size=0.0078 | obs_noise_std=0.6079 | ETA 1428s
+  [burn-in 100/100] 7.1s | accept=88% | step_size=0.0078 | obs_noise_std=0.6304 | ETA 1421s
+  [sample 1/200] 7.0s | accept=90% | step_size=0.0078 | obs_noise_std=0.6089 | ETA 1411s
+  [sample 2/200] 7.1s | accept=90% | step_size=0.0078 | obs_noise_std=0.6164 | ETA 1404s
+  [sample 3/200] 7.2s | accept=90% | step_size=0.0078 | obs_noise_std=0.6116 | ETA 1398s
+  [sample 4/200] 7.1s | accept=88% | step_size=0.0078 | obs_noise_std=0.6116 | ETA 1392s
+  [sample 5/200] 7.1s | accept=90% | step_size=0.0078 | obs_noise_std=0.5986 | ETA 1385s
+  [sample 6/200] 7.2s | accept=90% | step_size=0.0078 | obs_noise_std=0.5856 | ETA 1378s
+  [sample 7/200] 7.1s | accept=90% | step_size=0.0078 | obs_noise_std=0.5828 | ETA 1372s
+  [sample 8/200] 7.1s | accept=92% | step_size=0.0078 | obs_noise_std=0.5515 | ETA 1365s
+  [sample 9/200] 7.1s | accept=92% | step_size=0.0078 | obs_noise_std=0.5358 | ETA 1358s
+  [sample 10/200] 7.1s | accept=92% | step_size=0.0078 | obs_noise_std=0.5272 | ETA 1351s
+  [sample 11/200] 7.1s | accept=90% | step_size=0.0078 | obs_noise_std=0.5272 | ETA 1346s
+  [sample 12/200] 7.1s | accept=90% | step_size=0.0078 | obs_noise_std=0.5233 | ETA 1339s
+  [sample 13/200] 7.1s | accept=90% | step_size=0.0078 | obs_noise_std=0.5153 | ETA 1331s
+  [sample 14/200] 7.2s | accept=90% | step_size=0.0078 | obs_noise_std=0.5186 | ETA 1325s
+  [sample 15/200] 7.1s | accept=90% | step_size=0.0078 | obs_noise_std=0.5210 | ETA 1318s
+  [sample 16/200] 7.1s | accept=90% | step_size=0.0078 | obs_noise_std=0.4936 | ETA 1309s
+  [sample 17/200] 7.1s | accept=90% | step_size=0.0078 | obs_noise_std=0.4813 | ETA 1302s
+  [sample 18/200] 7.1s | accept=90% | step_size=0.0078 | obs_noise_std=0.4922 | ETA 1295s
+  [sample 19/200] 7.1s | accept=90% | step_size=0.0078 | obs_noise_std=0.5101 | ETA 1288s
+  [sample 20/200] 7.1s | accept=90% | step_size=0.0078 | obs_noise_std=0.5245 | ETA 1281s
+  [sample 21/200] 7.1s | accept=90% | step_size=0.0078 | obs_noise_std=0.5120 | ETA 1273s
+  [sample 22/200] 7.1s | accept=90% | step_size=0.0078 | obs_noise_std=0.5141 | ETA 1265s
+  [sample 23/200] 7.1s | accept=90% | step_size=0.0078 | obs_noise_std=0.5094 | ETA 1257s
+  [sample 24/200] 7.1s | accept=90% | step_size=0.0078 | obs_noise_std=0.5219 | ETA 1249s
+  [sample 25/200] 7.1s | accept=90% | step_size=0.0078 | obs_noise_std=0.5441 | ETA 1242s
+  [sample 26/200] 7.1s | accept=90% | step_size=0.0078 | obs_noise_std=0.5372 | ETA 1235s
+  [sample 27/200] 7.1s | accept=90% | step_size=0.0078 | obs_noise_std=0.4985 | ETA 1227s
+  [sample 28/200] 7.1s | accept=92% | step_size=0.0078 | obs_noise_std=0.4820 | ETA 1220s
+  [sample 29/200] 7.1s | accept=92% | step_size=0.0078 | obs_noise_std=0.4967 | ETA 1213s
+  [sample 30/200] 7.1s | accept=92% | step_size=0.0078 | obs_noise_std=0.5248 | ETA 1206s
+  [sample 31/200] 7.1s | accept=92% | step_size=0.0078 | obs_noise_std=0.5240 | ETA 1199s
+  [sample 32/200] 7.1s | accept=92% | step_size=0.0078 | obs_noise_std=0.5406 | ETA 1192s
+  [sample 33/200] 7.1s | accept=90% | step_size=0.0078 | obs_noise_std=0.5406 | ETA 1185s
+  [sample 34/200] 7.2s | accept=88% | step_size=0.0078 | obs_noise_std=0.5406 | ETA 1178s
+  [sample 35/200] 7.1s | accept=90% | step_size=0.0078 | obs_noise_std=0.5673 | ETA 1171s
+  [sample 36/200] 7.1s | accept=90% | step_size=0.0078 | obs_noise_std=0.5678 | ETA 1164s
+  [sample 37/200] 7.1s | accept=88% | step_size=0.0078 | obs_noise_std=0.5678 | ETA 1158s
+  [sample 38/200] 7.1s | accept=88% | step_size=0.0078 | obs_noise_std=0.5508 | ETA 1151s
+  [sample 39/200] 7.2s | accept=90% | step_size=0.0078 | obs_noise_std=0.5957 | ETA 1144s
+  [sample 40/200] 7.2s | accept=90% | step_size=0.0078 | obs_noise_std=0.6007 | ETA 1138s
+  [sample 41/200] 7.1s | accept=90% | step_size=0.0078 | obs_noise_std=0.6010 | ETA 1132s
+  [sample 42/200] 7.1s | accept=90% | step_size=0.0078 | obs_noise_std=0.5969 | ETA 1125s
+  [sample 43/200] 7.1s | accept=90% | step_size=0.0078 | obs_noise_std=0.5931 | ETA 1119s
+  [sample 44/200] 7.3s | accept=90% | step_size=0.0078 | obs_noise_std=0.6228 | ETA 1114s
+  [sample 45/200] 7.2s | accept=90% | step_size=0.0078 | obs_noise_std=0.6243 | ETA 1109s
+  [sample 46/200] 7.2s | accept=90% | step_size=0.0078 | obs_noise_std=0.6129 | ETA 1103s
+  [sample 47/200] 7.2s | accept=90% | step_size=0.0078 | obs_noise_std=0.5946 | ETA 1096s
+  [sample 48/200] 7.1s | accept=90% | step_size=0.0078 | obs_noise_std=0.6018 | ETA 1088s
+  [sample 49/200] 7.1s | accept=90% | step_size=0.0078 | obs_noise_std=0.5864 | ETA 1081s
+  [sample 50/200] 7.1s | accept=90% | step_size=0.0078 | obs_noise_std=0.5790 | ETA 1073s
+  [sample 51/200] 7.1s | accept=90% | step_size=0.0078 | obs_noise_std=0.5741 | ETA 1066s
+  [sample 52/200] 7.1s | accept=90% | step_size=0.0078 | obs_noise_std=0.5673 | ETA 1059s
+  [sample 53/200] 7.2s | accept=90% | step_size=0.0078 | obs_noise_std=0.5836 | ETA 1052s
+  [sample 54/200] 7.2s | accept=92% | step_size=0.0078 | obs_noise_std=0.5840 | ETA 1042s
+  [sample 55/200] 7.1s | accept=92% | step_size=0.0078 | obs_noise_std=0.5805 | ETA 1034s
+  [sample 56/200] 7.1s | accept=92% | step_size=0.0078 | obs_noise_std=0.5896 | ETA 1026s
+  [sample 57/200] 7.1s | accept=92% | step_size=0.0078 | obs_noise_std=0.6164 | ETA 1019s
+  [sample 58/200] 7.1s | accept=92% | step_size=0.0078 | obs_noise_std=0.6423 | ETA 1012s
+  [sample 59/200] 7.1s | accept=92% | step_size=0.0078 | obs_noise_std=0.6625 | ETA 1005s
+  [sample 60/200] 7.1s | accept=92% | step_size=0.0078 | obs_noise_std=0.6820 | ETA 997s
+  [sample 61/200] 7.1s | accept=92% | step_size=0.0078 | obs_noise_std=0.6820 | ETA 991s
+  [sample 62/200] 7.1s | accept=92% | step_size=0.0078 | obs_noise_std=0.6787 | ETA 983s
+  [sample 63/200] 7.2s | accept=92% | step_size=0.0078 | obs_noise_std=0.6990 | ETA 976s
+  [sample 64/200] 7.1s | accept=92% | step_size=0.0078 | obs_noise_std=0.7062 | ETA 969s
+  [sample 65/200] 7.2s | accept=92% | step_size=0.0078 | obs_noise_std=0.7172 | ETA 963s
+  [sample 66/200] 7.1s | accept=90% | step_size=0.0078 | obs_noise_std=0.7172 | ETA 955s
+  [sample 67/200] 7.1s | accept=90% | step_size=0.0078 | obs_noise_std=0.7423 | ETA 948s
+  [sample 68/200] 7.2s | accept=90% | step_size=0.0078 | obs_noise_std=0.7536 | ETA 941s
+  [sample 69/200] 7.2s | accept=90% | step_size=0.0078 | obs_noise_std=0.7663 | ETA 934s
+  [sample 70/200] 7.1s | accept=90% | step_size=0.0078 | obs_noise_std=0.7647 | ETA 927s
+  [sample 71/200] 7.2s | accept=90% | step_size=0.0078 | obs_noise_std=0.7942 | ETA 921s
+  [sample 72/200] 7.1s | accept=90% | step_size=0.0078 | obs_noise_std=0.7819 | ETA 913s
+  [sample 73/200] 7.1s | accept=90% | step_size=0.0078 | obs_noise_std=0.7881 | ETA 906s
+  [sample 74/200] 7.1s | accept=90% | step_size=0.0078 | obs_noise_std=0.7874 | ETA 899s
+  [sample 75/200] 7.2s | accept=88% | step_size=0.0078 | obs_noise_std=0.7874 | ETA 892s
+  [sample 76/200] 7.1s | accept=88% | step_size=0.0078 | obs_noise_std=0.7887 | ETA 885s
+  [sample 77/200] 7.2s | accept=88% | step_size=0.0078 | obs_noise_std=0.7755 | ETA 879s
+  [sample 78/200] 7.2s | accept=88% | step_size=0.0078 | obs_noise_std=0.8048 | ETA 872s
+  [sample 79/200] 7.1s | accept=88% | step_size=0.0078 | obs_noise_std=0.7645 | ETA 864s
+  [sample 80/200] 7.1s | accept=88% | step_size=0.0078 | obs_noise_std=0.7574 | ETA 858s
+  [sample 81/200] 7.2s | accept=88% | step_size=0.0078 | obs_noise_std=0.7053 | ETA 851s
+  [sample 82/200] 7.2s | accept=88% | step_size=0.0078 | obs_noise_std=0.7462 | ETA 845s
+  [sample 83/200] 7.1s | accept=90% | step_size=0.0078 | obs_noise_std=0.7282 | ETA 838s
+  [sample 84/200] 7.1s | accept=92% | step_size=0.0078 | obs_noise_std=0.7306 | ETA 830s
+  [sample 85/200] 7.1s | accept=92% | step_size=0.0078 | obs_noise_std=0.7343 | ETA 822s
+  [sample 86/200] 7.1s | accept=92% | step_size=0.0078 | obs_noise_std=0.6861 | ETA 814s
+  [sample 87/200] 7.2s | accept=94% | step_size=0.0078 | obs_noise_std=0.6693 | ETA 807s
+  [sample 88/200] 7.1s | accept=94% | step_size=0.0078 | obs_noise_std=0.6560 | ETA 799s
+  [sample 89/200] 7.2s | accept=94% | step_size=0.0078 | obs_noise_std=0.6553 | ETA 793s
+  [sample 90/200] 7.1s | accept=94% | step_size=0.0078 | obs_noise_std=0.6088 | ETA 785s
+  [sample 91/200] 7.1s | accept=94% | step_size=0.0078 | obs_noise_std=0.6143 | ETA 778s
+  [sample 92/200] 7.1s | accept=94% | step_size=0.0078 | obs_noise_std=0.5978 | ETA 770s
+  [sample 93/200] 7.2s | accept=92% | step_size=0.0078 | obs_noise_std=0.5978 | ETA 763s
+  [sample 94/200] 7.2s | accept=92% | step_size=0.0078 | obs_noise_std=0.6041 | ETA 757s
+  [sample 95/200] 7.1s | accept=92% | step_size=0.0078 | obs_noise_std=0.5825 | ETA 750s
+  [sample 96/200] 7.2s | accept=92% | step_size=0.0078 | obs_noise_std=0.5978 | ETA 743s
+  [sample 97/200] 7.1s | accept=92% | step_size=0.0078 | obs_noise_std=0.5841 | ETA 736s
+  [sample 98/200] 7.1s | accept=92% | step_size=0.0078 | obs_noise_std=0.5614 | ETA 729s
+  [sample 99/200] 7.1s | accept=92% | step_size=0.0078 | obs_noise_std=0.5407 | ETA 721s
+  [sample 100/200] 7.2s | accept=92% | step_size=0.0078 | obs_noise_std=0.5264 | ETA 714s
+  [sample 101/200] 7.1s | accept=92% | step_size=0.0078 | obs_noise_std=0.5199 | ETA 707s
+  [sample 102/200] 7.2s | accept=92% | step_size=0.0078 | obs_noise_std=0.5140 | ETA 700s
+  [sample 103/200] 7.1s | accept=92% | step_size=0.0078 | obs_noise_std=0.5069 | ETA 693s
+  [sample 104/200] 7.2s | accept=92% | step_size=0.0078 | obs_noise_std=0.4904 | ETA 686s
+  [sample 105/200] 7.1s | accept=92% | step_size=0.0078 | obs_noise_std=0.4983 | ETA 679s
+  [sample 106/200] 7.1s | accept=92% | step_size=0.0078 | obs_noise_std=0.4642 | ETA 671s
+  [sample 107/200] 7.2s | accept=92% | step_size=0.0078 | obs_noise_std=0.4646 | ETA 664s
+  [sample 108/200] 7.3s | accept=92% | step_size=0.0078 | obs_noise_std=0.4773 | ETA 659s
+  [sample 109/200] 7.2s | accept=92% | step_size=0.0078 | obs_noise_std=0.4807 | ETA 652s
+  [sample 110/200] 7.2s | accept=92% | step_size=0.0078 | obs_noise_std=0.4664 | ETA 645s
+  [sample 111/200] 7.1s | accept=94% | step_size=0.0078 | obs_noise_std=0.4709 | ETA 638s
+  [sample 112/200] 7.2s | accept=94% | step_size=0.0078 | obs_noise_std=0.4547 | ETA 631s
+  [sample 113/200] 7.2s | accept=94% | step_size=0.0078 | obs_noise_std=0.4409 | ETA 624s
+  [sample 114/200] 7.1s | accept=94% | step_size=0.0078 | obs_noise_std=0.4423 | ETA 616s
+  [sample 115/200] 7.1s | accept=94% | step_size=0.0078 | obs_noise_std=0.4358 | ETA 609s
+  [sample 116/200] 7.1s | accept=96% | step_size=0.0078 | obs_noise_std=0.4424 | ETA 602s
+  [sample 117/200] 7.1s | accept=96% | step_size=0.0078 | obs_noise_std=0.4597 | ETA 594s
+  [sample 118/200] 7.1s | accept=94% | step_size=0.0078 | obs_noise_std=0.4597 | ETA 585s
+  [sample 119/200] 7.1s | accept=94% | step_size=0.0078 | obs_noise_std=0.4401 | ETA 578s
+  [sample 120/200] 7.1s | accept=94% | step_size=0.0078 | obs_noise_std=0.4433 | ETA 569s
+  [sample 121/200] 7.1s | accept=94% | step_size=0.0078 | obs_noise_std=0.4349 | ETA 562s
+  [sample 122/200] 7.1s | accept=94% | step_size=0.0078 | obs_noise_std=0.4017 | ETA 554s
+  [sample 123/200] 7.2s | accept=94% | step_size=0.0078 | obs_noise_std=0.3926 | ETA 547s
+  [sample 124/200] 7.1s | accept=94% | step_size=0.0078 | obs_noise_std=0.3994 | ETA 540s
+  [sample 125/200] 7.1s | accept=96% | step_size=0.0078 | obs_noise_std=0.4192 | ETA 533s
+  [sample 126/200] 7.1s | accept=96% | step_size=0.0078 | obs_noise_std=0.3970 | ETA 526s
+  [sample 127/200] 7.1s | accept=96% | step_size=0.0078 | obs_noise_std=0.4027 | ETA 519s
+  [sample 128/200] 7.1s | accept=96% | step_size=0.0078 | obs_noise_std=0.4134 | ETA 512s
+  [sample 129/200] 7.1s | accept=96% | step_size=0.0078 | obs_noise_std=0.4003 | ETA 505s
+  [sample 130/200] 7.1s | accept=96% | step_size=0.0078 | obs_noise_std=0.3841 | ETA 498s
+  [sample 131/200] 7.1s | accept=96% | step_size=0.0078 | obs_noise_std=0.3798 | ETA 491s
+  [sample 132/200] 7.1s | accept=96% | step_size=0.0078 | obs_noise_std=0.3850 | ETA 484s
+  [sample 133/200] 7.2s | accept=96% | step_size=0.0078 | obs_noise_std=0.3924 | ETA 478s
+  [sample 134/200] 7.2s | accept=96% | step_size=0.0078 | obs_noise_std=0.3774 | ETA 471s
+  [sample 135/200] 7.2s | accept=96% | step_size=0.0078 | obs_noise_std=0.3691 | ETA 464s
+  [sample 136/200] 7.2s | accept=96% | step_size=0.0078 | obs_noise_std=0.3638 | ETA 458s
+  [sample 137/200] 7.2s | accept=96% | step_size=0.0078 | obs_noise_std=0.3597 | ETA 451s
+  [sample 138/200] 7.1s | accept=96% | step_size=0.0078 | obs_noise_std=0.3632 | ETA 443s
+  [sample 139/200] 7.2s | accept=96% | step_size=0.0078 | obs_noise_std=0.3491 | ETA 437s
+  [sample 140/200] 7.2s | accept=96% | step_size=0.0078 | obs_noise_std=0.3438 | ETA 430s
+  [sample 141/200] 7.2s | accept=96% | step_size=0.0078 | obs_noise_std=0.3347 | ETA 423s
+  [sample 142/200] 7.2s | accept=96% | step_size=0.0078 | obs_noise_std=0.3289 | ETA 416s
+  [sample 143/200] 7.2s | accept=98% | step_size=0.0078 | obs_noise_std=0.3279 | ETA 409s
+  [sample 144/200] 7.2s | accept=98% | step_size=0.0078 | obs_noise_std=0.3242 | ETA 401s
+  [sample 145/200] 7.1s | accept=98% | step_size=0.0078 | obs_noise_std=0.3121 | ETA 394s
+  [sample 146/200] 7.1s | accept=98% | step_size=0.0078 | obs_noise_std=0.3153 | ETA 387s
+  [sample 147/200] 7.2s | accept=98% | step_size=0.0078 | obs_noise_std=0.3151 | ETA 379s
+  [sample 148/200] 7.1s | accept=98% | step_size=0.0078 | obs_noise_std=0.3094 | ETA 372s
+  [sample 149/200] 7.1s | accept=98% | step_size=0.0078 | obs_noise_std=0.3196 | ETA 365s
+  [sample 150/200] 7.2s | accept=98% | step_size=0.0078 | obs_noise_std=0.3354 | ETA 358s
+  [sample 151/200] 7.1s | accept=98% | step_size=0.0078 | obs_noise_std=0.3223 | ETA 350s
+  [sample 152/200] 7.1s | accept=98% | step_size=0.0078 | obs_noise_std=0.3508 | ETA 343s
+  [sample 153/200] 7.1s | accept=98% | step_size=0.0078 | obs_noise_std=0.3329 | ETA 335s
+  [sample 154/200] 7.1s | accept=98% | step_size=0.0078 | obs_noise_std=0.3430 | ETA 328s
+  [sample 155/200] 7.3s | accept=98% | step_size=0.0078 | obs_noise_std=0.3207 | ETA 322s
+  [sample 156/200] 7.2s | accept=98% | step_size=0.0078 | obs_noise_std=0.3144 | ETA 315s
+  [sample 157/200] 7.1s | accept=98% | step_size=0.0078 | obs_noise_std=0.3213 | ETA 307s
+  [sample 158/200] 7.1s | accept=98% | step_size=0.0078 | obs_noise_std=0.3291 | ETA 300s
+  [sample 159/200] 7.1s | accept=98% | step_size=0.0078 | obs_noise_std=0.3348 | ETA 293s
+  [sample 160/200] 7.1s | accept=98% | step_size=0.0078 | obs_noise_std=0.3207 | ETA 286s
+  [sample 161/200] 7.1s | accept=98% | step_size=0.0078 | obs_noise_std=0.3108 | ETA 278s
+  [sample 162/200] 7.1s | accept=98% | step_size=0.0078 | obs_noise_std=0.3088 | ETA 271s
+  [sample 163/200] 7.1s | accept=98% | step_size=0.0078 | obs_noise_std=0.2966 | ETA 264s
+  [sample 164/200] 7.1s | accept=98% | step_size=0.0078 | obs_noise_std=0.2957 | ETA 257s
+  [sample 165/200] 7.1s | accept=98% | step_size=0.0078 | obs_noise_std=0.2997 | ETA 249s
+  [sample 166/200] 7.1s | accept=98% | step_size=0.0078 | obs_noise_std=0.2953 | ETA 242s
+  [sample 167/200] 7.1s | accept=98% | step_size=0.0078 | obs_noise_std=0.2968 | ETA 235s
+  [sample 168/200] 7.1s | accept=100% | step_size=0.0078 | obs_noise_std=0.2977 | ETA 227s
+  [sample 169/200] 7.1s | accept=100% | step_size=0.0078 | obs_noise_std=0.2785 | ETA 220s
+  [sample 170/200] 7.1s | accept=100% | step_size=0.0078 | obs_noise_std=0.2761 | ETA 213s
+  [sample 171/200] 7.2s | accept=100% | step_size=0.0078 | obs_noise_std=0.2717 | ETA 206s
+  [sample 172/200] 7.1s | accept=100% | step_size=0.0078 | obs_noise_std=0.2560 | ETA 199s
+  [sample 173/200] 7.1s | accept=100% | step_size=0.0078 | obs_noise_std=0.2500 | ETA 192s
+  [sample 174/200] 7.1s | accept=100% | step_size=0.0078 | obs_noise_std=0.2472 | ETA 185s
+  [sample 175/200] 7.1s | accept=100% | step_size=0.0078 | obs_noise_std=0.2385 | ETA 178s
+  [sample 176/200] 7.1s | accept=100% | step_size=0.0078 | obs_noise_std=0.2239 | ETA 170s
+  [sample 177/200] 7.1s | accept=100% | step_size=0.0078 | obs_noise_std=0.2191 | ETA 163s
+  [sample 178/200] 7.1s | accept=100% | step_size=0.0078 | obs_noise_std=0.2083 | ETA 156s
+  [sample 179/200] 7.1s | accept=100% | step_size=0.0078 | obs_noise_std=0.2034 | ETA 149s
+  [sample 180/200] 7.1s | accept=100% | step_size=0.0078 | obs_noise_std=0.1897 | ETA 142s
+  [sample 181/200] 7.1s | accept=100% | step_size=0.0078 | obs_noise_std=0.1955 | ETA 135s
+  [sample 182/200] 7.1s | accept=100% | step_size=0.0078 | obs_noise_std=0.1936 | ETA 128s
+  [sample 183/200] 7.1s | accept=100% | step_size=0.0078 | obs_noise_std=0.1918 | ETA 121s
+  [sample 184/200] 7.1s | accept=100% | step_size=0.0078 | obs_noise_std=0.1912 | ETA 114s
+  [sample 185/200] 7.1s | accept=100% | step_size=0.0078 | obs_noise_std=0.1830 | ETA 106s
+  [sample 186/200] 7.1s | accept=100% | step_size=0.0078 | obs_noise_std=0.1708 | ETA 99s
+  [sample 187/200] 7.1s | accept=100% | step_size=0.0078 | obs_noise_std=0.1680 | ETA 92s
+  [sample 188/200] 7.1s | accept=100% | step_size=0.0078 | obs_noise_std=0.1664 | ETA 85s
+  [sample 189/200] 7.1s | accept=100% | step_size=0.0078 | obs_noise_std=0.1606 | ETA 78s
+  [sample 190/200] 7.2s | accept=100% | step_size=0.0078 | obs_noise_std=0.1556 | ETA 71s
+  [sample 191/200] 7.1s | accept=100% | step_size=0.0078 | obs_noise_std=0.1544 | ETA 64s
+  [sample 192/200] 7.1s | accept=100% | step_size=0.0078 | obs_noise_std=0.1624 | ETA 57s
+  [sample 193/200] 7.1s | accept=100% | step_size=0.0078 | obs_noise_std=0.1635 | ETA 50s
+  [sample 194/200] 7.2s | accept=100% | step_size=0.0078 | obs_noise_std=0.1676 | ETA 43s
+  [sample 195/200] 7.2s | accept=100% | step_size=0.0078 | obs_noise_std=0.1665 | ETA 36s
+  [sample 196/200] 7.1s | accept=100% | step_size=0.0078 | obs_noise_std=0.1577 | ETA 29s
+  [sample 197/200] 7.1s | accept=100% | step_size=0.0078 | obs_noise_std=0.1521 | ETA 21s
+  [sample 198/200] 7.1s | accept=100% | step_size=0.0078 | obs_noise_std=0.1427 | ETA 14s
+  [sample 199/200] 7.1s | accept=100% | step_size=0.0078 | obs_noise_std=0.1423 | ETA 7s
+  [sample 200/200] 7.1s | accept=100% | step_size=0.0078 | obs_noise_std=0.1404 | ETA 0s
+HMC complete!
+
+============================================================
+DPF INFERENCE RESULTS
+============================================================
+
+  obs_noise_std:
+    True:           1.0
+    Posterior mean:  0.4688 +/- 0.1765
+    90% CI:         [0.1662, 0.7645]
+    True in 90% CI: NO
+
+Diagnostics:
+  Acceptance rate: 95.0%
+  Final step size: 0.007810
+  ESS: {'obs_noise_std': nan}
+  R-hat: {'obs_noise_std': 0.5385086970795827}
+
+Performance:
+  Wall time: 2165.2 seconds
+  Peak memory: 32.8 MB
+============================================================
+
+Results saved to /home/haowu/JPML/code/outputs/dpf/hmc/linear_gaussian/ledh_sys
+
+========================================
+[2/6] hmc/linear_gaussian/ledh_soft
+========================================
+Creating true model: src.models.linear_gaussian.LinearGaussianModel
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1771643093.024784 1925777 gpu_device.cc:2020] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 22322 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3090, pci bus id: 0000:01:00.0, compute capability: 8.6
+Generating 50 time steps with true params: {'obs_noise_std': 1.0}
+I0000 00:00:1771643093.234824 1925777 cuda_solvers.cc:175] Creating GpuSolver handles for stream 0x429859a0
+Creating inference model
+Trainable params: ['obs_noise_std']
+
+Running HMC inference...
+Using HMC sampler (num_leapfrog_steps=5)
+Running HMC: 100 burn-in + 200 sampling = 300 total steps
+  [grad check] lp=-92.9127, |grad|=15.82904452112295, grad=[-15.82904452]
+  [burn-in 1/100] 7.1s | accept=100% | step_size=0.0115 | obs_noise_std=1.9994 | ETA 2134s
+  [burn-in 2/100] 7.2s | accept=50% | step_size=0.0118 | obs_noise_std=1.9994 | ETA 2140s
+  [burn-in 3/100] 7.2s | accept=67% | step_size=0.0153 | obs_noise_std=2.0012 | ETA 2136s
+  [burn-in 4/100] 7.2s | accept=75% | step_size=0.0210 | obs_noise_std=1.8682 | ETA 2127s
+  [burn-in 5/100] 7.2s | accept=60% | step_size=0.0156 | obs_noise_std=1.8682 | ETA 2119s
+  [burn-in 6/100] 7.2s | accept=67% | step_size=0.0172 | obs_noise_std=1.8635 | ETA 2114s
+  [burn-in 7/100] 7.2s | accept=71% | step_size=0.0198 | obs_noise_std=1.8947 | ETA 2107s
+  [burn-in 8/100] 7.2s | accept=75% | step_size=0.0237 | obs_noise_std=1.8044 | ETA 2101s
+  [burn-in 9/100] 7.2s | accept=78% | step_size=0.0327 | obs_noise_std=1.5461 | ETA 2093s
+  [burn-in 10/100] 7.3s | accept=80% | step_size=0.0449 | obs_noise_std=1.4233 | ETA 2088s
+  [burn-in 11/100] 7.2s | accept=73% | step_size=0.0469 | obs_noise_std=1.4233 | ETA 2084s
+  [burn-in 12/100] 7.2s | accept=75% | step_size=0.0409 | obs_noise_std=0.8984 | ETA 2076s
+  [burn-in 13/100] 7.2s | accept=77% | step_size=0.0361 | obs_noise_std=0.7476 | ETA 2068s
+  [burn-in 14/100] 7.2s | accept=79% | step_size=0.0243 | obs_noise_std=0.5947 | ETA 2061s
+  [burn-in 15/100] 7.2s | accept=80% | step_size=0.0250 | obs_noise_std=0.5931 | ETA 2054s
+  [burn-in 16/100] 7.2s | accept=81% | step_size=0.0253 | obs_noise_std=0.5515 | ETA 2046s
+  [burn-in 17/100] 7.3s | accept=82% | step_size=0.0338 | obs_noise_std=0.4962 | ETA 2041s
+  [burn-in 18/100] 7.2s | accept=83% | step_size=0.0347 | obs_noise_std=0.4419 | ETA 2033s
+  [burn-in 19/100] 7.2s | accept=84% | step_size=0.0382 | obs_noise_std=0.3491 | ETA 2026s
+  [burn-in 20/100] 7.2s | accept=85% | step_size=0.0225 | obs_noise_std=0.2120 | ETA 2017s
+  [burn-in 21/100] 7.1s | accept=86% | step_size=0.0141 | obs_noise_std=0.1737 | ETA 2008s
+  [burn-in 22/100] 7.2s | accept=86% | step_size=0.0164 | obs_noise_std=0.1489 | ETA 2000s
+  [burn-in 23/100] 7.2s | accept=87% | step_size=0.0218 | obs_noise_std=0.1400 | ETA 1993s
+  [burn-in 24/100] 7.2s | accept=88% | step_size=0.0104 | obs_noise_std=0.1215 | ETA 1988s
+  [burn-in 25/100] 7.2s | accept=88% | step_size=0.0138 | obs_noise_std=0.1152 | ETA 1980s
+  [burn-in 26/100] 7.2s | accept=88% | step_size=0.0180 | obs_noise_std=0.1093 | ETA 1974s
+  [burn-in 27/100] 7.2s | accept=89% | step_size=0.0203 | obs_noise_std=0.0955 | ETA 1965s
+  [burn-in 28/100] 7.2s | accept=89% | step_size=0.0058 | obs_noise_std=0.0757 | ETA 1958s
+  [burn-in 29/100] 7.2s | accept=90% | step_size=0.0077 | obs_noise_std=0.0768 | ETA 1952s
+  [burn-in 30/100] 7.3s | accept=90% | step_size=0.0058 | obs_noise_std=0.0775 | ETA 1947s
+  [burn-in 31/100] 7.2s | accept=90% | step_size=0.0067 | obs_noise_std=0.0752 | ETA 1941s
+  [burn-in 32/100] 7.2s | accept=91% | step_size=0.0088 | obs_noise_std=0.0792 | ETA 1936s
+  [burn-in 33/100] 7.2s | accept=88% | step_size=0.0064 | obs_noise_std=0.0792 | ETA 1929s
+  [burn-in 34/100] 7.2s | accept=88% | step_size=0.0052 | obs_noise_std=0.0777 | ETA 1922s
+  [burn-in 35/100] 7.3s | accept=89% | step_size=0.0066 | obs_noise_std=0.0770 | ETA 1916s
+  [burn-in 36/100] 7.2s | accept=89% | step_size=0.0086 | obs_noise_std=0.0722 | ETA 1909s
+  [burn-in 37/100] 7.2s | accept=89% | step_size=0.0111 | obs_noise_std=0.0689 | ETA 1903s
+  [burn-in 38/100] 7.2s | accept=89% | step_size=0.0144 | obs_noise_std=0.0691 | ETA 1897s
+  [burn-in 39/100] 7.2s | accept=90% | step_size=0.0185 | obs_noise_std=0.0729 | ETA 1889s
+  [burn-in 40/100] 7.2s | accept=88% | step_size=0.0116 | obs_noise_std=0.0729 | ETA 1881s
+  [burn-in 41/100] 7.2s | accept=88% | step_size=0.0148 | obs_noise_std=0.0701 | ETA 1875s
+  [burn-in 42/100] 7.3s | accept=88% | step_size=0.0190 | obs_noise_std=0.0636 | ETA 1868s
+  [burn-in 43/100] 7.3s | accept=88% | step_size=0.0039 | obs_noise_std=0.0586 | ETA 1862s
+  [burn-in 44/100] 7.2s | accept=89% | step_size=0.0051 | obs_noise_std=0.0590 | ETA 1855s
+  [burn-in 45/100] 7.3s | accept=89% | step_size=0.0046 | obs_noise_std=0.0584 | ETA 1848s
+  [burn-in 46/100] 7.3s | accept=87% | step_size=0.0022 | obs_noise_std=0.0584 | ETA 1842s
+  [burn-in 47/100] 7.3s | accept=87% | step_size=0.0017 | obs_noise_std=0.0591 | ETA 1836s
+  [burn-in 48/100] 7.3s | accept=88% | step_size=0.0015 | obs_noise_std=0.0589 | ETA 1830s
+  [burn-in 49/100] 7.4s | accept=88% | step_size=0.0020 | obs_noise_std=0.0583 | ETA 1829s
+  [burn-in 50/100] 7.3s | accept=86% | step_size=0.0006 | obs_noise_std=0.0583 | ETA 1822s
+  [burn-in 51/100] 7.3s | accept=86% | step_size=0.0008 | obs_noise_std=0.0584 | ETA 1816s
+  [burn-in 52/100] 7.3s | accept=88% | step_size=0.0005 | obs_noise_std=0.0583 | ETA 1809s
+  [burn-in 53/100] 7.3s | accept=88% | step_size=0.0006 | obs_noise_std=0.0584 | ETA 1802s
