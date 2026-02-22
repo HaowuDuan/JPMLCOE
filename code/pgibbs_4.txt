@@ -1,0 +1,71 @@
+=== Running 4 PGibbs experiments ===
+
+========================================
+[1/4] pgibbs/kitagawa_bpf_mh (1000 burn-in + 2000 samples)
+========================================
+Creating true model: src.models.kitagawa.KitagawaModel
+Generating 100 time steps with true params: {'sigma_V': 3.162, 'sigma_W': 1.0}
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1771687487.280086 2118346 gpu_device.cc:2020] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 22322 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3090, pci bus id: 0000:01:00.0, compute capability: 8.6
+Creating inference model
+Trainable params: ['sigma_V', 'sigma_W']
+
+Running PGIBBS inference...
+PGibbs + MH: 1000 burn-in + 2000 sampling = 3000 total iterations
+  MH: 1 steps/iter, proposal_std=0.1
+Initializing trajectory...
+  Initial trajectory shape: (101, 1)
+I0000 00:00:1771687491.526043 2118346 cuda_solvers.cc:175] Creating GpuSolver handles for stream 0x19101550
+  [burn-in 1/1000] 4.3s | theta_accept=100% | proposal_std=0.1000 | sigma_V=2.0326, sigma_W=1.9048 | ETA 13027s
+  [burn-in 2/1000] 2.9s | theta_accept=50% | proposal_std=0.1000 | sigma_V=2.0326, sigma_W=1.9048 | ETA 10806s
+  [burn-in 3/1000] 2.9s | theta_accept=33% | proposal_std=0.1000 | sigma_V=2.0326, sigma_W=1.9048 | ETA 10059s
+  [burn-in 4/1000] 2.9s | theta_accept=25% | proposal_std=0.1000 | sigma_V=2.0326, sigma_W=1.9048 | ETA 9687s
+  [burn-in 5/1000] 2.9s | theta_accept=20% | proposal_std=0.1000 | sigma_V=2.0326, sigma_W=1.9048 | ETA 9474s
+  [burn-in 6/1000] 2.9s | theta_accept=17% | proposal_std=0.1000 | sigma_V=2.0326, sigma_W=1.9048 | ETA 9339s
+  [burn-in 7/1000] 2.9s | theta_accept=14% | proposal_std=0.1000 | sigma_V=2.0326, sigma_W=1.9048 | ETA 9241s
+  [burn-in 8/1000] 2.9s | theta_accept=25% | proposal_std=0.1000 | sigma_V=2.0786, sigma_W=1.9190 | ETA 9170s
+  [burn-in 9/1000] 2.9s | theta_accept=22% | proposal_std=0.1000 | sigma_V=2.0786, sigma_W=1.9190 | ETA 9116s
+  [burn-in 10/1000] 2.9s | theta_accept=30% | proposal_std=0.1000 | sigma_V=2.1680, sigma_W=1.9455 | ETA 9079s
+  [burn-in 11/1000] 2.9s | theta_accept=36% | proposal_std=0.1000 | sigma_V=2.1360, sigma_W=2.0387 | ETA 8657s
+  [burn-in 12/1000] 2.9s | theta_accept=42% | proposal_std=0.1000 | sigma_V=2.1573, sigma_W=2.0552 | ETA 8667s
+  [burn-in 13/1000] 2.9s | theta_accept=38% | proposal_std=0.1000 | sigma_V=2.1573, sigma_W=2.0552 | ETA 8684s
+  [burn-in 14/1000] 2.9s | theta_accept=43% | proposal_std=0.1000 | sigma_V=2.0421, sigma_W=2.1299 | ETA 8679s
+  [burn-in 15/1000] 2.9s | theta_accept=47% | proposal_std=0.1000 | sigma_V=2.1054, sigma_W=2.2163 | ETA 8671s
+  [burn-in 16/1000] 2.9s | theta_accept=44% | proposal_std=0.1000 | sigma_V=2.1054, sigma_W=2.2163 | ETA 8673s
+  [burn-in 17/1000] 2.9s | theta_accept=47% | proposal_std=0.1000 | sigma_V=2.1919, sigma_W=2.2479 | ETA 8681s
+  [burn-in 18/1000] 2.9s | theta_accept=50% | proposal_std=0.1000 | sigma_V=2.1392, sigma_W=2.1968 | ETA 8691s
+  [burn-in 19/1000] 3.0s | theta_accept=53% | proposal_std=0.1000 | sigma_V=2.2028, sigma_W=2.2511 | ETA 8699s
+  [burn-in 20/1000] 2.9s | theta_accept=50% | proposal_std=0.1000 | sigma_V=2.2028, sigma_W=2.2511 | ETA 8695s
+  [burn-in 21/1000] 2.9s | theta_accept=48% | proposal_std=0.1000 | sigma_V=2.2028, sigma_W=2.2511 | ETA 8693s
+  [burn-in 22/1000] 3.0s | theta_accept=45% | proposal_std=0.1000 | sigma_V=2.2028, sigma_W=2.2511 | ETA 8709s
+  [burn-in 23/1000] 2.9s | theta_accept=48% | proposal_std=0.1000 | sigma_V=2.3001, sigma_W=2.4997 | ETA 8698s
+  [burn-in 24/1000] 2.9s | theta_accept=46% | proposal_std=0.1000 | sigma_V=2.3001, sigma_W=2.4997 | ETA 8705s
+  [burn-in 25/1000] 2.9s | theta_accept=48% | proposal_std=0.1000 | sigma_V=2.3562, sigma_W=2.5727 | ETA 8698s
+  [burn-in 26/1000] 2.8s | theta_accept=46% | proposal_std=0.1000 | sigma_V=2.3562, sigma_W=2.5727 | ETA 8673s
+  [burn-in 27/1000] 2.8s | theta_accept=44% | proposal_std=0.1000 | sigma_V=2.3562, sigma_W=2.5727 | ETA 8645s
+  [burn-in 28/1000] 2.8s | theta_accept=43% | proposal_std=0.1000 | sigma_V=2.3562, sigma_W=2.5727 | ETA 8600s
+  [burn-in 29/1000] 2.9s | theta_accept=45% | proposal_std=0.1000 | sigma_V=2.4477, sigma_W=2.4644 | ETA 8569s
+  [burn-in 30/1000] 2.8s | theta_accept=47% | proposal_std=0.1000 | sigma_V=2.4954, sigma_W=2.5101 | ETA 8540s
+  [burn-in 31/1000] 2.9s | theta_accept=48% | proposal_std=0.1000 | sigma_V=2.4804, sigma_W=2.4998 | ETA 8515s
+  [burn-in 32/1000] 2.9s | theta_accept=47% | proposal_std=0.1000 | sigma_V=2.4804, sigma_W=2.4998 | ETA 8483s
+  [burn-in 33/1000] 2.9s | theta_accept=48% | proposal_std=0.1000 | sigma_V=2.4733, sigma_W=2.5156 | ETA 8474s
+  [burn-in 34/1000] 2.9s | theta_accept=47% | proposal_std=0.1000 | sigma_V=2.4733, sigma_W=2.5156 | ETA 8475s
+  [burn-in 35/1000] 2.9s | theta_accept=49% | proposal_std=0.1000 | sigma_V=2.6180, sigma_W=2.5384 | ETA 8485s
+  [burn-in 36/1000] 2.9s | theta_accept=50% | proposal_std=0.1000 | sigma_V=2.5794, sigma_W=2.5561 | ETA 8501s
+  [burn-in 37/1000] 2.9s | theta_accept=49% | proposal_std=0.1000 | sigma_V=2.5794, sigma_W=2.5561 | ETA 8510s
+  [burn-in 38/1000] 2.8s | theta_accept=50% | proposal_std=0.1000 | sigma_V=2.6206, sigma_W=2.5612 | ETA 8519s
+  [burn-in 39/1000] 2.8s | theta_accept=51% | proposal_std=0.1000 | sigma_V=2.4442, sigma_W=2.6330 | ETA 8507s
+  [burn-in 40/1000] 2.8s | theta_accept=52% | proposal_std=0.1000 | sigma_V=2.3712, sigma_W=2.6972 | ETA 8489s
+  [burn-in 41/1000] 2.8s | theta_accept=54% | proposal_std=0.1000 | sigma_V=2.3859, sigma_W=2.7443 | ETA 8465s
+  [burn-in 42/1000] 2.8s | theta_accept=52% | proposal_std=0.1000 | sigma_V=2.3859, sigma_W=2.7443 | ETA 8441s
+  [burn-in 43/1000] 2.8s | theta_accept=51% | proposal_std=0.1000 | sigma_V=2.3859, sigma_W=2.7443 | ETA 8428s
+  [burn-in 44/1000] 2.8s | theta_accept=52% | proposal_std=0.1000 | sigma_V=2.4932, sigma_W=2.7510 | ETA 8399s
+  [burn-in 45/1000] 2.8s | theta_accept=53% | proposal_std=0.1000 | sigma_V=2.5719, sigma_W=2.9003 | ETA 8365s
+  [burn-in 46/1000] 2.8s | theta_accept=54% | proposal_std=0.1000 | sigma_V=2.6567, sigma_W=2.8731 | ETA 8327s
+  [burn-in 47/1000] 2.8s | theta_accept=53% | proposal_std=0.1000 | sigma_V=2.6567, sigma_W=2.8731 | ETA 8297s
+  [burn-in 48/1000] 2.7s | theta_accept=54% | proposal_std=0.1000 | sigma_V=2.6693, sigma_W=2.9586 | ETA 8262s
+  [burn-in 49/1000] 2.8s | theta_accept=53% | proposal_std=0.1000 | sigma_V=2.6693, sigma_W=2.9586 | ETA 8242s
+  [burn-in 50/1000] 2.8s | theta_accept=52% | proposal_std=0.1000 | sigma_V=2.6693, sigma_W=2.9586 | ETA 8231s
+  [burn-in 51/1000] 2.7s | theta_accept=50% | proposal_std=0.1000 | sigma_V=2.6693, sigma_W=2.9586 | ETA 8211s
+  [burn-in 52/1000] 2.8s | theta_accept=50% | proposal_std=0.1000 | sigma_V=2.6693, sigma_W=2.9586 | ETA 8194s
+  [burn-in 53/1000] 2.8s | theta_accept=50% | proposal_std=0.1000 | sigma_V=2.6693, sigma_W=2.9586 | ETA 8179s

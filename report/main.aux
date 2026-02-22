@@ -62,62 +62,82 @@
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {2.3.1}Kalman-Joseph update-condition number}{14}{subsubsection.2.3.1}\protected@file@percent }
 \@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Comparison of Kalman Filter with Joseph Form vs. Standard Update}}{14}{table.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {2.3.2}KF, EKF, UKF broken by strong nonlinear model}{14}{subsubsection.2.3.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.3.3}Particle filter and particle degeneracy}{15}{subsubsection.2.3.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.3.4}EDH (LEDH) flow and filter}{15}{subsubsection.2.3.4}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Particle Filter Comparison on Range-Bearing Model}}{15}{table.2}\protected@file@percent }
-\newlabel{tab:range_bearing_comparison}{{2}{15}{Particle Filter Comparison on Range-Bearing Model}{table.2}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Particle Filter Comparison on Acoustic Tracking Model (4 targets, 25 sensors)}}{16}{table.3}\protected@file@percent }
-\newlabel{tab:acoustic_tracking_comparison}{{3}{16}{Particle Filter Comparison on Acoustic Tracking Model (4 targets, 25 sensors)}{table.3}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces LEDH Invertible with Geometric Lambda Schedule on Acoustic Tracking ($T=100$)}}{16}{table.4}\protected@file@percent }
-\newlabel{tab:acoustic_tracking_geometric}{{4}{16}{LEDH Invertible with Geometric Lambda Schedule on Acoustic Tracking ($T=100$)}{table.4}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Filter Comparison on Stochastic Volatility Model}}{17}{table.5}\protected@file@percent }
-\newlabel{tab:sv_comparison}{{5}{17}{Filter Comparison on Stochastic Volatility Model}{table.5}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.3.5}Matrix kernel preventing collapse}{17}{subsubsection.2.3.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.4}Filter comparison}{17}{subsection.2.4}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces EKF and UKF result on stochastic volatility model}}{15}{figure.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces EKF and UKF result on range bearing model}}{16}{figure.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.3.3}Particle filter and particle degeneracy}{16}{subsubsection.2.3.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces We see that particle filter tracking the means of both models pretty well}}{16}{figure.3}\protected@file@percent }
+\newlabel{fig:particle_tracking}{{3}{16}{We see that particle filter tracking the means of both models pretty well}{figure.3}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Effective sample size a function of time}}{17}{figure.4}\protected@file@percent }
+\newlabel{fig:ess_time}{{4}{17}{Effective sample size a function of time}{figure.4}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Weight distribution at three different time. It further demonstrate that bad initialization for range bearing model had collapsed weight distribution from the very beginning}}{17}{figure.5}\protected@file@percent }
+\newlabel{fig:weight_distribution}{{5}{17}{Weight distribution at three different time. It further demonstrate that bad initialization for range bearing model had collapsed weight distribution from the very beginning}{figure.5}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Particle diversity for the Stochastic Volatility model is reasonable.}}{18}{figure.6}\protected@file@percent }
+\newlabel{fig:particle_diversity}{{6}{18}{Particle diversity for the Stochastic Volatility model is reasonable}{figure.6}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.3.4}EDH (LEDH) flow and filter}{18}{subsubsection.2.3.4}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Particle Filter Comparison on Range-Bearing Model}}{18}{table.2}\protected@file@percent }
+\newlabel{tab:range_bearing_comparison}{{2}{18}{Particle Filter Comparison on Range-Bearing Model}{table.2}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Particle Filter Comparison on Acoustic Tracking Model (4 targets, 25 sensors)}}{19}{table.3}\protected@file@percent }
+\newlabel{tab:acoustic_tracking_comparison}{{3}{19}{Particle Filter Comparison on Acoustic Tracking Model (4 targets, 25 sensors)}{table.3}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces LEDH Invertible with Geometric Lambda Schedule on Acoustic Tracking ($T=100$)}}{19}{table.4}\protected@file@percent }
+\newlabel{tab:acoustic_tracking_geometric}{{4}{19}{LEDH Invertible with Geometric Lambda Schedule on Acoustic Tracking ($T=100$)}{table.4}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Filter Comparison on Stochastic Volatility Model}}{20}{table.5}\protected@file@percent }
+\newlabel{tab:sv_comparison}{{5}{20}{Filter Comparison on Stochastic Volatility Model}{table.5}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.3.5}Matrix kernel preventing collapse}{20}{subsubsection.2.3.5}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces We can see clearly that by switching to matrix kernel, $x_{20}$ no longer collapsed into one point}}{20}{figure.7}\protected@file@percent }
+\newlabel{fig:matrix_kernel}{{7}{20}{We can see clearly that by switching to matrix kernel, $x_{20}$ no longer collapsed into one point}{figure.7}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4}Filter comparison}{20}{subsection.2.4}\protected@file@percent }
 \citation{dai-new-2021}
 \citation{dai-new-2021}
 \citation{ding2012implementation}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.5}Part II}{18}{subsection.2.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.5.1}Stochastic flow}{18}{subsubsection.2.5.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Local correction for nonlinear observations.}{18}{section*.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Stiffness and the $\lambda $ schedule.}{19}{section*.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.5.2}Soft resampling and OT resampling}{20}{subsubsection.2.5.2}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces Resampling Method Comparison on Stochastic Volatility Model}}{20}{table.6}\protected@file@percent }
-\newlabel{tab:stochastic_volatility_resampling}{{6}{20}{Resampling Method Comparison on Stochastic Volatility Model}{table.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.5}Part II}{21}{subsection.2.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.5.1}Stochastic flow}{21}{subsubsection.2.5.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Stochastic EDH flow on the range-bearing model (global linearization, no local correction).}}{22}{figure.8}\protected@file@percent }
+\newlabel{fig:rb_sde}{{8}{22}{Stochastic EDH flow on the range-bearing model (global linearization, no local correction)}{figure.8}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces Stochastic EDH flow on the range-bearing model with local correction ($e_0 = h(\bar  \eta _0) - H\bar  \eta _0$).}}{23}{figure.9}\protected@file@percent }
+\newlabel{fig:rb_sde_local}{{9}{23}{Stochastic EDH flow on the range-bearing model with local correction ($e_0 = h(\bar \eta _0) - H\bar \eta _0$)}{figure.9}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.5.2}Soft resampling and OT resampling}{24}{subsubsection.2.5.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces Resampling Method Comparison on Stochastic Volatility Model}}{24}{table.6}\protected@file@percent }
+\newlabel{tab:stochastic_volatility_resampling}{{6}{24}{Resampling Method Comparison on Stochastic Volatility Model}{table.6}{}}
 \citation{Andrieu2010}
-\@writefile{toc}{\contentsline {section}{\numberline {3}Differentiable particle filter}{21}{section.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Filtering the Kitagawa model}{21}{subsection.3.1}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {7}{\ignorespaces Filtering performance on Kitagawa model ($T=100$, seed=42, float64). Log-likelihood is the particle filter's estimate of $\log p(z_{1:T})$.}}{21}{table.7}\protected@file@percent }
-\newlabel{tab:kitagawa_filters}{{7}{21}{Filtering performance on Kitagawa model ($T=100$, seed=42, float64). Log-likelihood is the particle filter's estimate of $\log p(z_{1:T})$}{table.7}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3}Differentiable particle filter}{25}{section.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Filtering the Kitagawa model}{25}{subsection.3.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {7}{\ignorespaces Filtering performance on Kitagawa model ($T=100$, seed=42, float64). Log-likelihood is the particle filter's estimate of $\log p(z_{1:T})$.}}{25}{table.7}\protected@file@percent }
+\newlabel{tab:kitagawa_filters}{{7}{25}{Filtering performance on Kitagawa model ($T=100$, seed=42, float64). Log-likelihood is the particle filter's estimate of $\log p(z_{1:T})$}{table.7}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces LEDH invertible filter on the Kitagawa model with 10,000 particles.}}{26}{figure.10}\protected@file@percent }
+\newlabel{fig:kitagawa_ledh_1e4}{{10}{26}{LEDH invertible filter on the Kitagawa model with 10,000 particles}{figure.10}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces LEDH bimodal filter with 1-step look-ahead correction ($k=1$) on the Kitagawa model.}}{26}{figure.11}\protected@file@percent }
+\newlabel{fig:kitagawa_k1}{{11}{26}{LEDH bimodal filter with 1-step look-ahead correction ($k=1$) on the Kitagawa model}{figure.11}{}}
 \citation{Andrieu2010}
-\@writefile{lot}{\contentsline {table}{\numberline {8}{\ignorespaces LEDH Bimodal look-ahead depth sweep ($N=500$, $n_\lambda =29$, $T=100$, seed=42, float64).}}{22}{table.8}\protected@file@percent }
-\newlabel{tab:kitagawa_ksweep}{{8}{22}{LEDH Bimodal look-ahead depth sweep ($N=500$, $n_\lambda =29$, $T=100$, seed=42, float64)}{table.8}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}PMCMC: gradient-free baseline}{22}{subsection.3.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {8}{\ignorespaces LEDH Bimodal look-ahead depth sweep ($N=500$, $n_\lambda =29$, $T=100$, seed=42, float64).}}{27}{table.8}\protected@file@percent }
+\newlabel{tab:kitagawa_ksweep}{{8}{27}{LEDH Bimodal look-ahead depth sweep ($N=500$, $n_\lambda =29$, $T=100$, seed=42, float64)}{table.8}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}PMCMC: gradient-free baseline}{27}{subsection.3.2}\protected@file@percent }
 \citation{Andrieu2010}
 \citation{Lindsten2014}
 \citation{Lindsten2014}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}SGD-based parameter estimation}{23}{subsection.3.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}SGD-based parameter estimation}{28}{subsection.3.3}\protected@file@percent }
 \citation{karkus2018particle}
 \citation{corenflos-differentiable-2021}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}The differentiability-bias trade-off}{24}{subsection.3.4}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {9}{\ignorespaces Resampling strategies for differentiable particle filters.}}{24}{table.9}\protected@file@percent }
-\newlabel{tab:resampling_grad}{{9}{24}{Resampling strategies for differentiable particle filters}{table.9}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.5}Workflow and current status of DPF pipeline}{25}{subsection.3.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}The differentiability-bias trade-off}{29}{subsection.3.4}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {9}{\ignorespaces Resampling strategies for differentiable particle filters.}}{29}{table.9}\protected@file@percent }
+\newlabel{tab:resampling_grad}{{9}{29}{Resampling strategies for differentiable particle filters}{table.9}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {12}{\ignorespaces HMC step size evolution on the cubic sensor model for three resampling methods. Systematic and soft resampling exhibit step size collapse due to the \texttt  {tf.cond} threshold discontinuity, while OT Sinkhorn maintains a stable step size.}}{30}{figure.12}\protected@file@percent }
+\newlabel{fig:stepsize_resampling}{{12}{30}{HMC step size evolution on the cubic sensor model for three resampling methods. Systematic and soft resampling exhibit step size collapse due to the \texttt {tf.cond} threshold discontinuity, while OT Sinkhorn maintains a stable step size}{figure.12}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.5}Workflow and current status of DPF pipeline}{30}{subsection.3.5}\protected@file@percent }
 \citation{Neal-2012-MCMC-Hamiltonian-Dynamics-ARXIV-1206-1901v1}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.6}Additional notes and practical considerations}{26}{subsection.3.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {A}Kalman Family}{27}{appendix.A}\protected@file@percent }
-\newlabel{APP:Kalman}{{A}{27}{Kalman Family}{appendix.A}{}}
-\newlabel{eq:general-kalman-gain}{{70}{29}{Kalman Family}{equation.70}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.6}Additional notes and practical considerations}{31}{subsection.3.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {A}Kalman Family}{33}{appendix.A}\protected@file@percent }
+\newlabel{APP:Kalman}{{A}{33}{Kalman Family}{appendix.A}{}}
+\newlabel{eq:general-kalman-gain}{{70}{35}{Kalman Family}{equation.70}{}}
 \citation{daum2010exact}
 \citation{daum2011particle}
-\@writefile{toc}{\contentsline {section}{\numberline {B}Particle flow and particle filter}{31}{appendix.B}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {B.1}Particle flow}{31}{subsection.B.1}\protected@file@percent }
-\newlabel{APP:Particle_flow}{{B.1}{31}{Particle flow}{subsection.B.1}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {B.2}Particle flow filter (kernel method)}{33}{subsection.B.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {B.2.1}Optimal Transport via Gradient Flow}{33}{subsubsection.B.2.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {B.2.2}Deriving Optimal Velocity via Kernel Restriction}{33}{subsubsection.B.2.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {B.2.3}Scalar Kernel}{34}{subsubsection.B.2.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {B.2.4}Matrix-Valued Kernel}{35}{subsubsection.B.2.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {B}Particle flow and particle filter}{37}{appendix.B}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {B.1}Particle flow}{37}{subsection.B.1}\protected@file@percent }
+\newlabel{APP:Particle_flow}{{B.1}{37}{Particle flow}{subsection.B.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {B.2}Particle flow filter (kernel method)}{39}{subsection.B.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {B.2.1}Optimal Transport via Gradient Flow}{39}{subsubsection.B.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {B.2.2}Deriving Optimal Velocity via Kernel Restriction}{39}{subsubsection.B.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {B.2.3}Scalar Kernel}{40}{subsubsection.B.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {B.2.4}Matrix-Valued Kernel}{41}{subsubsection.B.2.4}\protected@file@percent }
 \bibstyle{unsrt}
 \bibdata{main}
 \bibcite{feng2025semiparametric}{1}
@@ -152,4 +172,4 @@
 \bibcite{Duane1987}{30}
 \bibcite{Lindsten2014}{31}
 \bibcite{karkus2018particle}{32}
-\gdef \@abspage@last{37}
+\gdef \@abspage@last{43}

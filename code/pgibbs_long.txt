@@ -1,0 +1,26 @@
+=== Running 2 LEDH CSMC PGibbs experiments (~8h) ===
+
+========================================
+[1/2] pgibbs/kitagawa_ledh_csmc_mh (250 burn-in + 470 samples, ~2h)
+========================================
+Creating true model: src.models.kitagawa.KitagawaModel
+Generating 100 time steps with true params: {'sigma_V': 3.162, 'sigma_W': 1.0}
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1771687182.491961 2115822 gpu_device.cc:2020] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 22322 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3090, pci bus id: 0000:01:00.0, compute capability: 8.6
+Creating inference model
+Trainable params: ['sigma_V', 'sigma_W']
+
+Running PGIBBS inference...
+PGibbs + MH: 250 burn-in + 470 sampling = 720 total iterations
+  MH: 1 steps/iter, proposal_std=0.1
+Initializing trajectory...
+  Initial trajectory shape: (101, 1)
+I0000 00:00:1771687186.687269 2115822 cuda_solvers.cc:175] Creating GpuSolver handles for stream 0x35c48510
+  [burn-in 1/250] 14.1s | theta_accept=100% | proposal_std=0.1000 | sigma_V=2.0326, sigma_W=1.9048 | ETA 10122s
+  [burn-in 2/250] 10.1s | theta_accept=50% | proposal_std=0.1000 | sigma_V=2.0326, sigma_W=1.9048 | ETA 8685s
+  [burn-in 3/250] 10.1s | theta_accept=33% | proposal_std=0.1000 | sigma_V=2.0326, sigma_W=1.9048 | ETA 8190s
+  [burn-in 4/250] 10.1s | theta_accept=25% | proposal_std=0.1000 | sigma_V=2.0326, sigma_W=1.9048 | ETA 7947s
+  [burn-in 5/250] 10.2s | theta_accept=40% | proposal_std=0.1000 | sigma_V=2.2492, sigma_W=1.7992 | ETA 7811s
+  [burn-in 6/250] 10.2s | theta_accept=50% | proposal_std=0.1000 | sigma_V=2.3652, sigma_W=1.7471 | ETA 7713s
+  [burn-in 7/250] 10.2s | theta_accept=43% | proposal_std=0.1000 | sigma_V=2.3652, sigma_W=1.7471 | ETA 7636s
+  [burn-in 8/250] 10.2s | theta_accept=50% | proposal_std=0.1000 | sigma_V=2.4131, sigma_W=1.7609 | ETA 7581s

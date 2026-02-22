@@ -1,0 +1,529 @@
+=== Running 6 systematic resampling experiments ===
+
+========================================
+[1/6] hmc/range_bearing/ledh_sys
+========================================
+Creating true model: src.models.range_bearing.RangeBearingModel
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1771587717.247437 1803624 gpu_device.cc:2020] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 22322 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3090, pci bus id: 0000:01:00.0, compute capability: 8.6
+Generating 50 time steps with true params: {'sigma_range': 0.1, 'sigma_bearing': 0.1}
+I0000 00:00:1771587717.471898 1803737 cuda_solvers.cc:175] Creating GpuSolver handles for stream 0x2381e000
+Creating inference model
+Trainable params: ['sigma_range', 'sigma_bearing']
+
+Running HMC inference...
+Using HMC sampler (num_leapfrog_steps=5)
+Running HMC: 15 burn-in + 10 sampling = 25 total steps
+  [grad check] lp=5.4610, |grad|=59.343520142291744, grad=[-41.8553661 -42.0687736]
+  [burn-in 1/15] 37.9s | accept=100% | step_size=0.0101 | sigma_range=0.2997, sigma_bearing=0.3006 | ETA 910s
+  [burn-in 2/15] 38.1s | accept=50% | step_size=0.0051 | sigma_range=0.2997, sigma_bearing=0.3006 | ETA 874s
+  [burn-in 3/15] 37.8s | accept=67% | step_size=0.0061 | sigma_range=0.2996, sigma_bearing=0.2938 | ETA 835s
+  [burn-in 4/15] 37.8s | accept=75% | step_size=0.0024 | sigma_range=0.2838, sigma_bearing=0.2726 | ETA 796s
+  [burn-in 5/15] 37.9s | accept=80% | step_size=0.0031 | sigma_range=0.2826, sigma_bearing=0.2741 | ETA 758s
+  [burn-in 6/15] 37.9s | accept=83% | step_size=0.0027 | sigma_range=0.2834, sigma_bearing=0.2777 | ETA 720s
+  [burn-in 7/15] 37.9s | accept=86% | step_size=0.0020 | sigma_range=0.2862, sigma_bearing=0.2769 | ETA 682s
+  [burn-in 8/15] 38.0s | accept=88% | step_size=0.0027 | sigma_range=0.2849, sigma_bearing=0.2741 | ETA 645s
+  [burn-in 9/15] 38.2s | accept=89% | step_size=0.0037 | sigma_range=0.2781, sigma_bearing=0.2690 | ETA 607s
+  [burn-in 10/15] 38.0s | accept=90% | step_size=0.0027 | sigma_range=0.2775, sigma_bearing=0.2735 | ETA 569s
+  [burn-in 11/15] 37.9s | accept=91% | step_size=0.0038 | sigma_range=0.2794, sigma_bearing=0.2730 | ETA 531s
+  [burn-in 12/15] 38.1s | accept=92% | step_size=0.0035 | sigma_range=0.2702, sigma_bearing=0.2729 | ETA 493s
+  [burn-in 13/15] 37.9s | accept=92% | step_size=0.0035 | sigma_range=0.2677, sigma_bearing=0.2754 | ETA 455s
+  [burn-in 14/15] 38.0s | accept=93% | step_size=0.0035 | sigma_range=0.2625, sigma_bearing=0.2767 | ETA 418s
+  [burn-in 15/15] 37.9s | accept=93% | step_size=0.0035 | sigma_range=0.2632, sigma_bearing=0.2816 | ETA 380s
+  [sample 1/10] 38.2s | accept=88% | step_size=0.0035 | sigma_range=0.2632, sigma_bearing=0.2816 | ETA 342s
+  [sample 2/10] 37.9s | accept=88% | step_size=0.0035 | sigma_range=0.2599, sigma_bearing=0.2762 | ETA 304s
+  [sample 3/10] 38.0s | accept=89% | step_size=0.0035 | sigma_range=0.2587, sigma_bearing=0.2830 | ETA 266s
+  [sample 4/10] 38.0s | accept=89% | step_size=0.0035 | sigma_range=0.2552, sigma_bearing=0.2727 | ETA 228s
+  [sample 5/10] 38.1s | accept=90% | step_size=0.0035 | sigma_range=0.2493, sigma_bearing=0.2751 | ETA 190s
+  [sample 6/10] 38.0s | accept=90% | step_size=0.0035 | sigma_range=0.2463, sigma_bearing=0.2660 | ETA 152s
+  [sample 7/10] 38.0s | accept=91% | step_size=0.0035 | sigma_range=0.2400, sigma_bearing=0.2640 | ETA 114s
+  [sample 8/10] 38.3s | accept=91% | step_size=0.0035 | sigma_range=0.2403, sigma_bearing=0.2650 | ETA 76s
+  [sample 9/10] 38.0s | accept=92% | step_size=0.0035 | sigma_range=0.2399, sigma_bearing=0.2674 | ETA 38s
+  [sample 10/10] 38.1s | accept=92% | step_size=0.0035 | sigma_range=0.2374, sigma_bearing=0.2625 | ETA 0s
+HMC complete!
+
+============================================================
+DPF INFERENCE RESULTS
+============================================================
+
+  sigma_range:
+    True:           0.1
+    Posterior mean:  0.2490 +/- 0.0091
+    90% CI:         [0.2386, 0.2617]
+    True in 90% CI: NO
+
+  sigma_bearing:
+    True:           0.1
+    Posterior mean:  0.2714 +/- 0.0070
+    90% CI:         [0.2632, 0.2824]
+    True in 90% CI: NO
+
+Diagnostics:
+  Acceptance rate: 90.0%
+  Final step size: 0.003465
+  ESS: {'sigma_range': nan, 'sigma_bearing': nan}
+  R-hat: {'sigma_range': 0.6461043794940955, 'sigma_bearing': 0.5763096462423034}
+
+Performance:
+  Wall time: 1035.9 seconds
+  Peak memory: 95.5 MB
+============================================================
+
+Results saved to /home/haowu/JPML/code/outputs/dpf/hmc/range_bearing/ledh_sys
+
+========================================
+[2/6] hmc/range_bearing/ledh_soft
+========================================
+Creating true model: src.models.range_bearing.RangeBearingModel
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1771588759.716468 1808317 gpu_device.cc:2020] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 22322 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3090, pci bus id: 0000:01:00.0, compute capability: 8.6
+Generating 50 time steps with true params: {'sigma_range': 0.1, 'sigma_bearing': 0.1}
+I0000 00:00:1771588759.922246 1808412 cuda_solvers.cc:175] Creating GpuSolver handles for stream 0x32bc3d20
+Creating inference model
+Trainable params: ['sigma_range', 'sigma_bearing']
+
+Running HMC inference...
+Using HMC sampler (num_leapfrog_steps=5)
+Running HMC: 15 burn-in + 10 sampling = 25 total steps
+  [grad check] lp=5.2606, |grad|=58.44951325279714, grad=[-41.28835577 -41.37169658]
+  [burn-in 1/15] 38.3s | accept=100% | step_size=0.0120 | sigma_range=0.2997, sigma_bearing=0.3006 | ETA 920s
+  [burn-in 2/15] 38.6s | accept=100% | step_size=0.0150 | sigma_range=0.3117, sigma_bearing=0.2559 | ETA 885s
+  [burn-in 3/15] 38.3s | accept=100% | step_size=0.0207 | sigma_range=0.2912, sigma_bearing=0.2233 | ETA 845s
+  [burn-in 4/15] 38.4s | accept=100% | step_size=0.0290 | sigma_range=0.2105, sigma_bearing=0.1488 | ETA 807s
+  [burn-in 5/15] 38.4s | accept=100% | step_size=0.0409 | sigma_range=0.1394, sigma_bearing=0.1108 | ETA 769s
+  [burn-in 6/15] 38.5s | accept=100% | step_size=0.0307 | sigma_range=0.0708, sigma_bearing=0.0635 | ETA 730s
+  [burn-in 7/15] 38.4s | accept=100% | step_size=0.0427 | sigma_range=0.0521, sigma_bearing=0.0403 | ETA 692s
+  [burn-in 8/15] 38.4s | accept=100% | step_size=0.0592 | sigma_range=0.0191, sigma_bearing=0.0147 | ETA 653s
+  [burn-in 9/15] 38.8s | accept=100% | step_size=0.0141 | sigma_range=0.0049, sigma_bearing=0.0076 | ETA 616s
+  [burn-in 10/15] 38.4s | accept=100% | step_size=0.0194 | sigma_range=0.0054, sigma_bearing=0.0089 | ETA 577s
+  [burn-in 11/15] 38.4s | accept=100% | step_size=0.0266 | sigma_range=0.0067, sigma_bearing=0.0097 | ETA 539s
+  [burn-in 12/15] 38.4s | accept=100% | step_size=0.0281 | sigma_range=0.0063, sigma_bearing=0.0109 | ETA 500s
+  [burn-in 13/15] 38.4s | accept=100% | step_size=0.0281 | sigma_range=0.0072, sigma_bearing=0.0125 | ETA 462s
+  [burn-in 14/15] 38.5s | accept=100% | step_size=0.0281 | sigma_range=0.0071, sigma_bearing=0.0130 | ETA 423s
+  [burn-in 15/15] 38.5s | accept=100% | step_size=0.0281 | sigma_range=0.0082, sigma_bearing=0.0146 | ETA 385s
+  [sample 1/10] 38.8s | accept=100% | step_size=0.0281 | sigma_range=0.0081, sigma_bearing=0.0155 | ETA 347s
+  [sample 2/10] 38.5s | accept=100% | step_size=0.0281 | sigma_range=0.0078, sigma_bearing=0.0121 | ETA 308s
+  [sample 3/10] 38.4s | accept=100% | step_size=0.0281 | sigma_range=0.0082, sigma_bearing=0.0148 | ETA 270s
+  [sample 4/10] 38.4s | accept=100% | step_size=0.0281 | sigma_range=0.0078, sigma_bearing=0.0102 | ETA 231s
+  [sample 5/10] 38.5s | accept=100% | step_size=0.0281 | sigma_range=0.0072, sigma_bearing=0.0119 | ETA 192s
+  [sample 6/10] 38.4s | accept=100% | step_size=0.0281 | sigma_range=0.0075, sigma_bearing=0.0094 | ETA 154s
+  [sample 7/10] 38.4s | accept=100% | step_size=0.0281 | sigma_range=0.0070, sigma_bearing=0.0102 | ETA 115s
+  [sample 8/10] 38.7s | accept=100% | step_size=0.0281 | sigma_range=0.0082, sigma_bearing=0.0115 | ETA 77s
+  [sample 9/10] 38.3s | accept=100% | step_size=0.0281 | sigma_range=0.0086, sigma_bearing=0.0126 | ETA 38s
+  [sample 10/10] 38.4s | accept=100% | step_size=0.0281 | sigma_range=0.0083, sigma_bearing=0.0108 | ETA 0s
+HMC complete!
+
+============================================================
+DPF INFERENCE RESULTS
+============================================================
+
+  sigma_range:
+    True:           0.1
+    Posterior mean:  0.0078 +/- 0.0005
+    90% CI:         [0.0070, 0.0085]
+    True in 90% CI: NO
+
+  sigma_bearing:
+    True:           0.1
+    Posterior mean:  0.0119 +/- 0.0019
+    90% CI:         [0.0097, 0.0152]
+    True in 90% CI: NO
+
+Diagnostics:
+  Acceptance rate: 100.0%
+  Final step size: 0.028066
+  ESS: {'sigma_range': nan, 'sigma_bearing': nan}
+  R-hat: {'sigma_range': 1.0152543961534841, 'sigma_bearing': 0.6514786421811735}
+
+Performance:
+  Wall time: 1051.0 seconds
+  Peak memory: 96.5 MB
+============================================================
+
+Results saved to /home/haowu/JPML/code/outputs/dpf/hmc/range_bearing/ledh_soft
+
+========================================
+[3/6] hmc/range_bearing/ledh_ot
+========================================
+Creating true model: src.models.range_bearing.RangeBearingModel
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1771589817.162535 1813094 gpu_device.cc:2020] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 22322 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3090, pci bus id: 0000:01:00.0, compute capability: 8.6
+Generating 50 time steps with true params: {'sigma_range': 0.1, 'sigma_bearing': 0.1}
+I0000 00:00:1771589817.364785 1813189 cuda_solvers.cc:175] Creating GpuSolver handles for stream 0x189ce200
+Creating inference model
+Trainable params: ['sigma_range', 'sigma_bearing']
+
+Running HMC inference...
+Using HMC sampler (num_leapfrog_steps=5)
+Running HMC: 15 burn-in + 10 sampling = 25 total steps
+  [grad check] lp=-45.1172, |grad|=448346131.4477235, grad=[-1.90528191e+08  4.05848817e+08]
+  [burn-in 1/15] 39.3s | accept=0% | step_size=0.0019 | sigma_range=0.3000, sigma_bearing=0.3000 | ETA 942s
+  [burn-in 2/15] 38.2s | accept=0% | step_size=0.0001 | sigma_range=0.3000, sigma_bearing=0.3000 | ETA 891s
+W0000 00:00:1771589997.110931 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589997.141680 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589997.162825 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589997.191883 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589997.230734 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589997.248816 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589997.289434 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589997.318934 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589997.348123 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589997.370936 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589997.397131 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589997.435618 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589997.451744 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589997.482771 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589997.523993 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589997.552931 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589997.582619 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589997.611994 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589997.641118 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589997.670058 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589997.699431 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589997.728802 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589997.748625 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589997.787935 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589997.814124 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589997.848305 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589997.870300 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589997.906985 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589997.936428 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589997.965806 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589997.995182 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589998.024182 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589998.047032 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589998.082554 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589998.102387 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589998.140993 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589998.170993 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589998.200295 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589998.215433 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589998.258368 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589998.281062 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589998.316804 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589998.346045 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589998.375741 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589998.404867 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589998.434305 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589998.452832 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589998.482944 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589998.521869 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589998.551434 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589998.639435 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589998.678934 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589998.718808 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589998.758435 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589998.797501 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589998.835869 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589998.874059 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589998.911998 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589998.951308 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589998.990185 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589999.029125 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589999.068375 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589999.107619 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589999.147061 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589999.186500 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589999.225247 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589999.264187 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589999.303440 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589999.342120 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589999.381488 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589999.419185 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589999.457311 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589999.496249 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589999.534748 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589999.574061 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589999.613187 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589999.652059 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589999.690997 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589999.731059 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589999.769871 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589999.808310 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589999.847872 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589999.888745 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589999.928246 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771589999.967121 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771590000.006434 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771590000.046122 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771590000.084999 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771590000.124246 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771590000.162747 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771590000.201318 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771590000.240121 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771590000.278119 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771590000.316995 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771590000.355624 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771590000.395186 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771590000.434059 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771590000.472872 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771590000.511374 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+W0000 00:00:1771590000.550122 1813169 cholesky_op_gpu.cu.cc:205] Cholesky decomposition was not successful for batch 0. The input might not be valid. Filling lower-triangular output with NaNs.
+  [burn-in 3/15] 38.7s | accept=0% | step_size=0.0000 | sigma_range=0.3000, sigma_bearing=0.3000 | ETA 852s
+  [burn-in 4/15] 41.2s | accept=0% | step_size=0.0000 | sigma_range=0.3000, sigma_bearing=0.3000 | ETA 826s
+  [burn-in 5/15] 42.9s | accept=0% | step_size=0.0000 | sigma_range=0.3000, sigma_bearing=0.3000 | ETA 801s
+  [burn-in 6/15] 43.3s | accept=0% | step_size=0.0000 | sigma_range=0.3000, sigma_bearing=0.3000 | ETA 772s
+  [burn-in 7/15] 43.0s | accept=14% | step_size=0.0000 | sigma_range=0.3000, sigma_bearing=0.3000 | ETA 737s
+  [burn-in 8/15] 43.1s | accept=25% | step_size=0.0000 | sigma_range=0.3000, sigma_bearing=0.3000 | ETA 701s
+  [burn-in 9/15] 42.9s | accept=22% | step_size=0.0000 | sigma_range=0.3000, sigma_bearing=0.3000 | ETA 663s
+  [burn-in 10/15] 43.0s | accept=30% | step_size=0.0000 | sigma_range=0.3000, sigma_bearing=0.3000 | ETA 624s
+  [burn-in 11/15] 43.1s | accept=27% | step_size=0.0000 | sigma_range=0.3000, sigma_bearing=0.3000 | ETA 587s
+  [burn-in 12/15] 43.1s | accept=33% | step_size=0.0000 | sigma_range=0.3000, sigma_bearing=0.3000 | ETA 552s
+  [burn-in 13/15] 43.4s | accept=31% | step_size=0.0000 | sigma_range=0.3000, sigma_bearing=0.3000 | ETA 515s
+  [burn-in 14/15] 43.0s | accept=36% | step_size=0.0000 | sigma_range=0.3000, sigma_bearing=0.3000 | ETA 474s
+  [burn-in 15/15] 42.8s | accept=40% | step_size=0.0000 | sigma_range=0.3000, sigma_bearing=0.3000 | ETA 431s
+  [sample 1/10] 43.0s | accept=38% | step_size=0.0000 | sigma_range=0.3000, sigma_bearing=0.3000 | ETA 387s
+  [sample 2/10] 43.0s | accept=41% | step_size=0.0000 | sigma_range=0.3000, sigma_bearing=0.3000 | ETA 344s
+  [sample 3/10] 43.0s | accept=39% | step_size=0.0000 | sigma_range=0.3000, sigma_bearing=0.3000 | ETA 301s
+  [sample 4/10] 42.9s | accept=42% | step_size=0.0000 | sigma_range=0.3000, sigma_bearing=0.3000 | ETA 258s
+  [sample 5/10] 43.3s | accept=40% | step_size=0.0000 | sigma_range=0.3000, sigma_bearing=0.3000 | ETA 215s
+  [sample 6/10] 42.9s | accept=43% | step_size=0.0000 | sigma_range=0.3000, sigma_bearing=0.3000 | ETA 172s
+  [sample 7/10] 42.8s | accept=45% | step_size=0.0000 | sigma_range=0.3000, sigma_bearing=0.3000 | ETA 129s
+  [sample 8/10] 42.8s | accept=48% | step_size=0.0000 | sigma_range=0.3000, sigma_bearing=0.3000 | ETA 86s
+  [sample 9/10] 42.9s | accept=46% | step_size=0.0000 | sigma_range=0.3000, sigma_bearing=0.3000 | ETA 43s
+  [sample 10/10] 43.0s | accept=48% | step_size=0.0000 | sigma_range=0.3000, sigma_bearing=0.3000 | ETA 0s
+HMC complete!
+
+============================================================
+DPF INFERENCE RESULTS
+============================================================
+
+  sigma_range:
+    True:           0.1
+    Posterior mean:  0.3000 +/- 0.0000
+    90% CI:         [0.3000, 0.3000]
+    True in 90% CI: NO
+
+  sigma_bearing:
+    True:           0.1
+    Posterior mean:  0.3000 +/- 0.0000
+    90% CI:         [0.3000, 0.3000]
+    True in 90% CI: NO
+
+Diagnostics:
+  Acceptance rate: 60.0%
+  Final step size: 0.000000
+  ESS: {'sigma_range': nan, 'sigma_bearing': nan}
+  R-hat: {'sigma_range': 0.7422299630025052, 'sigma_bearing': 0.6210460927150749}
+
+Performance:
+  Wall time: 1153.3 seconds
+  Peak memory: 98.5 MB
+============================================================
+
+Results saved to /home/haowu/JPML/code/outputs/dpf/hmc/range_bearing/ledh_ot
+
+========================================
+[4/6] hmc/range_bearing/bpf_sys
+========================================
+Creating true model: src.models.range_bearing.RangeBearingModel
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1771590977.179571 1818242 gpu_device.cc:2020] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 22322 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3090, pci bus id: 0000:01:00.0, compute capability: 8.6
+Generating 50 time steps with true params: {'sigma_range': 0.1, 'sigma_bearing': 0.1}
+I0000 00:00:1771590977.384507 1818338 cuda_solvers.cc:175] Creating GpuSolver handles for stream 0xa057140
+Creating inference model
+Trainable params: ['sigma_range', 'sigma_bearing']
+
+Running HMC inference...
+Using HMC sampler (num_leapfrog_steps=5)
+Running HMC: 15 burn-in + 10 sampling = 25 total steps
+  [grad check] lp=-16.4975, |grad|=37.3961323509095, grad=[-27.96198347 -24.83139535]
+  [burn-in 1/15] 25.9s | accept=100% | step_size=0.0120 | sigma_range=0.2998, sigma_bearing=0.3006 | ETA 623s
+  [burn-in 2/15] 25.8s | accept=50% | step_size=0.0036 | sigma_range=0.2998, sigma_bearing=0.3006 | ETA 595s
+  [burn-in 3/15] 25.9s | accept=67% | step_size=0.0042 | sigma_range=0.3010, sigma_bearing=0.2972 | ETA 569s
+  [burn-in 4/15] 25.9s | accept=75% | step_size=0.0052 | sigma_range=0.2918, sigma_bearing=0.2843 | ETA 544s
+  [burn-in 5/15] 26.0s | accept=60% | step_size=0.0019 | sigma_range=0.2918, sigma_bearing=0.2843 | ETA 518s
+  [burn-in 6/15] 25.9s | accept=67% | step_size=0.0011 | sigma_range=0.2928, sigma_bearing=0.2871 | ETA 492s
+  [burn-in 7/15] 25.9s | accept=71% | step_size=0.0006 | sigma_range=0.2942, sigma_bearing=0.2870 | ETA 467s
+  [burn-in 8/15] 26.1s | accept=75% | step_size=0.0008 | sigma_range=0.2940, sigma_bearing=0.2863 | ETA 441s
+  [burn-in 9/15] 25.9s | accept=78% | step_size=0.0010 | sigma_range=0.2922, sigma_bearing=0.2851 | ETA 415s
+  [burn-in 10/15] 26.0s | accept=80% | step_size=0.0012 | sigma_range=0.2925, sigma_bearing=0.2868 | ETA 389s
+  [burn-in 11/15] 25.9s | accept=73% | step_size=0.0007 | sigma_range=0.2925, sigma_bearing=0.2868 | ETA 363s
+  [burn-in 12/15] 25.8s | accept=75% | step_size=0.0012 | sigma_range=0.2909, sigma_bearing=0.2871 | ETA 337s
+  [burn-in 13/15] 25.9s | accept=77% | step_size=0.0012 | sigma_range=0.2904, sigma_bearing=0.2885 | ETA 311s
+  [burn-in 14/15] 26.1s | accept=79% | step_size=0.0012 | sigma_range=0.2888, sigma_bearing=0.2894 | ETA 286s
+  [burn-in 15/15] 26.0s | accept=80% | step_size=0.0012 | sigma_range=0.2895, sigma_bearing=0.2917 | ETA 260s
+  [sample 1/10] 25.8s | accept=75% | step_size=0.0012 | sigma_range=0.2895, sigma_bearing=0.2917 | ETA 234s
+  [sample 2/10] 26.1s | accept=76% | step_size=0.0012 | sigma_range=0.2887, sigma_bearing=0.2901 | ETA 208s
+  [sample 3/10] 26.0s | accept=78% | step_size=0.0012 | sigma_range=0.2886, sigma_bearing=0.2931 | ETA 182s
+  [sample 4/10] 25.9s | accept=79% | step_size=0.0012 | sigma_range=0.2877, sigma_bearing=0.2897 | ETA 156s
+  [sample 5/10] 25.9s | accept=80% | step_size=0.0012 | sigma_range=0.2858, sigma_bearing=0.2911 | ETA 130s
+  [sample 6/10] 26.0s | accept=81% | step_size=0.0012 | sigma_range=0.2850, sigma_bearing=0.2881 | ETA 104s
+  [sample 7/10] 26.0s | accept=82% | step_size=0.0012 | sigma_range=0.2829, sigma_bearing=0.2878 | ETA 78s
+  [sample 8/10] 25.8s | accept=83% | step_size=0.0012 | sigma_range=0.2834, sigma_bearing=0.2887 | ETA 52s
+  [sample 9/10] 26.0s | accept=83% | step_size=0.0012 | sigma_range=0.2837, sigma_bearing=0.2900 | ETA 26s
+  [sample 10/10] 26.1s | accept=84% | step_size=0.0012 | sigma_range=0.2831, sigma_bearing=0.2886 | ETA 0s
+HMC complete!
+
+============================================================
+DPF INFERENCE RESULTS
+============================================================
+
+  sigma_range:
+    True:           0.1
+    Posterior mean:  0.2858 +/- 0.0024
+    90% CI:         [0.2830, 0.2891]
+    True in 90% CI: NO
+
+  sigma_bearing:
+    True:           0.1
+    Posterior mean:  0.2899 +/- 0.0016
+    90% CI:         [0.2880, 0.2924]
+    True in 90% CI: NO
+
+Diagnostics:
+  Acceptance rate: 90.0%
+  Final step size: 0.001221
+  ESS: {'sigma_range': nan, 'sigma_bearing': nan}
+  R-hat: {'sigma_range': 0.6163725840064613, 'sigma_bearing': 0.6230412232832488}
+
+Performance:
+  Wall time: 703.9 seconds
+  Peak memory: 58.7 MB
+============================================================
+
+Results saved to /home/haowu/JPML/code/outputs/dpf/hmc/range_bearing/bpf_sys
+
+========================================
+[5/6] hmc/range_bearing/bpf_soft
+========================================
+Creating true model: src.models.range_bearing.RangeBearingModel
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1771591686.581283 1821753 gpu_device.cc:2020] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 22322 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3090, pci bus id: 0000:01:00.0, compute capability: 8.6
+Generating 50 time steps with true params: {'sigma_range': 0.1, 'sigma_bearing': 0.1}
+I0000 00:00:1771591686.786228 1821850 cuda_solvers.cc:175] Creating GpuSolver handles for stream 0x29372c30
+Creating inference model
+Trainable params: ['sigma_range', 'sigma_bearing']
+
+Running HMC inference...
+Using HMC sampler (num_leapfrog_steps=5)
+Running HMC: 15 burn-in + 10 sampling = 25 total steps
+  [grad check] lp=-16.3804, |grad|=39.05989077389956, grad=[-28.83924222 -26.34337062]
+  [burn-in 1/15] 26.1s | accept=0% | step_size=0.0053 | sigma_range=0.3000, sigma_bearing=0.3000 | ETA 625s
+  [burn-in 2/15] 26.0s | accept=0% | step_size=0.0022 | sigma_range=0.3000, sigma_bearing=0.3000 | ETA 599s
+  [burn-in 3/15] 26.1s | accept=33% | step_size=0.0008 | sigma_range=0.3010, sigma_bearing=0.2982 | ETA 573s
+  [burn-in 4/15] 26.0s | accept=50% | step_size=0.0009 | sigma_range=0.2994, sigma_bearing=0.2958 | ETA 547s
+  [burn-in 5/15] 26.1s | accept=60% | step_size=0.0011 | sigma_range=0.2992, sigma_bearing=0.2966 | ETA 521s
+  [burn-in 6/15] 26.2s | accept=67% | step_size=0.0014 | sigma_range=0.2998, sigma_bearing=0.2983 | ETA 495s
+  [burn-in 7/15] 26.0s | accept=71% | step_size=0.0006 | sigma_range=0.3016, sigma_bearing=0.2982 | ETA 469s
+  [burn-in 8/15] 26.1s | accept=75% | step_size=0.0006 | sigma_range=0.3014, sigma_bearing=0.2975 | ETA 443s
+  [burn-in 9/15] 26.0s | accept=78% | step_size=0.0007 | sigma_range=0.3001, sigma_bearing=0.2966 | ETA 417s
+  [burn-in 10/15] 26.1s | accept=80% | step_size=0.0006 | sigma_range=0.3003, sigma_bearing=0.2978 | ETA 391s
+  [burn-in 11/15] 26.1s | accept=82% | step_size=0.0009 | sigma_range=0.3010, sigma_bearing=0.2979 | ETA 365s
+  [burn-in 12/15] 25.9s | accept=83% | step_size=0.0009 | sigma_range=0.2990, sigma_bearing=0.2983 | ETA 339s
+  [burn-in 13/15] 26.1s | accept=85% | step_size=0.0009 | sigma_range=0.2987, sigma_bearing=0.2993 | ETA 313s
+  [burn-in 14/15] 26.1s | accept=86% | step_size=0.0009 | sigma_range=0.2975, sigma_bearing=0.3000 | ETA 287s
+  [burn-in 15/15] 26.0s | accept=87% | step_size=0.0009 | sigma_range=0.2981, sigma_bearing=0.3017 | ETA 261s
+  [sample 1/10] 26.0s | accept=81% | step_size=0.0009 | sigma_range=0.2981, sigma_bearing=0.3017 | ETA 234s
+  [sample 2/10] 26.0s | accept=82% | step_size=0.0009 | sigma_range=0.2974, sigma_bearing=0.3006 | ETA 208s
+  [sample 3/10] 25.9s | accept=83% | step_size=0.0009 | sigma_range=0.2974, sigma_bearing=0.3028 | ETA 182s
+  [sample 4/10] 26.0s | accept=84% | step_size=0.0009 | sigma_range=0.2968, sigma_bearing=0.3003 | ETA 156s
+  [sample 5/10] 26.0s | accept=85% | step_size=0.0009 | sigma_range=0.2954, sigma_bearing=0.3014 | ETA 130s
+  [sample 6/10] 26.1s | accept=86% | step_size=0.0009 | sigma_range=0.2948, sigma_bearing=0.2992 | ETA 104s
+  [sample 7/10] 26.0s | accept=86% | step_size=0.0009 | sigma_range=0.2932, sigma_bearing=0.2990 | ETA 78s
+  [sample 8/10] 26.0s | accept=87% | step_size=0.0009 | sigma_range=0.2936, sigma_bearing=0.2996 | ETA 52s
+  [sample 9/10] 25.9s | accept=88% | step_size=0.0009 | sigma_range=0.2939, sigma_bearing=0.3006 | ETA 26s
+  [sample 10/10] 26.0s | accept=88% | step_size=0.0009 | sigma_range=0.2934, sigma_bearing=0.2996 | ETA 0s
+HMC complete!
+
+============================================================
+DPF INFERENCE RESULTS
+============================================================
+
+  sigma_range:
+    True:           0.1
+    Posterior mean:  0.2954 +/- 0.0018
+    90% CI:         [0.2933, 0.2978]
+    True in 90% CI: NO
+
+  sigma_bearing:
+    True:           0.1
+    Posterior mean:  0.3005 +/- 0.0012
+    90% CI:         [0.2991, 0.3023]
+    True in 90% CI: NO
+
+Diagnostics:
+  Acceptance rate: 90.0%
+  Final step size: 0.000892
+  ESS: {'sigma_range': nan, 'sigma_bearing': nan}
+  R-hat: {'sigma_range': 0.6140585179123292, 'sigma_bearing': 0.6352118178694077}
+
+Performance:
+  Wall time: 705.6 seconds
+  Peak memory: 59.4 MB
+============================================================
+
+Results saved to /home/haowu/JPML/code/outputs/dpf/hmc/range_bearing/bpf_soft
+
+========================================
+[6/6] hmc/range_bearing/bpf_ot
+========================================
+Creating true model: src.models.range_bearing.RangeBearingModel
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1771592397.667552 1825275 gpu_device.cc:2020] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 22322 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3090, pci bus id: 0000:01:00.0, compute capability: 8.6
+Generating 50 time steps with true params: {'sigma_range': 0.1, 'sigma_bearing': 0.1}
+I0000 00:00:1771592397.873334 1825369 cuda_solvers.cc:175] Creating GpuSolver handles for stream 0xf2c75b0
+Creating inference model
+Trainable params: ['sigma_range', 'sigma_bearing']
+
+Running HMC inference...
+Using HMC sampler (num_leapfrog_steps=5)
+Running HMC: 15 burn-in + 10 sampling = 25 total steps
+  [grad check] lp=-109.9891, |grad|=52610775.02034241, grad=[-24662243.31826394  46472221.84006087]
+  [burn-in 1/15] 26.7s | accept=0% | step_size=0.0019 | sigma_range=0.3000, sigma_bearing=0.3000 | ETA 641s
+  [burn-in 2/15] 26.7s | accept=0% | step_size=0.0001 | sigma_range=0.3000, sigma_bearing=0.3000 | ETA 614s
+  [burn-in 3/15] 33.1s | accept=0% | step_size=0.0000 | sigma_range=0.3000, sigma_bearing=0.3000 | ETA 634s
+  [burn-in 4/15] 31.8s | accept=0% | step_size=0.0000 | sigma_range=0.3000, sigma_bearing=0.3000 | ETA 621s
+  [burn-in 5/15] 31.6s | accept=0% | step_size=0.0000 | sigma_range=0.3000, sigma_bearing=0.3000 | ETA 600s
+  [burn-in 6/15] 31.6s | accept=0% | step_size=0.0000 | sigma_range=0.3000, sigma_bearing=0.3000 | ETA 575s
+  [burn-in 7/15] 31.6s | accept=14% | step_size=0.0000 | sigma_range=0.3000, sigma_bearing=0.3000 | ETA 548s
+  [burn-in 8/15] 31.8s | accept=25% | step_size=0.0000 | sigma_range=0.3000, sigma_bearing=0.3000 | ETA 520s
+  [burn-in 9/15] 31.7s | accept=33% | step_size=0.0000 | sigma_range=0.3000, sigma_bearing=0.3000 | ETA 492s
+  [burn-in 10/15] 31.6s | accept=40% | step_size=0.0000 | sigma_range=0.3000, sigma_bearing=0.3000 | ETA 462s
+  [burn-in 11/15] 31.7s | accept=45% | step_size=0.0000 | sigma_range=0.3000, sigma_bearing=0.3000 | ETA 439s
+  [burn-in 12/15] 31.7s | accept=50% | step_size=0.0000 | sigma_range=0.3000, sigma_bearing=0.3000 | ETA 414s
+  [burn-in 13/15] 31.9s | accept=46% | step_size=0.0000 | sigma_range=0.3000, sigma_bearing=0.3000 | ETA 380s
+  [burn-in 14/15] 31.8s | accept=50% | step_size=0.0000 | sigma_range=0.3000, sigma_bearing=0.3000 | ETA 349s
+  [burn-in 15/15] 32.0s | accept=53% | step_size=0.0000 | sigma_range=0.3000, sigma_bearing=0.3000 | ETA 317s
+  [sample 1/10] 31.7s | accept=50% | step_size=0.0000 | sigma_range=0.3000, sigma_bearing=0.3000 | ETA 286s
+  [sample 2/10] 31.8s | accept=53% | step_size=0.0000 | sigma_range=0.3000, sigma_bearing=0.3000 | ETA 254s
+  [sample 3/10] 31.9s | accept=56% | step_size=0.0000 | sigma_range=0.3000, sigma_bearing=0.3000 | ETA 222s
+  [sample 4/10] 31.7s | accept=58% | step_size=0.0000 | sigma_range=0.3000, sigma_bearing=0.3000 | ETA 191s
+  [sample 5/10] 31.8s | accept=60% | step_size=0.0000 | sigma_range=0.3000, sigma_bearing=0.3000 | ETA 159s
+  [sample 6/10] 31.8s | accept=62% | step_size=0.0000 | sigma_range=0.3000, sigma_bearing=0.3000 | ETA 127s
+  [sample 7/10] 31.8s | accept=64% | step_size=0.0000 | sigma_range=0.3000, sigma_bearing=0.3000 | ETA 95s
+  [sample 8/10] 31.8s | accept=65% | step_size=0.0000 | sigma_range=0.3000, sigma_bearing=0.3000 | ETA 64s
+  [sample 9/10] 31.8s | accept=62% | step_size=0.0000 | sigma_range=0.3000, sigma_bearing=0.3000 | ETA 32s
+  [sample 10/10] 31.8s | accept=64% | step_size=0.0000 | sigma_range=0.3000, sigma_bearing=0.3000 | ETA 0s
+HMC complete!
+
+============================================================
+DPF INFERENCE RESULTS
+============================================================
+
+  sigma_range:
+    True:           0.1
+    Posterior mean:  0.3000 +/- 0.0000
+    90% CI:         [0.3000, 0.3000]
+    True in 90% CI: NO
+
+  sigma_bearing:
+    True:           0.1
+    Posterior mean:  0.3000 +/- 0.0000
+    90% CI:         [0.3000, 0.3000]
+    True in 90% CI: NO
+
+Diagnostics:
+  Acceptance rate: 80.0%
+  Final step size: 0.000000
+  ESS: {'sigma_range': nan, 'sigma_bearing': nan}
+  R-hat: {'sigma_range': 0.6276614629585651, 'sigma_bearing': 1.2538771496740637}
+
+Performance:
+  Wall time: 845.3 seconds
+  Peak memory: 61.7 MB
+============================================================
+
+Results saved to /home/haowu/JPML/code/outputs/dpf/hmc/range_bearing/bpf_ot
+
+=== All 6 experiments complete ===

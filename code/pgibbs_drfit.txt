@@ -1,0 +1,46 @@
+=== Running 2 LEDH CSMC PGibbs experiments (~8h) ===
+
+========================================
+[1/2] pgibbs/kitagawa_ledh_csmc_mh (250 burn-in + 470 samples, ~2h)
+========================================
+Creating true model: src.models.kitagawa.KitagawaModel
+Generating 100 time steps with true params: {'sigma_V': 3.162, 'sigma_W': 1.0}
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1771686960.082345 2114049 gpu_device.cc:2020] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 22322 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3090, pci bus id: 0000:01:00.0, compute capability: 8.6
+Creating inference model
+Trainable params: ['sigma_V', 'sigma_W']
+
+Running PGIBBS inference...
+PGibbs + MH: 250 burn-in + 470 sampling = 720 total iterations
+  MH: 1 steps/iter, proposal_std=0.1
+Initializing trajectory...
+Error executing job with overrides: ['dpf=pgibbs/kitagawa_ledh_csmc_mh', 'dpf.pgibbs.num_burnin=250', 'dpf.pgibbs.num_samples=470']
+Traceback (most recent call last):
+  File "/home/haowu/JPML/code/src/experiments/run_dpf_experiment.py", line 340, in main
+    results = run_dpf_experiment(cfg)
+              ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/haowu/JPML/code/src/experiments/run_dpf_experiment.py", line 200, in run_dpf_experiment
+    result = runner.run_inference(
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/haowu/JPML/code/src/DF/pgibbs_runner.py", line 368, in run_inference
+    trajectory = self._initialize_trajectory(obs_tf, seed=seed)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/haowu/JPML/code/src/DF/pgibbs_runner.py", line 281, in _initialize_trajectory
+    result = init_filter.filter(
+             ^^^^^^^^^^^^^^^^^^^
+TypeError: ParticleFilterTF.filter() got an unexpected keyword argument 'random_seed'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+FAILED: pgibbs/kitagawa_ledh_csmc_mh
+
+========================================
+[2/2] pgibbs/kitagawa_ledh_csmc_hmc (70 burn-in + 146 samples, ~6h)
+========================================
+Creating true model: src.models.kitagawa.KitagawaModel
+Generating 100 time steps with true params: {'sigma_V': 3.162, 'sigma_W': 1.0}
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1771686964.798518 2114329 gpu_device.cc:2020] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 22322 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3090, pci bus id: 0000:01:00.0, compute capability: 8.6
+Creating inference model
+Trainable params: ['sigma_V', 'sigma_W']
+
+Running PGIBBS inference...

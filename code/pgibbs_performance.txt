@@ -1,0 +1,219 @@
+=== Running 4 PGibbs experiments (2 burn-in + 3 samples each) ===
+
+========================================
+[1/4] pgibbs/kitagawa_bpf_mh
+========================================
+Creating true model: src.models.kitagawa.KitagawaModel
+Generating 100 time steps with true params: {'sigma_V': 10.0, 'sigma_W': 1.0}
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1771671841.220319 2015419 gpu_device.cc:2020] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 22322 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3090, pci bus id: 0000:01:00.0, compute capability: 8.6
+Creating inference model
+Trainable params: ['sigma_V', 'sigma_W']
+
+Running PGIBBS inference...
+PGibbs + MH: 2 burn-in + 3 sampling = 5 total iterations
+  MH: 1 steps/iter, proposal_std=0.1
+Initializing trajectory...
+  Initial trajectory shape: (101, 1)
+I0000 00:00:1771671843.570521 2015419 cuda_solvers.cc:175] Creating GpuSolver handles for stream 0x18f83840
+  [burn-in 1/2] 4.9s | theta_accept=100% | proposal_std=0.1000 | sigma_V=4.8650, sigma_W=2.0584 | ETA 20s
+  [burn-in 2/2] 3.3s | theta_accept=100% | proposal_std=0.1000 | sigma_V=4.8938, sigma_W=2.0796 | ETA 12s
+  [sample 1/3] 3.3s | theta_accept=100% | proposal_std=0.1000 | sigma_V=4.8649, sigma_W=2.1920 | ETA 8s
+  [sample 2/3] 3.2s | theta_accept=100% | proposal_std=0.1000 | sigma_V=4.8455, sigma_W=2.2982 | ETA 4s
+  [sample 3/3] 3.2s | theta_accept=80% | proposal_std=0.1000 | sigma_V=4.8455, sigma_W=2.2982 | ETA 0s
+
+PGibbs + MH complete!
+  Theta acceptance: 66.7%
+
+============================================================
+DPF INFERENCE RESULTS
+============================================================
+
+  sigma_V:
+    True:           10.0
+    Posterior mean:  4.8520 +/- 0.0092
+    90% CI:         [4.8455, 4.8630]
+    True in 90% CI: NO
+
+  sigma_W:
+    True:           1.0
+    Posterior mean:  2.2628 +/- 0.0501
+    90% CI:         [2.2026, 2.2982]
+    True in 90% CI: NO
+
+Diagnostics:
+  Acceptance rate: 66.7%
+  Final step size: 0.100000
+  ESS: {'sigma_V': nan, 'sigma_W': nan}
+  R-hat: {'sigma_V': nan, 'sigma_W': nan}
+
+Performance:
+  Wall time: 18.4 seconds
+  Peak memory: 2.0 MB
+============================================================
+
+Results saved to /home/haowu/JPML/code/outputs/dpf/pgibbs/kitagawa_bpf_mh
+
+========================================
+[2/4] pgibbs/kitagawa_bpf_hmc
+========================================
+Creating true model: src.models.kitagawa.KitagawaModel
+Generating 100 time steps with true params: {'sigma_V': 10.0, 'sigma_W': 1.0}
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1771671864.041351 2015986 gpu_device.cc:2020] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 22322 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3090, pci bus id: 0000:01:00.0, compute capability: 8.6
+Creating inference model
+Trainable params: ['sigma_V', 'sigma_W']
+
+Running PGIBBS inference...
+PGibbs + HMC: 2 burn-in + 3 sampling = 5 total iterations
+  HMC: 5 steps/iter, 10 leapfrog, step_size=0.05
+Initializing trajectory...
+  Initial trajectory shape: (101, 1)
+I0000 00:00:1771671866.364830 2015986 cuda_solvers.cc:175] Creating GpuSolver handles for stream 0x331edd80
+  [burn-in 1/2] 92.0s | theta_accept=100% | step_size=0.7193 | sigma_V=7.6389, sigma_W=14.2888 | ETA 368s
+  [burn-in 2/2] 92.9s | theta_accept=90% | step_size=0.7193 | sigma_V=8.4030, sigma_W=13.1599 | ETA 277s
+  [sample 1/3] 94.6s | theta_accept=73% | step_size=0.7193 | sigma_V=8.5087, sigma_W=12.6657 | ETA 186s
+  [sample 2/3] 92.4s | theta_accept=75% | step_size=0.7193 | sigma_V=9.8375, sigma_W=12.9949 | ETA 93s
+  [sample 3/3] 90.2s | theta_accept=80% | step_size=0.7193 | sigma_V=9.6172, sigma_W=13.8766 | ETA 0s
+
+PGibbs + HMC complete!
+  Theta acceptance: 73.3%
+
+============================================================
+DPF INFERENCE RESULTS
+============================================================
+
+  sigma_V:
+    True:           10.0
+    Posterior mean:  9.3211 +/- 0.5815
+    90% CI:         [8.6196, 9.8155]
+    True in 90% CI: NO
+
+  sigma_W:
+    True:           1.0
+    Posterior mean:  13.1791 +/- 0.5112
+    90% CI:         [12.6987, 13.7884]
+    True in 90% CI: NO
+
+Diagnostics:
+  Acceptance rate: 73.3%
+  Final step size: 0.719276
+  ESS: {'sigma_V': nan, 'sigma_W': nan}
+  R-hat: {'sigma_V': nan, 'sigma_W': nan}
+
+Performance:
+  Wall time: 462.8 seconds
+  Peak memory: 2.4 MB
+============================================================
+
+Results saved to /home/haowu/JPML/code/outputs/dpf/pgibbs/kitagawa_bpf_hmc
+
+========================================
+[3/4] pgibbs/kitagawa_ledh_csmc_mh
+========================================
+Creating true model: src.models.kitagawa.KitagawaModel
+Generating 100 time steps with true params: {'sigma_V': 10.0, 'sigma_W': 1.0}
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1771672331.303088 2018449 gpu_device.cc:2020] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 22322 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3090, pci bus id: 0000:01:00.0, compute capability: 8.6
+Creating inference model
+Trainable params: ['sigma_V', 'sigma_W']
+
+Running PGIBBS inference...
+PGibbs + MH: 2 burn-in + 3 sampling = 5 total iterations
+  MH: 1 steps/iter, proposal_std=0.1
+Initializing trajectory...
+  Initial trajectory shape: (101, 1)
+I0000 00:00:1771672333.690075 2018449 cuda_solvers.cc:175] Creating GpuSolver handles for stream 0xfa44e80
+  [burn-in 1/2] 14.9s | theta_accept=100% | proposal_std=0.1000 | sigma_V=4.8650, sigma_W=2.0584 | ETA 59s
+  [burn-in 2/2] 9.9s | theta_accept=100% | proposal_std=0.1000 | sigma_V=4.8938, sigma_W=2.0796 | ETA 37s
+  [sample 1/3] 9.9s | theta_accept=100% | proposal_std=0.1000 | sigma_V=4.8649, sigma_W=2.1920 | ETA 23s
+  [sample 2/3] 10.1s | theta_accept=100% | proposal_std=0.1000 | sigma_V=4.8455, sigma_W=2.2982 | ETA 11s
+  [sample 3/3] 10.1s | theta_accept=100% | proposal_std=0.1000 | sigma_V=4.8255, sigma_W=2.2151 | ETA 0s
+
+PGibbs + MH complete!
+  Theta acceptance: 100.0%
+
+============================================================
+DPF INFERENCE RESULTS
+============================================================
+
+  sigma_V:
+    True:           10.0
+    Posterior mean:  4.8453 +/- 0.0161
+    90% CI:         [4.8275, 4.8630]
+    True in 90% CI: NO
+
+  sigma_W:
+    True:           1.0
+    Posterior mean:  2.2351 +/- 0.0456
+    90% CI:         [2.1943, 2.2899]
+    True in 90% CI: NO
+
+Diagnostics:
+  Acceptance rate: 100.0%
+  Final step size: 0.100000
+  ESS: {'sigma_V': nan, 'sigma_W': nan}
+  R-hat: {'sigma_V': nan, 'sigma_W': nan}
+
+Performance:
+  Wall time: 55.5 seconds
+  Peak memory: 5.5 MB
+============================================================
+
+Results saved to /home/haowu/JPML/code/outputs/dpf/pgibbs/kitagawa_ledh_csmc_mh
+
+========================================
+[4/4] pgibbs/kitagawa_ledh_csmc_hmc
+========================================
+Creating true model: src.models.kitagawa.KitagawaModel
+Generating 100 time steps with true params: {'sigma_V': 10.0, 'sigma_W': 1.0}
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1771672391.300676 2019219 gpu_device.cc:2020] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 22322 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3090, pci bus id: 0000:01:00.0, compute capability: 8.6
+Creating inference model
+Trainable params: ['sigma_V', 'sigma_W']
+
+Running PGIBBS inference...
+PGibbs + HMC: 2 burn-in + 3 sampling = 5 total iterations
+  HMC: 5 steps/iter, 10 leapfrog, step_size=0.05
+Initializing trajectory...
+  Initial trajectory shape: (101, 1)
+I0000 00:00:1771672393.634636 2019219 cuda_solvers.cc:175] Creating GpuSolver handles for stream 0x3c334490
+  [burn-in 1/2] 105.7s | theta_accept=100% | step_size=0.7193 | sigma_V=7.6389, sigma_W=14.2888 | ETA 423s
+  [burn-in 2/2] 98.9s | theta_accept=80% | step_size=0.7193 | sigma_V=8.5828, sigma_W=10.5466 | ETA 307s
+  [sample 1/3] 98.5s | theta_accept=67% | step_size=0.7193 | sigma_V=7.1901, sigma_W=11.2903 | ETA 202s
+  [sample 2/3] 98.3s | theta_accept=65% | step_size=0.7193 | sigma_V=8.0229, sigma_W=12.6876 | ETA 100s
+  [sample 3/3] 97.9s | theta_accept=72% | step_size=0.7193 | sigma_V=7.6187, sigma_W=10.1603 | ETA 0s
+
+PGibbs + HMC complete!
+  Theta acceptance: 66.7%
+
+============================================================
+DPF INFERENCE RESULTS
+============================================================
+
+  sigma_V:
+    True:           10.0
+    Posterior mean:  7.6106 +/- 0.3400
+    90% CI:         [7.2330, 7.9825]
+    True in 90% CI: NO
+
+  sigma_W:
+    True:           1.0
+    Posterior mean:  11.3794 +/- 1.0337
+    90% CI:         [10.2733, 12.5479]
+    True in 90% CI: NO
+
+Diagnostics:
+  Acceptance rate: 66.7%
+  Final step size: 0.719276
+  ESS: {'sigma_V': nan, 'sigma_W': nan}
+  R-hat: {'sigma_V': nan, 'sigma_W': nan}
+
+Performance:
+  Wall time: 499.8 seconds
+  Peak memory: 5.5 MB
+============================================================
+
+Results saved to /home/haowu/JPML/code/outputs/dpf/pgibbs/kitagawa_ledh_csmc_hmc
+
+=== All 4 experiments complete ===

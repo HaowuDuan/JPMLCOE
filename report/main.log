@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.3.8)  22 FEB 2026 21:38
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.3.8)  22 FEB 2026 22:13
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -666,16 +666,94 @@ pdfTeX warning (ext4): destination with the same identifier (name{table.1}) has
                                                   \__shipout_drop_firstpage_...
 l.576 \end{equation}
                     ]
+<sto_uekf2.png, id=410, 1002.3849pt x 713.064pt>
+File: sto_uekf2.png Graphic file (type png)
+<use sto_uekf2.png>
+Package pdftex.def Info: sto_uekf2.png  used on input line 610.
+(pdftex.def)             Requested size: 362.37569pt x 257.78pt.
+<rb_uekf.png, id=412, 1002.6258pt x 713.064pt>
+File: rb_uekf.png Graphic file (type png)
+<use rb_uekf.png>
+Package pdftex.def Info: rb_uekf.png  used on input line 615.
+(pdftex.def)             Requested size: 362.37569pt x 257.7256pt.
+
 
 [15
+pdfTeX warning (ext4): destination with the same identifier (name{figure.1}) ha
+s been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.618 w
+       e see that range bearing model works with UKF and EKF because we can ...
+ <./sto_uekf2.png>]
+<particle.png, id=423, 1002.3849pt x 713.064pt>
+File: particle.png Graphic file (type png)
+<use particle.png>
+Package pdftex.def Info: particle.png  used on input line 630.
+(pdftex.def)             Requested size: 362.37569pt x 257.78pt.
+<particle2.png, id=424, 1002.3849pt x 713.064pt>
+File: particle2.png Graphic file (type png)
+<use particle2.png>
+Package pdftex.def Info: particle2.png  used on input line 638.
+(pdftex.def)             Requested size: 362.37569pt x 257.78pt.
+
+
+[16
+pdfTeX warning (ext4): destination with the same identifier (name{figure.2}) ha
+s been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.642 T
+       he red lines are the times where we did resampling. It turns out that...
+
+pdfTeX warning (ext4): destination with the same identifier (name{figure.3}) ha
+s been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.642 T
+       he red lines are the times where we did resampling. It turns out that...
+ <./rb_uekf.png> <./particle.png>]
+<particle3.png, id=433, 1000.4577pt x 713.064pt>
+File: particle3.png Graphic file (type png)
+<use particle3.png>
+Package pdftex.def Info: particle3.png  used on input line 646.
+(pdftex.def)             Requested size: 362.37569pt x 258.2805pt.
+<particle4.png, id=434, 1002.6258pt x 713.064pt>
+File: particle4.png Graphic file (type png)
+<use particle4.png>
+Package pdftex.def Info: particle4.png  used on input line 654.
+(pdftex.def)             Requested size: 362.37569pt x 257.7256pt.
+
+
+[17
+pdfTeX warning (ext4): destination with the same identifier (name{figure.4}) ha
+s been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.658 
+      
+pdfTeX warning (ext4): destination with the same identifier (name{figure.5}) ha
+s been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.658 
+       <./particle2.png> <./particle3.png>]
+
+[18
+pdfTeX warning (ext4): destination with the same identifier (name{figure.6}) ha
+s been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.724 
+      
 pdfTeX warning (ext4): destination with the same identifier (name{table.2}) has
  been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
 l.724 
-      ]
+       <./particle4.png>]
 
-[16
+[19
 pdfTeX warning (ext4): destination with the same identifier (name{table.3}) has
  been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
@@ -688,52 +766,114 @@ pdfTeX warning (ext4): destination with the same identifier (name{table.4}) has
                                                   \__shipout_drop_firstpage_...
 l.789 
       ]
+<figure3_reproduction.png, id=464, 624.8946pt x 349.7868pt>
+File: figure3_reproduction.png Graphic file (type png)
+<use figure3_reproduction.png>
+Package pdftex.def Info: figure3_reproduction.png  used on input line 793.
+(pdftex.def)             Requested size: 226.48395pt x 126.77177pt.
 
-[17
+
+[20
 pdfTeX warning (ext4): destination with the same identifier (name{table.5}) has
  been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
 l.802 \newpage
-              ]
+              
+pdfTeX warning (ext4): destination with the same identifier (name{figure.7}) ha
+s been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.802 \newpage
+               <./figure3_reproduction.png>]
 
-[18]
+[21]
+<rb_sde.png, id=484, 859.5312pt x 865.3128pt>
+File: rb_sde.png Graphic file (type png)
+<use rb_sde.png>
+Package pdftex.def Info: rb_sde.png  used on input line 848.
+(pdftex.def)             Requested size: 407.66833pt x 410.42049pt.
+<rb_sde_local.png, id=485, 859.5312pt x 865.3128pt>
+File: rb_sde_local.png Graphic file (type png)
+<use rb_sde_local.png>
+Package pdftex.def Info: rb_sde_local.png  used on input line 855.
+(pdftex.def)             Requested size: 407.66833pt x 410.42049pt.
 
-[19]
-Overfull \hbox (35.56244pt too wide) in paragraph at lines 859--879
+
+[22
+pdfTeX warning (ext4): destination with the same identifier (name{figure.8}) ha
+s been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.861 \clearpage
+                 <./rb_sde.png>]
+
+[23
+pdfTeX warning (ext4): destination with the same identifier (name{figure.9}) ha
+s been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.861 \clearpage
+                 <./rb_sde_local.png>]
+Overfull \hbox (35.56244pt too wide) in paragraph at lines 867--887
  [][] 
  []
 
 
 
-[20
+[24
 
 
 pdfTeX warning (ext4): destination with the same identifier (name{table.6}) has
  been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.882 \clearpage
+l.890 \clearpage
                 ]
+<kitagawa_ledh_1e4.png, id=503, 859.5312pt x 434.1018pt>
+File: kitagawa_ledh_1e4.png Graphic file (type png)
+<use kitagawa_ledh_1e4.png>
+Package pdftex.def Info: kitagawa_ledh_1e4.png  used on input line 941.
+(pdftex.def)             Requested size: 407.66833pt x 205.8958pt.
+<kitagawa_k1.png, id=504, 859.5312pt x 434.1018pt>
+File: kitagawa_k1.png Graphic file (type png)
+<use kitagawa_k1.png>
+Package pdftex.def Info: kitagawa_k1.png  used on input line 948.
+(pdftex.def)             Requested size: 407.66833pt x 205.8958pt.
 
-[21
+
+[25
 
 
 pdfTeX warning (ext4): destination with the same identifier (name{table.7}) has
  been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.939 \begin{equation}
+l.957 \begin{equation}
                       ]
 
-[22
+[26
+pdfTeX warning (ext4): destination with the same identifier (name{figure.10}) h
+as been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.957 \begin{equation}
+                      
+pdfTeX warning (ext4): destination with the same identifier (name{figure.11}) h
+as been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.957 \begin{equation}
+                       <./kitagawa_ledh_1e4.png> <./kitagawa_k1.png>]
+
+[27
 pdfTeX warning (ext4): destination with the same identifier (name{table.8}) has
  been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.980 \begin{equation}
+l.998 \begin{equation}
                       ]
-Overfull \hbox (42.24124pt too wide) detected at line 986
+Overfull \hbox (42.24124pt too wide) detected at line 1004
 [][][][] \OML/cmm/m/it/10 p\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 ^^[[]; ^^[[] \OMS/
 cmsy/m/n/10 j \OML/cmm/m/it/10 x[]; z[]\OT1/cmr/m/n/10 ) = \OMS/cmsy/m/n/10 ^^@
 \OML/cmm/m/it/10 T [] ^^[[] \OMS/cmsy/m/n/10 ^^@ [] []  [][] ^^@ \OML/cmm/m/it/
@@ -743,47 +883,60 @@ it/10 p\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 ^^[[]; ^^[[]\OT1/cmr/m/n/10 )
 
 
 
-[23]
+[28]
+<stepsize_resampling.png, id=548, 715.473pt x 353.1594pt>
+File: stepsize_resampling.png Graphic file (type png)
+<use stepsize_resampling.png>
+Package pdftex.def Info: stepsize_resampling.png  used on input line 1065.
+(pdftex.def)             Requested size: 407.66833pt x 201.22209pt.
 
-[24
+
+[29
 pdfTeX warning (ext4): destination with the same identifier (name{table.9}) has
  been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.1045 F
-        or systematic and soft resampling, this jump is large: the resampled...
-]
+l.1068 \end{figure}
+                   ]
 
-[25]
+[30
+pdfTeX warning (ext4): destination with the same identifier (name{figure.12}) h
+as been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.1088 \end{itemize}
+                     <./stepsize_resampling.png>]
 
-[26]
-Underfull \hbox (badness 10000) in paragraph at lines 1116--1119
+[31]
+
+[32]
+Underfull \hbox (badness 10000) in paragraph at lines 1140--1143
 
  []
 
 
 
-[27]
-
-[28]
-
-[29]
-
-[30]
-
-[31]
-
-[32]
-
 [33]
 
 [34]
 
-[35] (./main.bbl
+[35]
 
-[36])
+[36]
 
-[37] (./main.aux)
+[37]
+
+[38]
+
+[39]
+
+[40]
+
+[41] (./main.bbl
+
+[42])
+
+[43] (./main.aux)
  ***********
 LaTeX2e <2024-11-01> patch level 2
 L3 programming layer <2025-01-18>
@@ -792,10 +945,10 @@ Package rerunfilecheck Info: File `main.out' has not changed.
 (rerunfilecheck)             Checksum: 5460201EF9AC06AF8230BC4F7A508276;9020.
  ) 
 Here is how much of TeX's memory you used:
- 12893 strings out of 473190
- 191215 string characters out of 5715801
- 619269 words of memory out of 5000000
- 35680 multiletter control sequences out of 15000+600000
+ 13007 strings out of 473190
+ 193481 string characters out of 5715801
+ 620521 words of memory out of 5000000
+ 35778 multiletter control sequences out of 15000+600000
  572163 words of font info for 86 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  75i,19n,79p,1990b,601s stack positions out of 10000i,1000n,20000p,200000b,200000s
@@ -822,10 +975,10 @@ ist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/local/texlive/2025/texmf-di
 st/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/local/texlive/2025/texmf-dis
 t/fonts/type1/public/amsfonts/symbols/msbm10.pfb></usr/local/texlive/2025/texmf
 -dist/fonts/type1/public/cm-super/sfrm1000.pfb>
-Output written on main.pdf (37 pages, 445510 bytes).
+Output written on main.pdf (43 pages, 6838923 bytes).
 PDF statistics:
- 825 PDF objects out of 1000 (max. 8388607)
- 732 compressed objects within 8 object streams
- 285 named destinations out of 1000 (max. 500000)
- 345 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 891 PDF objects out of 1000 (max. 8388607)
+ 768 compressed objects within 8 object streams
+ 301 named destinations out of 1000 (max. 500000)
+ 405 words of extra memory for PDF output out of 10000 (max. 10000000)
 
