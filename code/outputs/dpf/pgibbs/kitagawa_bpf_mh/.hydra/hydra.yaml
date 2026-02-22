@@ -113,12 +113,12 @@ hydra:
     - hydra.mode=RUN
     task:
     - dpf=pgibbs/kitagawa_bpf_mh
-    - dpf.pgibbs.num_burnin=2
-    - dpf.pgibbs.num_samples=3
+    - dpf.pgibbs.num_burnin=1000
+    - dpf.pgibbs.num_samples=2000
   job:
     name: run_dpf_experiment
     chdir: null
-    override_dirname: dpf.pgibbs.num_burnin=2,dpf.pgibbs.num_samples=3,dpf=pgibbs/kitagawa_bpf_mh
+    override_dirname: dpf.pgibbs.num_burnin=1000,dpf.pgibbs.num_samples=2000,dpf=pgibbs/kitagawa_bpf_mh
     id: ???
     num: ???
     config_name: config_dpf

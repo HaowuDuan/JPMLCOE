@@ -1,0 +1,173 @@
+{
+  "summary": {
+    "alpha": {
+      "mean": 0.6185254177499981,
+      "std": 0.13059922854261605,
+      "median": 0.6431048946502695,
+      "q5": 0.4019559133360455,
+      "q25": 0.5360041204907513,
+      "q75": 0.7184590071099022,
+      "q95": 0.7657874322766998,
+      "min": 0.3699416533495547,
+      "max": 0.8000810638959482
+    },
+    "sigma": {
+      "mean": 1.492651427571657,
+      "std": 0.6823818394098516,
+      "median": 1.3381661879737587,
+      "q5": 0.7489194367772803,
+      "q25": 0.9345023267929007,
+      "q75": 1.8008095016172474,
+      "q95": 2.6746800162041375,
+      "min": 0.737820197174725,
+      "max": 2.696420742638255
+    },
+    "beta": {
+      "mean": 0.32997351558185717,
+      "std": 0.1106537472631119,
+      "median": 0.3012230372748881,
+      "q5": 0.20410030111313818,
+      "q25": 0.2379562496229491,
+      "q75": 0.39789762310863486,
+      "q95": 0.5131389231162496,
+      "min": 0.19168179971992877,
+      "max": 0.5465692707763686
+    }
+  },
+  "diagnostics": {
+    "acceptance_rate": 1.0,
+    "final_step_size": 0.12487980723381042,
+    "ess": {
+      "alpha": 5.626107899598439,
+      "sigma": 3.764133430879737,
+      "beta": 10.0
+    },
+    "rhat": {
+      "alpha": 0.8930420648327754,
+      "sigma": 0.6031548181697104,
+      "beta": 0.9142398091293494
+    }
+  },
+  "metadata": {
+    "model_type": "StochasticVolatilityModel",
+    "filter_type": "BootstrapPFHMC",
+    "sampler": "hmc",
+    "num_samples": 10,
+    "num_burnin": 15,
+    "num_leapfrog_steps": 5,
+    "num_observations": 100,
+    "timing": {
+      "step_times": [
+        1.1942993253469467,
+        1.187211892567575,
+        1.2020966028794646,
+        1.1976947076618671,
+        1.19391068816185,
+        1.2029219791293144,
+        1.1996506545692682,
+        1.176286356523633,
+        1.1779327299445868,
+        1.1879475014284253,
+        1.1980501860380173,
+        1.1968062557280064,
+        1.2039697375148535,
+        1.199731738306582,
+        1.2080037370324135,
+        1.2240257263183594,
+        1.2174391197040677,
+        1.2061613462865353,
+        1.2083856780081987,
+        1.2049831757321954,
+        1.2089985217899084,
+        1.201630288735032,
+        1.1910849856212735,
+        1.1846641227602959,
+        1.2199849784374237
+      ],
+      "total_time_seconds": 29.993872036226094,
+      "mean_step_time": 1.1997548814490437,
+      "median_step_time": 1.199731738306582,
+      "min_step_time": 1.176286356523633,
+      "max_step_time": 1.2240257263183594,
+      "burnin_time_seconds": 17.926514092832804,
+      "sampling_time_seconds": 12.06735794339329,
+      "mean_time_per_gradient_eval": 0.23995097628980874
+    }
+  },
+  "true_params": {
+    "alpha": 0.91,
+    "sigma": 1.0,
+    "beta": 0.5
+  },
+  "config": {
+    "dtype": "float64",
+    "tf_log_level": 2,
+    "model": {
+      "_target_": "src.models.stochastic_volatility.StochasticVolatilityModel",
+      "alpha": 0.8,
+      "sigma": 1.5,
+      "beta": 0.3
+    },
+    "filter": {
+      "_target_": "src.filters.particle.bootstrap_pf_hmc.BootstrapPFHMC",
+      "n_particles": 1000,
+      "resampling_method": "systematic",
+      "stop_gradient_resampling": true,
+      "eager_mode": false
+    },
+    "dpf": {
+      "sampler": "hmc",
+      "trainable_params": {
+        "alpha": {
+          "constraint": "positive",
+          "prior": {
+            "_target_": "tensorflow_probability.distributions.LogNormal",
+            "loc": -0.094,
+            "scale": 0.5
+          }
+        },
+        "sigma": {
+          "constraint": "positive",
+          "prior": {
+            "_target_": "tensorflow_probability.distributions.LogNormal",
+            "loc": 0.0,
+            "scale": 0.5
+          }
+        },
+        "beta": {
+          "constraint": "positive",
+          "prior": {
+            "_target_": "tensorflow_probability.distributions.LogNormal",
+            "loc": -0.693,
+            "scale": 0.5
+          }
+        }
+      },
+      "hmc": {
+        "num_samples": 10,
+        "num_burnin": 15,
+        "step_size": 0.001,
+        "num_leapfrog_steps": 5,
+        "max_tree_depth": 10,
+        "adaptation_rate": 0.8,
+        "target_accept_prob": 0.9,
+        "seed": 42,
+        "grad_clip_norm": 100.0
+      }
+    },
+    "data": {
+      "T": 100,
+      "seed": 42,
+      "true_params": {
+        "alpha": 0.91,
+        "sigma": 1.0,
+        "beta": 0.5
+      }
+    }
+  },
+  "performance": {
+    "wall_time_seconds": 34.117576285265386,
+    "peak_memory_mb": 3.352252960205078,
+    "memory_increase_mb": 143.5390625
+  }
+}

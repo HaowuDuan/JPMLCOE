@@ -165,15 +165,15 @@ Simon Duane, A.D. Kennedy, Brian~J. Pendleton, and Duncan Roweth.
 \newblock Hybrid monte carlo.
 \newblock {\em Physics Letters B}, 195(2):216--222, 1987.
 
-\bibitem{Jonschkowski2018}
-Rico Jonschkowski, Divyam Rastogi, and Oliver Brock.
-\newblock Differentiable particle filters: End-to-end learning with algorithmic
-  priors.
-\newblock In {\em Robotics: Science and Systems XIV}, 2018.
-
 \bibitem{Lindsten2014}
 Fredrik Lindsten, Michael~I. Jordan, and Thomas~B. Sch\"on.
 \newblock Particle gibbs with ancestor sampling.
 \newblock {\em Journal of Machine Learning Research}, 15:2145--2184, 2014.
+
+\bibitem{karkus2018particle}
+Peter Karkus, David Hsu, and Wee~Sun Lee.
+\newblock Particle filter networks with application to visual localization.
+\newblock In {\em Conference on Robot Learning (CoRL)}, pages 169--178. PMLR,
+  2018.
 
 \end{thebibliography}

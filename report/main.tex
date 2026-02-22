@@ -254,7 +254,7 @@ Alternatively, we don't use weights to represent the distribution at all, namely
     
     \item \textbf{Invertible Particle flow-Particle filter:} Particle flow equations have discretizations errors, and they don't really transform the particle to the target probability. Think of the flow as a coordinate transformation, not only you should transform the map but also have Jacobian. PF-PF re-introduce the weights back into the picture and use the weight update to make adjustment to compensate the effect of this Jacobian. Because Jacobian is flow specific, if the flow equation kernel is identical across particles, in the case of EDH, then this Jacobian will not contribution and will be canceled by normalization. In the case of particle specific evolution, this Jacobian is highly non-trivial and will be important.
 \end{enumerate}
-All above methods, on the implementation side, share one important feature. They use EKF/UKF to guide the flow. In appendix.~\ref{APP:Particle_flow}, we have shown how to use Gaussian approximation to derive a closed form solution to the evolution kernel but left out this important implementation details. All particles filters track the mean and empirical variances, and these are the real quantities that reflect the underlying state and uncertainty. Follow up works by different author might include their own custom adjustment. One confusing point I found is the interplay of empirical mean/covariance and EKF/UKF mean and covariance. To derive the evolution kernel, one don't need the parallel EKF to track the mean and variance at all, and this is what early implementation of EDH flow does. Later the authors started running a parallel EKF/UEK filter to track a less noisy mean and covariance. In \cite{ding2012implementation}, the author proposed the feedback mechanism to use the empirical mean but EKF covariance to determine the evolution kernel. At the end of the day, there is no one-fits-all solution. Most of the proposed fix are empirical adjustment. Given the underlying ground truth mean, one would like to stay close to the ground truth as possible, the gist of the fix is that one have to try to compare which mean is closer. Though, for highly non-linear system, empirical mean is most likely to be more reliable than EKF mean, given enough particle. In addition, the author of \cite{Li-Particle-Filtering-2017} claimed that they took their equation (10) and equation (11) from \cite{ding2012implementation} for linearization performed at intermediate flow time. This is probably a typo, as I found no such equation in \cite{ding2012implementation}. {\color{red} HMC for sampling in later follow up work by the author of \cite{Li-Particle-Filtering-2017}.}
+All above methods, on the implementation side, share one important feature. They use EKF/UKF to guide the flow. In appendix.~\ref{APP:Particle_flow}, we have shown how to use Gaussian approximation to derive a closed form solution to the evolution kernel but left out this important implementation details. All particles filters track the mean and empirical variances, and these are the real quantities that reflect the underlying state and uncertainty. Follow up works by different author might include their own custom adjustment. One confusing point I found is the interplay of empirical mean/covariance and EKF/UKF mean and covariance. To derive the evolution kernel, one don't need the parallel EKF to track the mean and variance at all, and this is what early implementation of EDH flow does. Later the authors started running a parallel EKF/UEK filter to track a less noisy mean and covariance. In \cite{ding2012implementation}, the author proposed the feedback mechanism to use the empirical mean but EKF covariance to determine the evolution kernel. At the end of the day, there is no one-fits-all solution. Most of the proposed fix are empirical adjustment. Given the underlying ground truth mean, one would like to stay close to the ground truth as possible, the gist of the fix is that one have to try to compare which mean is closer. Though, for highly non-linear system, empirical mean is most likely to be more reliable than EKF mean, given enough particle. In addition, the author of \cite{Li-Particle-Filtering-2017} claimed that they took their equation (10) and equation (11) from \cite{ding2012implementation} for linearization performed at intermediate flow time. This is probably a typo, as I found no such equation in \cite{ding2012implementation}.
 
 \subsubsection{kernel Based methods}
 \textbf{kernel-embedded particle flow filter in an RK:\cite{Pulido2019,HuVanLeeuwen2021}:} Instead of moving particles with certain schedule, we move the particle along the trajectory where the difference between the particle distribution with the target is decreasing as fast as possible. 
@@ -289,6 +289,11 @@ In addition, there are of course alternatives to OT resampling. Notable example 
 
 Optimal transport resampling out-perform in certain scenarios but it's real power lies in that it makes it possible for entire filtering architecture differentiable. Because one can easily use neural network to model the dynamics or observation, which has been extensively discussed in \cite{chen2023overview}. I think there is no point to make comprehensive review here as it is problem specific and require careful testing, there is no one-fits-all solution. This field is exploding and there are so many different architectures that one can try. As pointed out in the Bonus question 2, it will be nice that we don't have to solve the optimal transport problem repeatedly, because each resampling is a different set of initial particle and weights. One way to deal with this problem is amortized optimization\cite{amos2022amortized}, where you train a model to predict solutions to optimization problems rather than solving each problem from scratch. It's application to OT problem is known as Meta-OT \cite{amos2023meta}. The idea is actually very easy, when we run a filtering algorithm, we need to solve the resampling a lot of times. Each time, we will have a transport schedule, from the dual problem. We simply run filter a lot of times and record what kind of transport plan we will run into in such problems. Then we train neural network to make predictions.  
 
+For the purpose of building a differentiable particle filter, we start with entropy-regularized-OT-resampling. It is one more step on top of our regular filter while fully differentiable. This is a good place for benchmarking and ensure the entire pipeline works. Any further improvement or innovative algorithm, namely neural network based algorithm are fully differentiable from the beginning. But they require additional training, for example Meta-OT. As for neural operator based approach, it will also require additional training for solving the Monge-Ampère equation. The idea is to work in parallel, first build the differentiable particle filter pipeline with model-blinded entropy-regularized-OT-resampling. Then for specific model, we can improve on the existing architecture with all the logistic components are ready. 
+
+
+
+
 \subsection{Hamiltonian Monte Carlo}
 The whole point of using optimal transport, specifically its differentiable implementation, is to make sure the entire process is differentiable. To make our discussion more focused, our filter will be the invertible particle flow particle filter \cite{Li-Particle-Filtering-2017}. Without a differentiable resampling algorithm, we are forced to use Markov Chain Monte Carlo \cite{Andrieu2010}. The idea is very simple, remember our goal is to find the best parameter set ${\theta}$, such that negative log-likelihood is minimized. If the system is not fully differentiable, then we can use random walk to propose moves in the parameter space $\theta_{i+1}=\theta_{i}+ w$, where $w$ is a random vector in the parameter space. As a result, we will get a new loss function $L(\theta_{i+1})$, we simply compute the difference $L(\theta_{i+1})-L(\theta_{i})=\Delta L$, if $\Delta L<0$, then we should accept the move. It is straightforward to incorporate prior distribution for $\theta$. The question is what to do when $\Delta L > 0$. Simply rejecting all uphill moves would trap the chain at the nearest local minimum. Instead, the Metropolis-Hastings algorithm\cite{Metropolis1953} accepts the proposed move with probability
 \begin{equation}
@@ -306,7 +311,10 @@ where $U(\v \theta) = -\log p(\v \theta \mid z_{1:T})$ is the negative log-poste
 \begin{equation}
     \frac{d\v \theta}{dt} = \frac{\partial H}{\partial \v p} = M^{-1}\v p, \qquad \frac{d\v p}{dt} = -\frac{\partial H}{\partial \v \theta} = -\nabla_{\v \theta} U(\v \theta)
 \end{equation}
-describe trajectories along which the total energy $H$ is exactly conserved. In practice, we integrate these equations numerically using the \textit{leapfrog} (St\"{o}rmer-Verlet) integrator: half-step momentum update, full-step position update, half-step momentum update. The leapfrog scheme is symplectic, meaning it preserves phase-space volume and approximately conserves the Hamiltonian up to discretization error.
+describe trajectories along which the total energy $H$ is exactly conserved. A good analogy is the Harmonic oscillator system $H(p,x)=\frac{p^2}{2}+\frac{x}{2}$. The ball in the potential $\frac{x^2}{2}$ will explore the phase space around the minimum with some kinetic energy.
+
+
+In practice, we integrate these equations numerically using the \textit{leapfrog} (St\"{o}rmer-Verlet) integrator: half-step momentum update, full-step position update, half-step momentum update. The leapfrog scheme is symplectic, meaning it preserves phase-space volume and approximately conserves the Hamiltonian up to discretization error.
 
 Each HMC iteration proceeds as follows. First, sample a fresh momentum $\v p \sim \mathcal{N}(0, M)$. Then simulate $L$ leapfrog steps starting from $(\v \theta_0, \v p_0)$ to obtain a proposal $(\v \theta^*, \v p^*)$. Finally, accept or reject with the Metropolis criterion,
 \begin{equation}
@@ -319,16 +327,10 @@ Both Hamiltonian Monte Carlo and stochastic gradient descent use the gradient $\
 
 HMC, by contrast, performs posterior sampling: it characterizes the full distribution $p(\v \theta \mid z_{1:T})$, not just the mode. HMC requires a \textit{fixed} random seed for the particle filter so that the energy landscape $U(\v \theta)$ is a deterministic function, because the leapfrog integrator simulates Hamiltonian dynamics and assumes the gradient is a smooth, deterministic force field. If the landscape changed randomly at each evaluation, the trajectory would see contradictory forces and diverge.
 
-This leads to opposite gradient requirements. SGD needs gradients that are \textit{correct on average} (unbiased), and can tolerate high variance. HMC needs gradients that are \textit{smooth at every point}, and a single gradient cliff (where $|\nabla U|$ is enormous) can cause the leapfrog trajectory to explode. In the zero-temperature limit (infinitely sharp posterior concentrated at the mode), HMC's trajectory would trace out the same path as gradient descent. One can think of SGD as HMC without momentum coherence and without the acceptance correction that ensures the correct stationary distribution.
-
+This leads to opposite gradient requirements. SGD needs gradients that are \textit{correct on average} (unbiased), and can tolerate high variance. HMC needs gradients that are \textit{smooth at every point}, and a single gradient cliff (where $|\nabla U|$ is enormous) can cause the leapfrog trajectory to explode. We can try to combine them to get best of them. This will be discussed in the later sections.
 \subsubsection{Implications for differentiable particle filters}
 When the filtering pipeline is fully differentiable (via soft or OT resampling), SGD or Adam can efficiently find the MAP point. When full posterior uncertainty is needed, HMC requires smooth gradients, and the choice of resampling strategy and filter type becomes critical. As we will see in Section 2.5, the tension between gradient quality (smoothness) and gradient information (low bias) is what drives the design of the differentiable particle filter pipeline.
 
-
-
-
-
-\subsection{Some further thoughts}
 
 \newpage
 \section{Problems and experiments}
@@ -454,11 +456,27 @@ X_n &= \frac{X_{n-1}}{2} + 25 \frac{X_{n-1}}{1 + X_{n-1}^2} + 8 \cos(1.2n) + V_n
 Y_n &= \frac{X_n^2}{20} + W_n \\
 \end{split}
 \end{equation}
-where $ X_1 \sim \mathcal{N}(0, 5)$ and 
+where $ X_1 \sim \mathcal{N}(0, 5)$ and
 $ V_n \sim \mathcal{N}(0, \sigma_V^2)$ \\
 $ W_n \sim \mathcal{N}(0, \sigma_W^2)$, where $\theta=(\sigma_v,\sigma_W)$ is our parameter. We only need to estimate the noise scale while the observation and dynamics are fixed.
 
+\item \textbf{Cubic Sensor Model}
 
+Dynamics (linear AR(1)):
+\[ x_t = a \, x_{t-1} + v_t, \quad v_t \sim \mathcal{N}(0, \sigma_V^2) \]
+
+Observation (mildly nonlinear):
+\[ y_t = x_t + c \, x_t^3 + w_t, \quad w_t \sim \mathcal{N}(0, \sigma_W^2) \]
+
+Parameters:
+\begin{itemize}
+\item $a = 0.9$: AR coefficient
+\item $c = 0.05$: Cubic nonlinearity strength
+\item $\sigma_V = 1.0$: Process noise std
+\item $\sigma_W = 1.0$: Observation noise std
+\item Initial distribution: $x_0 \sim \mathcal{N}(0, 5)$
+\end{itemize}
+The observation function $h(x) = x + cx^3$ has Jacobian $1 + 3cx^2 > 0$ everywhere, so it is injective. Setting $c = 0$ recovers the linear-Gaussian model. This makes it a useful stepping stone between the linear-Gaussian benchmark and the more challenging Kitagawa model: nonlinear enough to require a particle filter, but tame enough that debugging the pipeline is not a headache.
 
 \end{enumerate}
 \subsection{Code organization and testing strategy}
@@ -466,10 +484,25 @@ $ W_n \sim \mathcal{N}(0, \sigma_W^2)$, where $\theta=(\sigma_v,\sigma_W)$ is ou
 We use Hydra to manage the configuration with yaml files. Hydra is a framework that allows flexible management of the configurations. We start with a default base configuration for model and filters. In practice, we can override the default configuration with new configurations easily and the output file will automatically save a copy of the overwritten version of the configuration. In this way, we can easily create new experiments while keep track of the parameters corresponding to individual experiment outcome.
 \subsubsection{Code base organization}
 
+The codebase follows a modular design where models, filters, and experiment infrastructure are kept independent from each other. The motivation is simple: in filtering research, we constantly need to mix and match different filters with different models. If the model logic and filter logic are entangled, adding a new filter or testing an existing one on a new model becomes unnecessarily painful. By separating these concerns, we can, for instance, run all twenty filters on the linear Gaussian model with a one-line config change.
+
+The source code lives under \texttt{src/} and is organized into the following modules:
+\begin{itemize}
+    \item \texttt{core/} defines the abstract interfaces that the rest of the code builds on. \texttt{StateSpaceModel} specifies what any model must provide: sampling methods for state transitions and observations, log-probability evaluations for particle filters, and Jacobians for the EKF/UKF family. \texttt{Filter} defines a common filtering interface with \texttt{predict()}, \texttt{update()}, and \texttt{filter()} methods. All concrete implementations inherit from these base classes. This means that every model works with every filter without special-casing, and a new model or filter only needs to implement the abstract interface to integrate with the full pipeline.
+    \item \texttt{models/} contains the concrete state-space models. We have ten models ranging from the standard 2D linear Gaussian (which serves as our ground truth benchmark) to highly nonlinear ones like stochastic volatility and range-bearing tracking. Each model provides both a NumPy interface (used by Kalman filters) and a TensorFlow interface (used by particle filters and differentiable methods). The dual interface is necessary because Kalman filters operate on matrices directly while particle filters need batch-vectorized tensor operations for GPU acceleration.
+    \item \texttt{filters/} is split into \texttt{kalman/} and \texttt{particle/}. The Kalman side is relatively simple: a standard Kalman filter (with Joseph form for numerical stability), an Extended Kalman Filter, and an Unscented Kalman Filter. The particle side is where the bulk of the research code lives, with eighteen implementations spanning bootstrap particle filters, kernel-based flow filters, the Exact Daum-Huang family (global and local variants), invertible flow filters with importance weighting, and conditional SMC. A shared base class \texttt{ParticleFilterBase} handles diagnostic tracking --- ESS history, weight distributions, resampling events --- so that every particle filter automatically records the quantities we need for debugging and analysis. With filters inherit structure from easier filter, such as stochastic flow filter inherits from Exact-Duam-Huang flow filter, we only have to debug the updated methods instead of the whole class.
+    
+    \item \texttt{resampling/} provides three resampling strategies: systematic resampling (the standard low-variance method), soft resampling (a continuous relaxation that avoids hard index selection, useful for differentiable settings), and optimal transport entropy resampling. Each method follows the same interface, so swapping resampling methods is a config-level change.
+    \item \texttt{utils/} provides the numerical building blocks that the rest of the code depends on. For example, numerically stable linear algebra and other supporting function that is repeated called by other filters.
+      \item \texttt{experiments/} contains the Hydra-based experiment runner. Given a YAML configuration specifying the model, filter, and parameters, it instantiates the objects, runs the filter, generates diagnostic plots, and records timing and memory statistics. The outputs are saved alongside a copy of the resolved configuration, so every experiment result can be traced back to the exact parameters that produced it.
+    \item \texttt{DF/} houses the differentiable filtering module for parameter estimation. This includes runners for Hamiltonian Monte Carlo (HMC), Particle Gibbs (PGibbs), and Particle Marginal Metropolis-Hastings (PMMH). The idea is that once we have a working particle filter, we can treat the log-likelihood it computes as a differentiable function of the model parameters and use gradient-based or MCMC methods to fit those parameters to data.
+\end{itemize}
+
 \subsubsection{Testing}
 
+Every test fixes the random seed, so the output is deterministic. There is no stochasticity to deal with. The anchor for all filter tests is the 2D linear-Gaussian model with a Kalman filter, which gives the exact posterior mean, covariance, and log-likelihood at every time step. We run each particle filter on the same model and same observations, then check that the posterior mean converges to the Kalman solution and the log-likelihood is within tolerance. All three resampling methods (systematic, soft, OT) are tested independently this way. We also check numerical health --- no NaN or Inf in weights, ESS never collapsing, particles not degenerating to a single point --- and edge cases like running with only 10 particles or with extremely tight observation noise.
 
-
+The resampling methods are tested in isolation, outside of any filter. For systematic resampling: selection frequency matches the weights, uniform weights produce an exact permutation, and degenerate weights correctly duplicate a single particle. For soft resampling: $\alpha = 1$ reduces to systematic, $\alpha = 0$ gives uniform sampling, and output weights always sum to one. For OT: output weights are finite, and uniform input weights produce near-identity transport. All three methods are stress-tested with extreme weight ratios. The linear algebra utilities and ODE solvers have their own unit tests against known analytical solutions.
 
 
 
@@ -572,16 +605,16 @@ H(\mathbf{x}_t) = \frac{\partial h}{\partial \mathbf{x}} \bigg|_{\mathbf{x}_t} =
 \end{equation}
 where $r_t = \sqrt{(x_t - x_s)^2 + (y_t - y_s)^2}$ is the range.
 
-\begin{figure}[H]
-    \centering
-\includegraphics[width=0.8\linewidth]{sto_uekf2.png}
-    \caption{EKF and UKF result on stochastic volatility model}
-\end{figure}
-\begin{figure}[H]
-    \centering
-\includegraphics[width=0.8\linewidth]{rb_uekf.png}
-    \caption{EKF and UKF result on range bearing model}
-\end{figure}
+% \begin{figure}[H]
+%     \centering
+% \includegraphics[width=0.8\linewidth]{sto_uekf2.png}
+%     \caption{EKF and UKF result on stochastic volatility model}
+% \end{figure}
+% \begin{figure}[H]
+%     \centering
+% \includegraphics[width=0.8\linewidth]{rb_uekf.png}
+%     \caption{EKF and UKF result on range bearing model}
+% \end{figure}
 we see that range bearing model works with UKF and EKF because we get can get reasonable Jacobian from the observation model.
 
 
@@ -592,39 +625,39 @@ we see that range bearing model works with UKF and EKF because we get can get re
 \subsubsection{Particle filter and particle degeneracy}
 
 
-\begin{figure}[H]
-    \centering
-\includegraphics[width=0.8\linewidth]{particle.png}
-    \caption{We see that particle filter tracking the means of both models pretty well}
-    \label{fig:placeholder}
-\end{figure}
+% \begin{figure}[H]
+%     \centering
+% \includegraphics[width=0.8\linewidth]{particle.png}
+%     \caption{We see that particle filter tracking the means of both models pretty well}
+%     \label{fig:placeholder}
+% \end{figure}
 
 
-\begin{figure}[H]
-    \centering
-\includegraphics[width=0.8\linewidth]{particle2.png}
-    \caption{Effective sample size a function of time}
-    \label{fig:placeholder}
-\end{figure}
+% \begin{figure}[H]
+%     \centering
+% \includegraphics[width=0.8\linewidth]{particle2.png}
+%     \caption{Effective sample size a function of time}
+%     \label{fig:placeholder}
+% \end{figure}
 The red lines are the times where we did resampling. It turns out that range bearing had very bad initialization but the particle filter somehow managed to increased sample size at later time. This is likely due to that particles were moved into the right position so even with very few particles, it can track the distribution very well. But a depleted sample size means that uncertainty estimation is unreliable. 
 
-\begin{figure}[H]
-    \centering
-\includegraphics[width=0.8\linewidth]{particle3.png}
-    \caption{Weight distribution at three different time. It further demonstrate that bad initialization for range bearing model had collapsed weight distribution from the very beginning}
-    \label{fig:placeholder}
-\end{figure}
+% \begin{figure}[H]
+%     \centering
+% \includegraphics[width=0.8\linewidth]{particle3.png}
+%     \caption{Weight distribution at three different time. It further demonstrate that bad initialization for range bearing model had collapsed weight distribution from the very beginning}
+%     \label{fig:placeholder}
+% \end{figure}
 
 
-\begin{figure}[H]
-    \centering
-\includegraphics[width=0.8\linewidth]{particle4.png}
-    \caption{Particle diversity for the Stochastic Volatility model is reasonable.  }
-    \label{fig:placeholder}
-\end{figure}
+% \begin{figure}[H]
+%     \centering
+% \includegraphics[width=0.8\linewidth]{particle4.png}
+%     \caption{Particle diversity for the Stochastic Volatility model is reasonable.  }
+%     \label{fig:placeholder}
+% \end{figure}
 
 \subsubsection{EDH (LEDH) flow and filter}
-My flow filter and invertible flow particle filter did not work for acoustic tracking model or even simplified acoustic tracking model. I could not reproduce the result from \cite{Li-Particle-Filtering-2017}. But It works for range bearing model, so I include the performance for the range bearing model here. It is similar to the table 1 from \cite{Li-Particle-Filtering-2017}. The performance of PF is the baseline and all the flow and invertible filter will outperform Bootstrap particle filer. In addition, LEDH invertible has the best performance in terms of the accuracy but it is the slowest among all the filter.
+Table~\ref{tab:range_bearing_comparison} compares all five filters on the range-bearing model. The LEDH invertible filter achieves the best RMSE while the bootstrap PF requires the most particles. Table~\ref{tab:acoustic_tracking_comparison} shows results on the acoustic tracking model (4 targets, 25 sensors), a higher-dimensional problem where the global EDH filters struggle due to the linearisation approximation. The LEDH variants, which re-linearise at each particle, significantly outperform their global counterparts, with LEDH invertible again achieving the best RMSE.
 
 
 
@@ -636,13 +669,13 @@ My flow filter and invertible flow particle filter did not work for acoustic tra
 \caption{Particle Filter Comparison on Range-Bearing Model}
 \begin{tabular}{lccccc}
 \toprule
-\textbf{Filter} & \textbf{RMSE} & \textbf{Log-Lik} & \textbf{Wall Time (s)} & \textbf{Time/Step (ms)} & \textbf{Peak Mem (MB)} \\
+\textbf{Filter} & \textbf{RMSE} & \textbf{Log-Lik} & \textbf{Wall Time (s)} & \textbf{Time/Step (ms)} & \textbf{Mem (MB)} \\
 \midrule
-PF                & 0.0610 & 745.41  & 50.81  & 101.63  & 16.05  \\
-EDH Flow          & 0.0593 & ---     & 7.26   & 72.55   & 1.48   \\
-EDH Invertible    & 0.0584 & 423.50  & 22.15  & 221.48  & 4.64   \\
-LEDH Flow         & 0.0584 & ---     & 228.09 & 2280.95 & 1.46   \\
-LEDH Invertible   & 0.0582 & 428.97  & 163.06 & 1630.56 & 1.67   \\
+PF                & 0.1135 & 522.66  & 98.7   & 197.4   & 1684.7 \\
+EDH Flow          & 0.1687 & ---     & 93.4   & 934.2   & 474.3  \\
+EDH Invertible    & 0.1199 & 82.85   & 48.4   & 967.7   & 646.7  \\
+LEDH Flow         & 0.1135 & ---     & 455.3  & 910.6   & 574.3  \\
+LEDH Invertible   & 0.1130 & 1040.43 & 474.1  & 948.1   & 947.0  \\
 \bottomrule
 \end{tabular}
 \\[1em]
@@ -650,25 +683,122 @@ LEDH Invertible   & 0.0582 & 428.97  & 163.06 & 1630.56 & 1.67   \\
 \toprule
 \textbf{Filter} & \textbf{Particles} & \textbf{Resample Rate} & \textbf{Timesteps} \\
 \midrule
-PF                & 1000 & 1.00 & 500 \\
+PF                & 1000 & 0.70 & 500 \\
 EDH Flow          & 500  & ---  & 100 \\
-EDH Invertible    & 2000 & 0.45 & 100 \\
-LEDH Flow         & 500  & ---  & 100 \\
-LEDH Invertible   & 500  & 0.37 & 100 \\
+EDH Invertible    & 500  & 0.88 & 50  \\
+LEDH Flow         & 500  & ---  & 500 \\
+LEDH Invertible   & 500  & 0.57 & 500 \\
 \bottomrule
 \end{tabular}
 \label{tab:range_bearing_comparison}
 \end{table}
 
+\begin{table}[H]
+\centering
+\caption{Particle Filter Comparison on Acoustic Tracking Model (4 targets, 25 sensors)}
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Filter} & \textbf{RMSE} & \textbf{Log-Lik} & \textbf{Wall Time (s)} & \textbf{Time/Step (ms)} & \textbf{Mem (MB)} \\
+\midrule
+PF                & 23.61  & $-14158.41$ & 3.3    & 65.3    & 101.3  \\
+EDH Flow          & 85.62  & ---         & 65.3   & 1306.5  & 1568.7 \\
+EDH Invertible    & 67.93  & $-13029.33$ & 77.9   & 1557.3  & 2179.0 \\
+LEDH Flow         & 17.64  & ---         & 86.8   & 1735.4  & 1770.5 \\
+LEDH Invertible   & 16.68  & 1048.10     & 89.6   & 1791.9  & 2010.8 \\
+\bottomrule
+\end{tabular}
+\\[1em]
+\begin{tabular}{lccc}
+\toprule
+\textbf{Filter} & \textbf{Particles} & \textbf{Resample Rate} & \textbf{Timesteps} \\
+\midrule
+PF                & 1000 & 1.00 & 50 \\
+EDH Flow          & 500  & ---  & 50 \\
+EDH Invertible    & 500  & 1.00 & 50 \\
+LEDH Flow         & 500  & ---  & 50 \\
+LEDH Invertible   & 500  & 1.00 & 50 \\
+\bottomrule
+\end{tabular}
+\label{tab:acoustic_tracking_comparison}
+\end{table}
 
+Table~\ref{tab:acoustic_tracking_geometric} extends the acoustic tracking experiment to $T=100$ timesteps and studies the effect of geometric lambda schedules on the LEDH invertible filter. The geometric schedule concentrates integration steps near $\lambda=0$ (where the posterior changes most rapidly) by spacing steps as $\lambda_k \propto q^k$. Results show that $q=1.5$ with $n=37$ steps achieves the best RMSE (31.56), because it runs for longer, so RMSE is expected to be twice as much as $T=50$ case approximately.
+\begin{table}[H]
+\centering
+\caption{LEDH Invertible with Geometric Lambda Schedule on Acoustic Tracking ($T=100$)}
+\begin{tabular}{cccccc}
+\toprule
+\textbf{$q$} & \textbf{$n_\lambda$} & \textbf{RMSE} & \textbf{Log-Lik} & \textbf{Wall Time (s)} & \textbf{Time/Step (ms)} \\
+\midrule
+1.2 & 25 & 54.17 & $-6972.72$ & 143.4 & 1433.7 \\
+1.2 & 29 & 48.54 & 1806.41    & 160.5 & 1605.1 \\
+1.2 & 33 & 48.78 & $-6595.54$ & 179.2 & 1792.1 \\
+1.2 & 37 & 54.35 & $-6160.39$ & 198.3 & 1983.0 \\
+1.2 & 42 & 52.09 & $-7219.87$ & 226.6 & 2266.2 \\
+\midrule
+1.5 & 25 & 49.18 & 1835.16    & 146.6 & 1465.7 \\
+1.5 & 29 & 47.83 & $-6568.38$ & 165.0 & 1650.3 \\
+1.5 & 33 & 44.43 & 1776.00    & 183.8 & 1838.0 \\
+\textbf{1.5} & \textbf{37} & \textbf{31.56} & \textbf{988.83} & 197.5 & 1975.3 \\
+1.5 & 42 & 47.14 & $-6577.46$ & 221.2 & 2211.5 \\
+\bottomrule
+\end{tabular}
+\\[0.5em]
+{\small All runs: 500 particles, resample rate 1.0, float32. Best result in bold.}
+\label{tab:acoustic_tracking_geometric}
+\end{table}
+
+Table~\ref{tab:sv_comparison} compares filters on the stochastic volatility model, a 1D model with a strongly nonlinear observation $y_t = 0.5\exp(x_t/2)\cdot v_t$. The EKF and UKF linearise $h(x) = 0.5\exp(x/2)$ at the predicted mean; when the mean is near zero the Jacobian $h'(x) \approx 0.25$ is small and effectively gives zero information gain, causing them to track the prior rather than the data (RMSE~2.54 vs PF's~1.14). The EDH flow suffers similarly: its global linearisation at $\bar\eta_0$ yields $H \approx h'(\bar\eta_0)$, which degrades when the prior mean is uninformative. The bootstrap PF avoids linearisation entirely and achieves the best RMSE. 
+
+\begin{table}[H]
+\centering
+\caption{Filter Comparison on Stochastic Volatility Model}
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Filter} & \textbf{RMSE} & \textbf{Log-Lik} & \textbf{Wall Time (s)} & \textbf{Time/Step (ms)} & \textbf{Mem (MB)} \\
+\midrule
+PF              & 1.14  & $-547.56$   & 2.1    & 4.2     & 46.4   \\
+EKF             & 2.54  & $-8731.11$  & 2.7    & 5.4     & 40.6   \\
+UKF             & 2.54  & $-8731.11$  & 5.2    & 10.3    & 51.2   \\
+EDH Flow        & 2.58  & ---         & 33.3   & 66.5    & 64.1   \\
+Stochastic EDH  & 2.60  & ---         & 53.2   & 106.5   & 65.9   \\
+LEDH Flow$^*$   & 3.21  & ---         & 3.4    & 168.5   & 30.3   \\
+Kernel (scalar) & 2.71  & ---         & 224.9  & 449.9   & 416.1  \\
+Kernel (matrix) & 2.71  & ---         & 328.7  & 657.5   & 548.7  \\
+\bottomrule
+\end{tabular}
+\\[1em]
+\begin{tabular}{lccc}
+\toprule
+\textbf{Filter} & \textbf{Particles} & \textbf{Resample Rate} & \textbf{Timesteps} \\
+\midrule
+PF              & 1000 & 0.36 & 500 \\
+EKF             & ---  & ---  & 500 \\
+UKF             & ---  & ---  & 500 \\
+EDH Flow        & 500  & ---  & 500 \\
+Stochastic EDH  & 500  & ---  & 500 \\
+LEDH Flow$^*$   & 500  & ---  & 20  \\
+Kernel (scalar) & 20   & ---  & 500 \\
+Kernel (matrix) & 20   & ---  & 500 \\
+\bottomrule
+\end{tabular}
+\\[0.5em]
+{\small $^*$LEDH Flow ran for only $T=20$ timesteps.}
+\label{tab:sv_comparison}
+\end{table}
 
 \subsubsection{Matrix kernel preventing collapse}
-\begin{figure}[H]
-    \centering
-\includegraphics[width=0.5\linewidth]{figure3_reproduction.png}
-    \caption{We can see clearly that by switching to matrix kernel, $x_{20}$ no longer collapsed into one point}
-    \label{fig:placeholder}
-\end{figure}
+% \begin{figure}[H]
+%     \centering
+% \includegraphics[width=0.5\linewidth]{figure3_reproduction.png}
+%     \caption{We can see clearly that by switching to matrix kernel, $x_{20}$ no longer collapsed into one point}
+%     \label{fig:placeholder}
+% \end{figure}
+
+\subsection{Filter comparison}
+Overall, there is no one-fits-all filter option. When the model is non-linear but with additive noise, then flow based approach would work with carefully tuned hyper parameters. As you can see, there is a lot of freedom to adjust the flow equation implementation. With multiplicative noise, I cannot say for certain, but I would expect most of the expansion approach would fail because the observation is not useful at all, for flow evolution. 
+
+
 \newpage
 \subsection{Part II}
 \subsubsection{Stochastic flow}
@@ -678,6 +808,27 @@ The stochastic particle flow filter of \cite{dai-new-2021} generalises the deter
   d\v{x} = \bigl[A(\lambda)\v{x} + b(\lambda)\bigr]\,d\lambda + \sqrt{Q}\,dW_\lambda,
 \]
 where $Q = \operatorname{diag}(q_1,\ldots,q_d)$ is a diagonal diffusion matrix. The drift includes a score correction (Corollary~2.1 of \cite{dai-new-2021}) so that the posterior is exact in the continuous-time limit for any choice of $Q$.
+
+The deterministic EDH flow (ODE) can freely re-linearise $H$ at each particle's position---the local (LEDH) approach---because the ODE drift is simply a velocity field that each particle follows independently. The stochastic flow is fundamentally different. The drift contains a score correction:
+\[
+  f_{\mathrm{stoch}}(\v{x},\lambda)
+  = f_{\mathrm{det}}(\v{x},\lambda)
+    + \tfrac{1}{2}\,Q\;\nabla_{\v{x}} \log p(\v{x},\lambda),
+\]
+where $p(\v{x},\lambda) \propto g(\v{x})\,h(\v{x})^{\lambda}$ is the homotopy density. This correction compensates for the injected diffusion noise so that the particle density stays on the homotopy path. Formally, the drift must satisfy the Fokker--Planck equation
+\[
+  \frac{\partial p}{\partial\lambda}
+  = -\nabla\!\cdot\!(f\,p) + \tfrac{1}{2}\nabla\!\cdot\!\bigl(QQ^\top \nabla p\bigr),
+\]
+a \emph{global} constraint: there must exist a single density $p(\v{x},\lambda)$ whose score $\nabla\log p$ appears in the drift for every particle simultaneously.
+
+Under global linearization ($H$ fixed at $\bar\eta_0$), $p(\v{x},\lambda)$ is Gaussian with precision $M(\lambda) = P_0^{-1} + \lambda\,H^\top R^{-1}H$, and the score
+\[
+  \nabla\log p(\v{x},\lambda) = -M(\lambda)\bigl(\v{x} - m(\lambda)\bigr)
+\]
+is a single linear function of $\v{x}$ shared by all particles---consistent with the Fokker--Planck equation.
+
+If one were to re-linearise at each particle $\v{x}_i$ (as LEDH does for ODE flows), particle~$i$ would use its own $H_i$, giving it its own precision $M_i(\lambda)$, mean $m_i(\lambda)$, and score $-M_i(\v{x} - m_i)$. No single density has all of these as its score simultaneously---the Fokker--Planck equation cannot be satisfied. The particles would no longer be samples from a coherent density, and the theoretical guarantee that the flow preserves the homotopy path breaks down. This is why stochastic particle flows in the literature universally use global linearization, while the local (LEDH) variant is restricted to deterministic flows. Given this fact, in the code base, we can directly inherit the structure of EDH with small override to the flow parameter. For strong non-linear model, we need to add local corrections to the flow parameters, or re-linearize at the intermediate time. But for Stochastic flow, re-linearize is not possible, we cannot update the observation coefficient, but it turns out adding local correction will help stabilize the flow a lot. 
 
 \paragraph{Local correction for nonlinear observations.}
 The drift parameters $A(\lambda)$ and $b(\lambda)$ are derived under the assumption of a linear observation model $h(\v{x}) = H\v{x}$. In the pure global formulation---where $H$ is computed once at the prior mean $\bar\eta_0$ and the observation $z$ is used directly---this linear model is self-consistent and no additional correction is needed.
@@ -691,125 +842,26 @@ naturally produces a zeroth-order residual $e = h(\eta) - H(\eta)\,\eta$ that ac
 Empirically, this correction is essential for nonlinear models. On the range-bearing model, the uncorrected stochastic EDH diverges, while adding the local correction makes the filter work. The correction costs only one additional evaluation of $h(\bar\eta_0)$ per time step.
 
 \paragraph{Stiffness and the $\lambda$ schedule.}
-The drift matrix $A(\lambda)$ has eigenvalues that are most extreme near $\lambda = 0$, where the precision $M(\lambda) = P_0^{-1} + \lambda\,H^\top R^{-1} H$ is dominated by the anisotropic prior $P_0^{-1}$. As $\lambda \to 1$, measurement information regularises $M$ and the stiffness diminishes. With a sufficiently fine uniform grid (small $d\lambda$), the Euler--Maruyama integrator stays within the stability region even near $\lambda = 0$---a fine uniform schedule is not stressed by the stiff system.
+The drift matrix $A(\lambda)$ has eigenvalues that are most extreme near $\lambda = 0$, where the precision $M(\lambda) = P_0^{-1} + \lambda\,H^\top R^{-1} H$ is dominated by the anisotropic prior $P_0^{-1}$. As $\lambda \to 1$, measurement information regularizes $M$ and the stiffness diminishes. With a sufficiently fine uniform grid (small $d\lambda$), the Euler--Maruyama integrator stays within the stability region even near $\lambda = 0$---a fine uniform schedule is not stressed by the stiff system.
 
-In practice, one can do better with a geometric (exponential) schedule: step sizes $\varepsilon_j = \varepsilon_1 q^{j-1}$ with ratio $q = 1.2$, which concentrates steps near $\lambda = 0$ where they are most needed and uses larger steps near $\lambda = 1$ where the system is well-conditioned. This simple engineering choice already resolves the practical stiffness issue without solving any optimisation problem.
+In practice, one can do better with a geometric (exponential) schedule: step sizes $\varepsilon_j = \varepsilon_1 q^{j-1}$ with ratio $q = 1.2$, which concentrates steps near $\lambda = 0$ where they are most needed and uses larger steps near $\lambda = 1$ where the system is well-conditioned. This simple engineering choice already resolves the practical stiffness issue without solving any optimization problem. I spent sometime to test and reproduce the result of the stiffness mitigation paper but could not reproduce. The filter itself works fine, but I find the usefulness of the method proposed by the author is limited, and the stiffness in the example can be mitigated by fine uniform step size. But it is something to keep in mind if we ran into a problem with stiffness issue, we can try this methods. A successful stochastic flow filter is equivalent to edh flow filter. As we shown, adding local correction is a much bigger effect. In addition, one thing we did not try is to switch the integration scheme. We evaluate our parameter after we update the step counts, follow the pseudocode from \cite{ding2012implementation}. As we know the first step has strong stiffness problem, this could be the reason why I could not reproduce the paper. But I should spend more time on differentiable particle filter pipeline. This will be a quick confirmation when we have time.
 
-The companion paper \cite{dai-stiffness-mitigation-2021} goes further, proposing an optimal homotopy schedule $\beta^{*}(\lambda)$ that minimises the nuclear-norm condition number of $M$ via a boundary-value problem (BVP). We attempted to reproduce this but found both a sign error in the key formula and fundamental numerical issues.
-
-\paragraph{Setup.}
-Following \cite{dai-stiffness-mitigation-2021} (Remark~3.2), define the precision matrix
-\[
-  M(\beta) = P_0^{-1} + \beta\, H^\top R^{-1} H,
-\]
-with shorthands $J_{\mathrm{prior}} = P_0^{-1}$, $J_{\mathrm{meas}} = H^\top R^{-1} H$, and $\partial M / \partial\beta = J_{\mathrm{meas}}$.
-The nuclear-norm condition number is
-\[
-  \kappa_\nu(M) = \|M\|_\nu \, \|M^{-1}\|_\nu = \operatorname{tr}(M)\,\operatorname{tr}(M^{-1}),
-\]
-and the optimal schedule solves the BVP (Theorem~3.1, Eqs~26--27):
-\[
-  \ddot\beta = \mu\,\frac{\partial\kappa_\nu}{\partial\beta}, \qquad \beta(0)=0,\quad \beta(1)=1.
-\]
-
-\paragraph{Correct derivative of $\kappa_\nu$.}
-By the product rule and the matrix identity $dA^{-1}/d\theta = -A^{-1}(dA/d\theta)A^{-1}$ (Lemma~A.1 of the paper):
-\begin{align}
-  \frac{\partial\kappa_\nu}{\partial\beta}
-  &= \frac{\partial\operatorname{tr}(M)}{\partial\beta}\,\operatorname{tr}(M^{-1})
-     + \operatorname{tr}(M)\,\frac{\partial\operatorname{tr}(M^{-1})}{\partial\beta} \nonumber\\
-  &= \operatorname{tr}(J_{\mathrm{meas}})\,\operatorname{tr}(M^{-1})
-     \;\mathbf{-}\; \operatorname{tr}(M)\,\operatorname{tr}(M^{-1} J_{\mathrm{meas}}\, M^{-1}).
-  \label{eq:dkappa_correct}
-\end{align}
-The second term carries a \textbf{minus} sign. However, Eq~(28) of \cite{dai-stiffness-mitigation-2021}, after translating $\nabla_x\nabla_x^\top\!\log h = -J_{\mathrm{meas}}$, yields a \textbf{plus} sign instead.
-
-\paragraph{Verification.}
-We verify the sign in two independent ways.
-
-\emph{Finite differences.}
-Using central differences $\bigl(f(\beta+\varepsilon)-f(\beta-\varepsilon)\bigr)/(2\varepsilon)$ with $\varepsilon=10^{-7}$ and the paper's numerical example (Section~4), the finite-difference values match the minus-sign formula to relative error $<10^{-8}$ at every test point.
-
-\begin{table}[H]
-\centering
-\caption{Finite-difference verification of $\partial\kappa_\nu/\partial\beta$}
-\begin{tabular}{rrrrl}
-\toprule
-$\beta$ & Finite diff & Minus sign & Plus sign & FD matches \\
-\midrule
-0.00 & $-559{,}000.44$ & $-559{,}000.43$ & $+561{,}729.57$ & minus \\
-0.01 & $-3{,}762.72$ & $-3{,}762.72$ & $+3{,}991.69$ & minus \\
-0.10 & $-41.83$ & $-41.83$ & $+71.20$ & minus \\
-0.50 & $-0.31$ & $-0.31$ & $+9.59$ & minus \\
-1.00 & $+0.59$ & $+0.59$ & $+5.55$ & minus \\
-\bottomrule
-\end{tabular}
-\label{tab:fd_verification}
-\end{table}
-
-\emph{Isotropic sanity check.}
-For $M=(c+\beta)I$ with $J_{\mathrm{meas}}=I$, the condition number is $\kappa_\nu = n^2$ (constant), so $\partial\kappa_\nu/\partial\beta=0$. The minus-sign formula gives $n/(c+\beta) - n/(c+\beta)=0$, while the plus-sign formula gives $2n/(c+\beta)\neq 0$---incorrectly predicting a nonzero derivative for a constant function.
-
-\paragraph{BVP analysis.}
-Using the paper's parameters ($P_0 = \operatorname{diag}(1000,2)$, sensors at $(\pm 3.5, 0)$, $R=0.04I$, $\mu=0.2$):
-
-\begin{itemize}
-  \item \textbf{Paper sign (+):} Both terms in the plus-sign formula are strictly positive (traces of PSD matrices with PD $M$), so $\ddot\beta > 0$ everywhere and $\beta$ is strictly convex. A shooting scan over $\dot\beta(0) \in [-1, 2]$ gives $\beta(1) \geq 1.62$ for all initial velocities tested. The BVP has no solution.
-
-  \item \textbf{Correct sign ($-$):} $|\partial\kappa_\nu/\partial\beta| \approx 559{,}000$ at $\beta=0$ (caused by 500:1 anisotropy in $P_0$), making the raw BVP extremely stiff and intractable for shooting.
-\end{itemize}
-
-\paragraph{Log-$\kappa$ fix.}
-Replacing $\kappa_\nu$ with $\log\kappa_\nu$ in the objective gives
-\[
-  \ddot\beta = \mu\,\frac{\partial\log\kappa_\nu}{\partial\beta}
-  = \mu\,\frac{1}{\kappa_\nu}\frac{\partial\kappa_\nu}{\partial\beta}.
-\]
-At $\beta=0$: $\kappa_\nu = 502$, so the driving term drops from $559{,}000$ to $\approx 1{,}114$, making the BVP well-conditioned. Bisection shooting converges to $\dot\beta(0)^{*}=1.6947$, yielding $\beta(1) = 1.0000000$.
-
-\paragraph{The resulting schedule is nearly linear.}
-The optimal schedule from the $\log\kappa_\nu$ BVP deviates from linear by at most $\max|\beta^{*}-\lambda| = 0.0195$. Compare with the paper's Figure~2(b), which shows $\max|\beta^{*}-\lambda|\approx 0.14$ (seven times larger). The condition-number reduction is correspondingly modest:
-
-\begin{table}[H]
-\centering
-\caption{Condition number comparison: linear vs.\ optimal schedule}
-\begin{tabular}{rccc}
-\toprule
-$\lambda$ & $\kappa_\nu$(linear) & $\kappa_\nu$(optimal) & ratio \\
-\midrule
-0.01 & 43.3 & 31.6 & 0.73 \\
-0.05 & 11.1 & 9.4  & 0.85 \\
-0.10 & 6.9  & 6.3  & 0.91 \\
-0.50 & 4.0  & 4.0  & 1.00 \\
-\bottomrule
-\end{tabular}
-\label{tab:kappa_comparison}
-\end{table}
-
-This is not sufficient to reproduce the paper's Table~1 ($\operatorname{tr}(P)$: $1535 \to 1028$, a 33\% reduction).
-
-\paragraph{Summary.}
-\begin{enumerate}
-  \item Eq~(28) of \cite{dai-stiffness-mitigation-2021} has a sign error: the second term should be minus, not plus.
-  \item The plus-sign BVP has no solution for the paper's own numerical example.
-  \item The correct minus-sign BVP is numerically intractable due to $O(10^5)$ derivatives near $\beta=0$.
-  \item Replacing $\kappa_\nu$ with $\log\kappa_\nu$ makes the BVP solvable but yields a nearly linear schedule ($\max|\beta^{*}-\lambda|=0.02$), insufficient to reproduce the paper's reported results.
-  \item The paper's Figure~2 and Table~1 show a much more aggressive schedule that cannot be obtained from the nuclear-norm condition number as described in Eq~(28), with either sign. The authors likely used a different implementation than what the equation describes.
-\end{enumerate}
-
-Our code (\texttt{stochastic\_edh.py}) uses the $\log\kappa_\nu$ formulation with the correct minus sign, a Radau stiff solver, and grid-scan bracketing.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.5\linewidth]{sde_kalman.png}
-    \caption{The current version of the SDE filter, when diffusion scale is set to $0.001$}
-    \label{fig:sde_kalman}
-\end{figure}
+% \begin{figure}[htbp]
+%   \centering
+%   \includegraphics[width=0.9\textwidth]{rb_sde.png}
+%   \caption{Stochastic EDH flow on the range-bearing model (global linearization, no local correction).}
+%   \label{fig:rb_sde}
+% \end{figure}
+%
+% \begin{figure}[htbp]
+%   \centering
+%   \includegraphics[width=0.9\textwidth]{rb_sde_local.png}
+%   \caption{Stochastic EDH flow on the range-bearing model with local correction ($e_0 = h(\bar\eta_0) - H\bar\eta_0$).}
+%   \label{fig:rb_sde_local}
+% \end{figure}
 
 
-
-
-
+\clearpage
 \subsubsection{Soft resampling and OT resampling}
 
 \begin{table}[htbp]
@@ -820,26 +872,27 @@ Our code (\texttt{stochastic\_edh.py}) uses the $\log\kappa_\nu$ formulation wit
 \textbf{Method} & \textbf{Param} & \textbf{RMSE} & \textbf{Log-Lik} & \textbf{Wall Time (s)} & \textbf{Time/Step (ms)} & \textbf{Resample Rate} \\
 \midrule
 \multicolumn{7}{l}{\textit{Baseline}} \\
-PF (Systematic) & ---    & 1.182 & $-436.29$ & 3.65  & 7.31  & 0.356 \\
+PF (Systematic) & ---    & 1.142 & $-547.56$ & 2.12  & 4.25  & 0.358 \\
 \midrule
 \multicolumn{7}{l}{\textit{Optimal Transport (OT) Resampling}} \\
-OT              & $\epsilon=0.1$ & NaN   & NaN       & 32.61 & 65.23 & 0.290 \\
-OT              & $\epsilon=0.3$ & 1.372 & $-477.29$ & 25.04 & 50.08 & 0.390 \\
-OT              & $\epsilon=0.5$ & 1.379 & $-476.44$ & 18.32 & 36.65 & 0.390 \\
-OT              & $\epsilon=1.0$ & NaN   & NaN       & 5.92  & 11.85 & 0.286 \\
+OT              & $\epsilon=0.1$ & 1.582 & $-702.84$ & 359.45 & 718.91 & 0.420 \\
+OT              & $\epsilon=0.3$ & 1.560 & $-839.05$ & 182.84 & 365.68 & 0.432 \\
+OT              & $\epsilon=0.5$ & 1.841 & $-703.65$ & 156.06 & 312.12 & 0.428 \\
+OT              & $\epsilon=1.0$ & 2.110 & $-723.65$ & 47.94  & 95.89  & 0.432 \\
 \midrule
 \multicolumn{7}{l}{\textit{Soft Resampling}} \\
-Soft            & $\alpha=0.5$   & 1.173 & $-436.42$ & 1.26  & 2.52  & 0.534 \\
-Soft            & $\alpha=0.7$   & 1.167 & $-436.04$ & 1.25  & 2.51  & 0.420 \\
-Soft            & $\alpha=0.9$   & 1.175 & $-435.56$ & 1.27  & 2.54  & 0.368 \\
+Soft            & $\alpha=0.5$   & 1.140 & $-545.37$ & 2.32  & 4.64  & 0.532 \\
+Soft            & $\alpha=0.7$   & 1.137 & $-544.05$ & 2.26  & 4.52  & 0.426 \\
+Soft            & $\alpha=0.9$   & 1.135 & $-545.60$ & 2.26  & 4.52  & 0.370 \\
 \bottomrule
 \end{tabular}
 \label{tab:stochastic_volatility_resampling}
 \end{table}
-Here I only have the result on their face value, so I will not speculate why the result turn out this way. 
+PF (Systematic) works really well for Stochastic volatility model for the purpose of doing the filtering. We see that as we increase the $\epsilon$, the effect of smoothing out the particle distribution from OT resampling degrade the filtering result but it takes less time to run. Accuracy, namely less regularization requires more computation. Soft resampling is a modification of multinomial resampling, which is cheap to run, and less regularization is more accurate, consistent with OT resampling as well. 
 
+\clearpage
 
-\subsection{Differentiable particle filter}
+\section{Differentiable particle filter}
 
 The goal is to build a differentiable particle filter on kitagawa model,
 \begin{equation}
@@ -848,105 +901,218 @@ X_n &= \frac{X_{n-1}}{2} + 25 \frac{X_{n-1}}{1 + X_{n-1}^2} + 8 \cos(1.2n) + V_n
 Y_n &= \frac{X_n^2}{20} + W_n \\
 \end{split}
 \end{equation}
-where $ X_1 \sim \mathcal{N}(0, 5)$ and 
+where $ X_1 \sim \mathcal{N}(0, 5)$ and
 $ V_n \sim \mathcal{N}(0, \sigma_V^2)$.
-$ W_n \sim \mathcal{N}(0, \sigma_W^2)$, where $\theta=(\sigma_v,\sigma_W)$ is our parameter. One can clearly see that the key difficulty is the observation model, not because it is non-linear but it is bimodal. This means the observation is basically useless if we just plug in the filter we have used so far. Therefore, we take a three step approach. 
+$ W_n \sim \mathcal{N}(0, \sigma_W^2)$, where $\theta=(\sigma_V,\sigma_W)$ is our parameter. The key difficulty is the observation model $Y_n = X_n^2/20 + W_n$: squaring the state destroys sign information, making the filtering distribution bimodal at every time step. Both $+x$ and $-x$ produce the same expected observation $x^2/20$. This means standard filters cannot distinguish the two modes from a single observation, and parameter estimation inherits this structural difficulty. We take a three-step approach:
 \begin{enumerate}
-    \item We build a differentiable particle filter that works for easier model, this is mostly test the pipeline of differentiable particle filter 
-    \item we reproduce the PMCMC paper
-    \item we improve the ledh invertible particle flow particle filter and plug it into the dpf pipeline.
-\end{enumerate}
-We now discuss each step in detail. Step 1 requires building the differentiable pipeline itself and choosing between optimization (SGD) and sampling (HMC). Step 2 provides a gradient-free benchmark via PMCMC\cite{Andrieu2010}. Step 3 introduces Particle Gibbs to overcome the limitations discovered in steps 1 and 2.
+    \item \textbf{Filtering results.} We first run bootstrap particle filter, LEDH invertible filter on the Kitagawa model to demonstrate that this is a structurally difficult problem. Then we propose an improvement using the observation of the next $k$ step to distinguish the two modes. Even though, it is not always true that most accurate filter is best suitable for Differentiable particle filter, it doesn't hurt to try the improvement then figure out ways to make it compatible with dpf pipeline.
 
-\subsubsection{SGD-based parameter estimation (Step 1)}
+    \item \textbf{PMCMC paper analysis.} We discuss the approach of Andrieu et al.\cite{Andrieu2010}, who applied Particle Gibbs with a conjugate Inverse Gamma $\theta$-step to this exact model. Their method works, but relies on a conjugate shortcut that is not available for general models. We will report our findings in the actual section.
+ 
+     \item \textbf{HMC differentiable particle filter pipeline.} We build a full differentiable pipeline, and report our findings so far, including the difficulties such initialization, comparison between different resampling methods, and how do we plan to improve it further.
+     
+    \end{enumerate}
+
+\subsection{Filtering the Kitagawa model}
+
+Before attempting parameter estimation, we first establish how well various filters track the latent state when the true parameters are known ($\sigma_V^2 = 10$, $\sigma_W^2 = 1$). Table~\ref{tab:kitagawa_filters} summarizes the results for $T = 100$ time steps.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lrrrl}
+\toprule
+Filter & $N$ & RMSE & Log-lik & Time (s) \\
+\midrule
+EKF & --- & 33.06 & $-1431.7$ & 1.5 \\
+Bootstrap PF & 1000 & 19.66 & $-360.6$ & 1.4 \\
+EDH Invertible & 500 & 20.67 & $-132.7$ & 18.3 \\
+LEDH Invertible & 500 & 19.91 & $-135.4$ & 15.3 \\
+LEDH Flow & 500 & 18.93 & --- & 14.5 \\
+Bootstrap PF & 10000 & 19.27 & $-359.0$ & 1.3 \\
+LEDH Invertible & 10000 & 19.50 & $-137.0$ & 33.2 \\
+\midrule
+LEDH Bimodal ($K\!=\!1$) & 500 & \textbf{11.57} & $-205.4$ & 18.9 \\
+\bottomrule
+\end{tabular}
+\caption{Filtering performance on Kitagawa model ($T=100$, seed=42, float64). Log-likelihood is the particle filter's estimate of $\log p(z_{1:T})$.}
+\label{tab:kitagawa_filters}
+\end{table}
+
+Three observations stand out. First, all standard filters (BPF, EDH, LEDH) converge to RMSE $\approx 19$--$21$ regardless of method. The problem is structural: the observation $y = x^2/20$ provides zero sign information, so every filter tracks the magnitude correctly but guesses the sign at chance ($\approx 50\%$). 
+% \begin{figure}[htbp]
+%   \centering
+%   \includegraphics[width=0.9\textwidth]{kitagawa_ledh_1e4.png}
+%   \caption{LEDH invertible filter on the Kitagawa model with 10,000 particles.}
+%   \label{fig:kitagawa_ledh_1e4}
+% \end{figure}
+Second, increasing particles by $20\times$ (from 500 to 10,000) gives less than 1\% RMSE improvement, confirming that the bottleneck is not sample size but the bimodal posterior.Third, the LEDH bimodal filter with a 1-step look-ahead correction (using the next observation $y_{t+1}$ to disambiguate sign via the asymmetric transition dynamics $f(x) \neq f(-x)$) breaks through to RMSE 11.57, a 42\% improvement. 
+% \begin{figure}[htbp]
+%   \centering
+%   \includegraphics[width=0.9\textwidth]{kitagawa_k1.png}
+%   \caption{LEDH bimodal filter with 1-step look-ahead correction ($k=1$) on the Kitagawa model.}
+%   \label{fig:kitagawa_k1}
+% \end{figure}
+The key insight is that while a single observation $y_t$ cannot distinguish $+x$ from $-x$ (since $h(x) = x^2/20$ is an even function), the \emph{next} observation $y_{t+1}$ can, indirectly. For each flowed particle $\eta_1$, we propagate both signs one step forward through the transition:
+\begin{equation}
+x_{t+1}^{+} = f(+\eta_1,\, t\!+\!1), \qquad x_{t+1}^{-} = f(-\eta_1,\, t\!+\!1),
+\end{equation}
+and compute predicted observations $\hat{y}^{\pm} = (x_{t+1}^{\pm})^2/20$. Because the transition $f(x,t) = x/2 + 25x/(1+x^2) + 8\cos(1.2t)$ contains the even cosine term $8\cos(1.2t)$, we have $f(+x) \neq -f(-x)$ in general, so the two predicted observations differ. Comparing $\hat{y}^+$ and $\hat{y}^-$ against the actual $y_{t+1}$ tells us which sign is more consistent with the data. The flip probability is
+\begin{equation}
+P_{flip} = \sigma\!\Big(\log p(y_{t+1} \mid x_{t+1}^{-}) - \log p(y_{t+1} \mid x_{t+1}^{+})\Big),
+\end{equation}
+where the log-likelihoods use a predictive variance that accounts for process noise propagated through the observation Jacobian. For example, at $t = 50$, we have $\cos(1.2 \times 51) \approx -0.95$:
+\begin{alignat*}{2}
+f(+15) &= 7.5 + 1.66 - 7.6 = 1.56 &\quad&\Longrightarrow\quad \hat{y}^{+} = 1.56^2/20 = 0.12, \\
+f(-15) &= -7.5 - 1.66 - 7.6 = -16.76 &\quad&\Longrightarrow\quad \hat{y}^{-} = 16.76^2/20 = 14.05.
+\end{alignat*}
+If $y_{t+1} \approx 14$, the negative mode is overwhelmingly favored (signal difference $\sim 14$ vs $\sim 0.1$). Table~\ref{tab:kitagawa_ksweep} shows how the look-ahead depth $K$ affects performance.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{rrrrl}
+\toprule
+$K$ & RMSE & Log-lik & Mean ESS & Time (s) \\
+\midrule
+0 (baseline) & 19.91 & $-135.4$ & $\sim\!200$ & 12.0 \\
+1 & \textbf{11.57} & $-205.4$ & 170.8 & 18.9 \\
+2 & 12.89 & $-215.2$ & 211.2 & 37.1 \\
+5 & 11.80 & $-196.2$ & 223.5 & 21.3 \\
+7 & 15.35 & $-208.4$ & 218.4 & 22.3 \\
+10 & 17.19 & $-214.7$ & 233.6 & 24.0 \\
+\bottomrule
+\end{tabular}
+\caption{LEDH Bimodal look-ahead depth sweep ($N=500$, $n_\lambda=29$, $T=100$, seed=42, float64).}
+\label{tab:kitagawa_ksweep}
+\end{table}
+
+$K=1$ is already near-optimal (RMSE 11.57, a 42\% improvement over baseline). One step of deterministic propagation through $f(x,t)$ is already asymmetric enough to provide strong discriminative signal. For $K \geq 5$, the deterministic rollout ignores process noise ($\sigma_V = 10$), so later predictions diverge from reality and contribute noise rather than signal to the score. The degradation at $K = 7$ and $K = 10$ confirms this. $K = 1$ is preferred for its simplicity, lowest wall time, and best RMSE. In addition, we note that RMSE and log-likelihood do not follow the same trend. The standard LEDH invertible has the best log-likelihood ($-135$) despite mediocre RMSE ($19.9$): all particles concentrate in one mode, producing well-calibrated weights but a biased point estimate. The bimodal filter spreads particles across both modes, improving the point estimate (lower RMSE) but diluting the predictive density (lower log-likelihood). This dissociation is characteristic of bimodal filtering problems.
+
+
+We keep in mind that  \textbf{the sign correction is not differentiable.}
+The look-ahead scoring produces a smooth flip probability $p_{\text{flip}} = \sigma(\cdot)$ via the sigmoid, but the actual flip decision uses a hard threshold which means if we wanted to embed this filter inside a differentiable particle filter framework---learning $\theta$ by minimizing $-\log p(y_{1:T} \mid \theta)$ via gradient descent through the entire filter---the sign correction would block gradients. The loss would not see the effect of $\theta$ on the sign decisions. In the future, we can try to replace the hard threshold with a soft threshold, or other novel improvement. 
+
+\subsection{PMCMC: gradient-free baseline}
+
+Andrieu et al.\cite{Andrieu2010} introduce two gradient-free MCMC methods that use the particle filter as a black-box likelihood estimator, avoiding all differentiability issues. Particle Marginal Metropolis-Hastings replaces the intractable likelihood $p(z_{1:T}|\v\theta)$ with the particle filter's unbiased estimate $\hat{p}(z_{1:T}|\v\theta)$, then runs standard Metropolis-Hastings:
+\begin{equation}
+    \alpha = \min\!\left(1,\; \frac{\hat{p}(z_{1:T}|\v\theta^*)\, p(\v\theta^*)}{\hat{p}(z_{1:T}|\v\theta^{(i)})\, p(\v\theta^{(i)})}\right)
+\end{equation}
+Their Theorem 2 shows this leaves the correct posterior invariant for \textit{any} $N \geq 1$ particles. No gradients are needed, so gradient cliffs and resampling discontinuities are irrelevant. The variance of the likelihood estimate scales as $\mathcal{O}(T/N)$ (their Theorem 1), so doubling $T$ requires doubling $N$ to maintain the same acceptance rate. In addition, they use particle Gibbs (PG) to split the joint posterior $p(\v\theta, x_{0:T} \mid z_{1:T})$ via Gibbs sampling, alternating between a $\v\theta$-step and an $x$-step. In the $\v\theta$-step, given a fixed trajectory $x_{0:T}$, the conditional posterior is
+\begin{equation}
+    \log p(\v\theta \mid x_{0:T}, z_{1:T}) = \sum_{t=1}^{T} \log p(x_t \mid x_{t-1}, \v\theta) + \sum_{t=1}^{T} \log p(z_t \mid x_t, \v\theta) + \log p(\v\theta) + \text{const}
+\end{equation}
+Each term is a Gaussian log-density. No particle filter is involved --- no resampling, no Jacobian accumulation, no weight collapse. For the Kitagawa model with $\v\theta = (\sigma_V, \sigma_W)$, this becomes
+\begin{equation}
+    \log p(\sigma_V, \sigma_W \mid x_{0:T}, z_{1:T}) = -T\log\sigma_V - \frac{1}{2\sigma_V^2}\sum_{t=1}^{T}\!\left(x_t - f(x_{t-1},t)\right)^2 -T\log\sigma_W - \frac{1}{2\sigma_W^2}\sum_{t=1}^{T}\!\left(z_t - \frac{x_t^2}{20}\right)^2 + \log p(\sigma_V, \sigma_W)
+\end{equation}
+where $f(x,t) = x/2 + 25x/(1+x^2) + 8\cos(1.2t)$. The paper parameterizes in terms of variances $\sigma_V^2, \sigma_W^2$ with Inverse Gamma (IG) priors: $\sigma_V^2 \sim \text{IG}(0.01, 0.01)$. The Gaussian likelihood, viewed as a function of $\sigma^2$, has the form
+\begin{equation}
+    p(\text{data} \mid \sigma^2) \propto (\sigma^2)^{-T/2} \exp\!\left(-\frac{S}{2\sigma^2}\right), \qquad S = \sum_{t=1}^{T} e_t^2
+\end{equation}
+where $e_t = x_t - f(x_{t-1})$ are the transition residuals. This is IG-shaped in $\sigma^2$. Multiplying by the IG prior preserves the functional form:
+\begin{equation}
+    \sigma_V^2 \mid x_{0:T} \;\sim\; \text{IG}\!\left(\alpha_0 + \frac{T}{2},\;\; \beta_0 + \frac{1}{2}\sum_{t=1}^{T}\!\left(x_t - f(x_{t-1},t)\right)^2\right)
+\end{equation}
+and similarly for $\sigma_W^2$ with observation residuals $r_t = z_t - x_t^2/20$. The $\theta$-step reduces to computing a sum of squared residuals and drawing one sample from an IG distribution --- no MH, no HMC, 100\% acceptance, zero tuning. The paper presents this as simply ``sample $\theta$ from the conditional'' without elaboration, but it is a significant hidden advantage: the $\theta$-step is exact, instant, and requires no hyperparameter choices.
+
+In the $x$-step, a new trajectory $x_{0:T}$ is sampled via Conditional SMC (CSMC)\cite{Andrieu2010,Lindsten2014}, which pins one particle (the \textit{reference}) to the previous iteration's trajectory while letting $N-1$ free particles explore. Reference pinning guarantees ergodicity, and ancestor sampling\cite{Lindsten2014} improves mixing by allowing the reference particle's history to graft onto other particles' pasts.
+
+The paper's successful results use $N = 5000$ particles, $T = 500$ time steps, 50,000 MCMC iterations, and the conjugate IG $\theta$-step. We want to borrow what we can to make the problem easier as a step stone toward full dpf framework. We can split the whole dpf procedure into MC/HMC + CSMC, where the CSMC part can be further improved with the look-ahead flip trick we invented for kitagawa model. Currently, we have done small test run  to ensure numerical stability, and we observe that the algorithm is very sensitive to initial guess, with a bad initial guess, the parameters will drift away instead of oscillating around the true value. For production run, we will need to make good guess on the initial guess before we run Baysian estimation on the model parameter. Which we will discuss in the next section.
+
+
+\subsection{SGD-based parameter estimation}
 The simplest way to test the differentiable particle filter pipeline is to use gradient-based optimization. Given the differentiable pipeline, we treat the negative log-posterior as a loss function and minimize it with Adam or SGD,
 \begin{equation}
     \v \theta \leftarrow \v \theta - \eta \,\nabla_{\v \theta}\!\left[-\log p(z_{1:T} \mid \v\theta) - \log p(\v \theta)\right]
 \end{equation}
-where $\log p(z_{1:T}|\v\theta)$ is the log marginal likelihood from the particle filter. Each optimization step uses a different random seed for the particle filter, making the gradient stochastic, but SGD handles this naturally by averaging over hundreds of steps. This is the approach of PF-net\cite{Jonschkowski2018}, which introduced soft resampling specifically to give nonzero gradient through the resampling step. Corenflos et al.\cite{corenflos-differentiable-2021} later used OT resampling for the same purpose.
+where $\log p(z_{1:T}|\v\theta)$ is the log marginal likelihood from the particle filter. Each optimization step uses a different random seed for the particle filter, making the gradient stochastic, but SGD handles this naturally by averaging over hundreds of steps. SGD-based estimation finds the MAP point efficiently but provides no uncertainty quantification: it returns a single best estimate $\v\theta^*$ without characterizing how confident we should be in that estimate. Currently, this is implemented in the codebase, but no experiment was done. Eventually, we can add this to the warming-up stage to improve the exploration efficiency.
 
-SGD-based estimation finds the MAP point efficiently but provides no uncertainty quantification, it returns a single best estimate $\v\theta^*$ without characterizing how confident we should be in that estimate. We start with easier models (linear-Gaussian) to verify the pipeline works, then move to Kitagawa.
 
-{\color{red} Add MAP estimation results: convergence curves for linear-Gaussian and Kitagawa models, compare BPF vs LEDH.}
-
-\subsubsection{HMC through the particle filter (Step 1)}
+\subsection{The differentiability-bias trade-off}
 For full posterior estimation (uncertainty quantification), we use HMC on a deterministic likelihood surface by fixing the particle filter seed. This gives us the posterior distribution $p(\v \theta \mid z_{1:T})$, not just the mode. However, the particle filter's log-likelihood surface has features that make HMC challenging.
 
-\textbf{The differentiability-bias trade-off.} A common claim is that systematic resampling is ``not differentiable'' and therefore cannot be used in differentiable particle filters. This is misleading. Systematic resampling consists of computing cumulative weights, generating uniform points, finding indices via searchsorted, and gathering particles. The searchsorted step maps continuous weights to integer indices, a piecewise-constant function, so
-$$\frac{\partial I_k}{\partial w_j} = 0 \quad \text{almost everywhere}$$
-The code runs fine; TensorFlow computes a gradient through this, it is just zero. The gradient carries no information about how the resampling depends on weights, but there is no crash or error. Using \texttt{stop\_gradient} explicitly cuts all gradient through resampling, the effect is almost identical to the natural zero-gradient but more controlled.
+The true gradient $\nabla_\theta \log \hat{p}(z_{1:T}|\theta)$ should account for how $\theta$ affects everything: the state transitions, the observation weights, and the resampling decisions --- which particles survive and which are killed. Resampling selects particles by mapping continuous weights to integer indices, a piecewise-constant operation with zero derivative almost everywhere. Autodiff passes through this operation and misses the dependence of particle selection on $\theta$. The \textit{gradient bias} is precisely this missing ``selection gradient.'' The three resampling strategies handle this differently:
 
-Soft resampling replaces the discrete index selection with a continuous relaxation. The weights are blended with a uniform distribution,
-\begin{equation}
-    \tilde{w}_i = \alpha \, w_i + (1-\alpha)/N
-\end{equation}
-so that $\partial \tilde{w}_i / \partial w_i = \alpha \neq 0$. OT Sinkhorn produces a differentiable transport plan $T_{ij}$ so that $x_i' = \sum_j T_{ij} x_j$. Both approaches give nonzero gradients through resampling, but at a cost.
+\textit{Systematic resampling} selects particles by mapping cumulative weights to integer indices --- a discrete, non-differentiable operation. If we detach the gradient at the resampling step (treating the selected indices as fixed constants), autodiff captures how $\theta$ affects particle values and observation log-probabilities, but learns nothing about which particles were selected. The resulting gradient is heavily biased but well-behaved: it is bounded and varies continuously with $\theta$, because it only differentiates through smooth transition and observation models. However, the loss surface \textit{itself} is not smooth. It is piecewise smooth with discontinuities wherever a small change in $\theta$ causes a different particle to be selected. With $N$ particles and $T$ resampling steps, there are up to $\sim NT$ such boundaries.
 
-The critical distinction is that HMC is not SGD. SGD averages over many noisy gradient steps and tolerates high variance. HMC's leapfrog integrator simulates Hamiltonian dynamics and assumes the gradient is a smooth, deterministic force field. With \texttt{stop\_gradient}, the gradient is biased but smooth, giving a valid (if slightly wrong) Hamiltonian for the leapfrog to simulate. With soft resampling, the gradient through resampling of $N$ particles has high variance, causing leapfrog trajectories to accumulate noise at each step and diverge into extreme parameter regions. Therefore, soft or OT resampling is preferred for SGD (less bias), while systematic resampling with \texttt{stop\_gradient} is more stable for HMC (smoother energy surface).
+\textit{Soft resampling}\cite{karkus2018particle} blends the normalized weights with a uniform distribution, $\tilde{w}_i = \alpha \, w_i + (1-\alpha)/N$, making the importance weight correction $w_{\text{new}} = w / \tilde{w}$ differentiable. However, the core particle selection is unchanged --- it still maps cumulative weights to integer indices. Autodiff captures the weight correction but not the selection. This makes soft resampling \textit{partially} differentiable with medium gradient bias.
 
-\textbf{The gradient cliff problem.} The observation log-likelihood for Gaussian noise is
-\begin{equation}
-    \log p(y \mid x, \sigma) = -\frac{1}{2}\log(2\pi\sigma^2) - \frac{(y-h(x))^2}{2\sigma^2}
-\end{equation}
-As $\sigma \to 0$, the $-\log \sigma$ term increases while the $(y-h(x))^2/\sigma^2$ term explodes. There is a narrow ridge where these balance, creating a sharp cliff in the log-likelihood surface. The gradient at the cliff edge is enormous, far too large for the leapfrog step size to handle. LEDH amplifies this problem: its 29-step Jacobian chain $\prod_{j=1}^{29} \det(I + \Delta\lambda\, A_j(\v\theta))$ is extremely sensitive to $\v\theta$, creating additional curvature that causes leapfrog divergence.
+\textit{OT Sinkhorn resampling}\cite{corenflos-differentiable-2021} replaces discrete index selection entirely with a continuous transport: $x_i' = \sum_j T_{ij} x_j$, where $T$ is a doubly-stochastic matrix computed via differentiable Sinkhorn iterations. Every input particle contributes to every output particle with a smooth, differentiable weight. This is the only \textit{fully} differentiable resampling method, producing gradients with low bias. The cost is that differentiating through the Sinkhorn iterations can produce large gradient magnitudes --- the gradient is correct but potentially unbounded.
 
-{\color{red} Add experimental results: filter $\times$ resampling comparison table (acceptance rates, convergence, time/step). Currently BPF+systematic is the only working config for direct HMC.}
+\begin{table}[H]
+\centering
+\caption{Resampling strategies for differentiable particle filters.}
+\label{tab:resampling_grad}
+\begin{tabular}{lcccc}
+\toprule
+Resampling & Fully diff.? & Gradient bias & Gradient bounded? & Loss continuous? \\
+\midrule
+Systematic (detached) & No & High & Yes & No \\
+Soft (PF-net) & Partial & Medium & Yes & No \\
+OT Sinkhorn & Yes & Low & Not guaranteed & Yes \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-This limitation, that only the simplest filter (BPF with systematic resampling) works with direct HMC, motivates steps 2 and 3.
+HMC's leapfrog integrator simulates Hamiltonian dynamics and treats the gradient as a deterministic force field. It requires two properties:
+\begin{enumerate}
+    \item \textit{Bounded gradients.} A single gradient spike can send the leapfrog trajectory to infinity; the proposal is rejected but no progress is made.
+    \item \textit{A continuous loss surface.} Discontinuities in the Hamiltonian cause large energy errors $\Delta H$, leading to rejected proposals and step-size collapse.
+\end{enumerate}
+Systematic resampling with detached gradients satisfies (1) but not (2): the biased gradient is bounded and well-behaved, producing stable leapfrog trajectories, but the piecewise-smooth loss surface causes Metropolis rejections at the discontinuities. OT Sinkhorn satisfies (2) but can violate (1): the continuous transport makes the loss surface smooth, but differentiating through Sinkhorn can produce gradient spikes. In simple models (e.g.\ linear Gaussian), systematic resampling works better for HMC because the discontinuities are mild and bounded gradients dominate. In harder models, OT's continuity becomes essential.
 
-\subsubsection{PMMH: gradient-free benchmark (Step 2)}
+The conditional resampling threshold is a further source of discontinuity affects all filters that resample conditionally. Most particle filters resample only when the effective sample size drops below a threshold, $N_{\text{eff}} < N/2$. During HMC's leapfrog integration, each step perturbs $\theta$ slightly, changing the particle weights and hence the ESS. When the ESS crosses the threshold at some time step $t$, the filter switches from no resampling to full resampling (or vice versa), and the log-likelihood jumps discontinuously. In the experiment for cubic sensor model, we observe exactly this phenomenon: shrinking step size for systematic and soft resampling and stable step size for OT Sinkhorn resampling.
 
-The Particle Marginal Metropolis-Hastings (PMMH) algorithm from \cite{Andrieu2010} takes a completely different approach: it replaces the intractable likelihood $p(z_{1:T}|\v\theta)$ with the particle filter's unbiased estimate $\hat{p}(z_{1:T}|\v\theta)$, then uses standard Metropolis-Hastings. At each iteration, we propose $\v\theta^*$ via random walk, run a particle filter with a fresh random seed to obtain $\hat{p}(z_{1:T}|\v\theta^*)$, and accept with probability
-\begin{equation}
-    \alpha = \min\!\left(1,\; \frac{\hat{p}(z_{1:T}|\v\theta^*)\, p(\v\theta^*)}{\hat{p}(z_{1:T}|\v\theta^{(i)})\, p(\v\theta^{(i)})}\right)
-\end{equation}
-The remarkable result (their Theorem 2) is that this leaves the correct posterior invariant for \textit{any} $N \geq 1$ particles. No gradients are needed, so gradient cliffs and resampling discontinuities are completely irrelevant.
+For systematic and soft resampling, this jump is large: the resampled particle set (with duplicated high-weight and killed low-weight particles) differs substantially from the unresampled set. The Hamiltonian error $\Delta H \gg 1$, the proposal is rejected, and adaptive step-size tuning shrinks the step size. Since the threshold can be crossed at any scale of perturbation, the step size collapses toward zero.
 
-In their Section 3.1, they apply PMMH to exactly our Kitagawa model with $\sigma_V^2 = 10$, $\sigma_W^2 = 1$, using $N=5000$ particles, $T=500$ time steps, and 50,000 MCMC iterations with Inverse Gamma priors on the variances. The acceptance rate depends strongly on $N$: roughly 10\% at $N=100$, 50\% at $N=500$, and 80\% at $N=2000$ (for $T=100$). This is consistent with their Theorem 1, which shows that the variance of the likelihood estimate scales as $\mathcal{O}(T/N)$, doubling $T$ requires doubling $N$ to maintain the same acceptance rate.
+For OT Sinkhorn resampling, this jump is negligible. When ESS is near the threshold, the weights are close to uniform, and the transport matrix is close to the identity: $T \approx I$, so $x_i' = \sum_j T_{ij} x_j \approx x_i$. Crossing the threshold causes almost no change in the output particles, preserving the Hamiltonian. This is a strong practical argument for fully differentiable resampling: it eliminates the threshold discontinuity by construction.
 
-An important warning from their paper (p.~283): standard block-wise MCMC (updating latent states $x_{1:T}$ one block at a time, then updating $\v\theta$) ``tends to become trapped in a local mode of the multimodal posterior\ldots and results in an overestimation of the true value of $\sigma_V$.'' PMMH and Particle Gibbs did not have this trapping problem, suggesting that the difficulty we face with the Kitagawa model is partly a multimodality issue, not just a gradient cliff issue. The trade-off is that each PMMH step is cheap (one particle filter run, no gradient computation) but mixing is slow because the proposals are random walk.
+\textbf{Unconditional resampling.} For systematic and soft resampling, the threshold discontinuity can be removed by resampling unconditionally at every time step. This eliminates the branch point but does \textit{not} eliminate the piecewise-smooth nature of the loss surface --- the discrete particle selection still changes as $\theta$ varies. For OT resampling, the threshold discontinuity is already negligible, so conditional resampling is acceptable.
 
-{\color{red} Add our PMMH reproduction results on Kitagawa model: posterior histograms, acceptance rates, comparison with their Fig.~3.}
+\textbf{Model-dependent choice.} The best resampling method depends on the model. For models without sample impoverishment (e.g.\ linear Gaussian), systematic resampling with detached gradients and unconditional resampling is sufficient and cheapest: the bounded gradient gives stable leapfrog trajectories, and the mild discontinuities do not prevent convergence. For nonlinear models where sample impoverishment is a concern, OT Sinkhorn is preferred: its continuous transport preserves particle diversity and eliminates both sources of discontinuity (threshold and selection).
 
-\subsubsection{Particle Gibbs: decoupling parameters and states (Step 3)}
-Steps 1 and 2 reveal three core problems: gradient cliffs when differentiating through the particle filter (Step 1), weight collapse from LEDH's accumulated Jacobian products (Step 1), and bimodality trapping for the Kitagawa observation model (Step 2). The key insight, also from \cite{Andrieu2010}, is that instead of marginalizing out the latent states $x_{0:T}$ (which requires differentiating through the particle filter), we can target the \textit{joint} posterior $p(\v\theta, x_{0:T} \mid z_{1:T})$ via Gibbs sampling, alternating between two steps.
 
-\textbf{$\v\theta$-step (HMC on a smooth surface).} Given a fixed trajectory $x_{0:T}$, the conditional posterior of $\v\theta$ is
-\begin{equation}
-    \log p(\v\theta \mid x_{0:T}, z_{1:T}) = \sum_{t=1}^{T} \log p(x_t \mid x_{t-1}, \v\theta) + \sum_{t=1}^{T} \log p(z_t \mid x_t, \v\theta) + \log p(\v\theta) + \text{const}
-\end{equation}
-Each term is a Gaussian log-density. No particle filter is involved, there is no resampling, no Jacobian accumulation, no weight collapse. For the Kitagawa model with $\v\theta = (\sigma_V, \sigma_W)$, this becomes
-\begin{equation}
-    \log p(\sigma_V, \sigma_W \mid x_{0:T}, z_{1:T}) = -T\log\sigma_V - \frac{1}{2\sigma_V^2}\sum_{t=1}^{T}\!\left(x_t - f(x_{t-1},t)\right)^2 -T\log\sigma_W - \frac{1}{2\sigma_W^2}\sum_{t=1}^{T}\!\left(z_t - \frac{x_t^2}{20}\right)^2 + \log p(\sigma_V, \sigma_W)
-\end{equation}
-where $f(x,t) = x/2 + 25x/(1+x^2) + 8\cos(1.2t)$. This is a smooth, cheap $\mathcal{O}(T)$ computation with exact gradients. HMC can use large step sizes and achieve 60--80\% acceptance on this surface, compared to 0--10\% when differentiating through the particle filter.
 
-\textbf{$x$-step (Conditional SMC).} We sample a new trajectory $x_{0:T} \sim p(x_{0:T} \mid \v\theta, z_{1:T})$ using a particle filter with fixed $\v\theta$. No gradients are needed, this is pure forward simulation. The standard approach is Conditional Sequential Monte Carlo (CSMC)\cite{Andrieu2010,Lindsten2014}, which pins one particle (the \textit{reference}) to the previous iteration's trajectory $x_{0:T}^*$ while letting $N-1$ free particles explore. At each time step, the reference particle follows the prescribed path deterministically, while free particles are propagated and weighted normally. At the final time step, a trajectory is sampled from the weighted particles and becomes the reference for the next Gibbs iteration.
 
-Reference pinning serves two purposes. First, it guarantees ergodicity, the chain can always ``stay put'' by selecting the reference trajectory. Second, for bimodal models like Kitagawa where $y = x^2/20$ admits both $+\sqrt{20y}$ and $-\sqrt{20y}$, the free particles can explore both modes while the reference anchors the sampler. Ancestor sampling\cite{Lindsten2014} further improves mixing by allowing the reference particle's history to ``detach'' and graft onto any other particle's past, dramatically reducing path degeneracy.
+\subsection{Workflow and current status of DPF pipeline}
 
-The Gibbs decomposition solves all three problems identified in Steps 1 and 2:
+\textbf{How the components fit together.}
+The differentiable filtering module (\texttt{src/DF/}) provides three runners, each implementing a different inference strategy:
 \begin{itemize}
-    \item Gradient cliffs from Step 1 are eliminated, the $\v\theta$-step is closed-form.
-    \item Weight collapse from LEDH is eliminated, no Jacobian accumulation in the $\v\theta$-step.
-    \item Bimodality trapping from Step 2 is addressed by CSMC reference pinning in the $x$-step.
+    \item \texttt{DPFRunner}: HMC on the particle filter's log-likelihood. A \texttt{DifferentiableModel} wraps the state-space model, and a \texttt{ParameterHandler} manages bijector transforms between constrained and unconstrained space. Parameters flow as plain tensors: unconstrained $\to$ bijector $\to$ \texttt{setattr} on the model $\to$ filter $\to$ \texttt{log\_marginal\_likelihood\_tf}. \texttt{tf.GradientTape} differentiates through the entire chain. The particle filter seed is fixed, making the likelihood surface deterministic.
+    \item \texttt{PMMHRunner}: Gradient-free. Random-walk Metropolis-Hastings with a fresh seed at each proposal. No \texttt{DifferentiableModel} needed --- the particle filter is a black box.
+    \item \texttt{PGibbsRunner}: Gibbs sampler alternating a $\theta$-step (HMC or MH on the closed-form conditional $p(\theta \mid x_{0:T}, y_{1:T})$) and an $x$-step (Conditional SMC with ancestor sampling). The $\theta$-step involves no particle filter --- just a sum of Gaussian log-densities.
 \end{itemize}
-The implementation proceeds in two phases. Phase 1 uses a bootstrap particle filter for the CSMC $x$-step, which is the simplest and validates the framework. Phase 2 replaces it with LEDH CSMC, where the flow is applied only to the $N-1$ free particles while the reference stays pinned, providing better proposals for challenging high-dimensional models. This is the ``improve LEDH and plug into DPF'' from the three-step plan above.
+The experiment runner (\texttt{run\_dpf\_experiment.py}) wires everything together via Hydra configs: pick a model, a filter, a runner, and the trainable parameters. We currently have configs for linear-Gaussian, cubic sensor, range-bearing, Kitagawa, and stochastic volatility, crossed with BPF and LEDH invertible, crossed with systematic, soft, and OT resampling.
 
-{\color{red} Add PGibbs + HMC results: $\theta$-step acceptance rate on closed-form surface, CSMC trajectory diversity, comparison with direct HMC through PF and PMMH.}
+We started with the linear-Gaussian model as a benchmark. I initially thought this would be easy --- we have the Kalman filter as ground truth, so we can check everything. It turned out that systematic resampling is the only method that works cleanly with HMC on this model. Soft and OT resampling introduce extra noise into the gradient that makes the leapfrog integrator less stable, even though the model itself is trivial. This was an early lesson: the resampling method matters more for gradient quality than for filtering quality.
 
-\subsubsection{Additional notes and practical considerations}
+Next I tried range-bearing (2D state, nonlinear observation). Too slow, too many things to debug at once. Not a good model for iterating on the pipeline. So I added the cubic sensor: 1D, mildly nonlinear, fast. Better for debugging, I realized the resampling threshold causing shrinking step size from experiments on this model. Stochastic volatility turned out to be the sweet spot --- 1D, nonlinear enough to stress the pipeline, and fast enough to run many experiments.
 
-\textbf{Leapfrog divergence.} The mechanism by which direct HMC fails is instructive. The leapfrog trajectory starts in a reasonable region, passes through the likelihood cliff near small noise values (where the log-density changes sign), and the enormous gradient launches the state into an extreme parameter region. The Metropolis acceptance correctly rejects such diverged proposals (with acceptance probability $e^{-\Delta H} \approx 0$), but the chain makes no progress. Two remedies exist: gradient clipping, which caps $|\nabla U|$ at a threshold $C$ (a practical hack that preserves detailed balance because the true energy is still used for acceptance), and NUTS (No U-Turn Sampler), which adaptively truncates the trajectory when it starts doubling back\cite{Neal-2012-MCMC-Hamiltonian-Dynamics-ARXIV-1206-1901v1}. Both are worth trying for particle filter likelihoods.
+Along the way, we dealt with several engineering issues. TensorFlow was repeatedly retracing the \texttt{GradientTape} computation, causing each HMC step to take minutes instead of seconds. Fixed. Python loops over time steps were slow. Fixed. There are no speed problems anymore. Gradient explosion was a bigger concern: the log-likelihood surface has cliffs near small noise values, and the gradient can blow up to $10^{10}$ or produce NaN. We added a diagnostic callback (\texttt{on\_grad}) that logs the gradient norm at every HMC step, and used gradient clipping to keep the leapfrog integrator stable. The gradients are now finite across all configurations we have tested.
 
-\textbf{Seed handling.} HMC uses a \textit{fixed} seed for the particle filter, making the likelihood surface deterministic for gradient computation. PMMH uses a \textit{fresh} seed each evaluation, the stochasticity is part of the algorithm, not a bug. On rejection, PMMH keeps the old likelihood estimate rather than re-evaluating with new randomness.
+The most recent problem is bad initialization. When the initial guess for $\theta$ is far from the truth, the MCMC chain drifts instead of converging. This is not surprising --- the likelihood surface is rugged, and HMC with a bad starting point can get stuck in a local mode or wander along a ridge. The plan is to add a MAP warm-start stage: run SGD or Adam for a few hundred steps to find a reasonable $\theta^*$, then start the HMC chain there. Before implementing that, we are testing the pipeline with initial guesses close to the true values to confirm that the inference itself is correct.
 
-\textbf{Parameterization.} The PMCMC paper uses variances $\sigma^2$ with Inverse Gamma priors (conjugate for Gaussian variance), while our setup uses standard deviations $\sigma$ with an exponential bijector (log-space HMC). The gradient of $\log p(z|\sigma)$ with respect to $\log \sigma$ involves an extra chain rule factor of $\sigma$, which amplifies gradient magnitudes for large $\sigma$. Switching to a $\sigma^2$ parameterization might smooth the landscape.
+LEDH invertible is slower than BPF and has more numerical instability due to the 29-step Jacobian chain. For the DPF pipeline, BPF is the workhorse; LEDH is reserved for models where BPF's proposal quality is insufficient.
 
-\textbf{Likelihood variance.} From Theorem 1 of \cite{Andrieu2010}, the variance of the particle filter's likelihood estimate scales as $\text{Var}(\hat{Z}^N/Z) \leq C \cdot T / N$. Doubling the number of time steps $T$ requires doubling the number of particles $N$ to maintain the same MCMC acceptance rate. For $T=100$, $N=1000$ should suffice; for $T=500$, they needed $N=5000$.
+During the early stages, the tests were not structured. Now that the picture is more coherent, we can move to systematic benchmarking.
 
-{\color{red} Organize these notes further as needed. Some may be moved to appendix or removed.}
+\begin{enumerate}
+    \item \textbf{Comprehensive benchmark.} BPF + OT resampling + stochastic volatility as the primary test case. The goal is to verify that the full pipeline (data generation $\to$ filtering $\to$ HMC $\to$ posterior) produces correct posteriors on a nontrivial model.
+    \item \textbf{Cross-check with Particle Gibbs.} Run PGibbs + MH/HMC on the same model and compare posteriors. This is a different algorithm that avoids differentiating through the filter entirely, so agreement would be strong evidence that both pipelines are correct. However, PGibbs is a separate codebase with its own tuning, so this may digress our attention.
+    \item \textbf{LEDH invertible + look-ahead.} Integrate the bimodal look-ahead version of ledh invertible PF-PF into the DPF pipeline for models like Kitagawa.
+     \item \textbf{MAP warm-start.} Add an SGD/Adam pre-optimization stage to find a good initialization before launching HMC. This should eliminate the parameter drift problem we currently see with bad initial guesses.
+\end{enumerate}
 
+\subsection{Additional notes and practical considerations}
+
+\textbf{Leapfrog divergence.} The mechanism by which direct HMC fails is instructive. The leapfrog trajectory starts in a reasonable region, passes through the likelihood cliff near small noise values (where the log-density changes sign), and the enormous gradient launches the state into an extreme parameter region. The Metropolis acceptance correctly rejects such diverged proposals (with acceptance probability $e^{-\Delta H} \approx 0$), but the chain makes no progress. Two remedies exist: gradient clipping, which caps $|\nabla U|$ at a threshold $C$ (a practical hack that preserves detailed balance because the true energy is still used for acceptance), and NUTS (No U-Turn Sampler), which adaptively truncates the trajectory when it starts doubling back\cite{Neal-2012-MCMC-Hamiltonian-Dynamics-ARXIV-1206-1901v1}. Both are worth trying for particle filter likelihoods. I did not use NUTS yet due to time cost.
+
+\textbf{Mass matrix and preconditioning.} HMC's efficiency depends on the mass matrix $M$ matching the posterior geometry. With the default $M = I$, the leapfrog explores all parameter directions at the same rate, which is inefficient when posterior variances differ across parameters. A practical approach is to run a short preliminary chain, estimate the posterior covariance from the samples, and use it as the mass matrix for a longer production run. This problem-specific adjustment is necessary: no off-the-shelf HMC configuration works well for particle filter likelihoods without tuning.
+
+\textbf{Parameterization.} The PMCMC paper uses variances $\sigma^2$ with Inverse Gamma priors (conjugate for Gaussian variance), while our setup uses standard deviations $\sigma$ with a Softplus bijector (log-space HMC). The gradient of $\log p(z|\sigma)$ with respect to $\log \sigma$ involves an extra chain rule factor of $\sigma$, which amplifies gradient magnitudes for large $\sigma$. Switching to a $\sigma^2$ parameterization might smooth the landscape.
+
+\textbf{Scale} We need to increase the scale of experiment, more particles, longer times. But this can only happen for well-tuned pipeline.
 
 % \newpage
 
@@ -1196,8 +1362,6 @@ Update state mean and covariance:
 
 \section{Particle flow and particle filter}
 
-\subsection{Particle filter}
-{\color{red} Importance sampling, more general than Bootstrap particle filter}
 \subsection{Particle flow}\label{APP:Particle_flow}
 
 Previously, we have discussed how after each resampling, the information of the distribution is concentrated on the multiplicity distribution of the particles, and the diversity of the particles have been lost. If we look at the particle methods, it's clearly that we either use weights or multiplicity distribution to mimic distribution. The culprit of the particle degeneracy is the consecutive multiplication of small numbers $p(y_t | x_t^{(i)})$ will make a large number of particles irrelevant after view steps. And the observation was done independently and there is no way to control the value of $p(y_t | x_t^{(i)})$. In \cite{daum2010exact,daum2011particle}, the author proposed to use the multiplicity to store the information of the distribution and invented an alternative evolution for the particles such that $p(y_t | x_t^{(i)})$ was never too small. The limitation of these two papers is that to solve the equation, which we will talk about later, they have to assume linear or nearly linearly observation model and dynamics with additive Gaussian noise. The evolution for the particles is complete different equation than underlying dynamics for the ground truth. Later, we will see the methods that generalize the equation for more general noise distribution. Let us first derive the evolution equations. First, we have the prediction step: 
@@ -1316,8 +1480,6 @@ After algebraic manipulation, this simplifies to:
 \end{equation}
 
 The EDH flow equations are derived by requiring that Gaussian distributions remain Gaussian under the flow, that the flow satisfies the Fokker-Planck equation, and that the boundary conditions $p(x,0) = g(x)$ and $p(x,1) \propto g(x)h(x)$ are satisfied. The resulting solution provides an \textbf{exact} method for transporting particles from the prior to the posterior in the linear-Gaussian case, avoiding the weight degeneracy issues that plague standard particle filters. As for the LEDH, the difference is that each particle has their own equation. That is because the expansion of the model are taken at their individual location instead of the average position.
-
-\subsection{SDE}
 
 \subsection{Particle flow filter (kernel method)}
 

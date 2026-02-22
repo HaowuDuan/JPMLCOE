@@ -28,7 +28,6 @@
 \citation{Li-Particle-Filtering-2017}
 \citation{ding2012implementation}
 \citation{ding2012implementation}
-\citation{Li-Particle-Filtering-2017}
 \citation{Pulido2019}
 \citation{HuVanLeeuwen2021}
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {1.3.1}Flow and kernal flow}{6}{subsubsection.1.3.1}\protected@file@percent }
@@ -52,95 +51,73 @@
 \@writefile{toc}{\contentsline {subsection}{\numberline {1.4}Hamiltonian Monte Carlo}{8}{subsection.1.4}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {1.4.1}Connection and difference with SGD}{9}{subsubsection.1.4.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {1.4.2}Implications for differentiable particle filters}{9}{subsubsection.1.4.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {1.5}Some further thoughts}{9}{subsection.1.5}\protected@file@percent }
 \@writefile{toc}{\contentsline {section}{\numberline {2}Problems and experiments}{10}{section.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.1}State Space models}{10}{subsection.2.1}\protected@file@percent }
 \citation{Andrieu2010}
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Code organization and testing strategy}{12}{subsection.2.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {2.2.1}Configuration management}{12}{subsubsection.2.2.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {2.2.2}Code base organization}{12}{subsubsection.2.2.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.2.3}Testing}{12}{subsubsection.2.2.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Part I}{13}{subsection.2.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.3.1}Kalman-Joseph update-condition number}{13}{subsubsection.2.3.1}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Comparison of Kalman Filter with Joseph Form vs. Standard Update}}{13}{table.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.3.2}KF, EKF, UKF broken by strong nonlinear model}{13}{subsubsection.2.3.2}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces EKF and UKF result on stochastic volatility model}}{14}{figure.1}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces EKF and UKF result on range bearing model}}{15}{figure.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.2.3}Testing}{13}{subsubsection.2.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Part I}{14}{subsection.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.3.1}Kalman-Joseph update-condition number}{14}{subsubsection.2.3.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Comparison of Kalman Filter with Joseph Form vs. Standard Update}}{14}{table.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.3.2}KF, EKF, UKF broken by strong nonlinear model}{14}{subsubsection.2.3.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {2.3.3}Particle filter and particle degeneracy}{15}{subsubsection.2.3.3}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces We see that particle filter tracking the means of both models pretty well}}{15}{figure.3}\protected@file@percent }
-\newlabel{fig:placeholder}{{3}{15}{We see that particle filter tracking the means of both models pretty well}{figure.3}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Effective sample size a function of time}}{16}{figure.4}\protected@file@percent }
-\newlabel{fig:placeholder}{{4}{16}{Effective sample size a function of time}{figure.4}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Weight distribution at three different time. It further demonstrate that bad initialization for range bearing model had collapsed weight distribution from the very beginning}}{16}{figure.5}\protected@file@percent }
-\newlabel{fig:placeholder}{{5}{16}{Weight distribution at three different time. It further demonstrate that bad initialization for range bearing model had collapsed weight distribution from the very beginning}{figure.5}{}}
-\citation{Li-Particle-Filtering-2017}
-\citation{Li-Particle-Filtering-2017}
-\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Particle diversity for the Stochastic Volatility model is reasonable. }}{17}{figure.6}\protected@file@percent }
-\newlabel{fig:placeholder}{{6}{17}{Particle diversity for the Stochastic Volatility model is reasonable}{figure.6}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.3.4}EDH (LEDH) flow and filter}{17}{subsubsection.2.3.4}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Particle Filter Comparison on Range-Bearing Model}}{17}{table.2}\protected@file@percent }
-\newlabel{tab:range_bearing_comparison}{{2}{17}{Particle Filter Comparison on Range-Bearing Model}{table.2}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.3.5}Matrix kernel preventing collapse}{18}{subsubsection.2.3.5}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces We can see clearly that by switching to matrix kernel, $x_{20}$ no longer collapsed into one point}}{18}{figure.7}\protected@file@percent }
-\newlabel{fig:placeholder}{{7}{18}{We can see clearly that by switching to matrix kernel, $x_{20}$ no longer collapsed into one point}{figure.7}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.3.4}EDH (LEDH) flow and filter}{15}{subsubsection.2.3.4}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Particle Filter Comparison on Range-Bearing Model}}{15}{table.2}\protected@file@percent }
+\newlabel{tab:range_bearing_comparison}{{2}{15}{Particle Filter Comparison on Range-Bearing Model}{table.2}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Particle Filter Comparison on Acoustic Tracking Model (4 targets, 25 sensors)}}{16}{table.3}\protected@file@percent }
+\newlabel{tab:acoustic_tracking_comparison}{{3}{16}{Particle Filter Comparison on Acoustic Tracking Model (4 targets, 25 sensors)}{table.3}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces LEDH Invertible with Geometric Lambda Schedule on Acoustic Tracking ($T=100$)}}{16}{table.4}\protected@file@percent }
+\newlabel{tab:acoustic_tracking_geometric}{{4}{16}{LEDH Invertible with Geometric Lambda Schedule on Acoustic Tracking ($T=100$)}{table.4}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Filter Comparison on Stochastic Volatility Model}}{17}{table.5}\protected@file@percent }
+\newlabel{tab:sv_comparison}{{5}{17}{Filter Comparison on Stochastic Volatility Model}{table.5}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.3.5}Matrix kernel preventing collapse}{17}{subsubsection.2.3.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4}Filter comparison}{17}{subsection.2.4}\protected@file@percent }
 \citation{dai-new-2021}
 \citation{dai-new-2021}
-\citation{dai-stiffness-mitigation-2021}
-\citation{dai-stiffness-mitigation-2021}
-\citation{dai-stiffness-mitigation-2021}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.4}Part II}{19}{subsection.2.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.4.1}Stochastic flow}{19}{subsubsection.2.4.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Local correction for nonlinear observations.}{19}{section*.2}\protected@file@percent }
+\citation{ding2012implementation}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.5}Part II}{18}{subsection.2.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.5.1}Stochastic flow}{18}{subsubsection.2.5.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Local correction for nonlinear observations.}{18}{section*.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {paragraph}{Stiffness and the $\lambda $ schedule.}{19}{section*.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Setup.}{19}{section*.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Correct derivative of $\kappa _\nu $.}{19}{section*.5}\protected@file@percent }
-\newlabel{eq:dkappa_correct}{{31}{19}{Correct derivative of $\kappa _\nu $}{equation.31}{}}
-\citation{dai-stiffness-mitigation-2021}
-\@writefile{toc}{\contentsline {paragraph}{Verification.}{20}{section*.6}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Finite-difference verification of $\partial \kappa _\nu /\partial \beta $}}{20}{table.3}\protected@file@percent }
-\newlabel{tab:fd_verification}{{3}{20}{Finite-difference verification of $\partial \kappa _\nu /\partial \beta $}{table.3}{}}
-\@writefile{toc}{\contentsline {paragraph}{BVP analysis.}{20}{section*.7}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Log-$\kappa $ fix.}{20}{section*.8}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{The resulting schedule is nearly linear.}{20}{section*.9}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Condition number comparison: linear vs.\ optimal schedule}}{20}{table.4}\protected@file@percent }
-\newlabel{tab:kappa_comparison}{{4}{20}{Condition number comparison: linear vs.\ optimal schedule}{table.4}{}}
-\@writefile{toc}{\contentsline {paragraph}{Summary.}{20}{section*.10}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces The current version of the SDE filter, when diffusion scale is set to $0.001$}}{21}{figure.8}\protected@file@percent }
-\newlabel{fig:sde_kalman}{{8}{21}{The current version of the SDE filter, when diffusion scale is set to $0.001$}{figure.8}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.4.2}Soft resampling and OT resampling}{21}{subsubsection.2.4.2}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Resampling Method Comparison on Stochastic Volatility Model}}{21}{table.5}\protected@file@percent }
-\newlabel{tab:stochastic_volatility_resampling}{{5}{21}{Resampling Method Comparison on Stochastic Volatility Model}{table.5}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.5}Differentiable particle filter}{21}{subsection.2.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.5.2}Soft resampling and OT resampling}{20}{subsubsection.2.5.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces Resampling Method Comparison on Stochastic Volatility Model}}{20}{table.6}\protected@file@percent }
+\newlabel{tab:stochastic_volatility_resampling}{{6}{20}{Resampling Method Comparison on Stochastic Volatility Model}{table.6}{}}
 \citation{Andrieu2010}
-\citation{Jonschkowski2018}
+\@writefile{toc}{\contentsline {section}{\numberline {3}Differentiable particle filter}{21}{section.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Filtering the Kitagawa model}{21}{subsection.3.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {7}{\ignorespaces Filtering performance on Kitagawa model ($T=100$, seed=42, float64). Log-likelihood is the particle filter's estimate of $\log p(z_{1:T})$.}}{21}{table.7}\protected@file@percent }
+\newlabel{tab:kitagawa_filters}{{7}{21}{Filtering performance on Kitagawa model ($T=100$, seed=42, float64). Log-likelihood is the particle filter's estimate of $\log p(z_{1:T})$}{table.7}{}}
+\citation{Andrieu2010}
+\@writefile{lot}{\contentsline {table}{\numberline {8}{\ignorespaces LEDH Bimodal look-ahead depth sweep ($N=500$, $n_\lambda =29$, $T=100$, seed=42, float64).}}{22}{table.8}\protected@file@percent }
+\newlabel{tab:kitagawa_ksweep}{{8}{22}{LEDH Bimodal look-ahead depth sweep ($N=500$, $n_\lambda =29$, $T=100$, seed=42, float64)}{table.8}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}PMCMC: gradient-free baseline}{22}{subsection.3.2}\protected@file@percent }
+\citation{Andrieu2010}
+\citation{Lindsten2014}
+\citation{Lindsten2014}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}SGD-based parameter estimation}{23}{subsection.3.3}\protected@file@percent }
+\citation{karkus2018particle}
 \citation{corenflos-differentiable-2021}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.5.1}SGD-based parameter estimation (Step 1)}{22}{subsubsection.2.5.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.5.2}HMC through the particle filter (Step 1)}{22}{subsubsection.2.5.2}\protected@file@percent }
-\citation{Andrieu2010}
-\citation{Andrieu2010}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.5.3}PMMH: gradient-free benchmark (Step 2)}{23}{subsubsection.2.5.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.5.4}Particle Gibbs: decoupling parameters and states (Step 3)}{23}{subsubsection.2.5.4}\protected@file@percent }
-\citation{Andrieu2010}
-\citation{Lindsten2014}
-\citation{Lindsten2014}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}The differentiability-bias trade-off}{24}{subsection.3.4}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {9}{\ignorespaces Resampling strategies for differentiable particle filters.}}{24}{table.9}\protected@file@percent }
+\newlabel{tab:resampling_grad}{{9}{24}{Resampling strategies for differentiable particle filters}{table.9}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.5}Workflow and current status of DPF pipeline}{25}{subsection.3.5}\protected@file@percent }
 \citation{Neal-2012-MCMC-Hamiltonian-Dynamics-ARXIV-1206-1901v1}
-\citation{Andrieu2010}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.5.5}Additional notes and practical considerations}{24}{subsubsection.2.5.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {A}Kalman Family}{25}{appendix.A}\protected@file@percent }
-\newlabel{APP:Kalman}{{A}{25}{Kalman Family}{appendix.A}{}}
-\newlabel{eq:general-kalman-gain}{{69}{27}{Kalman Family}{equation.69}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.6}Additional notes and practical considerations}{26}{subsection.3.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {A}Kalman Family}{27}{appendix.A}\protected@file@percent }
+\newlabel{APP:Kalman}{{A}{27}{Kalman Family}{appendix.A}{}}
+\newlabel{eq:general-kalman-gain}{{70}{29}{Kalman Family}{equation.70}{}}
 \citation{daum2010exact}
 \citation{daum2011particle}
-\@writefile{toc}{\contentsline {section}{\numberline {B}Particle flow and particle filter}{29}{appendix.B}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {B.1}Particle filter}{29}{subsection.B.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {B.2}Particle flow}{29}{subsection.B.2}\protected@file@percent }
-\newlabel{APP:Particle_flow}{{B.2}{29}{Particle flow}{subsection.B.2}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {B.3}SDE}{31}{subsection.B.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {B.4}Particle flow filter (kernel method)}{31}{subsection.B.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {B.4.1}Optimal Transport via Gradient Flow}{31}{subsubsection.B.4.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {B.4.2}Deriving Optimal Velocity via Kernel Restriction}{31}{subsubsection.B.4.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {B.4.3}Scalar Kernel}{33}{subsubsection.B.4.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {B.4.4}Matrix-Valued Kernel}{33}{subsubsection.B.4.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {B}Particle flow and particle filter}{31}{appendix.B}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {B.1}Particle flow}{31}{subsection.B.1}\protected@file@percent }
+\newlabel{APP:Particle_flow}{{B.1}{31}{Particle flow}{subsection.B.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {B.2}Particle flow filter (kernel method)}{33}{subsection.B.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {B.2.1}Optimal Transport via Gradient Flow}{33}{subsubsection.B.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {B.2.2}Deriving Optimal Velocity via Kernel Restriction}{33}{subsubsection.B.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {B.2.3}Scalar Kernel}{34}{subsubsection.B.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {B.2.4}Matrix-Valued Kernel}{35}{subsubsection.B.2.4}\protected@file@percent }
 \bibstyle{unsrt}
 \bibdata{main}
 \bibcite{feng2025semiparametric}{1}
@@ -173,6 +150,6 @@
 \bibcite{Metropolis1953}{28}
 \bibcite{Neal-2012-MCMC-Hamiltonian-Dynamics-ARXIV-1206-1901v1}{29}
 \bibcite{Duane1987}{30}
-\bibcite{Jonschkowski2018}{31}
-\bibcite{Lindsten2014}{32}
-\gdef \@abspage@last{35}
+\bibcite{Lindsten2014}{31}
+\bibcite{karkus2018particle}{32}
+\gdef \@abspage@last{37}

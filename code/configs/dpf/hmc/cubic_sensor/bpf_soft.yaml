@@ -22,6 +22,7 @@ filter:
   hmc_resampling_method: soft
   hmc_resampling_config:
     alpha: 0.5
+  always_resample: true
   eager_mode: false
 
 dpf:

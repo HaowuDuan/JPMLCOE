@@ -2,7 +2,7 @@ dtype: float64
 tf_log_level: 2
 model:
   _target_: src.models.kitagawa.KitagawaModel
-  sigma_V: 5.0
+  sigma_V: 2.0
   sigma_W: 2.0
   initial_var: 5.0
 filter:
@@ -19,7 +19,7 @@ dpf:
       constraint: positive
       prior:
         _target_: tensorflow_probability.distributions.LogNormal
-        loc: 2.3
+        loc: 1.15
         scale: 0.5
     sigma_W:
       constraint: positive
@@ -29,8 +29,8 @@ dpf:
         scale: 1.0
   pgibbs:
     theta_sampler: hmc
-    num_samples: 3
-    num_burnin: 2
+    num_samples: 146
+    num_burnin: 70
     hmc_steps_per_iter: 5
     hmc_step_size: 0.05
     hmc_num_leapfrog: 10
@@ -41,5 +41,5 @@ data:
   T: 100
   seed: 42
   true_params:
-    sigma_V: 10.0
+    sigma_V: 3.162
     sigma_W: 1.0

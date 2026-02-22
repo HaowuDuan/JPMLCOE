@@ -372,3 +372,162 @@ def test_linear_vs_optimal_differ():
     # With endpoint evaluation the filter converges well, so difference is modest.
     assert abs(trP_lin - trP_opt) > 0.01, \
         f"Linear and optimal give same tr(P) = {trP_lin:.2f}"
+
+
+# ============================================================================
+# Test 12 — Jacobian Stiffness Ratio Diagnostic
+# ============================================================================
+
+def test_jacobian_stiffness_ratio():
+    """Compare R_stiff(F) vs κ_ν(M) at several β values.
+
+    R_stiff uses eigenvalues of the flow Jacobian F = -½M⁻¹J_meas - diag(Q/2)·M.
+    κ_ν uses the precision matrix M = P⁻¹ + β·H^TR⁻¹H.
+    These are different — R_stiff should be much larger at β=0.
+    """
+    model = TwoSensorBearingOnlyModel(dtype=tf.float64)
+    P = np.diag([1000.0, 2.0])
+    R_inv = np.linalg.inv(np.diag([0.04, 0.04]))
+    eta_bar = np.array([3.0, 5.0])
+    H = model.observation_jacobian(tf.constant(eta_bar, dtype=tf.float64)).numpy()
+    J_prior = np.linalg.inv(P)
+    J_meas = H.T @ R_inv @ H
+    Q_diag = np.array([4.0, 0.4])
+
+    print("\nJacobian stiffness ratio vs κ_ν(M):")
+    print(f"  {'β':>6s}  {'R_stiff(F)':>12s}  {'R_stiff(F,Q=0)':>14s}  {'κ_ν(M)':>10s}")
+
+    for beta in [0.0, 0.01, 0.05, 0.1, 0.25, 0.5, 0.75, 1.0]:
+        M = J_prior + beta * J_meas
+        M_inv = np.linalg.inv(M)
+
+        # κ_ν(M) = tr(M)·tr(M⁻¹)
+        kappa_nu = np.trace(M) * np.trace(M_inv)
+
+        # F with diffusion
+        F_stoch = -0.5 * M_inv @ J_meas - np.diag(Q_diag / 2.0) @ M
+        eigvals_stoch = np.linalg.eigvals(F_stoch)
+        re_stoch = np.abs(np.real(eigvals_stoch))
+        R_stiff_stoch = np.max(re_stoch) / max(np.min(re_stoch), 1e-15)
+
+        # F without diffusion (deterministic)
+        F_det = -0.5 * M_inv @ J_meas
+        eigvals_det = np.linalg.eigvals(F_det)
+        re_det = np.abs(np.real(eigvals_det))
+        R_stiff_det = np.max(re_det) / max(np.min(re_det), 1e-15)
+
+        print(f"  {beta:6.2f}  {R_stiff_stoch:12.1f}  {R_stiff_det:14.1f}  {kappa_nu:10.1f}")
+
+    # Validate: at β=0, R_stiff >> κ_ν
+    M0 = J_prior
+    F0_det = -0.5 * np.linalg.inv(M0) @ J_meas
+    eig0 = np.abs(np.real(np.linalg.eigvals(F0_det)))
+    R_stiff_0 = np.max(eig0) / max(np.min(eig0), 1e-15)
+    kappa_0 = np.trace(M0) * np.trace(np.linalg.inv(M0))
+    assert R_stiff_0 > kappa_0, \
+        f"Expected R_stiff(0) > κ_ν(0), got {R_stiff_0:.1f} vs {kappa_0:.1f}"
+
+
+# ============================================================================
+# Test 13 — Jacobian Schedule Shape
+# ============================================================================
+
+def test_jacobian_schedule_shape():
+    """Solve BVP with Jacobian stiffness and print schedule shape.
+
+    Paper (arXiv:2107.04672) reports:
+    - max|β*(λ) - λ| ≈ 0.14  (Figure 2b)
+    - β̇*(0) ≈ 14  (Figure 2c)
+    """
+    model = TwoSensorBearingOnlyModel(dtype=tf.float64)
+    filt = StochasticEDHFlowPaper(
+        model, n_particles=10, n_lambda_steps=100,
+        diffusion_scale=[4.0, 0.4], schedule_mu=0.2,
+        schedule_method='jacobian', lambda_schedule='uniform')
+
+    rng = np.random.default_rng(0)
+    filt.initialize(rng)
+    filt.predict()
+
+    P = filt.predicted_cov
+    R_inv = tf.linalg.inv(model.R)
+    beta_vals, dbeta_vals = filt._compute_jacobian_schedule(P, R_inv)
+
+    beta_np = beta_vals.numpy()
+    dbeta_np = dbeta_vals.numpy()
+    lambda_np = np.cumsum(np.ones(100) / 100.0)
+
+    # Also compute κ_ν schedule for comparison
+    beta_kn, dbeta_kn = filt._compute_optimal_schedule(P, R_inv)
+    beta_kn_np = beta_kn.numpy()
+
+    max_diff_jac = np.max(np.abs(beta_np - lambda_np))
+    max_diff_kn = np.max(np.abs(beta_kn_np - lambda_np))
+    beta_dot_0_jac = dbeta_np[0] / (1.0 / 100)  # dβ/dλ at first step
+    beta_dot_0_kn = dbeta_kn.numpy()[0] / (1.0 / 100)
+
+    print("\nSchedule comparison (Jacobian vs κ_ν vs paper):")
+    print(f"  {'Method':<12s}  {'max|β*-λ|':>10s}  {'β̇*(0)':>8s}")
+    print(f"  {'Jacobian':<12s}  {max_diff_jac:10.4f}  {beta_dot_0_jac:8.2f}")
+    print(f"  {'κ_ν(M)':<12s}  {max_diff_kn:10.4f}  {beta_dot_0_kn:8.2f}")
+    print(f"  {'Paper':<12s}  {'~0.14':>10s}  {'~14':>8s}")
+
+    print(f"\nJacobian β*(λ) at key points:")
+    for idx in [0, 4, 9, 24, 49, 74, 99]:
+        lam = lambda_np[idx]
+        print(f"  λ={lam:.2f}: β*_jac={beta_np[idx]:.4f}, "
+              f"β*_kν={beta_kn_np[idx]:.4f}, linear={lam:.4f}")
+
+    # Jacobian schedule should deviate more from linear than κ_ν schedule
+    assert max_diff_jac > max_diff_kn, \
+        f"Expected Jacobian schedule to deviate more, got {max_diff_jac:.4f} vs {max_diff_kn:.4f}"
+
+
+# ============================================================================
+# Test 14 — End-to-End: Linear vs κ_ν vs Jacobian
+# ============================================================================
+
+def test_jacobian_vs_kappa_nu_filter():
+    """Compare filter performance across schedule methods at various step counts.
+
+    With 100 steps, Euler is stable and all methods converge equally.
+    With fewer steps (10-20), Euler becomes unstable near β=0 where the
+    stiff eigenvalue of A ≈ -559 violates |1 + dλ·λ_max| < 1.
+    The schedule should matter most in the unstable regime.
+
+    Paper Table 1 (N=200, n_steps=100, 50 MC runs):
+    - Linear:  tr(P) = 1535.2 ± 2506
+    - Optimal: tr(P) = 1028.8 ± 1508
+    """
+    model = TwoSensorBearingOnlyModel(dtype=tf.float64)
+    z_fixed = np.array([[0.4754, 1.1868]])
+    n_particles = 200
+    n_mc = 10
+
+    configs = [
+        ('Linear',   0.0, 'kappa_nu'),
+        ('κ_ν(M)',   0.2, 'kappa_nu'),
+        ('Jacobian', 0.2, 'jacobian'),
+    ]
+
+    for n_steps in [10, 20, 50, 100]:
+        print(f"\n--- K={n_steps} steps (dλ={1.0/n_steps:.3f}) ---")
+        print(f"  {'Method':<12s}  {'mean tr(P)':>12s}  {'std tr(P)':>12s}  "
+              f"{'median tr(P)':>12s}")
+
+        for name, mu, method in configs:
+            trP_list = []
+            for mc in range(n_mc):
+                filt = StochasticEDHFlowPaper(
+                    model, n_particles=n_particles, n_lambda_steps=n_steps,
+                    diffusion_scale=[4.0, 0.4], schedule_mu=mu,
+                    schedule_method=method, lambda_schedule='uniform')
+                rng = np.random.default_rng(mc)
+                result = filt.filter(z_fixed, random_state=rng)
+                trP_list.append(float(np.trace(result.covs[0])))
+
+            trP_arr = np.array(trP_list)
+            print(f"  {name:<12s}  {np.mean(trP_arr):12.1f}  "
+                  f"{np.std(trP_arr):12.1f}  {np.median(trP_arr):12.1f}")
+
+    print(f"\n  Paper reports (K=100): Linear=1535.2±2506, Optimal=1028.8±1508")

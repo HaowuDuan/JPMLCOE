@@ -10,44 +10,36 @@
 \contentsline {subsection}{\numberline {1.4}Hamiltonian Monte Carlo}{8}{subsection.1.4}%
 \contentsline {subsubsection}{\numberline {1.4.1}Connection and difference with SGD}{9}{subsubsection.1.4.1}%
 \contentsline {subsubsection}{\numberline {1.4.2}Implications for differentiable particle filters}{9}{subsubsection.1.4.2}%
-\contentsline {subsection}{\numberline {1.5}Some further thoughts}{9}{subsection.1.5}%
 \contentsline {section}{\numberline {2}Problems and experiments}{10}{section.2}%
 \contentsline {subsection}{\numberline {2.1}State Space models}{10}{subsection.2.1}%
 \contentsline {subsection}{\numberline {2.2}Code organization and testing strategy}{12}{subsection.2.2}%
 \contentsline {subsubsection}{\numberline {2.2.1}Configuration management}{12}{subsubsection.2.2.1}%
 \contentsline {subsubsection}{\numberline {2.2.2}Code base organization}{12}{subsubsection.2.2.2}%
-\contentsline {subsubsection}{\numberline {2.2.3}Testing}{12}{subsubsection.2.2.3}%
-\contentsline {subsection}{\numberline {2.3}Part I}{13}{subsection.2.3}%
-\contentsline {subsubsection}{\numberline {2.3.1}Kalman-Joseph update-condition number}{13}{subsubsection.2.3.1}%
-\contentsline {subsubsection}{\numberline {2.3.2}KF, EKF, UKF broken by strong nonlinear model}{13}{subsubsection.2.3.2}%
+\contentsline {subsubsection}{\numberline {2.2.3}Testing}{13}{subsubsection.2.2.3}%
+\contentsline {subsection}{\numberline {2.3}Part I}{14}{subsection.2.3}%
+\contentsline {subsubsection}{\numberline {2.3.1}Kalman-Joseph update-condition number}{14}{subsubsection.2.3.1}%
+\contentsline {subsubsection}{\numberline {2.3.2}KF, EKF, UKF broken by strong nonlinear model}{14}{subsubsection.2.3.2}%
 \contentsline {subsubsection}{\numberline {2.3.3}Particle filter and particle degeneracy}{15}{subsubsection.2.3.3}%
-\contentsline {subsubsection}{\numberline {2.3.4}EDH (LEDH) flow and filter}{17}{subsubsection.2.3.4}%
-\contentsline {subsubsection}{\numberline {2.3.5}Matrix kernel preventing collapse}{18}{subsubsection.2.3.5}%
-\contentsline {subsection}{\numberline {2.4}Part II}{19}{subsection.2.4}%
-\contentsline {subsubsection}{\numberline {2.4.1}Stochastic flow}{19}{subsubsection.2.4.1}%
-\contentsline {paragraph}{Local correction for nonlinear observations.}{19}{section*.2}%
+\contentsline {subsubsection}{\numberline {2.3.4}EDH (LEDH) flow and filter}{15}{subsubsection.2.3.4}%
+\contentsline {subsubsection}{\numberline {2.3.5}Matrix kernel preventing collapse}{17}{subsubsection.2.3.5}%
+\contentsline {subsection}{\numberline {2.4}Filter comparison}{17}{subsection.2.4}%
+\contentsline {subsection}{\numberline {2.5}Part II}{18}{subsection.2.5}%
+\contentsline {subsubsection}{\numberline {2.5.1}Stochastic flow}{18}{subsubsection.2.5.1}%
+\contentsline {paragraph}{Local correction for nonlinear observations.}{18}{section*.2}%
 \contentsline {paragraph}{Stiffness and the $\lambda $ schedule.}{19}{section*.3}%
-\contentsline {paragraph}{Setup.}{19}{section*.4}%
-\contentsline {paragraph}{Correct derivative of $\kappa _\nu $.}{19}{section*.5}%
-\contentsline {paragraph}{Verification.}{20}{section*.6}%
-\contentsline {paragraph}{BVP analysis.}{20}{section*.7}%
-\contentsline {paragraph}{Log-$\kappa $ fix.}{20}{section*.8}%
-\contentsline {paragraph}{The resulting schedule is nearly linear.}{20}{section*.9}%
-\contentsline {paragraph}{Summary.}{20}{section*.10}%
-\contentsline {subsubsection}{\numberline {2.4.2}Soft resampling and OT resampling}{21}{subsubsection.2.4.2}%
-\contentsline {subsection}{\numberline {2.5}Differentiable particle filter}{21}{subsection.2.5}%
-\contentsline {subsubsection}{\numberline {2.5.1}SGD-based parameter estimation (Step 1)}{22}{subsubsection.2.5.1}%
-\contentsline {subsubsection}{\numberline {2.5.2}HMC through the particle filter (Step 1)}{22}{subsubsection.2.5.2}%
-\contentsline {subsubsection}{\numberline {2.5.3}PMMH: gradient-free benchmark (Step 2)}{23}{subsubsection.2.5.3}%
-\contentsline {subsubsection}{\numberline {2.5.4}Particle Gibbs: decoupling parameters and states (Step 3)}{23}{subsubsection.2.5.4}%
-\contentsline {subsubsection}{\numberline {2.5.5}Additional notes and practical considerations}{24}{subsubsection.2.5.5}%
-\contentsline {section}{\numberline {A}Kalman Family}{25}{appendix.A}%
-\contentsline {section}{\numberline {B}Particle flow and particle filter}{29}{appendix.B}%
-\contentsline {subsection}{\numberline {B.1}Particle filter}{29}{subsection.B.1}%
-\contentsline {subsection}{\numberline {B.2}Particle flow}{29}{subsection.B.2}%
-\contentsline {subsection}{\numberline {B.3}SDE}{31}{subsection.B.3}%
-\contentsline {subsection}{\numberline {B.4}Particle flow filter (kernel method)}{31}{subsection.B.4}%
-\contentsline {subsubsection}{\numberline {B.4.1}Optimal Transport via Gradient Flow}{31}{subsubsection.B.4.1}%
-\contentsline {subsubsection}{\numberline {B.4.2}Deriving Optimal Velocity via Kernel Restriction}{31}{subsubsection.B.4.2}%
-\contentsline {subsubsection}{\numberline {B.4.3}Scalar Kernel}{33}{subsubsection.B.4.3}%
-\contentsline {subsubsection}{\numberline {B.4.4}Matrix-Valued Kernel}{33}{subsubsection.B.4.4}%
+\contentsline {subsubsection}{\numberline {2.5.2}Soft resampling and OT resampling}{20}{subsubsection.2.5.2}%
+\contentsline {section}{\numberline {3}Differentiable particle filter}{21}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Filtering the Kitagawa model}{21}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}PMCMC: gradient-free baseline}{22}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}SGD-based parameter estimation}{23}{subsection.3.3}%
+\contentsline {subsection}{\numberline {3.4}The differentiability-bias trade-off}{24}{subsection.3.4}%
+\contentsline {subsection}{\numberline {3.5}Workflow and current status of DPF pipeline}{25}{subsection.3.5}%
+\contentsline {subsection}{\numberline {3.6}Additional notes and practical considerations}{26}{subsection.3.6}%
+\contentsline {section}{\numberline {A}Kalman Family}{27}{appendix.A}%
+\contentsline {section}{\numberline {B}Particle flow and particle filter}{31}{appendix.B}%
+\contentsline {subsection}{\numberline {B.1}Particle flow}{31}{subsection.B.1}%
+\contentsline {subsection}{\numberline {B.2}Particle flow filter (kernel method)}{33}{subsection.B.2}%
+\contentsline {subsubsection}{\numberline {B.2.1}Optimal Transport via Gradient Flow}{33}{subsubsection.B.2.1}%
+\contentsline {subsubsection}{\numberline {B.2.2}Deriving Optimal Velocity via Kernel Restriction}{33}{subsubsection.B.2.2}%
+\contentsline {subsubsection}{\numberline {B.2.3}Scalar Kernel}{34}{subsubsection.B.2.3}%
+\contentsline {subsubsection}{\numberline {B.2.4}Matrix-Valued Kernel}{35}{subsubsection.B.2.4}%

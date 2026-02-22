@@ -16,6 +16,7 @@ filter:
   n_particles: 1000
   resampling_method: systematic
   stop_gradient_resampling: true
+  always_resample: true
   eager_mode: false
 
 dpf:

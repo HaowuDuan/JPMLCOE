@@ -1,0 +1,1266 @@
+=== Running 6 BPF experiments (Cubic Sensor + Stochastic Volatility) ===
+
+========================================
+[1/6] hmc/cubic_sensor/bpf_sys
+========================================
+Creating true model: src.models.cubic_sensor.CubicSensorModel
+Generating 50 time steps with true params: {'sigma_V': 1.0, 'sigma_W': 1.0}
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1771739646.544352 2186196 gpu_device.cc:2020] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 22322 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3090, pci bus id: 0000:01:00.0, compute capability: 8.6
+Creating inference model
+Trainable params: ['sigma_V', 'sigma_W']
+
+Running HMC inference...
+Using HMC sampler (num_leapfrog_steps=5)
+Running HMC: 100 burn-in + 200 sampling = 300 total steps
+  [grad check] lp=-160.7081, |grad|=9.49333477487508, grad=[-8.8520786  -3.42988478]
+  [burn-in 1/100] 0.8s | accept=100% | step_size=0.0120 | sigma_V=4.9994, sigma_W=2.0023 | ETA 238s
+  [burn-in 2/100] 0.8s | accept=50% | step_size=0.0088 | sigma_V=4.9994, sigma_W=2.0023 | ETA 236s
+  [burn-in 3/100] 0.8s | accept=67% | step_size=0.0040 | sigma_V=5.0129, sigma_W=1.9806 | ETA 235s
+  [burn-in 4/100] 0.8s | accept=75% | step_size=0.0049 | sigma_V=4.9833, sigma_W=1.9428 | ETA 235s
+  [burn-in 5/100] 0.8s | accept=60% | step_size=0.0030 | sigma_V=4.9833, sigma_W=1.9428 | ETA 234s
+  [burn-in 6/100] 0.8s | accept=67% | step_size=0.0039 | sigma_V=4.9903, sigma_W=1.9589 | ETA 233s
+  [burn-in 7/100] 0.8s | accept=71% | step_size=0.0012 | sigma_V=5.0101, sigma_W=1.9591 | ETA 232s
+  [burn-in 8/100] 0.8s | accept=75% | step_size=0.0013 | sigma_V=5.0081, sigma_W=1.9543 | ETA 232s
+  [burn-in 9/100] 0.8s | accept=78% | step_size=0.0018 | sigma_V=4.9963, sigma_W=1.9468 | ETA 231s
+  [burn-in 10/100] 0.8s | accept=70% | step_size=0.0007 | sigma_V=4.9963, sigma_W=1.9468 | ETA 230s
+  [burn-in 11/100] 0.8s | accept=64% | step_size=0.0004 | sigma_V=4.9963, sigma_W=1.9468 | ETA 229s
+  [burn-in 12/100] 0.8s | accept=67% | step_size=0.0001 | sigma_V=4.9932, sigma_W=1.9474 | ETA 228s
+  [burn-in 13/100] 0.8s | accept=69% | step_size=0.0002 | sigma_V=4.9930, sigma_W=1.9480 | ETA 227s
+  [burn-in 14/100] 0.8s | accept=71% | step_size=0.0003 | sigma_V=4.9921, sigma_W=1.9486 | ETA 227s
+  [burn-in 15/100] 0.8s | accept=73% | step_size=0.0002 | sigma_V=4.9928, sigma_W=1.9503 | ETA 225s
+  [burn-in 16/100] 0.8s | accept=75% | step_size=0.0003 | sigma_V=4.9926, sigma_W=1.9517 | ETA 224s
+  [burn-in 17/100] 0.8s | accept=76% | step_size=0.0002 | sigma_V=4.9918, sigma_W=1.9504 | ETA 223s
+  [burn-in 18/100] 0.8s | accept=78% | step_size=0.0003 | sigma_V=4.9919, sigma_W=1.9526 | ETA 222s
+  [burn-in 19/100] 0.8s | accept=79% | step_size=0.0002 | sigma_V=4.9910, sigma_W=1.9497 | ETA 221s
+  [burn-in 20/100] 0.8s | accept=80% | step_size=0.0003 | sigma_V=4.9900, sigma_W=1.9505 | ETA 221s
+  [burn-in 21/100] 0.8s | accept=81% | step_size=0.0003 | sigma_V=4.9895, sigma_W=1.9485 | ETA 220s
+  [burn-in 22/100] 0.8s | accept=82% | step_size=0.0001 | sigma_V=4.9871, sigma_W=1.9483 | ETA 219s
+  [burn-in 23/100] 0.8s | accept=83% | step_size=0.0002 | sigma_V=4.9874, sigma_W=1.9486 | ETA 218s
+  [burn-in 24/100] 0.8s | accept=83% | step_size=0.0003 | sigma_V=4.9877, sigma_W=1.9494 | ETA 217s
+  [burn-in 25/100] 0.8s | accept=80% | step_size=0.0002 | sigma_V=4.9877, sigma_W=1.9494 | ETA 217s
+  [burn-in 26/100] 0.8s | accept=77% | step_size=0.0002 | sigma_V=4.9877, sigma_W=1.9494 | ETA 216s
+  [burn-in 27/100] 0.8s | accept=78% | step_size=0.0003 | sigma_V=4.9873, sigma_W=1.9501 | ETA 215s
+  [burn-in 28/100] 0.8s | accept=79% | step_size=0.0002 | sigma_V=4.9855, sigma_W=1.9529 | ETA 214s
+  [burn-in 29/100] 0.8s | accept=79% | step_size=0.0002 | sigma_V=4.9864, sigma_W=1.9528 | ETA 214s
+  [burn-in 30/100] 0.8s | accept=80% | step_size=0.0002 | sigma_V=4.9870, sigma_W=1.9539 | ETA 213s
+  [burn-in 31/100] 0.8s | accept=81% | step_size=0.0002 | sigma_V=4.9861, sigma_W=1.9545 | ETA 212s
+  [burn-in 32/100] 0.8s | accept=81% | step_size=0.0002 | sigma_V=4.9877, sigma_W=1.9545 | ETA 211s
+  [burn-in 33/100] 0.8s | accept=79% | step_size=0.0002 | sigma_V=4.9877, sigma_W=1.9545 | ETA 210s
+  [burn-in 34/100] 0.8s | accept=79% | step_size=0.0002 | sigma_V=4.9875, sigma_W=1.9543 | ETA 209s
+  [burn-in 35/100] 0.8s | accept=80% | step_size=0.0001 | sigma_V=4.9874, sigma_W=1.9544 | ETA 208s
+  [burn-in 36/100] 0.8s | accept=81% | step_size=0.0002 | sigma_V=4.9863, sigma_W=1.9537 | ETA 207s
+  [burn-in 37/100] 0.8s | accept=81% | step_size=0.0002 | sigma_V=4.9857, sigma_W=1.9526 | ETA 206s
+  [burn-in 38/100] 0.8s | accept=82% | step_size=0.0003 | sigma_V=4.9864, sigma_W=1.9521 | ETA 206s
+  [burn-in 39/100] 0.8s | accept=79% | step_size=0.0003 | sigma_V=4.9864, sigma_W=1.9521 | ETA 205s
+  [burn-in 40/100] 0.8s | accept=78% | step_size=0.0001 | sigma_V=4.9864, sigma_W=1.9521 | ETA 204s
+  [burn-in 41/100] 0.8s | accept=78% | step_size=0.0001 | sigma_V=4.9863, sigma_W=1.9511 | ETA 203s
+  [burn-in 42/100] 0.8s | accept=79% | step_size=0.0001 | sigma_V=4.9860, sigma_W=1.9506 | ETA 203s
+  [burn-in 43/100] 0.8s | accept=79% | step_size=0.0002 | sigma_V=4.9859, sigma_W=1.9507 | ETA 202s
+  [burn-in 44/100] 0.8s | accept=80% | step_size=0.0002 | sigma_V=4.9864, sigma_W=1.9503 | ETA 201s
+  [burn-in 45/100] 0.8s | accept=80% | step_size=0.0003 | sigma_V=4.9861, sigma_W=1.9507 | ETA 200s
+  [burn-in 46/100] 0.8s | accept=78% | step_size=0.0001 | sigma_V=4.9861, sigma_W=1.9507 | ETA 199s
+  [burn-in 47/100] 0.8s | accept=79% | step_size=0.0001 | sigma_V=4.9867, sigma_W=1.9506 | ETA 199s
+  [burn-in 48/100] 0.8s | accept=79% | step_size=0.0000 | sigma_V=4.9866, sigma_W=1.9509 | ETA 198s
+  [burn-in 49/100] 0.8s | accept=78% | step_size=0.0000 | sigma_V=4.9866, sigma_W=1.9509 | ETA 197s
+  [burn-in 50/100] 0.8s | accept=78% | step_size=0.0000 | sigma_V=4.9866, sigma_W=1.9510 | ETA 196s
+  [burn-in 51/100] 0.8s | accept=78% | step_size=0.0001 | sigma_V=4.9867, sigma_W=1.9511 | ETA 196s
+  [burn-in 52/100] 0.8s | accept=80% | step_size=0.0000 | sigma_V=4.9865, sigma_W=1.9510 | ETA 195s
+  [burn-in 53/100] 0.8s | accept=80% | step_size=0.0000 | sigma_V=4.9867, sigma_W=1.9511 | ETA 194s
+  [burn-in 54/100] 0.8s | accept=80% | step_size=0.0000 | sigma_V=4.9864, sigma_W=1.9510 | ETA 192s
+  [burn-in 55/100] 0.8s | accept=80% | step_size=0.0001 | sigma_V=4.9864, sigma_W=1.9510 | ETA 192s
+  [burn-in 56/100] 0.8s | accept=80% | step_size=0.0001 | sigma_V=4.9863, sigma_W=1.9510 | ETA 191s
+  [burn-in 57/100] 0.8s | accept=80% | step_size=0.0001 | sigma_V=4.9861, sigma_W=1.9513 | ETA 190s
+  [burn-in 58/100] 0.8s | accept=80% | step_size=0.0001 | sigma_V=4.9860, sigma_W=1.9513 | ETA 190s
+  [burn-in 59/100] 0.8s | accept=80% | step_size=0.0001 | sigma_V=4.9866, sigma_W=1.9519 | ETA 189s
+  [burn-in 60/100] 0.8s | accept=82% | step_size=0.0000 | sigma_V=4.9872, sigma_W=1.9521 | ETA 188s
+  [burn-in 61/100] 0.8s | accept=84% | step_size=0.0001 | sigma_V=4.9873, sigma_W=1.9519 | ETA 187s
+  [burn-in 62/100] 0.8s | accept=84% | step_size=0.0001 | sigma_V=4.9872, sigma_W=1.9519 | ETA 187s
+  [burn-in 63/100] 0.8s | accept=84% | step_size=0.0001 | sigma_V=4.9874, sigma_W=1.9514 | ETA 186s
+  [burn-in 64/100] 0.8s | accept=82% | step_size=0.0001 | sigma_V=4.9874, sigma_W=1.9514 | ETA 185s
+  [burn-in 65/100] 0.8s | accept=82% | step_size=0.0001 | sigma_V=4.9875, sigma_W=1.9513 | ETA 184s
+  [burn-in 66/100] 0.8s | accept=82% | step_size=0.0001 | sigma_V=4.9877, sigma_W=1.9510 | ETA 184s
+  [burn-in 67/100] 0.8s | accept=82% | step_size=0.0001 | sigma_V=4.9873, sigma_W=1.9510 | ETA 183s
+  [burn-in 68/100] 0.8s | accept=82% | step_size=0.0001 | sigma_V=4.9870, sigma_W=1.9513 | ETA 182s
+  [burn-in 69/100] 0.8s | accept=82% | step_size=0.0001 | sigma_V=4.9865, sigma_W=1.9517 | ETA 182s
+  [burn-in 70/100] 0.8s | accept=82% | step_size=0.0001 | sigma_V=4.9874, sigma_W=1.9520 | ETA 181s
+  [burn-in 71/100] 0.8s | accept=82% | step_size=0.0002 | sigma_V=4.9878, sigma_W=1.9518 | ETA 180s
+  [burn-in 72/100] 0.8s | accept=82% | step_size=0.0002 | sigma_V=4.9892, sigma_W=1.9515 | ETA 180s
+  [burn-in 73/100] 0.8s | accept=82% | step_size=0.0002 | sigma_V=4.9902, sigma_W=1.9516 | ETA 179s
+  [burn-in 74/100] 0.8s | accept=82% | step_size=0.0002 | sigma_V=4.9905, sigma_W=1.9507 | ETA 178s
+  [burn-in 75/100] 0.8s | accept=84% | step_size=0.0002 | sigma_V=4.9917, sigma_W=1.9504 | ETA 177s
+  [burn-in 76/100] 0.8s | accept=86% | step_size=0.0002 | sigma_V=4.9913, sigma_W=1.9504 | ETA 177s
+  [burn-in 77/100] 0.8s | accept=86% | step_size=0.0002 | sigma_V=4.9910, sigma_W=1.9508 | ETA 176s
+  [burn-in 78/100] 0.8s | accept=84% | step_size=0.0002 | sigma_V=4.9910, sigma_W=1.9508 | ETA 175s
+  [burn-in 79/100] 0.8s | accept=84% | step_size=0.0001 | sigma_V=4.9914, sigma_W=1.9499 | ETA 175s
+  [burn-in 80/100] 0.8s | accept=84% | step_size=0.0001 | sigma_V=4.9911, sigma_W=1.9505 | ETA 174s
+  [burn-in 81/100] 0.8s | accept=84% | step_size=0.0001 | sigma_V=4.9911, sigma_W=1.9514 | ETA 173s
+  [burn-in 82/100] 0.8s | accept=84% | step_size=0.0001 | sigma_V=4.9912, sigma_W=1.9510 | ETA 172s
+  [burn-in 83/100] 0.8s | accept=86% | step_size=0.0001 | sigma_V=4.9914, sigma_W=1.9504 | ETA 172s
+  [burn-in 84/100] 0.8s | accept=86% | step_size=0.0001 | sigma_V=4.9913, sigma_W=1.9501 | ETA 171s
+  [burn-in 85/100] 0.8s | accept=86% | step_size=0.0001 | sigma_V=4.9914, sigma_W=1.9504 | ETA 170s
+  [burn-in 86/100] 0.8s | accept=86% | step_size=0.0001 | sigma_V=4.9924, sigma_W=1.9500 | ETA 169s
+  [burn-in 87/100] 0.8s | accept=84% | step_size=0.0001 | sigma_V=4.9924, sigma_W=1.9500 | ETA 168s
+  [burn-in 88/100] 0.8s | accept=84% | step_size=0.0001 | sigma_V=4.9918, sigma_W=1.9488 | ETA 167s
+  [burn-in 89/100] 0.8s | accept=86% | step_size=0.0001 | sigma_V=4.9919, sigma_W=1.9490 | ETA 166s
+  [burn-in 90/100] 0.8s | accept=88% | step_size=0.0001 | sigma_V=4.9918, sigma_W=1.9484 | ETA 166s
+  [burn-in 91/100] 0.8s | accept=88% | step_size=0.0001 | sigma_V=4.9914, sigma_W=1.9489 | ETA 165s
+  [burn-in 92/100] 0.8s | accept=88% | step_size=0.0001 | sigma_V=4.9913, sigma_W=1.9489 | ETA 164s
+  [burn-in 93/100] 0.8s | accept=88% | step_size=0.0001 | sigma_V=4.9911, sigma_W=1.9490 | ETA 163s
+  [burn-in 94/100] 0.8s | accept=88% | step_size=0.0001 | sigma_V=4.9903, sigma_W=1.9485 | ETA 162s
+  [burn-in 95/100] 0.8s | accept=88% | step_size=0.0001 | sigma_V=4.9908, sigma_W=1.9477 | ETA 161s
+  [burn-in 96/100] 0.8s | accept=90% | step_size=0.0001 | sigma_V=4.9910, sigma_W=1.9476 | ETA 160s
+  [burn-in 97/100] 0.8s | accept=90% | step_size=0.0001 | sigma_V=4.9910, sigma_W=1.9469 | ETA 160s
+  [burn-in 98/100] 0.8s | accept=90% | step_size=0.0001 | sigma_V=4.9914, sigma_W=1.9463 | ETA 159s
+  [burn-in 99/100] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9908, sigma_W=1.9473 | ETA 158s
+  [burn-in 100/100] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9917, sigma_W=1.9474 | ETA 157s
+  [sample 1/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9911, sigma_W=1.9474 | ETA 156s
+  [sample 2/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9915, sigma_W=1.9470 | ETA 156s
+  [sample 3/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9915, sigma_W=1.9478 | ETA 155s
+  [sample 4/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9916, sigma_W=1.9477 | ETA 154s
+  [sample 5/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9914, sigma_W=1.9482 | ETA 154s
+  [sample 6/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9911, sigma_W=1.9484 | ETA 153s
+  [sample 7/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9911, sigma_W=1.9489 | ETA 152s
+  [sample 8/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9902, sigma_W=1.9485 | ETA 152s
+  [sample 9/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9899, sigma_W=1.9494 | ETA 151s
+  [sample 10/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9899, sigma_W=1.9494 | ETA 151s
+  [sample 11/200] 0.8s | accept=90% | step_size=0.0001 | sigma_V=4.9899, sigma_W=1.9494 | ETA 150s
+  [sample 12/200] 0.8s | accept=90% | step_size=0.0001 | sigma_V=4.9899, sigma_W=1.9498 | ETA 149s
+  [sample 13/200] 0.8s | accept=90% | step_size=0.0001 | sigma_V=4.9898, sigma_W=1.9497 | ETA 148s
+  [sample 14/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9900, sigma_W=1.9495 | ETA 147s
+  [sample 15/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9903, sigma_W=1.9503 | ETA 146s
+  [sample 16/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9894, sigma_W=1.9502 | ETA 146s
+  [sample 17/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9892, sigma_W=1.9499 | ETA 145s
+  [sample 18/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9897, sigma_W=1.9501 | ETA 144s
+  [sample 19/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9905, sigma_W=1.9497 | ETA 143s
+  [sample 20/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9912, sigma_W=1.9493 | ETA 142s
+  [sample 21/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9909, sigma_W=1.9487 | ETA 141s
+  [sample 22/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9912, sigma_W=1.9486 | ETA 140s
+  [sample 23/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9911, sigma_W=1.9490 | ETA 140s
+  [sample 24/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9918, sigma_W=1.9500 | ETA 139s
+  [sample 25/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9927, sigma_W=1.9497 | ETA 138s
+  [sample 26/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9926, sigma_W=1.9502 | ETA 137s
+  [sample 27/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9914, sigma_W=1.9498 | ETA 136s
+  [sample 28/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9909, sigma_W=1.9493 | ETA 136s
+  [sample 29/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9917, sigma_W=1.9495 | ETA 135s
+  [sample 30/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9928, sigma_W=1.9498 | ETA 134s
+  [sample 31/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9930, sigma_W=1.9502 | ETA 133s
+  [sample 32/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9937, sigma_W=1.9502 | ETA 132s
+  [sample 33/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9937, sigma_W=1.9502 | ETA 131s
+  [sample 34/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9931, sigma_W=1.9495 | ETA 130s
+  [sample 35/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9942, sigma_W=1.9495 | ETA 129s
+  [sample 36/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9944, sigma_W=1.9497 | ETA 129s
+  [sample 37/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9932, sigma_W=1.9497 | ETA 128s
+  [sample 38/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9928, sigma_W=1.9498 | ETA 127s
+  [sample 39/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9928, sigma_W=1.9498 | ETA 126s
+  [sample 40/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9931, sigma_W=1.9494 | ETA 125s
+  [sample 41/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9933, sigma_W=1.9496 | ETA 124s
+  [sample 42/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9933, sigma_W=1.9496 | ETA 123s
+  [sample 43/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9933, sigma_W=1.9491 | ETA 123s
+  [sample 44/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9944, sigma_W=1.9487 | ETA 122s
+  [sample 45/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9946, sigma_W=1.9487 | ETA 121s
+  [sample 46/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9943, sigma_W=1.9488 | ETA 120s
+  [sample 47/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9939, sigma_W=1.9489 | ETA 119s
+  [sample 48/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9943, sigma_W=1.9488 | ETA 118s
+  [sample 49/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9939, sigma_W=1.9494 | ETA 118s
+  [sample 50/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9938, sigma_W=1.9503 | ETA 117s
+  [sample 51/200] 0.8s | accept=90% | step_size=0.0001 | sigma_V=4.9938, sigma_W=1.9503 | ETA 116s
+  [sample 52/200] 0.8s | accept=90% | step_size=0.0001 | sigma_V=4.9938, sigma_W=1.9500 | ETA 116s
+  [sample 53/200] 0.8s | accept=90% | step_size=0.0001 | sigma_V=4.9944, sigma_W=1.9503 | ETA 115s
+  [sample 54/200] 0.8s | accept=90% | step_size=0.0001 | sigma_V=4.9946, sigma_W=1.9498 | ETA 115s
+  [sample 55/200] 0.8s | accept=90% | step_size=0.0001 | sigma_V=4.9946, sigma_W=1.9501 | ETA 114s
+  [sample 56/200] 0.8s | accept=90% | step_size=0.0001 | sigma_V=4.9951, sigma_W=1.9506 | ETA 113s
+  [sample 57/200] 0.8s | accept=90% | step_size=0.0001 | sigma_V=4.9961, sigma_W=1.9517 | ETA 113s
+  [sample 58/200] 0.8s | accept=90% | step_size=0.0001 | sigma_V=4.9970, sigma_W=1.9513 | ETA 112s
+  [sample 59/200] 0.8s | accept=90% | step_size=0.0001 | sigma_V=4.9978, sigma_W=1.9513 | ETA 111s
+  [sample 60/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9985, sigma_W=1.9514 | ETA 110s
+  [sample 61/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9975, sigma_W=1.9518 | ETA 109s
+  [sample 62/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9975, sigma_W=1.9510 | ETA 108s
+  [sample 63/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9982, sigma_W=1.9503 | ETA 107s
+  [sample 64/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9986, sigma_W=1.9510 | ETA 107s
+  [sample 65/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9990, sigma_W=1.9513 | ETA 106s
+  [sample 66/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9990, sigma_W=1.9513 | ETA 105s
+  [sample 67/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9998, sigma_W=1.9512 | ETA 104s
+  [sample 68/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=5.0002, sigma_W=1.9512 | ETA 104s
+  [sample 69/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=5.0007, sigma_W=1.9508 | ETA 103s
+  [sample 70/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=5.0008, sigma_W=1.9514 | ETA 102s
+  [sample 71/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=5.0017, sigma_W=1.9506 | ETA 101s
+  [sample 72/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=5.0015, sigma_W=1.9503 | ETA 100s
+  [sample 73/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=5.0018, sigma_W=1.9498 | ETA 100s
+  [sample 74/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=5.0019, sigma_W=1.9496 | ETA 99s
+  [sample 75/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=5.0015, sigma_W=1.9490 | ETA 98s
+  [sample 76/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=5.0017, sigma_W=1.9493 | ETA 97s
+  [sample 77/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=5.0015, sigma_W=1.9482 | ETA 96s
+  [sample 78/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=5.0024, sigma_W=1.9484 | ETA 95s
+  [sample 79/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=5.0014, sigma_W=1.9487 | ETA 94s
+  [sample 80/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=5.0014, sigma_W=1.9487 | ETA 94s
+  [sample 81/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=5.0000, sigma_W=1.9488 | ETA 93s
+  [sample 82/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=5.0013, sigma_W=1.9484 | ETA 92s
+  [sample 83/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=5.0009, sigma_W=1.9477 | ETA 91s
+  [sample 84/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=5.0011, sigma_W=1.9472 | ETA 91s
+  [sample 85/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=5.0013, sigma_W=1.9466 | ETA 90s
+  [sample 86/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=5.0001, sigma_W=1.9472 | ETA 89s
+  [sample 87/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9997, sigma_W=1.9469 | ETA 89s
+  [sample 88/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9995, sigma_W=1.9466 | ETA 88s
+  [sample 89/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9995, sigma_W=1.9466 | ETA 87s
+  [sample 90/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9982, sigma_W=1.9463 | ETA 86s
+  [sample 91/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9985, sigma_W=1.9462 | ETA 85s
+  [sample 92/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9981, sigma_W=1.9464 | ETA 85s
+  [sample 93/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9969, sigma_W=1.9462 | ETA 84s
+  [sample 94/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9972, sigma_W=1.9465 | ETA 83s
+  [sample 95/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9967, sigma_W=1.9471 | ETA 82s
+  [sample 96/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9973, sigma_W=1.9469 | ETA 81s
+  [sample 97/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9970, sigma_W=1.9470 | ETA 81s
+  [sample 98/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9964, sigma_W=1.9469 | ETA 80s
+  [sample 99/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9959, sigma_W=1.9464 | ETA 79s
+  [sample 100/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9959, sigma_W=1.9464 | ETA 78s
+  [sample 101/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9958, sigma_W=1.9469 | ETA 77s
+  [sample 102/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9958, sigma_W=1.9469 | ETA 76s
+  [sample 103/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9957, sigma_W=1.9469 | ETA 76s
+  [sample 104/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9952, sigma_W=1.9460 | ETA 75s
+  [sample 105/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9957, sigma_W=1.9460 | ETA 74s
+  [sample 106/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9946, sigma_W=1.9461 | ETA 73s
+  [sample 107/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9947, sigma_W=1.9454 | ETA 72s
+  [sample 108/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9954, sigma_W=1.9454 | ETA 72s
+  [sample 109/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9957, sigma_W=1.9454 | ETA 71s
+  [sample 110/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9953, sigma_W=1.9453 | ETA 70s
+  [sample 111/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9957, sigma_W=1.9455 | ETA 69s
+  [sample 112/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9952, sigma_W=1.9454 | ETA 69s
+  [sample 113/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9948, sigma_W=1.9453 | ETA 68s
+  [sample 114/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9950, sigma_W=1.9458 | ETA 67s
+  [sample 115/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9949, sigma_W=1.9455 | ETA 66s
+  [sample 116/200] 0.8s | accept=96% | step_size=0.0001 | sigma_V=4.9953, sigma_W=1.9459 | ETA 66s
+  [sample 117/200] 0.8s | accept=96% | step_size=0.0001 | sigma_V=4.9962, sigma_W=1.9467 | ETA 65s
+  [sample 118/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9962, sigma_W=1.9467 | ETA 64s
+  [sample 119/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9956, sigma_W=1.9466 | ETA 64s
+  [sample 120/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9959, sigma_W=1.9464 | ETA 63s
+  [sample 121/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9957, sigma_W=1.9471 | ETA 62s
+  [sample 122/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9945, sigma_W=1.9468 | ETA 61s
+  [sample 123/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9942, sigma_W=1.9469 | ETA 61s
+  [sample 124/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9947, sigma_W=1.9468 | ETA 60s
+  [sample 125/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9958, sigma_W=1.9467 | ETA 59s
+  [sample 126/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9950, sigma_W=1.9465 | ETA 58s
+  [sample 127/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9954, sigma_W=1.9464 | ETA 58s
+  [sample 128/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9961, sigma_W=1.9454 | ETA 57s
+  [sample 129/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9957, sigma_W=1.9461 | ETA 56s
+  [sample 130/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9951, sigma_W=1.9461 | ETA 55s
+  [sample 131/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9951, sigma_W=1.9456 | ETA 54s
+  [sample 132/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9956, sigma_W=1.9459 | ETA 54s
+  [sample 133/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9956, sigma_W=1.9459 | ETA 53s
+  [sample 134/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9951, sigma_W=1.9452 | ETA 52s
+  [sample 135/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9949, sigma_W=1.9454 | ETA 51s
+  [sample 136/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9949, sigma_W=1.9455 | ETA 50s
+  [sample 137/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9949, sigma_W=1.9455 | ETA 50s
+  [sample 138/200] 0.8s | accept=90% | step_size=0.0001 | sigma_V=4.9949, sigma_W=1.9455 | ETA 49s
+  [sample 139/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9944, sigma_W=1.9456 | ETA 48s
+  [sample 140/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9944, sigma_W=1.9454 | ETA 47s
+  [sample 141/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9942, sigma_W=1.9452 | ETA 46s
+  [sample 142/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9941, sigma_W=1.9451 | ETA 46s
+  [sample 143/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9943, sigma_W=1.9446 | ETA 45s
+  [sample 144/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9944, sigma_W=1.9455 | ETA 44s
+  [sample 145/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9940, sigma_W=1.9463 | ETA 43s
+  [sample 146/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9944, sigma_W=1.9466 | ETA 42s
+  [sample 147/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9946, sigma_W=1.9465 | ETA 42s
+  [sample 148/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9946, sigma_W=1.9467 | ETA 41s
+  [sample 149/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9954, sigma_W=1.9472 | ETA 40s
+  [sample 150/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9965, sigma_W=1.9464 | ETA 39s
+  [sample 151/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9960, sigma_W=1.9470 | ETA 38s
+  [sample 152/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9977, sigma_W=1.9471 | ETA 38s
+  [sample 153/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9971, sigma_W=1.9476 | ETA 37s
+  [sample 154/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9978, sigma_W=1.9477 | ETA 36s
+  [sample 155/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9969, sigma_W=1.9473 | ETA 35s
+  [sample 156/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9968, sigma_W=1.9470 | ETA 35s
+  [sample 157/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9975, sigma_W=1.9471 | ETA 34s
+  [sample 158/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9981, sigma_W=1.9468 | ETA 33s
+  [sample 159/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9981, sigma_W=1.9468 | ETA 32s
+  [sample 160/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9976, sigma_W=1.9470 | ETA 32s
+  [sample 161/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9973, sigma_W=1.9476 | ETA 31s
+  [sample 162/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9975, sigma_W=1.9468 | ETA 30s
+  [sample 163/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9971, sigma_W=1.9471 | ETA 29s
+  [sample 164/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9973, sigma_W=1.9469 | ETA 29s
+  [sample 165/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9978, sigma_W=1.9464 | ETA 28s
+  [sample 166/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9978, sigma_W=1.9466 | ETA 27s
+  [sample 167/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9982, sigma_W=1.9471 | ETA 26s
+  [sample 168/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9985, sigma_W=1.9473 | ETA 25s
+  [sample 169/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9976, sigma_W=1.9469 | ETA 24s
+  [sample 170/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9978, sigma_W=1.9465 | ETA 24s
+  [sample 171/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9978, sigma_W=1.9462 | ETA 23s
+  [sample 172/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9971, sigma_W=1.9456 | ETA 22s
+  [sample 173/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9970, sigma_W=1.9450 | ETA 21s
+  [sample 174/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9971, sigma_W=1.9452 | ETA 21s
+  [sample 175/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9968, sigma_W=1.9456 | ETA 20s
+  [sample 176/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9961, sigma_W=1.9457 | ETA 19s
+  [sample 177/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9960, sigma_W=1.9455 | ETA 18s
+  [sample 178/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9955, sigma_W=1.9450 | ETA 17s
+  [sample 179/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9955, sigma_W=1.9454 | ETA 17s
+  [sample 180/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9947, sigma_W=1.9450 | ETA 16s
+  [sample 181/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9955, sigma_W=1.9456 | ETA 15s
+  [sample 182/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9957, sigma_W=1.9457 | ETA 14s
+  [sample 183/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9957, sigma_W=1.9457 | ETA 14s
+  [sample 184/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9959, sigma_W=1.9453 | ETA 13s
+  [sample 185/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9956, sigma_W=1.9455 | ETA 12s
+  [sample 186/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9948, sigma_W=1.9456 | ETA 11s
+  [sample 187/200] 0.8s | accept=92% | step_size=0.0001 | sigma_V=4.9948, sigma_W=1.9456 | ETA 10s
+  [sample 188/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9950, sigma_W=1.9455 | ETA 10s
+  [sample 189/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9948, sigma_W=1.9452 | ETA 9s
+  [sample 190/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9946, sigma_W=1.9456 | ETA 8s
+  [sample 191/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9948, sigma_W=1.9455 | ETA 7s
+  [sample 192/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9959, sigma_W=1.9457 | ETA 6s
+  [sample 193/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9963, sigma_W=1.9464 | ETA 6s
+  [sample 194/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9971, sigma_W=1.9458 | ETA 5s
+  [sample 195/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9973, sigma_W=1.9462 | ETA 4s
+  [sample 196/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9968, sigma_W=1.9460 | ETA 3s
+  [sample 197/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9965, sigma_W=1.9456 | ETA 2s
+  [sample 198/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9959, sigma_W=1.9459 | ETA 2s
+  [sample 199/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9962, sigma_W=1.9464 | ETA 1s
+  [sample 200/200] 0.8s | accept=94% | step_size=0.0001 | sigma_V=4.9963, sigma_W=1.9457 | ETA 0s
+HMC complete!
+
+============================================================
+DPF INFERENCE RESULTS
+============================================================
+
+  sigma_V:
+    True:           1.0
+    Posterior mean:  4.9956 +/- 0.0029
+    90% CI:         [4.9903, 5.0013]
+    True in 90% CI: NO
+
+  sigma_W:
+    True:           1.0
+    Posterior mean:  1.9476 +/- 0.0019
+    90% CI:         [1.9453, 1.9510]
+    True in 90% CI: NO
+
+Diagnostics:
+  Acceptance rate: 93.0%
+  Final step size: 0.000114
+  ESS: {'sigma_V': 6.536643205480283, 'sigma_W': 3.721817741816353}
+  R-hat: {'sigma_V': 1.298424107126236, 'sigma_W': 0.6568855504229453}
+
+Performance:
+  Wall time: 242.5 seconds
+  Peak memory: 4.1 MB
+============================================================
+
+Results saved to /home/haowu/JPML/code/outputs/dpf/hmc/cubic_sensor/bpf_sys
+
+========================================
+[2/6] hmc/cubic_sensor/bpf_soft
+========================================
+Creating true model: src.models.cubic_sensor.CubicSensorModel
+Generating 50 time steps with true params: {'sigma_V': 1.0, 'sigma_W': 1.0}
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1771739893.452486 2188278 gpu_device.cc:2020] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 22322 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3090, pci bus id: 0000:01:00.0, compute capability: 8.6
+Creating inference model
+Trainable params: ['sigma_V', 'sigma_W']
+
+Running HMC inference...
+Using HMC sampler (num_leapfrog_steps=5)
+Running HMC: 100 burn-in + 200 sampling = 300 total steps
+  [grad check] lp=-161.2129, |grad|=10.049825547805431, grad=[-9.43715415 -3.45530246]
+  [burn-in 1/100] 0.9s | accept=100% | step_size=0.0120 | sigma_V=4.9994, sigma_W=2.0023 | ETA 256s
+  [burn-in 2/100] 0.8s | accept=100% | step_size=0.0160 | sigma_V=5.1021, sigma_W=1.9021 | ETA 252s
+  [burn-in 3/100] 0.9s | accept=100% | step_size=0.0082 | sigma_V=5.1132, sigma_W=1.8588 | ETA 253s
+  [burn-in 4/100] 0.9s | accept=75% | step_size=0.0033 | sigma_V=5.1132, sigma_W=1.8588 | ETA 252s
+  [burn-in 5/100] 0.8s | accept=60% | step_size=0.0021 | sigma_V=5.1132, sigma_W=1.8588 | ETA 250s
+  [burn-in 6/100] 0.8s | accept=67% | step_size=0.0028 | sigma_V=5.1185, sigma_W=1.8703 | ETA 249s
+  [burn-in 7/100] 0.8s | accept=71% | step_size=0.0037 | sigma_V=5.1328, sigma_W=1.8705 | ETA 248s
+  [burn-in 8/100] 0.8s | accept=75% | step_size=0.0050 | sigma_V=5.1257, sigma_W=1.8555 | ETA 247s
+  [burn-in 9/100] 0.8s | accept=78% | step_size=0.0061 | sigma_V=5.0794, sigma_W=1.8276 | ETA 246s
+  [burn-in 10/100] 0.8s | accept=70% | step_size=0.0011 | sigma_V=5.0794, sigma_W=1.8276 | ETA 245s
+  [burn-in 11/100] 0.8s | accept=64% | step_size=0.0005 | sigma_V=5.0794, sigma_W=1.8276 | ETA 243s
+  [burn-in 12/100] 0.8s | accept=67% | step_size=0.0002 | sigma_V=5.0749, sigma_W=1.8285 | ETA 242s
+  [burn-in 13/100] 0.8s | accept=69% | step_size=0.0002 | sigma_V=5.0746, sigma_W=1.8295 | ETA 241s
+  [burn-in 14/100] 0.8s | accept=71% | step_size=0.0001 | sigma_V=5.0738, sigma_W=1.8300 | ETA 240s
+  [burn-in 15/100] 0.8s | accept=73% | step_size=0.0001 | sigma_V=5.0740, sigma_W=1.8304 | ETA 239s
+  [burn-in 16/100] 0.8s | accept=75% | step_size=0.0001 | sigma_V=5.0739, sigma_W=1.8309 | ETA 238s
+  [burn-in 17/100] 0.8s | accept=76% | step_size=0.0001 | sigma_V=5.0736, sigma_W=1.8304 | ETA 237s
+  [burn-in 18/100] 0.8s | accept=78% | step_size=0.0002 | sigma_V=5.0736, sigma_W=1.8316 | ETA 236s
+  [burn-in 19/100] 0.8s | accept=79% | step_size=0.0002 | sigma_V=5.0731, sigma_W=1.8299 | ETA 235s
+  [burn-in 20/100] 0.8s | accept=80% | step_size=0.0002 | sigma_V=5.0722, sigma_W=1.8305 | ETA 235s
+  [burn-in 21/100] 0.8s | accept=81% | step_size=0.0002 | sigma_V=5.0718, sigma_W=1.8294 | ETA 234s
+  [burn-in 22/100] 0.8s | accept=82% | step_size=0.0001 | sigma_V=5.0704, sigma_W=1.8293 | ETA 234s
+  [burn-in 23/100] 0.8s | accept=83% | step_size=0.0001 | sigma_V=5.0707, sigma_W=1.8295 | ETA 233s
+  [burn-in 24/100] 0.8s | accept=83% | step_size=0.0001 | sigma_V=5.0708, sigma_W=1.8299 | ETA 232s
+  [burn-in 25/100] 0.9s | accept=84% | step_size=0.0001 | sigma_V=5.0707, sigma_W=1.8297 | ETA 232s
+  [burn-in 26/100] 0.8s | accept=81% | step_size=0.0001 | sigma_V=5.0707, sigma_W=1.8297 | ETA 231s
+  [burn-in 27/100] 0.8s | accept=81% | step_size=0.0001 | sigma_V=5.0705, sigma_W=1.8300 | ETA 231s
+  [burn-in 28/100] 0.9s | accept=82% | step_size=0.0001 | sigma_V=5.0700, sigma_W=1.8308 | ETA 230s
+  [burn-in 29/100] 0.9s | accept=83% | step_size=0.0001 | sigma_V=5.0702, sigma_W=1.8308 | ETA 230s
+  [burn-in 30/100] 0.9s | accept=83% | step_size=0.0001 | sigma_V=5.0705, sigma_W=1.8313 | ETA 229s
+  [burn-in 31/100] 0.9s | accept=84% | step_size=0.0001 | sigma_V=5.0701, sigma_W=1.8316 | ETA 228s
+  [burn-in 32/100] 0.9s | accept=84% | step_size=0.0001 | sigma_V=5.0706, sigma_W=1.8316 | ETA 228s
+  [burn-in 33/100] 0.9s | accept=82% | step_size=0.0000 | sigma_V=5.0706, sigma_W=1.8316 | ETA 227s
+  [burn-in 34/100] 0.9s | accept=82% | step_size=0.0000 | sigma_V=5.0706, sigma_W=1.8316 | ETA 227s
+  [burn-in 35/100] 0.9s | accept=83% | step_size=0.0000 | sigma_V=5.0706, sigma_W=1.8316 | ETA 226s
+  [burn-in 36/100] 0.9s | accept=83% | step_size=0.0000 | sigma_V=5.0704, sigma_W=1.8315 | ETA 225s
+  [burn-in 37/100] 0.9s | accept=84% | step_size=0.0000 | sigma_V=5.0703, sigma_W=1.8313 | ETA 225s
+  [burn-in 38/100] 0.9s | accept=84% | step_size=0.0000 | sigma_V=5.0703, sigma_W=1.8312 | ETA 224s
+  [burn-in 39/100] 0.9s | accept=85% | step_size=0.0000 | sigma_V=5.0705, sigma_W=1.8314 | ETA 223s
+  [burn-in 40/100] 0.9s | accept=82% | step_size=0.0000 | sigma_V=5.0705, sigma_W=1.8314 | ETA 223s
+  [burn-in 41/100] 0.9s | accept=83% | step_size=0.0000 | sigma_V=5.0704, sigma_W=1.8313 | ETA 222s
+  [burn-in 42/100] 0.9s | accept=81% | step_size=0.0000 | sigma_V=5.0704, sigma_W=1.8313 | ETA 221s
+  [burn-in 43/100] 0.9s | accept=81% | step_size=0.0000 | sigma_V=5.0704, sigma_W=1.8313 | ETA 220s
+  [burn-in 44/100] 0.9s | accept=82% | step_size=0.0000 | sigma_V=5.0705, sigma_W=1.8313 | ETA 220s
+  [burn-in 45/100] 0.8s | accept=82% | step_size=0.0000 | sigma_V=5.0705, sigma_W=1.8313 | ETA 218s
+  [burn-in 46/100] 0.9s | accept=83% | step_size=0.0000 | sigma_V=5.0705, sigma_W=1.8313 | ETA 218s
+  [burn-in 47/100] 0.9s | accept=83% | step_size=0.0000 | sigma_V=5.0705, sigma_W=1.8313 | ETA 217s
+  [burn-in 48/100] 0.9s | accept=83% | step_size=0.0000 | sigma_V=5.0705, sigma_W=1.8313 | ETA 216s
+  [burn-in 49/100] 0.9s | accept=82% | step_size=0.0000 | sigma_V=5.0705, sigma_W=1.8313 | ETA 215s
+  [burn-in 50/100] 0.9s | accept=80% | step_size=0.0000 | sigma_V=5.0705, sigma_W=1.8313 | ETA 214s
+  [burn-in 51/100] 0.9s | accept=80% | step_size=0.0000 | sigma_V=5.0705, sigma_W=1.8313 | ETA 213s
+  [burn-in 52/100] 0.8s | accept=80% | step_size=0.0000 | sigma_V=5.0705, sigma_W=1.8313 | ETA 212s
+  [burn-in 53/100] 0.9s | accept=80% | step_size=0.0000 | sigma_V=5.0705, sigma_W=1.8313 | ETA 211s
+  [burn-in 54/100] 0.8s | accept=82% | step_size=0.0000 | sigma_V=5.0705, sigma_W=1.8313 | ETA 210s
+  [burn-in 55/100] 0.8s | accept=84% | step_size=0.0000 | sigma_V=5.0705, sigma_W=1.8313 | ETA 209s
+  [burn-in 56/100] 0.8s | accept=84% | step_size=0.0000 | sigma_V=5.0704, sigma_W=1.8313 | ETA 208s
+  [burn-in 57/100] 0.8s | accept=84% | step_size=0.0000 | sigma_V=5.0704, sigma_W=1.8313 | ETA 207s
+  [burn-in 58/100] 0.8s | accept=84% | step_size=0.0000 | sigma_V=5.0704, sigma_W=1.8314 | ETA 206s
+  [burn-in 59/100] 0.8s | accept=84% | step_size=0.0000 | sigma_V=5.0705, sigma_W=1.8315 | ETA 204s
+  [burn-in 60/100] 0.8s | accept=86% | step_size=0.0000 | sigma_V=5.0706, sigma_W=1.8315 | ETA 203s
+  [burn-in 61/100] 0.8s | accept=88% | step_size=0.0000 | sigma_V=5.0707, sigma_W=1.8315 | ETA 202s
+  [burn-in 62/100] 0.8s | accept=88% | step_size=0.0000 | sigma_V=5.0706, sigma_W=1.8315 | ETA 201s
+  [burn-in 63/100] 0.8s | accept=88% | step_size=0.0000 | sigma_V=5.0707, sigma_W=1.8314 | ETA 200s
+  [burn-in 64/100] 0.8s | accept=88% | step_size=0.0000 | sigma_V=5.0707, sigma_W=1.8314 | ETA 199s
+  [burn-in 65/100] 0.8s | accept=88% | step_size=0.0000 | sigma_V=5.0707, sigma_W=1.8314 | ETA 198s
+  [burn-in 66/100] 0.8s | accept=88% | step_size=0.0000 | sigma_V=5.0707, sigma_W=1.8314 | ETA 197s
+  [burn-in 67/100] 0.8s | accept=88% | step_size=0.0000 | sigma_V=5.0707, sigma_W=1.8314 | ETA 196s
+  [burn-in 68/100] 0.8s | accept=88% | step_size=0.0000 | sigma_V=5.0706, sigma_W=1.8314 | ETA 195s
+  [burn-in 69/100] 0.8s | accept=88% | step_size=0.0000 | sigma_V=5.0706, sigma_W=1.8314 | ETA 194s
+  [burn-in 70/100] 0.8s | accept=86% | step_size=0.0000 | sigma_V=5.0706, sigma_W=1.8314 | ETA 194s
+  [burn-in 71/100] 0.8s | accept=86% | step_size=0.0000 | sigma_V=5.0706, sigma_W=1.8314 | ETA 193s
+  [burn-in 72/100] 0.9s | accept=86% | step_size=0.0000 | sigma_V=5.0706, sigma_W=1.8314 | ETA 193s
+  [burn-in 73/100] 0.9s | accept=86% | step_size=0.0000 | sigma_V=5.0706, sigma_W=1.8314 | ETA 192s
+  [burn-in 74/100] 0.9s | accept=86% | step_size=0.0000 | sigma_V=5.0706, sigma_W=1.8314 | ETA 192s
+  [burn-in 75/100] 0.9s | accept=86% | step_size=0.0000 | sigma_V=5.0707, sigma_W=1.8314 | ETA 192s
+  [burn-in 76/100] 0.8s | accept=88% | step_size=0.0000 | sigma_V=5.0707, sigma_W=1.8314 | ETA 191s
+  [burn-in 77/100] 0.8s | accept=88% | step_size=0.0000 | sigma_V=5.0706, sigma_W=1.8314 | ETA 190s
+  [burn-in 78/100] 0.8s | accept=88% | step_size=0.0000 | sigma_V=5.0706, sigma_W=1.8314 | ETA 190s
+  [burn-in 79/100] 0.8s | accept=88% | step_size=0.0000 | sigma_V=5.0706, sigma_W=1.8314 | ETA 189s
+  [burn-in 80/100] 0.8s | accept=88% | step_size=0.0000 | sigma_V=5.0706, sigma_W=1.8314 | ETA 188s
+  [burn-in 81/100] 0.8s | accept=88% | step_size=0.0000 | sigma_V=5.0706, sigma_W=1.8315 | ETA 187s
+  [burn-in 82/100] 0.8s | accept=88% | step_size=0.0000 | sigma_V=5.0706, sigma_W=1.8314 | ETA 185s
+  [burn-in 83/100] 0.8s | accept=88% | step_size=0.0000 | sigma_V=5.0706, sigma_W=1.8314 | ETA 184s
+  [burn-in 84/100] 0.8s | accept=88% | step_size=0.0000 | sigma_V=5.0706, sigma_W=1.8314 | ETA 183s
+  [burn-in 85/100] 0.8s | accept=86% | step_size=0.0000 | sigma_V=5.0706, sigma_W=1.8314 | ETA 181s
+  [burn-in 86/100] 0.8s | accept=86% | step_size=0.0000 | sigma_V=5.0707, sigma_W=1.8314 | ETA 180s
+  [burn-in 87/100] 0.9s | accept=86% | step_size=0.0000 | sigma_V=5.0707, sigma_W=1.8314 | ETA 180s
+  [burn-in 88/100] 0.8s | accept=86% | step_size=0.0000 | sigma_V=5.0707, sigma_W=1.8314 | ETA 179s
+  [burn-in 89/100] 0.8s | accept=86% | step_size=0.0000 | sigma_V=5.0707, sigma_W=1.8314 | ETA 178s
+  [burn-in 90/100] 0.8s | accept=88% | step_size=0.0000 | sigma_V=5.0707, sigma_W=1.8314 | ETA 177s
+  [burn-in 91/100] 0.8s | accept=88% | step_size=0.0000 | sigma_V=5.0706, sigma_W=1.8314 | ETA 176s
+  [burn-in 92/100] 0.8s | accept=90% | step_size=0.0000 | sigma_V=5.0706, sigma_W=1.8314 | ETA 175s
+  [burn-in 93/100] 0.9s | accept=90% | step_size=0.0000 | sigma_V=5.0706, sigma_W=1.8314 | ETA 175s
+  [burn-in 94/100] 0.8s | accept=90% | step_size=0.0000 | sigma_V=5.0706, sigma_W=1.8314 | ETA 174s
+  [burn-in 95/100] 0.8s | accept=90% | step_size=0.0000 | sigma_V=5.0706, sigma_W=1.8313 | ETA 173s
+  [burn-in 96/100] 0.9s | accept=90% | step_size=0.0000 | sigma_V=5.0706, sigma_W=1.8313 | ETA 173s
+  [burn-in 97/100] 0.9s | accept=90% | step_size=0.0000 | sigma_V=5.0706, sigma_W=1.8313 | ETA 172s
+  [burn-in 98/100] 0.9s | accept=90% | step_size=0.0000 | sigma_V=5.0706, sigma_W=1.8313 | ETA 171s
+  [burn-in 99/100] 0.9s | accept=92% | step_size=0.0000 | sigma_V=5.0706, sigma_W=1.8313 | ETA 171s
+  [burn-in 100/100] 0.9s | accept=94% | step_size=0.0000 | sigma_V=5.0707, sigma_W=1.8313 | ETA 170s
+  [sample 1/200] 0.9s | accept=94% | step_size=0.0000 | sigma_V=5.0706, sigma_W=1.8313 | ETA 170s
+  [sample 2/200] 0.9s | accept=94% | step_size=0.0000 | sigma_V=5.0706, sigma_W=1.8313 | ETA 169s
+  [sample 3/200] 0.9s | accept=94% | step_size=0.0000 | sigma_V=5.0706, sigma_W=1.8313 | ETA 168s
+  [sample 4/200] 0.9s | accept=94% | step_size=0.0000 | sigma_V=5.0707, sigma_W=1.8313 | ETA 168s
+  [sample 5/200] 0.8s | accept=94% | step_size=0.0000 | sigma_V=5.0706, sigma_W=1.8313 | ETA 167s
+  [sample 6/200] 0.8s | accept=94% | step_size=0.0000 | sigma_V=5.0706, sigma_W=1.8314 | ETA 166s
+  [sample 7/200] 0.9s | accept=94% | step_size=0.0000 | sigma_V=5.0706, sigma_W=1.8314 | ETA 165s
+  [sample 8/200] 0.9s | accept=94% | step_size=0.0000 | sigma_V=5.0706, sigma_W=1.8314 | ETA 164s
+  [sample 9/200] 0.9s | accept=94% | step_size=0.0000 | sigma_V=5.0706, sigma_W=1.8314 | ETA 163s
+  [sample 10/200] 0.9s | accept=92% | step_size=0.0000 | sigma_V=5.0706, sigma_W=1.8314 | ETA 162s
+  [sample 11/200] 0.9s | accept=90% | step_size=0.0000 | sigma_V=5.0706, sigma_W=1.8314 | ETA 161s
+  [sample 12/200] 0.9s | accept=90% | step_size=0.0000 | sigma_V=5.0706, sigma_W=1.8314 | ETA 161s
+  [sample 13/200] 0.8s | accept=88% | step_size=0.0000 | sigma_V=5.0706, sigma_W=1.8314 | ETA 160s
+  [sample 14/200] 0.9s | accept=88% | step_size=0.0000 | sigma_V=5.0706, sigma_W=1.8314 | ETA 159s
+  [sample 15/200] 0.9s | accept=88% | step_size=0.0000 | sigma_V=5.0706, sigma_W=1.8314 | ETA 158s
+  [sample 16/200] 0.9s | accept=88% | step_size=0.0000 | sigma_V=5.0706, sigma_W=1.8314 | ETA 157s
+  [sample 17/200] 0.9s | accept=88% | step_size=0.0000 | sigma_V=5.0706, sigma_W=1.8314 | ETA 157s
+  [sample 18/200] 0.9s | accept=88% | step_size=0.0000 | sigma_V=5.0706, sigma_W=1.8314 | ETA 156s
+  [sample 19/200] 0.8s | accept=88% | step_size=0.0000 | sigma_V=5.0706, sigma_W=1.8314 | ETA 155s
+  [sample 20/200] 0.8s | accept=90% | step_size=0.0000 | sigma_V=5.0706, sigma_W=1.8314 | ETA 154s
+  [sample 21/200] 0.9s | accept=90% | step_size=0.0000 | sigma_V=5.0706, sigma_W=1.8314 | ETA 153s
+  [sample 22/200] 0.8s | accept=90% | step_size=0.0000 | sigma_V=5.0706, sigma_W=1.8314 | ETA 152s
+  [sample 23/200] 0.8s | accept=90% | step_size=0.0000 | sigma_V=5.0706, sigma_W=1.8314 | ETA 151s
+  [sample 24/200] 0.8s | accept=88% | step_size=0.0000 | sigma_V=5.0706, sigma_W=1.8314 | ETA 149s
+  [sample 25/200] 0.8s | accept=88% | step_size=0.0000 | sigma_V=5.0707, sigma_W=1.8314 | ETA 148s
+  [sample 26/200] 0.9s | accept=88% | step_size=0.0000 | sigma_V=5.0707, sigma_W=1.8314 | ETA 148s
+  [sample 27/200] 0.9s | accept=88% | step_size=0.0000 | sigma_V=5.0706, sigma_W=1.8314 | ETA 147s
+  [sample 28/200] 0.9s | accept=88% | step_size=0.0000 | sigma_V=5.0706, sigma_W=1.8314 | ETA 146s
+  [sample 29/200] 0.9s | accept=88% | step_size=0.0000 | sigma_V=5.0706, sigma_W=1.8314 | ETA 146s
+  [sample 30/200] 0.9s | accept=88% | step_size=0.0000 | sigma_V=5.0707, sigma_W=1.8314 | ETA 145s
+  [sample 31/200] 0.9s | accept=88% | step_size=0.0000 | sigma_V=5.0707, sigma_W=1.8314 | ETA 144s
+  [sample 32/200] 0.9s | accept=88% | step_size=0.0000 | sigma_V=5.0707, sigma_W=1.8314 | ETA 144s
+  [sample 33/200] 0.9s | accept=90% | step_size=0.0000 | sigma_V=5.0707, sigma_W=1.8314 | ETA 143s
+  [sample 34/200] 0.8s | accept=88% | step_size=0.0000 | sigma_V=5.0707, sigma_W=1.8314 | ETA 142s
+  [sample 35/200] 0.8s | accept=90% | step_size=0.0000 | sigma_V=5.0707, sigma_W=1.8314 | ETA 141s
+  [sample 36/200] 0.8s | accept=90% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8314 | ETA 140s
+  [sample 37/200] 0.9s | accept=90% | step_size=0.0000 | sigma_V=5.0707, sigma_W=1.8314 | ETA 139s
+  [sample 38/200] 0.9s | accept=90% | step_size=0.0000 | sigma_V=5.0707, sigma_W=1.8314 | ETA 138s
+  [sample 39/200] 0.9s | accept=90% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8314 | ETA 137s
+  [sample 40/200] 0.9s | accept=90% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8314 | ETA 136s
+  [sample 41/200] 0.9s | accept=90% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8314 | ETA 135s
+  [sample 42/200] 0.9s | accept=90% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8314 | ETA 135s
+  [sample 43/200] 0.9s | accept=90% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8314 | ETA 134s
+  [sample 44/200] 0.9s | accept=90% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8313 | ETA 133s
+  [sample 45/200] 0.9s | accept=90% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8313 | ETA 132s
+  [sample 46/200] 0.8s | accept=90% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8313 | ETA 132s
+  [sample 47/200] 0.9s | accept=90% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8313 | ETA 131s
+  [sample 48/200] 0.9s | accept=90% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8313 | ETA 130s
+  [sample 49/200] 0.9s | accept=90% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8314 | ETA 129s
+  [sample 50/200] 0.9s | accept=90% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8314 | ETA 128s
+  [sample 51/200] 0.9s | accept=90% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8314 | ETA 127s
+  [sample 52/200] 0.8s | accept=90% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8314 | ETA 126s
+  [sample 53/200] 0.8s | accept=90% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8314 | ETA 125s
+  [sample 54/200] 0.8s | accept=90% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8314 | ETA 124s
+  [sample 55/200] 0.8s | accept=90% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8314 | ETA 123s
+  [sample 56/200] 0.8s | accept=90% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8314 | ETA 122s
+  [sample 57/200] 0.9s | accept=90% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8314 | ETA 121s
+  [sample 58/200] 0.8s | accept=88% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8314 | ETA 120s
+  [sample 59/200] 0.8s | accept=88% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8314 | ETA 119s
+  [sample 60/200] 0.8s | accept=90% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8314 | ETA 118s
+  [sample 61/200] 0.8s | accept=92% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8315 | ETA 117s
+  [sample 62/200] 0.9s | accept=92% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8314 | ETA 117s
+  [sample 63/200] 0.8s | accept=94% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8314 | ETA 116s
+  [sample 64/200] 0.9s | accept=94% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8314 | ETA 115s
+  [sample 65/200] 0.9s | accept=94% | step_size=0.0000 | sigma_V=5.0710, sigma_W=1.8314 | ETA 114s
+  [sample 66/200] 0.9s | accept=94% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8314 | ETA 114s
+  [sample 67/200] 0.9s | accept=94% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8314 | ETA 113s
+  [sample 68/200] 0.9s | accept=94% | step_size=0.0000 | sigma_V=5.0710, sigma_W=1.8314 | ETA 112s
+  [sample 69/200] 0.9s | accept=94% | step_size=0.0000 | sigma_V=5.0710, sigma_W=1.8314 | ETA 111s
+  [sample 70/200] 0.8s | accept=94% | step_size=0.0000 | sigma_V=5.0710, sigma_W=1.8315 | ETA 110s
+  [sample 71/200] 0.8s | accept=94% | step_size=0.0000 | sigma_V=5.0710, sigma_W=1.8314 | ETA 110s
+  [sample 72/200] 0.8s | accept=94% | step_size=0.0000 | sigma_V=5.0710, sigma_W=1.8314 | ETA 109s
+  [sample 73/200] 0.8s | accept=94% | step_size=0.0000 | sigma_V=5.0710, sigma_W=1.8314 | ETA 108s
+  [sample 74/200] 0.8s | accept=96% | step_size=0.0000 | sigma_V=5.0710, sigma_W=1.8314 | ETA 107s
+  [sample 75/200] 0.8s | accept=96% | step_size=0.0000 | sigma_V=5.0710, sigma_W=1.8314 | ETA 106s
+  [sample 76/200] 0.8s | accept=96% | step_size=0.0000 | sigma_V=5.0710, sigma_W=1.8314 | ETA 105s
+  [sample 77/200] 0.9s | accept=96% | step_size=0.0000 | sigma_V=5.0710, sigma_W=1.8313 | ETA 104s
+  [sample 78/200] 0.9s | accept=96% | step_size=0.0000 | sigma_V=5.0710, sigma_W=1.8313 | ETA 103s
+  [sample 79/200] 0.9s | accept=96% | step_size=0.0000 | sigma_V=5.0710, sigma_W=1.8314 | ETA 103s
+  [sample 80/200] 0.9s | accept=96% | step_size=0.0000 | sigma_V=5.0710, sigma_W=1.8314 | ETA 102s
+  [sample 81/200] 0.8s | accept=96% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8314 | ETA 101s
+  [sample 82/200] 0.9s | accept=96% | step_size=0.0000 | sigma_V=5.0710, sigma_W=1.8313 | ETA 100s
+  [sample 83/200] 0.9s | accept=96% | step_size=0.0000 | sigma_V=5.0710, sigma_W=1.8313 | ETA 100s
+  [sample 84/200] 0.9s | accept=98% | step_size=0.0000 | sigma_V=5.0710, sigma_W=1.8313 | ETA 99s
+  [sample 85/200] 0.9s | accept=98% | step_size=0.0000 | sigma_V=5.0710, sigma_W=1.8313 | ETA 98s
+  [sample 86/200] 0.9s | accept=96% | step_size=0.0000 | sigma_V=5.0710, sigma_W=1.8313 | ETA 98s
+  [sample 87/200] 0.9s | accept=96% | step_size=0.0000 | sigma_V=5.0710, sigma_W=1.8313 | ETA 97s
+  [sample 88/200] 0.9s | accept=96% | step_size=0.0000 | sigma_V=5.0710, sigma_W=1.8313 | ETA 96s
+  [sample 89/200] 0.9s | accept=94% | step_size=0.0000 | sigma_V=5.0710, sigma_W=1.8313 | ETA 95s
+  [sample 90/200] 0.9s | accept=94% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8312 | ETA 94s
+  [sample 91/200] 0.9s | accept=94% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8312 | ETA 93s
+  [sample 92/200] 0.8s | accept=94% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8312 | ETA 93s
+  [sample 93/200] 0.8s | accept=92% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8312 | ETA 92s
+  [sample 94/200] 0.8s | accept=92% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8313 | ETA 91s
+  [sample 95/200] 0.8s | accept=90% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8313 | ETA 90s
+  [sample 96/200] 0.8s | accept=90% | step_size=0.0000 | sigma_V=5.0710, sigma_W=1.8313 | ETA 89s
+  [sample 97/200] 0.9s | accept=90% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8313 | ETA 88s
+  [sample 98/200] 0.9s | accept=90% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8313 | ETA 87s
+  [sample 99/200] 0.8s | accept=90% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8312 | ETA 86s
+  [sample 100/200] 0.8s | accept=88% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8312 | ETA 85s
+  [sample 101/200] 0.8s | accept=88% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8313 | ETA 84s
+  [sample 102/200] 0.8s | accept=88% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8313 | ETA 83s
+  [sample 103/200] 0.8s | accept=88% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8313 | ETA 82s
+  [sample 104/200] 0.8s | accept=88% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8312 | ETA 81s
+  [sample 105/200] 0.9s | accept=88% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8312 | ETA 81s
+  [sample 106/200] 0.8s | accept=88% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8312 | ETA 80s
+  [sample 107/200] 0.8s | accept=86% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8312 | ETA 79s
+  [sample 108/200] 0.9s | accept=86% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8312 | ETA 78s
+  [sample 109/200] 0.9s | accept=84% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8312 | ETA 77s
+  [sample 110/200] 0.8s | accept=84% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8312 | ETA 76s
+  [sample 111/200] 0.8s | accept=84% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8312 | ETA 75s
+  [sample 112/200] 0.9s | accept=84% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8312 | ETA 75s
+  [sample 113/200] 0.8s | accept=84% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8312 | ETA 74s
+  [sample 114/200] 0.9s | accept=84% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8312 | ETA 73s
+  [sample 115/200] 0.9s | accept=84% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8312 | ETA 72s
+  [sample 116/200] 0.9s | accept=84% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8312 | ETA 71s
+  [sample 117/200] 0.8s | accept=84% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8313 | ETA 71s
+  [sample 118/200] 0.8s | accept=84% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8313 | ETA 70s
+  [sample 119/200] 0.8s | accept=84% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8313 | ETA 69s
+  [sample 120/200] 0.8s | accept=84% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8312 | ETA 68s
+  [sample 121/200] 0.9s | accept=84% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8313 | ETA 67s
+  [sample 122/200] 0.8s | accept=84% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8313 | ETA 66s
+  [sample 123/200] 0.8s | accept=84% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8313 | ETA 65s
+  [sample 124/200] 0.8s | accept=84% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8313 | ETA 64s
+  [sample 125/200] 0.9s | accept=84% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8313 | ETA 64s
+  [sample 126/200] 0.8s | accept=84% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8313 | ETA 63s
+  [sample 127/200] 0.9s | accept=84% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8312 | ETA 62s
+  [sample 128/200] 0.9s | accept=84% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8312 | ETA 61s
+  [sample 129/200] 0.9s | accept=84% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8312 | ETA 60s
+  [sample 130/200] 0.8s | accept=84% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8312 | ETA 59s
+  [sample 131/200] 0.9s | accept=84% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8312 | ETA 59s
+  [sample 132/200] 0.8s | accept=84% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8312 | ETA 58s
+  [sample 133/200] 0.9s | accept=84% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8312 | ETA 57s
+  [sample 134/200] 0.8s | accept=84% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8312 | ETA 56s
+  [sample 135/200] 0.8s | accept=84% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8312 | ETA 55s
+  [sample 136/200] 0.9s | accept=86% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8312 | ETA 54s
+  [sample 137/200] 0.9s | accept=86% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8312 | ETA 54s
+  [sample 138/200] 0.9s | accept=86% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8312 | ETA 53s
+  [sample 139/200] 0.9s | accept=88% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8312 | ETA 52s
+  [sample 140/200] 0.8s | accept=88% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8312 | ETA 51s
+  [sample 141/200] 0.9s | accept=88% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8312 | ETA 50s
+  [sample 142/200] 0.9s | accept=88% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8312 | ETA 50s
+  [sample 143/200] 0.9s | accept=90% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8312 | ETA 49s
+  [sample 144/200] 0.9s | accept=90% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8312 | ETA 48s
+  [sample 145/200] 0.9s | accept=92% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8312 | ETA 47s
+  [sample 146/200] 0.8s | accept=92% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8312 | ETA 46s
+  [sample 147/200] 0.8s | accept=92% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8312 | ETA 45s
+  [sample 148/200] 0.9s | accept=92% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8312 | ETA 44s
+  [sample 149/200] 0.9s | accept=92% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8313 | ETA 43s
+  [sample 150/200] 0.9s | accept=94% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8312 | ETA 43s
+  [sample 151/200] 0.8s | accept=94% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8313 | ETA 42s
+  [sample 152/200] 0.9s | accept=94% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8313 | ETA 41s
+  [sample 153/200] 0.8s | accept=94% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8313 | ETA 40s
+  [sample 154/200] 0.8s | accept=94% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8313 | ETA 39s
+  [sample 155/200] 0.8s | accept=94% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8313 | ETA 38s
+  [sample 156/200] 0.8s | accept=94% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8313 | ETA 37s
+  [sample 157/200] 0.9s | accept=94% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8313 | ETA 37s
+  [sample 158/200] 0.8s | accept=96% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8312 | ETA 36s
+  [sample 159/200] 0.8s | accept=98% | step_size=0.0000 | sigma_V=5.0710, sigma_W=1.8312 | ETA 35s
+  [sample 160/200] 0.8s | accept=98% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8312 | ETA 34s
+  [sample 161/200] 0.8s | accept=98% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8313 | ETA 33s
+  [sample 162/200] 0.8s | accept=98% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8312 | ETA 32s
+  [sample 163/200] 0.8s | accept=98% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8312 | ETA 31s
+  [sample 164/200] 0.8s | accept=98% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8312 | ETA 30s
+  [sample 165/200] 0.8s | accept=98% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8312 | ETA 30s
+  [sample 166/200] 0.9s | accept=98% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8312 | ETA 29s
+  [sample 167/200] 0.9s | accept=98% | step_size=0.0000 | sigma_V=5.0710, sigma_W=1.8312 | ETA 28s
+  [sample 168/200] 0.9s | accept=98% | step_size=0.0000 | sigma_V=5.0710, sigma_W=1.8312 | ETA 27s
+  [sample 169/200] 0.9s | accept=98% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8312 | ETA 26s
+  [sample 170/200] 0.8s | accept=98% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8312 | ETA 26s
+  [sample 171/200] 0.8s | accept=98% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8312 | ETA 25s
+  [sample 172/200] 0.9s | accept=98% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8312 | ETA 24s
+  [sample 173/200] 0.8s | accept=98% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8312 | ETA 23s
+  [sample 174/200] 0.9s | accept=98% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8312 | ETA 22s
+  [sample 175/200] 0.9s | accept=98% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8312 | ETA 21s
+  [sample 176/200] 0.9s | accept=98% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8312 | ETA 20s
+  [sample 177/200] 0.9s | accept=98% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8312 | ETA 20s
+  [sample 178/200] 0.9s | accept=98% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8312 | ETA 19s
+  [sample 179/200] 0.9s | accept=96% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8312 | ETA 18s
+  [sample 180/200] 0.8s | accept=96% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8311 | ETA 17s
+  [sample 181/200] 0.9s | accept=96% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8312 | ETA 16s
+  [sample 182/200] 0.8s | accept=94% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8312 | ETA 15s
+  [sample 183/200] 0.8s | accept=92% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8312 | ETA 14s
+  [sample 184/200] 0.9s | accept=92% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8312 | ETA 14s
+  [sample 185/200] 0.9s | accept=90% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8312 | ETA 13s
+  [sample 186/200] 0.9s | accept=90% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8312 | ETA 12s
+  [sample 187/200] 0.9s | accept=90% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8311 | ETA 11s
+  [sample 188/200] 0.9s | accept=90% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8311 | ETA 10s
+  [sample 189/200] 0.9s | accept=90% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8311 | ETA 9s
+  [sample 190/200] 0.8s | accept=90% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8311 | ETA 9s
+  [sample 191/200] 0.9s | accept=90% | step_size=0.0000 | sigma_V=5.0708, sigma_W=1.8311 | ETA 8s
+  [sample 192/200] 0.9s | accept=90% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8311 | ETA 7s
+  [sample 193/200] 0.9s | accept=90% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8312 | ETA 6s
+  [sample 194/200] 0.8s | accept=90% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8311 | ETA 5s
+  [sample 195/200] 0.9s | accept=90% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8312 | ETA 4s
+  [sample 196/200] 0.9s | accept=90% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8311 | ETA 3s
+  [sample 197/200] 0.8s | accept=90% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8311 | ETA 3s
+  [sample 198/200] 0.8s | accept=90% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8311 | ETA 2s
+  [sample 199/200] 0.8s | accept=90% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8312 | ETA 1s
+  [sample 200/200] 0.9s | accept=90% | step_size=0.0000 | sigma_V=5.0709, sigma_W=1.8311 | ETA 0s
+HMC complete!
+
+============================================================
+DPF INFERENCE RESULTS
+============================================================
+
+  sigma_V:
+    True:           1.0
+    Posterior mean:  5.0708 +/- 0.0001
+    90% CI:         [5.0706, 5.0710]
+    True in 90% CI: NO
+
+  sigma_W:
+    True:           1.0
+    Posterior mean:  1.8313 +/- 0.0001
+    90% CI:         [1.8311, 1.8314]
+    True in 90% CI: NO
+
+Diagnostics:
+  Acceptance rate: 90.5%
+  Final step size: 0.000004
+  ESS: {'sigma_V': 5.531199883207169, 'sigma_W': 3.355064202890062}
+  R-hat: {'sigma_V': 1.2779575683076152, 'sigma_W': 0.6770121633908257}
+
+Performance:
+  Wall time: 261.7 seconds
+  Peak memory: 4.8 MB
+============================================================
+
+Results saved to /home/haowu/JPML/code/outputs/dpf/hmc/cubic_sensor/bpf_soft
+
+========================================
+[3/6] hmc/cubic_sensor/bpf_ot
+========================================
+Creating true model: src.models.cubic_sensor.CubicSensorModel
+Generating 50 time steps with true params: {'sigma_V': 1.0, 'sigma_W': 1.0}
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1771740159.481447 2190484 gpu_device.cc:2020] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 22322 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3090, pci bus id: 0000:01:00.0, compute capability: 8.6
+Creating inference model
+Trainable params: ['sigma_V', 'sigma_W']
+
+Running HMC inference...
+Using HMC sampler (num_leapfrog_steps=5)
+Running HMC: 100 burn-in + 200 sampling = 300 total steps
+  [grad check] lp=-162.4575, |grad|=13.64405674262907, grad=[-13.52913768  -1.76712143]
+  [burn-in 1/100] 12.8s | accept=100% | step_size=0.0116 | sigma_V=4.9994, sigma_W=2.0023 | ETA 3822s
+  [burn-in 2/100] 12.8s | accept=50% | step_size=0.0015 | sigma_V=4.9994, sigma_W=2.0023 | ETA 3812s
+  [burn-in 3/100] 12.8s | accept=67% | step_size=0.0016 | sigma_V=5.0030, sigma_W=1.9990 | ETA 3801s
+  [burn-in 4/100] 12.8s | accept=75% | step_size=0.0018 | sigma_V=4.9919, sigma_W=1.9838 | ETA 3790s
+  [burn-in 5/100] 12.8s | accept=80% | step_size=0.0023 | sigma_V=4.9894, sigma_W=1.9892 | ETA 3777s
+  [burn-in 6/100] 12.8s | accept=83% | step_size=0.0027 | sigma_V=4.9955, sigma_W=2.0018 | ETA 3765s
+  [burn-in 7/100] 12.8s | accept=86% | step_size=0.0036 | sigma_V=5.0089, sigma_W=2.0015 | ETA 3751s
+  [burn-in 8/100] 12.8s | accept=88% | step_size=0.0049 | sigma_V=5.0019, sigma_W=1.9863 | ETA 3739s
+  [burn-in 9/100] 12.8s | accept=89% | step_size=0.0029 | sigma_V=4.9547, sigma_W=1.9589 | ETA 3727s
+  [burn-in 10/100] 12.8s | accept=80% | step_size=0.0009 | sigma_V=4.9547, sigma_W=1.9589 | ETA 3715s
+  [burn-in 11/100] 12.8s | accept=73% | step_size=0.0010 | sigma_V=4.9547, sigma_W=1.9589 | ETA 3703s
+  [burn-in 12/100] 12.8s | accept=75% | step_size=0.0008 | sigma_V=4.9462, sigma_W=1.9603 | ETA 3692s
+  [burn-in 13/100] 12.9s | accept=77% | step_size=0.0010 | sigma_V=4.9451, sigma_W=1.9635 | ETA 3680s
+  [burn-in 14/100] 12.8s | accept=79% | step_size=0.0014 | sigma_V=4.9402, sigma_W=1.9665 | ETA 3668s
+  [burn-in 15/100] 12.8s | accept=80% | step_size=0.0019 | sigma_V=4.9437, sigma_W=1.9761 | ETA 3656s
+  [burn-in 16/100] 12.9s | accept=81% | step_size=0.0026 | sigma_V=4.9407, sigma_W=1.9877 | ETA 3645s
+  [burn-in 17/100] 12.8s | accept=82% | step_size=0.0015 | sigma_V=4.9310, sigma_W=1.9762 | ETA 3632s
+  [burn-in 18/100] 12.8s | accept=83% | step_size=0.0021 | sigma_V=4.9313, sigma_W=1.9891 | ETA 3620s
+  [burn-in 19/100] 12.8s | accept=84% | step_size=0.0017 | sigma_V=4.9250, sigma_W=1.9699 | ETA 3607s
+  [burn-in 20/100] 12.9s | accept=85% | step_size=0.0024 | sigma_V=4.9146, sigma_W=1.9770 | ETA 3596s
+  [burn-in 21/100] 12.9s | accept=86% | step_size=0.0030 | sigma_V=4.9089, sigma_W=1.9578 | ETA 3585s
+  [burn-in 22/100] 12.9s | accept=86% | step_size=0.0041 | sigma_V=4.8881, sigma_W=1.9559 | ETA 3573s
+  [burn-in 23/100] 12.9s | accept=87% | step_size=0.0042 | sigma_V=4.8967, sigma_W=1.9668 | ETA 3560s
+  [burn-in 24/100] 12.9s | accept=88% | step_size=0.0056 | sigma_V=4.9008, sigma_W=1.9828 | ETA 3547s
+  [burn-in 25/100] 12.8s | accept=88% | step_size=0.0068 | sigma_V=4.8933, sigma_W=1.9601 | ETA 3534s
+  [burn-in 26/100] 12.8s | accept=85% | step_size=0.0008 | sigma_V=4.8933, sigma_W=1.9601 | ETA 3521s
+  [burn-in 27/100] 12.8s | accept=85% | step_size=0.0010 | sigma_V=4.8921, sigma_W=1.9622 | ETA 3509s
+  [burn-in 28/100] 12.9s | accept=86% | step_size=0.0014 | sigma_V=4.8869, sigma_W=1.9710 | ETA 3497s
+  [burn-in 29/100] 12.9s | accept=86% | step_size=0.0019 | sigma_V=4.8927, sigma_W=1.9702 | ETA 3485s
+  [burn-in 30/100] 12.8s | accept=87% | step_size=0.0016 | sigma_V=4.8966, sigma_W=1.9837 | ETA 3471s
+  [burn-in 31/100] 12.8s | accept=87% | step_size=0.0021 | sigma_V=4.8900, sigma_W=1.9882 | ETA 3457s
+  [burn-in 32/100] 12.8s | accept=88% | step_size=0.0019 | sigma_V=4.9112, sigma_W=1.9879 | ETA 3443s
+  [burn-in 33/100] 12.8s | accept=88% | step_size=0.0022 | sigma_V=4.9011, sigma_W=1.9885 | ETA 3429s
+  [burn-in 34/100] 12.8s | accept=88% | step_size=0.0030 | sigma_V=4.8981, sigma_W=1.9856 | ETA 3416s
+  [burn-in 35/100] 12.8s | accept=89% | step_size=0.0038 | sigma_V=4.8960, sigma_W=1.9860 | ETA 3403s
+  [burn-in 36/100] 12.8s | accept=89% | step_size=0.0049 | sigma_V=4.8650, sigma_W=1.9641 | ETA 3390s
+  [burn-in 37/100] 12.8s | accept=89% | step_size=0.0048 | sigma_V=4.8383, sigma_W=1.9361 | ETA 3377s
+  [burn-in 38/100] 12.8s | accept=89% | step_size=0.0053 | sigma_V=4.8503, sigma_W=1.9245 | ETA 3364s
+  [burn-in 39/100] 12.8s | accept=90% | step_size=0.0069 | sigma_V=4.8907, sigma_W=1.9728 | ETA 3350s
+  [burn-in 40/100] 12.8s | accept=90% | step_size=0.0089 | sigma_V=4.8987, sigma_W=2.0153 | ETA 3337s
+  [burn-in 41/100] 12.8s | accept=90% | step_size=0.0115 | sigma_V=4.8844, sigma_W=1.9544 | ETA 3324s
+  [burn-in 42/100] 12.8s | accept=88% | step_size=0.0053 | sigma_V=4.8844, sigma_W=1.9544 | ETA 3311s
+  [burn-in 43/100] 12.9s | accept=88% | step_size=0.0068 | sigma_V=4.8785, sigma_W=1.9581 | ETA 3298s
+  [burn-in 44/100] 12.8s | accept=89% | step_size=0.0070 | sigma_V=4.8898, sigma_W=1.9425 | ETA 3284s
+  [burn-in 45/100] 12.8s | accept=89% | step_size=0.0088 | sigma_V=4.8762, sigma_W=1.9505 | ETA 3272s
+  [burn-in 46/100] 12.8s | accept=89% | step_size=0.0080 | sigma_V=4.9109, sigma_W=1.9393 | ETA 3259s
+  [burn-in 47/100] 12.8s | accept=89% | step_size=0.0103 | sigma_V=4.9464, sigma_W=1.9266 | ETA 3247s
+  [burn-in 48/100] 12.8s | accept=90% | step_size=0.0029 | sigma_V=4.9627, sigma_W=1.9013 | ETA 3233s
+  [burn-in 49/100] 12.9s | accept=88% | step_size=0.0024 | sigma_V=4.9627, sigma_W=1.9013 | ETA 3221s
+  [burn-in 50/100] 12.9s | accept=88% | step_size=0.0031 | sigma_V=4.9611, sigma_W=1.9070 | ETA 3209s
+  [burn-in 51/100] 12.9s | accept=88% | step_size=0.0040 | sigma_V=4.9683, sigma_W=1.9120 | ETA 3197s
+  [burn-in 52/100] 12.9s | accept=90% | step_size=0.0050 | sigma_V=4.9572, sigma_W=1.9022 | ETA 3185s
+  [burn-in 53/100] 12.9s | accept=90% | step_size=0.0064 | sigma_V=4.9755, sigma_W=1.9229 | ETA 3173s
+  [burn-in 54/100] 12.8s | accept=90% | step_size=0.0078 | sigma_V=4.9254, sigma_W=1.9005 | ETA 3161s
+  [burn-in 55/100] 12.9s | accept=90% | step_size=0.0098 | sigma_V=4.9162, sigma_W=1.8956 | ETA 3149s
+  [burn-in 56/100] 12.9s | accept=90% | step_size=0.0063 | sigma_V=4.8948, sigma_W=1.8793 | ETA 3136s
+  [burn-in 57/100] 12.9s | accept=90% | step_size=0.0080 | sigma_V=4.8694, sigma_W=1.9020 | ETA 3124s
+  [burn-in 58/100] 12.8s | accept=90% | step_size=0.0098 | sigma_V=4.8445, sigma_W=1.9018 | ETA 3112s
+  [burn-in 59/100] 12.8s | accept=88% | step_size=0.0057 | sigma_V=4.8445, sigma_W=1.9018 | ETA 3098s
+  [burn-in 60/100] 12.8s | accept=90% | step_size=0.0072 | sigma_V=4.8972, sigma_W=1.9229 | ETA 3084s
+  [burn-in 61/100] 12.9s | accept=90% | step_size=0.0021 | sigma_V=4.8972, sigma_W=1.9229 | ETA 3072s
+  [burn-in 62/100] 12.8s | accept=90% | step_size=0.0027 | sigma_V=4.8946, sigma_W=1.9216 | ETA 3059s
+  [burn-in 63/100] 12.9s | accept=90% | step_size=0.0012 | sigma_V=4.9074, sigma_W=1.8993 | ETA 3045s
+  [burn-in 64/100] 12.8s | accept=90% | step_size=0.0015 | sigma_V=4.9077, sigma_W=1.9024 | ETA 3032s
+  [burn-in 65/100] 12.8s | accept=90% | step_size=0.0019 | sigma_V=4.9113, sigma_W=1.9008 | ETA 3019s
+  [burn-in 66/100] 12.8s | accept=90% | step_size=0.0023 | sigma_V=4.9164, sigma_W=1.8900 | ETA 3006s
+  [burn-in 67/100] 12.8s | accept=90% | step_size=0.0019 | sigma_V=4.8991, sigma_W=1.8886 | ETA 2991s
+  [burn-in 68/100] 12.9s | accept=90% | step_size=0.0024 | sigma_V=4.8928, sigma_W=1.8959 | ETA 2979s
+  [burn-in 69/100] 12.9s | accept=90% | step_size=0.0024 | sigma_V=4.8804, sigma_W=1.9046 | ETA 2967s
+  [burn-in 70/100] 12.8s | accept=88% | step_size=0.0025 | sigma_V=4.8804, sigma_W=1.9046 | ETA 2954s
+  [burn-in 71/100] 12.9s | accept=88% | step_size=0.0032 | sigma_V=4.8868, sigma_W=1.9011 | ETA 2941s
+  [burn-in 72/100] 12.8s | accept=88% | step_size=0.0033 | sigma_V=4.9135, sigma_W=1.8951 | ETA 2928s
+  [burn-in 73/100] 12.8s | accept=88% | step_size=0.0040 | sigma_V=4.9334, sigma_W=1.8964 | ETA 2914s
+  [burn-in 74/100] 12.9s | accept=88% | step_size=0.0050 | sigma_V=4.9371, sigma_W=1.8755 | ETA 2902s
+  [burn-in 75/100] 12.8s | accept=86% | step_size=0.0008 | sigma_V=4.9371, sigma_W=1.8755 | ETA 2890s
+  [burn-in 76/100] 12.8s | accept=88% | step_size=0.0010 | sigma_V=4.9347, sigma_W=1.8754 | ETA 2877s
+  [burn-in 77/100] 12.9s | accept=88% | step_size=0.0011 | sigma_V=4.9330, sigma_W=1.8777 | ETA 2865s
+  [burn-in 78/100] 12.9s | accept=88% | step_size=0.0013 | sigma_V=4.9232, sigma_W=1.8754 | ETA 2853s
+  [burn-in 79/100] 12.8s | accept=86% | step_size=0.0009 | sigma_V=4.9232, sigma_W=1.8754 | ETA 2840s
+  [burn-in 80/100] 12.9s | accept=86% | step_size=0.0028 | sigma_V=4.9215, sigma_W=1.8791 | ETA 2828s
+  [burn-in 81/100] 12.8s | accept=86% | step_size=0.0028 | sigma_V=4.9218, sigma_W=1.8982 | ETA 2814s
+  [burn-in 82/100] 12.9s | accept=86% | step_size=0.0028 | sigma_V=4.9231, sigma_W=1.8890 | ETA 2801s
+  [burn-in 83/100] 12.8s | accept=86% | step_size=0.0028 | sigma_V=4.9207, sigma_W=1.8809 | ETA 2789s
+  [burn-in 84/100] 12.9s | accept=86% | step_size=0.0028 | sigma_V=4.9172, sigma_W=1.8736 | ETA 2776s
+  [burn-in 85/100] 12.9s | accept=86% | step_size=0.0028 | sigma_V=4.9208, sigma_W=1.8810 | ETA 2764s
+  [burn-in 86/100] 12.9s | accept=86% | step_size=0.0028 | sigma_V=4.9420, sigma_W=1.8736 | ETA 2752s
+  [burn-in 87/100] 12.9s | accept=84% | step_size=0.0028 | sigma_V=4.9420, sigma_W=1.8736 | ETA 2738s
+  [burn-in 88/100] 12.9s | accept=84% | step_size=0.0028 | sigma_V=4.9263, sigma_W=1.8474 | ETA 2726s
+  [burn-in 89/100] 12.9s | accept=82% | step_size=0.0028 | sigma_V=4.9263, sigma_W=1.8474 | ETA 2713s
+  [burn-in 90/100] 12.8s | accept=82% | step_size=0.0028 | sigma_V=4.9251, sigma_W=1.8336 | ETA 2699s
+  [burn-in 91/100] 12.9s | accept=80% | step_size=0.0028 | sigma_V=4.9251, sigma_W=1.8336 | ETA 2687s
+  [burn-in 92/100] 12.8s | accept=82% | step_size=0.0028 | sigma_V=4.9166, sigma_W=1.8332 | ETA 2674s
+  [burn-in 93/100] 12.8s | accept=80% | step_size=0.0028 | sigma_V=4.9166, sigma_W=1.8332 | ETA 2661s
+  [burn-in 94/100] 12.8s | accept=78% | step_size=0.0028 | sigma_V=4.9166, sigma_W=1.8332 | ETA 2647s
+  [burn-in 95/100] 12.8s | accept=78% | step_size=0.0028 | sigma_V=4.9292, sigma_W=1.8131 | ETA 2633s
+  [burn-in 96/100] 12.8s | accept=76% | step_size=0.0028 | sigma_V=4.9292, sigma_W=1.8131 | ETA 2620s
+  [burn-in 97/100] 12.8s | accept=76% | step_size=0.0028 | sigma_V=4.9265, sigma_W=1.7974 | ETA 2607s
+  [burn-in 98/100] 12.8s | accept=76% | step_size=0.0028 | sigma_V=4.9369, sigma_W=1.7826 | ETA 2594s
+  [burn-in 99/100] 12.8s | accept=78% | step_size=0.0028 | sigma_V=4.9214, sigma_W=1.8038 | ETA 2581s
+  [burn-in 100/100] 12.8s | accept=78% | step_size=0.0028 | sigma_V=4.9484, sigma_W=1.8084 | ETA 2567s
+  [sample 1/200] 12.8s | accept=78% | step_size=0.0028 | sigma_V=4.9284, sigma_W=1.8074 | ETA 2554s
+  [sample 2/200] 12.8s | accept=78% | step_size=0.0028 | sigma_V=4.9459, sigma_W=1.7976 | ETA 2541s
+  [sample 3/200] 12.9s | accept=78% | step_size=0.0028 | sigma_V=4.9439, sigma_W=1.8149 | ETA 2529s
+  [sample 4/200] 12.8s | accept=76% | step_size=0.0028 | sigma_V=4.9439, sigma_W=1.8149 | ETA 2516s
+  [sample 5/200] 12.8s | accept=76% | step_size=0.0028 | sigma_V=4.9375, sigma_W=1.8259 | ETA 2503s
+  [sample 6/200] 12.8s | accept=76% | step_size=0.0028 | sigma_V=4.9303, sigma_W=1.8299 | ETA 2490s
+  [sample 7/200] 12.9s | accept=76% | step_size=0.0028 | sigma_V=4.9294, sigma_W=1.8394 | ETA 2477s
+  [sample 8/200] 12.8s | accept=76% | step_size=0.0028 | sigma_V=4.9063, sigma_W=1.8311 | ETA 2465s
+  [sample 9/200] 12.8s | accept=76% | step_size=0.0028 | sigma_V=4.9063, sigma_W=1.8311 | ETA 2451s
+  [sample 10/200] 12.8s | accept=74% | step_size=0.0028 | sigma_V=4.9063, sigma_W=1.8311 | ETA 2438s
+  [sample 11/200] 12.8s | accept=74% | step_size=0.0028 | sigma_V=4.9063, sigma_W=1.8311 | ETA 2425s
+  [sample 12/200] 12.9s | accept=72% | step_size=0.0028 | sigma_V=4.9063, sigma_W=1.8311 | ETA 2413s
+  [sample 13/200] 12.9s | accept=70% | step_size=0.0028 | sigma_V=4.9063, sigma_W=1.8311 | ETA 2400s
+  [sample 14/200] 12.9s | accept=68% | step_size=0.0028 | sigma_V=4.9063, sigma_W=1.8311 | ETA 2388s
+  [sample 15/200] 12.9s | accept=66% | step_size=0.0028 | sigma_V=4.9063, sigma_W=1.8311 | ETA 2376s
+  [sample 16/200] 12.8s | accept=66% | step_size=0.0028 | sigma_V=4.9236, sigma_W=1.8347 | ETA 2363s
+  [sample 17/200] 12.8s | accept=64% | step_size=0.0028 | sigma_V=4.9236, sigma_W=1.8347 | ETA 2349s
+  [sample 18/200] 12.9s | accept=64% | step_size=0.0028 | sigma_V=4.9354, sigma_W=1.8398 | ETA 2337s
+  [sample 19/200] 12.9s | accept=64% | step_size=0.0028 | sigma_V=4.9435, sigma_W=1.8236 | ETA 2325s
+  [sample 20/200] 12.9s | accept=66% | step_size=0.0028 | sigma_V=4.9597, sigma_W=1.8140 | ETA 2313s
+  [sample 21/200] 12.9s | accept=66% | step_size=0.0028 | sigma_V=4.9503, sigma_W=1.8015 | ETA 2301s
+  [sample 22/200] 12.8s | accept=66% | step_size=0.0028 | sigma_V=4.9554, sigma_W=1.7974 | ETA 2288s
+  [sample 23/200] 12.9s | accept=66% | step_size=0.0028 | sigma_V=4.9546, sigma_W=1.8084 | ETA 2275s
+  [sample 24/200] 12.9s | accept=64% | step_size=0.0028 | sigma_V=4.9546, sigma_W=1.8084 | ETA 2262s
+  [sample 25/200] 12.9s | accept=66% | step_size=0.0028 | sigma_V=4.9762, sigma_W=1.8001 | ETA 2249s
+  [sample 26/200] 12.8s | accept=66% | step_size=0.0028 | sigma_V=4.9727, sigma_W=1.8110 | ETA 2237s
+  [sample 27/200] 12.9s | accept=66% | step_size=0.0028 | sigma_V=4.9431, sigma_W=1.7999 | ETA 2224s
+  [sample 28/200] 12.8s | accept=66% | step_size=0.0028 | sigma_V=4.9303, sigma_W=1.7884 | ETA 2211s
+  [sample 29/200] 12.9s | accept=68% | step_size=0.0028 | sigma_V=4.9472, sigma_W=1.7928 | ETA 2198s
+  [sample 30/200] 12.9s | accept=68% | step_size=0.0028 | sigma_V=4.9764, sigma_W=1.7990 | ETA 2184s
+  [sample 31/200] 12.9s | accept=66% | step_size=0.0028 | sigma_V=4.9764, sigma_W=1.7990 | ETA 2172s
+  [sample 32/200] 12.8s | accept=66% | step_size=0.0028 | sigma_V=4.9926, sigma_W=1.7992 | ETA 2159s
+  [sample 33/200] 12.8s | accept=66% | step_size=0.0028 | sigma_V=4.9880, sigma_W=1.7850 | ETA 2146s
+  [sample 34/200] 12.8s | accept=66% | step_size=0.0028 | sigma_V=4.9740, sigma_W=1.7683 | ETA 2133s
+  [sample 35/200] 12.8s | accept=66% | step_size=0.0028 | sigma_V=4.9992, sigma_W=1.7689 | ETA 2119s
+  [sample 36/200] 12.8s | accept=66% | step_size=0.0028 | sigma_V=5.0020, sigma_W=1.7737 | ETA 2106s
+  [sample 37/200] 12.8s | accept=66% | step_size=0.0028 | sigma_V=5.0020, sigma_W=1.7737 | ETA 2092s
+  [sample 38/200] 12.8s | accept=66% | step_size=0.0028 | sigma_V=4.9909, sigma_W=1.7746 | ETA 2080s
+  [sample 39/200] 12.8s | accept=66% | step_size=0.0028 | sigma_V=4.9909, sigma_W=1.7746 | ETA 2066s
+  [sample 40/200] 12.8s | accept=66% | step_size=0.0028 | sigma_V=4.9978, sigma_W=1.7650 | ETA 2052s
+  [sample 41/200] 12.8s | accept=68% | step_size=0.0028 | sigma_V=5.0011, sigma_W=1.7686 | ETA 2039s
+  [sample 42/200] 12.8s | accept=68% | step_size=0.0028 | sigma_V=5.0009, sigma_W=1.7686 | ETA 2026s
+  [sample 43/200] 12.8s | accept=70% | step_size=0.0028 | sigma_V=5.0015, sigma_W=1.7587 | ETA 2013s
+  [sample 44/200] 12.8s | accept=72% | step_size=0.0028 | sigma_V=5.0269, sigma_W=1.7504 | ETA 2000s
+  [sample 45/200] 12.8s | accept=72% | step_size=0.0028 | sigma_V=5.0308, sigma_W=1.7495 | ETA 1987s
+  [sample 46/200] 12.8s | accept=74% | step_size=0.0028 | sigma_V=5.0254, sigma_W=1.7513 | ETA 1974s
+  [sample 47/200] 12.8s | accept=74% | step_size=0.0028 | sigma_V=5.0187, sigma_W=1.7524 | ETA 1962s
+  [sample 48/200] 12.9s | accept=74% | step_size=0.0028 | sigma_V=5.0275, sigma_W=1.7497 | ETA 1950s
+  [sample 49/200] 12.8s | accept=74% | step_size=0.0028 | sigma_V=5.0252, sigma_W=1.7630 | ETA 1937s
+  [sample 50/200] 12.8s | accept=74% | step_size=0.0028 | sigma_V=5.0216, sigma_W=1.7859 | ETA 1925s
+  [sample 51/200] 12.8s | accept=74% | step_size=0.0028 | sigma_V=5.0204, sigma_W=1.7811 | ETA 1911s
+  [sample 52/200] 12.8s | accept=74% | step_size=0.0028 | sigma_V=5.0162, sigma_W=1.7721 | ETA 1899s
+  [sample 53/200] 12.8s | accept=74% | step_size=0.0028 | sigma_V=5.0320, sigma_W=1.7806 | ETA 1886s
+  [sample 54/200] 12.8s | accept=76% | step_size=0.0028 | sigma_V=5.0362, sigma_W=1.7689 | ETA 1873s
+  [sample 55/200] 12.9s | accept=76% | step_size=0.0028 | sigma_V=5.0366, sigma_W=1.7761 | ETA 1861s
+  [sample 56/200] 12.8s | accept=76% | step_size=0.0028 | sigma_V=5.0473, sigma_W=1.7892 | ETA 1849s
+  [sample 57/200] 12.8s | accept=74% | step_size=0.0028 | sigma_V=5.0473, sigma_W=1.7892 | ETA 1836s
+  [sample 58/200] 12.9s | accept=74% | step_size=0.0028 | sigma_V=5.0711, sigma_W=1.7795 | ETA 1823s
+  [sample 59/200] 12.9s | accept=76% | step_size=0.0028 | sigma_V=5.0851, sigma_W=1.7747 | ETA 1811s
+  [sample 60/200] 12.9s | accept=78% | step_size=0.0028 | sigma_V=5.1008, sigma_W=1.7785 | ETA 1798s
+  [sample 61/200] 12.8s | accept=78% | step_size=0.0028 | sigma_V=5.1008, sigma_W=1.7785 | ETA 1785s
+  [sample 62/200] 12.8s | accept=78% | step_size=0.0028 | sigma_V=5.1008, sigma_W=1.7785 | ETA 1772s
+  [sample 63/200] 12.8s | accept=80% | step_size=0.0028 | sigma_V=5.1170, sigma_W=1.7613 | ETA 1759s
+  [sample 64/200] 12.8s | accept=82% | step_size=0.0028 | sigma_V=5.1245, sigma_W=1.7780 | ETA 1746s
+  [sample 65/200] 12.8s | accept=84% | step_size=0.0028 | sigma_V=5.1335, sigma_W=1.7842 | ETA 1733s
+  [sample 66/200] 12.8s | accept=84% | step_size=0.0028 | sigma_V=5.1032, sigma_W=1.7904 | ETA 1720s
+  [sample 67/200] 12.8s | accept=86% | step_size=0.0028 | sigma_V=5.1232, sigma_W=1.7878 | ETA 1707s
+  [sample 68/200] 12.8s | accept=86% | step_size=0.0028 | sigma_V=5.1315, sigma_W=1.7909 | ETA 1693s
+  [sample 69/200] 12.8s | accept=84% | step_size=0.0028 | sigma_V=5.1315, sigma_W=1.7909 | ETA 1680s
+  [sample 70/200] 12.8s | accept=84% | step_size=0.0028 | sigma_V=5.1331, sigma_W=1.8042 | ETA 1667s
+  [sample 71/200] 12.8s | accept=84% | step_size=0.0028 | sigma_V=5.1542, sigma_W=1.7854 | ETA 1654s
+  [sample 72/200] 12.8s | accept=84% | step_size=0.0028 | sigma_V=5.1481, sigma_W=1.7775 | ETA 1642s
+  [sample 73/200] 12.8s | accept=84% | step_size=0.0028 | sigma_V=5.1538, sigma_W=1.7660 | ETA 1629s
+  [sample 74/200] 12.8s | accept=86% | step_size=0.0028 | sigma_V=5.1548, sigma_W=1.7616 | ETA 1616s
+  [sample 75/200] 12.8s | accept=84% | step_size=0.0028 | sigma_V=5.1548, sigma_W=1.7616 | ETA 1603s
+  [sample 76/200] 12.8s | accept=84% | step_size=0.0028 | sigma_V=5.1581, sigma_W=1.7662 | ETA 1590s
+  [sample 77/200] 12.8s | accept=84% | step_size=0.0028 | sigma_V=5.1477, sigma_W=1.7421 | ETA 1578s
+  [sample 78/200] 12.8s | accept=84% | step_size=0.0028 | sigma_V=5.1690, sigma_W=1.7453 | ETA 1564s
+  [sample 79/200] 12.8s | accept=84% | step_size=0.0028 | sigma_V=5.1455, sigma_W=1.7528 | ETA 1551s
+  [sample 80/200] 12.8s | accept=84% | step_size=0.0028 | sigma_V=5.1428, sigma_W=1.7536 | ETA 1539s
+  [sample 81/200] 12.9s | accept=86% | step_size=0.0028 | sigma_V=5.1095, sigma_W=1.7553 | ETA 1526s
+  [sample 82/200] 12.8s | accept=86% | step_size=0.0028 | sigma_V=5.1397, sigma_W=1.7478 | ETA 1513s
+  [sample 83/200] 12.8s | accept=86% | step_size=0.0028 | sigma_V=5.1296, sigma_W=1.7312 | ETA 1500s
+  [sample 84/200] 12.9s | accept=86% | step_size=0.0028 | sigma_V=5.1324, sigma_W=1.7194 | ETA 1488s
+  [sample 85/200] 12.8s | accept=86% | step_size=0.0028 | sigma_V=5.1375, sigma_W=1.7056 | ETA 1475s
+  [sample 86/200] 12.8s | accept=86% | step_size=0.0028 | sigma_V=5.1034, sigma_W=1.7191 | ETA 1463s
+  [sample 87/200] 12.8s | accept=88% | step_size=0.0028 | sigma_V=5.0941, sigma_W=1.7113 | ETA 1450s
+  [sample 88/200] 12.8s | accept=88% | step_size=0.0028 | sigma_V=5.0862, sigma_W=1.7035 | ETA 1437s
+  [sample 89/200] 12.8s | accept=90% | step_size=0.0028 | sigma_V=5.0878, sigma_W=1.7043 | ETA 1425s
+  [sample 90/200] 12.8s | accept=90% | step_size=0.0028 | sigma_V=5.0560, sigma_W=1.6968 | ETA 1412s
+  [sample 91/200] 12.9s | accept=90% | step_size=0.0028 | sigma_V=5.0627, sigma_W=1.6958 | ETA 1399s
+  [sample 92/200] 12.8s | accept=90% | step_size=0.0028 | sigma_V=5.0502, sigma_W=1.6985 | ETA 1386s
+  [sample 93/200] 12.8s | accept=88% | step_size=0.0028 | sigma_V=5.0502, sigma_W=1.6985 | ETA 1374s
+  [sample 94/200] 12.8s | accept=88% | step_size=0.0028 | sigma_V=5.0571, sigma_W=1.7050 | ETA 1361s
+  [sample 95/200] 12.8s | accept=88% | step_size=0.0028 | sigma_V=5.0444, sigma_W=1.7193 | ETA 1348s
+  [sample 96/200] 12.9s | accept=88% | step_size=0.0028 | sigma_V=5.0477, sigma_W=1.7271 | ETA 1335s
+  [sample 97/200] 12.9s | accept=88% | step_size=0.0028 | sigma_V=5.0397, sigma_W=1.7294 | ETA 1323s
+  [sample 98/200] 12.8s | accept=86% | step_size=0.0028 | sigma_V=5.0397, sigma_W=1.7294 | ETA 1310s
+  [sample 99/200] 12.8s | accept=86% | step_size=0.0028 | sigma_V=5.0257, sigma_W=1.7143 | ETA 1297s
+  [sample 100/200] 12.9s | accept=86% | step_size=0.0028 | sigma_V=5.0175, sigma_W=1.7205 | ETA 1285s
+  [sample 101/200] 12.8s | accept=86% | step_size=0.0028 | sigma_V=5.0154, sigma_W=1.7313 | ETA 1272s
+  [sample 102/200] 12.8s | accept=86% | step_size=0.0028 | sigma_V=5.0141, sigma_W=1.7301 | ETA 1259s
+  [sample 103/200] 12.9s | accept=86% | step_size=0.0028 | sigma_V=5.0114, sigma_W=1.7304 | ETA 1246s
+  [sample 104/200] 12.9s | accept=86% | step_size=0.0028 | sigma_V=5.0070, sigma_W=1.7075 | ETA 1234s
+  [sample 105/200] 12.8s | accept=86% | step_size=0.0028 | sigma_V=5.0211, sigma_W=1.7102 | ETA 1221s
+  [sample 106/200] 12.9s | accept=86% | step_size=0.0028 | sigma_V=5.0188, sigma_W=1.7285 | ETA 1208s
+  [sample 107/200] 12.8s | accept=88% | step_size=0.0028 | sigma_V=5.0228, sigma_W=1.7114 | ETA 1195s
+  [sample 108/200] 12.8s | accept=88% | step_size=0.0028 | sigma_V=5.0385, sigma_W=1.7126 | ETA 1182s
+  [sample 109/200] 12.8s | accept=88% | step_size=0.0028 | sigma_V=5.0451, sigma_W=1.7119 | ETA 1169s
+  [sample 110/200] 12.9s | accept=86% | step_size=0.0028 | sigma_V=5.0451, sigma_W=1.7119 | ETA 1156s
+  [sample 111/200] 12.8s | accept=86% | step_size=0.0028 | sigma_V=5.0451, sigma_W=1.7119 | ETA 1143s
+  [sample 112/200] 12.8s | accept=88% | step_size=0.0028 | sigma_V=5.0325, sigma_W=1.7097 | ETA 1130s
+  [sample 113/200] 12.8s | accept=88% | step_size=0.0028 | sigma_V=5.0208, sigma_W=1.7065 | ETA 1117s
+  [sample 114/200] 12.8s | accept=86% | step_size=0.0028 | sigma_V=5.0208, sigma_W=1.7065 | ETA 1104s
+  [sample 115/200] 12.9s | accept=86% | step_size=0.0028 | sigma_V=5.0150, sigma_W=1.6985 | ETA 1092s
+  [sample 116/200] 12.9s | accept=86% | step_size=0.0028 | sigma_V=5.0253, sigma_W=1.7063 | ETA 1079s
+  [sample 117/200] 12.8s | accept=86% | step_size=0.0028 | sigma_V=5.0451, sigma_W=1.7262 | ETA 1066s
+  [sample 118/200] 12.8s | accept=86% | step_size=0.0028 | sigma_V=5.0338, sigma_W=1.7192 | ETA 1053s
+  [sample 119/200] 12.8s | accept=88% | step_size=0.0028 | sigma_V=5.0186, sigma_W=1.7179 | ETA 1040s
+  [sample 120/200] 12.8s | accept=88% | step_size=0.0028 | sigma_V=5.0221, sigma_W=1.7116 | ETA 1027s
+  [sample 121/200] 12.8s | accept=88% | step_size=0.0028 | sigma_V=5.0170, sigma_W=1.7276 | ETA 1014s
+  [sample 122/200] 12.8s | accept=88% | step_size=0.0028 | sigma_V=4.9870, sigma_W=1.7220 | ETA 1001s
+  [sample 123/200] 12.8s | accept=88% | step_size=0.0028 | sigma_V=4.9813, sigma_W=1.7226 | ETA 988s
+  [sample 124/200] 12.8s | accept=88% | step_size=0.0028 | sigma_V=4.9920, sigma_W=1.7204 | ETA 975s
+  [sample 125/200] 12.9s | accept=90% | step_size=0.0028 | sigma_V=5.0160, sigma_W=1.7172 | ETA 962s
+  [sample 126/200] 12.8s | accept=90% | step_size=0.0028 | sigma_V=4.9952, sigma_W=1.7146 | ETA 949s
+  [sample 127/200] 12.9s | accept=90% | step_size=0.0028 | sigma_V=5.0056, sigma_W=1.7121 | ETA 937s
+  [sample 128/200] 12.8s | accept=90% | step_size=0.0028 | sigma_V=5.0206, sigma_W=1.6889 | ETA 924s
+  [sample 129/200] 12.8s | accept=90% | step_size=0.0028 | sigma_V=5.0099, sigma_W=1.7047 | ETA 911s
+  [sample 130/200] 12.8s | accept=90% | step_size=0.0028 | sigma_V=4.9964, sigma_W=1.7055 | ETA 898s
+  [sample 131/200] 12.8s | accept=90% | step_size=0.0028 | sigma_V=4.9943, sigma_W=1.6915 | ETA 886s
+  [sample 132/200] 12.8s | accept=90% | step_size=0.0028 | sigma_V=5.0051, sigma_W=1.6985 | ETA 873s
+  [sample 133/200] 12.8s | accept=90% | step_size=0.0028 | sigma_V=5.0163, sigma_W=1.6959 | ETA 860s
+  [sample 134/200] 12.8s | accept=90% | step_size=0.0028 | sigma_V=5.0040, sigma_W=1.6796 | ETA 847s
+  [sample 135/200] 12.8s | accept=90% | step_size=0.0028 | sigma_V=4.9988, sigma_W=1.6848 | ETA 834s
+  [sample 136/200] 12.8s | accept=90% | step_size=0.0028 | sigma_V=4.9973, sigma_W=1.6868 | ETA 821s
+  [sample 137/200] 12.8s | accept=88% | step_size=0.0028 | sigma_V=4.9973, sigma_W=1.6868 | ETA 808s
+  [sample 138/200] 12.9s | accept=86% | step_size=0.0028 | sigma_V=4.9973, sigma_W=1.6868 | ETA 796s
+  [sample 139/200] 12.8s | accept=84% | step_size=0.0028 | sigma_V=4.9973, sigma_W=1.6868 | ETA 783s
+  [sample 140/200] 12.8s | accept=82% | step_size=0.0028 | sigma_V=4.9973, sigma_W=1.6868 | ETA 770s
+  [sample 141/200] 12.8s | accept=82% | step_size=0.0028 | sigma_V=4.9910, sigma_W=1.6837 | ETA 757s
+  [sample 142/200] 12.9s | accept=82% | step_size=0.0028 | sigma_V=4.9891, sigma_W=1.6799 | ETA 745s
+  [sample 143/200] 12.8s | accept=82% | step_size=0.0028 | sigma_V=4.9891, sigma_W=1.6799 | ETA 732s
+  [sample 144/200] 12.9s | accept=82% | step_size=0.0028 | sigma_V=4.9855, sigma_W=1.7001 | ETA 719s
+  [sample 145/200] 12.8s | accept=82% | step_size=0.0028 | sigma_V=4.9731, sigma_W=1.7180 | ETA 706s
+  [sample 146/200] 12.8s | accept=82% | step_size=0.0028 | sigma_V=4.9815, sigma_W=1.7256 | ETA 693s
+  [sample 147/200] 12.8s | accept=82% | step_size=0.0028 | sigma_V=4.9875, sigma_W=1.7205 | ETA 681s
+  [sample 148/200] 12.8s | accept=84% | step_size=0.0028 | sigma_V=4.9860, sigma_W=1.7274 | ETA 668s
+  [sample 149/200] 12.8s | accept=84% | step_size=0.0028 | sigma_V=5.0052, sigma_W=1.7389 | ETA 655s
+  [sample 150/200] 12.8s | accept=84% | step_size=0.0028 | sigma_V=5.0305, sigma_W=1.7218 | ETA 642s
+  [sample 151/200] 12.8s | accept=84% | step_size=0.0028 | sigma_V=5.0203, sigma_W=1.7339 | ETA 629s
+  [sample 152/200] 12.9s | accept=84% | step_size=0.0028 | sigma_V=5.0622, sigma_W=1.7361 | ETA 616s
+  [sample 153/200] 12.8s | accept=84% | step_size=0.0028 | sigma_V=5.0486, sigma_W=1.7489 | ETA 603s
+  [sample 154/200] 12.8s | accept=84% | step_size=0.0028 | sigma_V=5.0671, sigma_W=1.7539 | ETA 590s
+  [sample 155/200] 12.8s | accept=84% | step_size=0.0028 | sigma_V=5.0446, sigma_W=1.7445 | ETA 577s
+  [sample 156/200] 12.9s | accept=84% | step_size=0.0028 | sigma_V=5.0429, sigma_W=1.7372 | ETA 565s
+  [sample 157/200] 12.8s | accept=82% | step_size=0.0028 | sigma_V=5.0429, sigma_W=1.7372 | ETA 552s
+  [sample 158/200] 12.8s | accept=80% | step_size=0.0028 | sigma_V=5.0429, sigma_W=1.7372 | ETA 539s
+  [sample 159/200] 12.8s | accept=78% | step_size=0.0028 | sigma_V=5.0429, sigma_W=1.7372 | ETA 526s
+  [sample 160/200] 12.8s | accept=80% | step_size=0.0028 | sigma_V=5.0285, sigma_W=1.7418 | ETA 513s
+  [sample 161/200] 12.9s | accept=82% | step_size=0.0028 | sigma_V=5.0206, sigma_W=1.7558 | ETA 501s
+  [sample 162/200] 12.8s | accept=82% | step_size=0.0028 | sigma_V=5.0229, sigma_W=1.7383 | ETA 488s
+  [sample 163/200] 12.8s | accept=82% | step_size=0.0028 | sigma_V=5.0120, sigma_W=1.7446 | ETA 475s
+  [sample 164/200] 12.8s | accept=84% | step_size=0.0028 | sigma_V=5.0152, sigma_W=1.7391 | ETA 462s
+  [sample 165/200] 12.8s | accept=82% | step_size=0.0028 | sigma_V=5.0152, sigma_W=1.7391 | ETA 449s
+  [sample 166/200] 12.8s | accept=82% | step_size=0.0028 | sigma_V=5.0131, sigma_W=1.7424 | ETA 436s
+  [sample 167/200] 12.8s | accept=82% | step_size=0.0028 | sigma_V=5.0209, sigma_W=1.7558 | ETA 424s
+  [sample 168/200] 12.9s | accept=82% | step_size=0.0028 | sigma_V=5.0288, sigma_W=1.7584 | ETA 411s
+  [sample 169/200] 12.8s | accept=82% | step_size=0.0028 | sigma_V=5.0081, sigma_W=1.7498 | ETA 398s
+  [sample 170/200] 12.8s | accept=82% | step_size=0.0028 | sigma_V=5.0104, sigma_W=1.7403 | ETA 385s
+  [sample 171/200] 12.8s | accept=82% | step_size=0.0028 | sigma_V=5.0060, sigma_W=1.7317 | ETA 372s
+  [sample 172/200] 12.8s | accept=82% | step_size=0.0028 | sigma_V=4.9897, sigma_W=1.7167 | ETA 360s
+  [sample 173/200] 12.9s | accept=82% | step_size=0.0028 | sigma_V=4.9864, sigma_W=1.7002 | ETA 347s
+  [sample 174/200] 12.8s | accept=82% | step_size=0.0028 | sigma_V=4.9911, sigma_W=1.7047 | ETA 334s
+  [sample 175/200] 12.8s | accept=82% | step_size=0.0028 | sigma_V=4.9847, sigma_W=1.7149 | ETA 321s
+  [sample 176/200] 12.8s | accept=82% | step_size=0.0028 | sigma_V=4.9680, sigma_W=1.7162 | ETA 308s
+  [sample 177/200] 12.8s | accept=82% | step_size=0.0028 | sigma_V=4.9666, sigma_W=1.7104 | ETA 295s
+  [sample 178/200] 12.9s | accept=82% | step_size=0.0028 | sigma_V=4.9490, sigma_W=1.7064 | ETA 283s
+  [sample 179/200] 12.8s | accept=80% | step_size=0.0028 | sigma_V=4.9490, sigma_W=1.7064 | ETA 270s
+  [sample 180/200] 12.9s | accept=80% | step_size=0.0028 | sigma_V=4.9281, sigma_W=1.6965 | ETA 257s
+  [sample 181/200] 12.8s | accept=80% | step_size=0.0028 | sigma_V=4.9469, sigma_W=1.7096 | ETA 244s
+  [sample 182/200] 12.8s | accept=80% | step_size=0.0028 | sigma_V=4.9504, sigma_W=1.7116 | ETA 231s
+  [sample 183/200] 12.9s | accept=78% | step_size=0.0028 | sigma_V=4.9504, sigma_W=1.7116 | ETA 218s
+  [sample 184/200] 12.9s | accept=78% | step_size=0.0028 | sigma_V=4.9557, sigma_W=1.7029 | ETA 206s
+  [sample 185/200] 12.9s | accept=76% | step_size=0.0028 | sigma_V=4.9557, sigma_W=1.7029 | ETA 193s
+  [sample 186/200] 12.9s | accept=76% | step_size=0.0028 | sigma_V=4.9338, sigma_W=1.7053 | ETA 180s
+  [sample 187/200] 12.9s | accept=76% | step_size=0.0028 | sigma_V=4.9338, sigma_W=1.7053 | ETA 167s
+  [sample 188/200] 12.9s | accept=78% | step_size=0.0028 | sigma_V=4.9398, sigma_W=1.7052 | ETA 154s
+  [sample 189/200] 12.9s | accept=80% | step_size=0.0028 | sigma_V=4.9336, sigma_W=1.6991 | ETA 141s
+  [sample 190/200] 12.9s | accept=82% | step_size=0.0028 | sigma_V=4.9292, sigma_W=1.7072 | ETA 129s
+  [sample 191/200] 12.9s | accept=82% | step_size=0.0028 | sigma_V=4.9342, sigma_W=1.7060 | ETA 116s
+  [sample 192/200] 12.9s | accept=82% | step_size=0.0028 | sigma_V=4.9595, sigma_W=1.7057 | ETA 103s
+  [sample 193/200] 12.8s | accept=84% | step_size=0.0028 | sigma_V=4.9741, sigma_W=1.7227 | ETA 90s
+  [sample 194/200] 12.9s | accept=84% | step_size=0.0028 | sigma_V=4.9881, sigma_W=1.7077 | ETA 77s
+  [sample 195/200] 12.9s | accept=84% | step_size=0.0028 | sigma_V=4.9908, sigma_W=1.7151 | ETA 64s
+  [sample 196/200] 12.9s | accept=84% | step_size=0.0028 | sigma_V=4.9777, sigma_W=1.7110 | ETA 51s
+  [sample 197/200] 12.9s | accept=84% | step_size=0.0028 | sigma_V=4.9713, sigma_W=1.7005 | ETA 39s
+  [sample 198/200] 12.9s | accept=84% | step_size=0.0028 | sigma_V=4.9642, sigma_W=1.7068 | ETA 26s
+  [sample 199/200] 12.8s | accept=84% | step_size=0.0028 | sigma_V=4.9664, sigma_W=1.7185 | ETA 13s
+  [sample 200/200] 12.8s | accept=84% | step_size=0.0028 | sigma_V=4.9620, sigma_W=1.7034 | ETA 0s
+HMC complete!
+
+============================================================
+DPF INFERENCE RESULTS
+============================================================
+
+  sigma_V:
+    True:           1.0
+    Posterior mean:  5.0140 +/- 0.0619
+    90% CI:         [4.9279, 5.1398]
+    True in 90% CI: NO
+
+  sigma_W:
+    True:           1.0
+    Posterior mean:  1.7452 +/- 0.0423
+    90% CI:         [1.6888, 1.8311]
+    True in 90% CI: NO
+
+Diagnostics:
+  Acceptance rate: 82.0%
+  Final step size: 0.002777
+  ESS: {'sigma_V': 6.2557149467459015, 'sigma_W': 3.826078509587198}
+  R-hat: {'sigma_V': 0.7385142061115308, 'sigma_W': 0.7080784845011397}
+
+Performance:
+  Wall time: 3866.1 seconds
+  Peak memory: 7.0 MB
+============================================================
+
+Results saved to /home/haowu/JPML/code/outputs/dpf/hmc/cubic_sensor/bpf_ot
+
+========================================
+[4/6] hmc/stochastic_volatility/bpf_sys
+========================================
+Creating true model: src.models.stochastic_volatility.StochasticVolatilityModel
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1771744030.039012 2209704 gpu_device.cc:2020] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 22322 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3090, pci bus id: 0000:01:00.0, compute capability: 8.6
+Generating 100 time steps with true params: {'alpha': 0.91, 'sigma': 1.0, 'beta': 0.5}
+Creating inference model
+Trainable params: ['alpha', 'sigma', 'beta']
+
+Running HMC inference...
+Using HMC sampler (num_leapfrog_steps=5)
+Running HMC: 15 burn-in + 10 sampling = 25 total steps
+  [grad check] lp=-72.9834, |grad|=1.999917302599899, grad=[ 0.11656819 -1.1347661   1.64267677]
+  [burn-in 1/15] 1.2s | accept=100% | step_size=0.0120 | alpha=0.7997, sigma=1.5021, beta=0.3009 | ETA 29s
+  [burn-in 2/15] 1.2s | accept=100% | step_size=0.0160 | alpha=0.8675, sigma=1.4160, beta=0.2867 | ETA 27s
+  [burn-in 3/15] 1.2s | accept=100% | step_size=0.0222 | alpha=0.8909, sigma=1.3836, beta=0.2746 | ETA 26s
+  [burn-in 4/15] 1.2s | accept=100% | step_size=0.0314 | alpha=0.8002, sigma=1.2024, beta=0.2561 | ETA 25s
+  [burn-in 5/15] 1.2s | accept=100% | step_size=0.0444 | alpha=0.7861, sigma=1.2798, beta=0.2526 | ETA 24s
+  [burn-in 6/15] 1.2s | accept=100% | step_size=0.0628 | alpha=0.8556, sigma=1.4777, beta=0.2821 | ETA 23s
+  [burn-in 7/15] 1.2s | accept=100% | step_size=0.0883 | alpha=1.0615, sigma=1.4463, beta=0.4200 | ETA 22s
+  [burn-in 8/15] 1.2s | accept=100% | step_size=0.1206 | alpha=0.9419, sigma=1.0880, beta=0.9414 | ETA 20s
+  [burn-in 9/15] 1.2s | accept=100% | step_size=0.1673 | alpha=0.4587, sigma=0.6435, beta=0.6821 | ETA 19s
+  [burn-in 10/15] 1.2s | accept=100% | step_size=0.2305 | alpha=0.8129, sigma=1.4306, beta=0.4604 | ETA 18s
+  [burn-in 11/15] 1.2s | accept=100% | step_size=0.3117 | alpha=1.2569, sigma=1.0778, beta=0.4105 | ETA 17s
+  [burn-in 12/15] 1.2s | accept=100% | step_size=0.1249 | alpha=0.3609, sigma=1.0055, beta=0.4648 | ETA 16s
+  [burn-in 13/15] 1.2s | accept=100% | step_size=0.1249 | alpha=0.4955, sigma=1.3492, beta=0.5802 | ETA 14s
+  [burn-in 14/15] 1.2s | accept=100% | step_size=0.1249 | alpha=0.4338, sigma=1.5205, beta=0.2133 | ETA 13s
+  [burn-in 15/15] 1.2s | accept=100% | step_size=0.1249 | alpha=0.7230, sigma=2.0992, beta=0.2683 | ETA 12s
+  [sample 1/10] 1.2s | accept=100% | step_size=0.1249 | alpha=0.7105, sigma=2.6481, beta=0.4122 | ETA 11s
+  [sample 2/10] 1.2s | accept=100% | step_size=0.1249 | alpha=0.6319, sigma=1.8608, beta=0.5466 | ETA 10s
+  [sample 3/10] 1.2s | accept=100% | step_size=0.1249 | alpha=0.7239, sigma=2.6964, beta=0.1917 | ETA 8s
+  [sample 4/10] 1.2s | accept=100% | step_size=0.1249 | alpha=0.6267, sigma=1.3258, beta=0.3549 | ETA 7s
+  [sample 5/10] 1.2s | accept=100% | step_size=0.1249 | alpha=0.4411, sigma=1.6207, beta=0.2193 | ETA 6s
+  [sample 6/10] 1.2s | accept=100% | step_size=0.1249 | alpha=0.5058, sigma=0.7378, beta=0.2797 | ETA 5s
+  [sample 7/10] 1.2s | accept=100% | step_size=0.1249 | alpha=0.3699, sigma=0.7625, beta=0.2746 | ETA 4s
+  [sample 8/10] 1.2s | accept=100% | step_size=0.1249 | alpha=0.6544, sigma=1.0167, beta=0.2258 | ETA 2s
+  [sample 9/10] 1.2s | accept=100% | step_size=0.1249 | alpha=0.8001, sigma=1.3505, beta=0.3228 | ETA 1s
+  [sample 10/10] 1.2s | accept=100% | step_size=0.1249 | alpha=0.7211, sigma=0.9071, beta=0.4723 | ETA 0s
+HMC complete!
+
+============================================================
+DPF INFERENCE RESULTS
+============================================================
+
+  alpha:
+    True:           0.91
+    Posterior mean:  0.6185 +/- 0.1306
+    90% CI:         [0.4020, 0.7658]
+    True in 90% CI: NO
+
+  sigma:
+    True:           1.0
+    Posterior mean:  1.4927 +/- 0.6824
+    90% CI:         [0.7489, 2.6747]
+    True in 90% CI: YES
+
+  beta:
+    True:           0.5
+    Posterior mean:  0.3300 +/- 0.1107
+    90% CI:         [0.2041, 0.5131]
+    True in 90% CI: YES
+
+Diagnostics:
+  Acceptance rate: 100.0%
+  Final step size: 0.124880
+  ESS: {'alpha': 5.626107899598439, 'sigma': 3.764133430879737, 'beta': 10.0}
+  R-hat: {'alpha': 0.8930420648327754, 'sigma': 0.6031548181697104, 'beta': 0.9142398091293494}
+
+Performance:
+  Wall time: 34.1 seconds
+  Peak memory: 3.4 MB
+============================================================
+
+Results saved to /home/haowu/JPML/code/outputs/dpf/hmc/stochastic_volatility/bpf_sys
+
+========================================
+[5/6] hmc/stochastic_volatility/bpf_soft
+========================================
+Creating true model: src.models.stochastic_volatility.StochasticVolatilityModel
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1771744068.694997 2210380 gpu_device.cc:2020] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 22322 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3090, pci bus id: 0000:01:00.0, compute capability: 8.6
+Generating 100 time steps with true params: {'alpha': 0.91, 'sigma': 1.0, 'beta': 0.5}
+Creating inference model
+Trainable params: ['alpha', 'sigma', 'beta']
+
+Running HMC inference...
+Using HMC sampler (num_leapfrog_steps=5)
+Running HMC: 15 burn-in + 10 sampling = 25 total steps
+  [grad check] lp=-72.0929, |grad|=1.999917302599899, grad=[ 0.11656819 -1.1347661   1.64267677]
+  [burn-in 1/15] 1.3s | accept=100% | step_size=0.0120 | alpha=0.7997, sigma=1.5021, beta=0.3009 | ETA 32s
+  [burn-in 2/15] 1.3s | accept=100% | step_size=0.0160 | alpha=0.8675, sigma=1.4160, beta=0.2867 | ETA 30s
+  [burn-in 3/15] 1.3s | accept=100% | step_size=0.0222 | alpha=0.8909, sigma=1.3836, beta=0.2746 | ETA 29s
+  [burn-in 4/15] 1.3s | accept=100% | step_size=0.0314 | alpha=0.8002, sigma=1.2024, beta=0.2561 | ETA 27s
+  [burn-in 5/15] 1.3s | accept=100% | step_size=0.0444 | alpha=0.7861, sigma=1.2798, beta=0.2526 | ETA 26s
+  [burn-in 6/15] 1.3s | accept=100% | step_size=0.0628 | alpha=0.8556, sigma=1.4777, beta=0.2821 | ETA 25s
+  [burn-in 7/15] 1.3s | accept=100% | step_size=0.0883 | alpha=1.0615, sigma=1.4463, beta=0.4200 | ETA 23s
+  [burn-in 8/15] 1.3s | accept=100% | step_size=0.1206 | alpha=0.9419, sigma=1.0880, beta=0.9414 | ETA 22s
+  [burn-in 9/15] 1.3s | accept=100% | step_size=0.1673 | alpha=0.4587, sigma=0.6435, beta=0.6821 | ETA 21s
+  [burn-in 10/15] 1.3s | accept=100% | step_size=0.2305 | alpha=0.8129, sigma=1.4306, beta=0.4604 | ETA 20s
+  [burn-in 11/15] 1.3s | accept=100% | step_size=0.3117 | alpha=1.2569, sigma=1.0778, beta=0.4105 | ETA 18s
+  [burn-in 12/15] 1.3s | accept=100% | step_size=0.1249 | alpha=0.3609, sigma=1.0055, beta=0.4648 | ETA 17s
+  [burn-in 13/15] 1.3s | accept=100% | step_size=0.1249 | alpha=0.4955, sigma=1.3492, beta=0.5802 | ETA 16s
+  [burn-in 14/15] 1.3s | accept=100% | step_size=0.1249 | alpha=0.4338, sigma=1.5205, beta=0.2133 | ETA 14s
+  [burn-in 15/15] 1.3s | accept=100% | step_size=0.1249 | alpha=0.7230, sigma=2.0992, beta=0.2683 | ETA 13s
+  [sample 1/10] 1.3s | accept=100% | step_size=0.1249 | alpha=0.7105, sigma=2.6481, beta=0.4122 | ETA 12s
+  [sample 2/10] 1.3s | accept=100% | step_size=0.1249 | alpha=0.6319, sigma=1.8608, beta=0.5466 | ETA 10s
+  [sample 3/10] 1.3s | accept=100% | step_size=0.1249 | alpha=0.7239, sigma=2.6964, beta=0.1917 | ETA 9s
+  [sample 4/10] 1.3s | accept=100% | step_size=0.1249 | alpha=0.6267, sigma=1.3258, beta=0.3549 | ETA 8s
+  [sample 5/10] 1.3s | accept=100% | step_size=0.1249 | alpha=0.4411, sigma=1.6207, beta=0.2193 | ETA 7s
+  [sample 6/10] 1.3s | accept=100% | step_size=0.1249 | alpha=0.5058, sigma=0.7378, beta=0.2797 | ETA 5s
+  [sample 7/10] 1.3s | accept=100% | step_size=0.1249 | alpha=0.3699, sigma=0.7625, beta=0.2746 | ETA 4s
+  [sample 8/10] 1.3s | accept=100% | step_size=0.1249 | alpha=0.6544, sigma=1.0167, beta=0.2258 | ETA 3s
+  [sample 9/10] 1.3s | accept=100% | step_size=0.1249 | alpha=0.8001, sigma=1.3505, beta=0.3228 | ETA 1s
+  [sample 10/10] 1.3s | accept=100% | step_size=0.1249 | alpha=0.7211, sigma=0.9071, beta=0.4723 | ETA 0s
+HMC complete!
+
+============================================================
+DPF INFERENCE RESULTS
+============================================================
+
+  alpha:
+    True:           0.91
+    Posterior mean:  0.6185 +/- 0.1306
+    90% CI:         [0.4020, 0.7658]
+    True in 90% CI: NO
+
+  sigma:
+    True:           1.0
+    Posterior mean:  1.4927 +/- 0.6824
+    90% CI:         [0.7489, 2.6747]
+    True in 90% CI: YES
+
+  beta:
+    True:           0.5
+    Posterior mean:  0.3300 +/- 0.1107
+    90% CI:         [0.2041, 0.5131]
+    True in 90% CI: YES
+
+Diagnostics:
+  Acceptance rate: 100.0%
+  Final step size: 0.124880
+  ESS: {'alpha': 5.626107899598439, 'sigma': 3.764133430879737, 'beta': 10.0}
+  R-hat: {'alpha': 0.8930420648327754, 'sigma': 0.6031548181697104, 'beta': 0.9142398091293494}
+
+Performance:
+  Wall time: 37.0 seconds
+  Peak memory: 5.1 MB
+============================================================
+
+Results saved to /home/haowu/JPML/code/outputs/dpf/hmc/stochastic_volatility/bpf_soft
+
+========================================
+[6/6] hmc/stochastic_volatility/bpf_ot
+========================================
+Creating true model: src.models.stochastic_volatility.StochasticVolatilityModel
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1771744110.209979 2211087 gpu_device.cc:2020] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 22322 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3090, pci bus id: 0000:01:00.0, compute capability: 8.6
+Generating 100 time steps with true params: {'alpha': 0.91, 'sigma': 1.0, 'beta': 0.5}
+Creating inference model
+Trainable params: ['alpha', 'sigma', 'beta']
+
+Running HMC inference...
+Using HMC sampler (num_leapfrog_steps=5)
+Running HMC: 15 burn-in + 10 sampling = 25 total steps
+  [grad check] lp=-74.5088, |grad|=1.999917302599899, grad=[ 0.11656819 -1.1347661   1.64267677]
+  [burn-in 1/15] 13.6s | accept=100% | step_size=0.0120 | alpha=0.7997, sigma=1.5021, beta=0.3009 | ETA 326s
+  [burn-in 2/15] 13.6s | accept=100% | step_size=0.0160 | alpha=0.8675, sigma=1.4160, beta=0.2867 | ETA 312s
+  [burn-in 3/15] 13.6s | accept=100% | step_size=0.0222 | alpha=0.8909, sigma=1.3836, beta=0.2746 | ETA 299s
+  [burn-in 4/15] 13.6s | accept=100% | step_size=0.0314 | alpha=0.8002, sigma=1.2024, beta=0.2561 | ETA 285s
+  [burn-in 5/15] 13.6s | accept=100% | step_size=0.0444 | alpha=0.7861, sigma=1.2798, beta=0.2526 | ETA 272s
+  [burn-in 6/15] 13.6s | accept=100% | step_size=0.0628 | alpha=0.8556, sigma=1.4777, beta=0.2821 | ETA 258s
+  [burn-in 7/15] 13.6s | accept=100% | step_size=0.0883 | alpha=1.0615, sigma=1.4463, beta=0.4200 | ETA 245s
+  [burn-in 8/15] 13.6s | accept=100% | step_size=0.1206 | alpha=0.9419, sigma=1.0880, beta=0.9414 | ETA 231s
+  [burn-in 9/15] 13.6s | accept=100% | step_size=0.1673 | alpha=0.4587, sigma=0.6435, beta=0.6821 | ETA 217s
+  [burn-in 10/15] 13.6s | accept=100% | step_size=0.2305 | alpha=0.8129, sigma=1.4306, beta=0.4604 | ETA 204s
+  [burn-in 11/15] 13.6s | accept=100% | step_size=0.3117 | alpha=1.2569, sigma=1.0778, beta=0.4105 | ETA 190s
+  [burn-in 12/15] 13.7s | accept=100% | step_size=0.1249 | alpha=0.3609, sigma=1.0055, beta=0.4648 | ETA 177s
+  [burn-in 13/15] 13.6s | accept=100% | step_size=0.1249 | alpha=0.4955, sigma=1.3492, beta=0.5802 | ETA 163s
+  [burn-in 14/15] 13.6s | accept=100% | step_size=0.1249 | alpha=0.4338, sigma=1.5205, beta=0.2133 | ETA 150s
+  [burn-in 15/15] 13.6s | accept=100% | step_size=0.1249 | alpha=0.7230, sigma=2.0992, beta=0.2683 | ETA 136s
+  [sample 1/10] 13.6s | accept=100% | step_size=0.1249 | alpha=0.7105, sigma=2.6481, beta=0.4122 | ETA 123s
+  [sample 2/10] 13.6s | accept=100% | step_size=0.1249 | alpha=0.6319, sigma=1.8608, beta=0.5466 | ETA 109s
+  [sample 3/10] 13.6s | accept=100% | step_size=0.1249 | alpha=0.7239, sigma=2.6964, beta=0.1917 | ETA 95s
+  [sample 4/10] 13.6s | accept=100% | step_size=0.1249 | alpha=0.6267, sigma=1.3258, beta=0.3549 | ETA 82s
+  [sample 5/10] 13.6s | accept=100% | step_size=0.1249 | alpha=0.4411, sigma=1.6207, beta=0.2193 | ETA 68s
+  [sample 6/10] 13.6s | accept=100% | step_size=0.1249 | alpha=0.5058, sigma=0.7378, beta=0.2797 | ETA 54s
+  [sample 7/10] 13.6s | accept=100% | step_size=0.1249 | alpha=0.3699, sigma=0.7625, beta=0.2746 | ETA 41s
+  [sample 8/10] 13.6s | accept=100% | step_size=0.1249 | alpha=0.6544, sigma=1.0167, beta=0.2258 | ETA 27s
+  [sample 9/10] 13.6s | accept=100% | step_size=0.1249 | alpha=0.8001, sigma=1.3505, beta=0.3228 | ETA 14s
+  [sample 10/10] 13.6s | accept=100% | step_size=0.1249 | alpha=0.7211, sigma=0.9071, beta=0.4723 | ETA 0s
+HMC complete!
+
+============================================================
+DPF INFERENCE RESULTS
+============================================================
+
+  alpha:
+    True:           0.91
+    Posterior mean:  0.6185 +/- 0.1306
+    90% CI:         [0.4020, 0.7658]
+    True in 90% CI: NO
+
+  sigma:
+    True:           1.0
+    Posterior mean:  1.4927 +/- 0.6824
+    90% CI:         [0.7489, 2.6747]
+    True in 90% CI: YES
+
+  beta:
+    True:           0.5
+    Posterior mean:  0.3300 +/- 0.1107
+    90% CI:         [0.2041, 0.5131]
+    True in 90% CI: YES
+
+Diagnostics:
+  Acceptance rate: 100.0%
+  Final step size: 0.124880
+  ESS: {'alpha': 5.626107899598439, 'sigma': 3.764133430879737, 'beta': 10.0}
+  R-hat: {'alpha': 0.8930420648327754, 'sigma': 0.6031548181697104, 'beta': 0.9142398091293494}
+
+Performance:
+  Wall time: 351.9 seconds
+  Peak memory: 6.5 MB
+============================================================
+
+Results saved to /home/haowu/JPML/code/outputs/dpf/hmc/stochastic_volatility/bpf_ot
+
+=== All 6 experiments complete ===
