@@ -1,4 +1,4 @@
-This is BibTeX, Version 0.99d (TeX Live 2025/Homebrew)
+This is BibTeX, Version 0.99d (TeX Live 2025)
 Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
 The top-level auxiliary file: main.aux
 The style file: unsrt.bst
@@ -9,43 +9,43 @@ Warning--empty journal in HuVanLeeuwen2021
 Warning--empty journal in Andrieu2010
 You've used 32 entries,
             1791 wiz_defined-function locations,
-            631 strings with 9081 characters,
-and the built_in function-call counts, 6639 in all, are:
-= -- 562
+            631 strings with 9054 characters,
+and the built_in function-call counts, 6832 in all, are:
+= -- 591
 > -- 326
-< -- 7
+< -- 8
 + -- 121
 - -- 89
-* -- 371
-:= -- 1045
-add.period$ -- 96
+* -- 383
+:= -- 1064
+add.period$ -- 97
 call.type$ -- 32
 change.case$ -- 31
 chr.to.int$ -- 0
 cite$ -- 36
-duplicate$ -- 298
-empty$ -- 677
+duplicate$ -- 307
+empty$ -- 690
 format.name$ -- 89
-if$ -- 1501
+if$ -- 1553
 int.to.chr$ -- 0
 int.to.str$ -- 32
 missing$ -- 24
 newline$ -- 159
 num.names$ -- 32
-pop$ -- 139
+pop$ -- 137
 preamble$ -- 1
 purify$ -- 0
 quote$ -- 0
-skip$ -- 161
+skip$ -- 173
 stack$ -- 0
-substring$ -- 307
-swap$ -- 73
-text.length$ -- 7
+substring$ -- 339
+swap$ -- 82
+text.length$ -- 8
 text.prefix$ -- 0
 top$ -- 0
 type$ -- 0
 warning$ -- 4
-while$ -- 55
+while$ -- 58
 width$ -- 34
-write$ -- 330
+write$ -- 332
 (There were 4 warnings)

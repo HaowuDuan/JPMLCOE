@@ -45,6 +45,7 @@ class StochasticEDHFlow(ExactDaumHuangFlow):
 
     def __init__(self, model, diffusion_scale=0.0,
                  schedule_mu: float = 0.0,
+                 schedule_method: str = 'kappa_nu',
                  lambda_schedule: str = 'exponential',
                  bvp_config: BVPShootingConfig = BVPShootingConfig(),
                  **kwargs):
@@ -57,6 +58,11 @@ class StochasticEDHFlow(ExactDaumHuangFlow):
             schedule_mu: Weight μ for stiffness mitigation optimal control.
                 0.0 = linear schedule β=λ (Remark 3.1).
                 >0  = solve BVP for optimal β(λ) (Theorem 3.1).
+            schedule_method: Which stiffness measure to minimize.
+                'kappa_nu': κ_ν(M) = tr(M)·tr(M⁻¹), nuclear-norm condition number
+                    of the precision matrix M (arXiv:2107.04672, Eq 28).
+                'jacobian': R_stiff(F) = max|Re(λᵢ)|/min|Re(λᵢ)| of the flow
+                    Jacobian F = A_det - diag(Q/2)·M (follow-up paper, Eq 11-12).
             lambda_schedule: Step-size schedule for λ ∈ [0,1].
                 'exponential': geometric growth (q=1.2), small steps near λ=0.
                 'uniform':     equal steps dλ = 1/n (matches paper Section 4).
@@ -64,6 +70,7 @@ class StochasticEDHFlow(ExactDaumHuangFlow):
         """
         self._lambda_schedule_override = lambda_schedule
         self.bvp_config = bvp_config
+        self.schedule_method = schedule_method
         super().__init__(model, **kwargs)
         self.dtype = getattr(model, 'dtype', tf.float64)
         self.np_dtype = np.float64 if self.dtype == tf.float64 else np.float32
@@ -186,6 +193,120 @@ class StochasticEDHFlow(ExactDaumHuangFlow):
                 tf.constant(dbeta_np, dtype=self.dtype))
 
     # ------------------------------------------------------------------
+    # Jacobian stiffness schedule (follow-up paper: "On the Role of the
+    # Diffusion Matrix in Stiffness Mitigation for Stochastic Particle
+    # Flow Filters", Dai & Daum)
+    # ------------------------------------------------------------------
+
+    def _compute_jacobian_schedule(self, P: tf.Tensor,
+                                   R_inv: tf.Tensor
+                                   ) -> tuple[tf.Tensor, tf.Tensor]:
+        """
+        Solve BVP β̈ = μ·∂(log R_stiff)/∂β, β(0)=0, β(1)=1.
+
+        R_stiff is the stiffness ratio of the flow Jacobian:
+            F(β) = -½ M(β)⁻¹ J_meas  -  diag(Q/2) · M(β)
+            R_stiff = max|Re(λᵢ(F))| / min|Re(λᵢ(F))|
+
+        This measures actual ODE stiffness (eigenvalue spread of F),
+        unlike _compute_optimal_schedule which uses κ_ν(M) (precision
+        matrix condition number — a weaker proxy).
+
+        Returns:
+            beta_values:  TF tensor, shape (n_lambda_steps,), β at each step
+            dbeta_values: TF tensor, shape (n_lambda_steps,), dβ per step
+        """
+        from scipy.integrate import solve_ivp
+
+        H_np = self.model.observation_jacobian(self.eta_bar_0).numpy()
+        J_prior = np.linalg.inv(P.numpy())
+        J_meas = H_np.T @ R_inv.numpy() @ H_np
+        Q_diag = self.Q_diag
+        mu = float(self.schedule_mu)
+        has_diffusion = bool(np.any(Q_diag > 0))
+        lambda_steps_np = self.lambda_steps.numpy()
+
+        def _compute_F(beta):
+            """Flow Jacobian F(β) = ∇_x f^T evaluated at linearization point."""
+            M = J_prior + beta * J_meas
+            M_inv = np.linalg.inv(M)
+            # Deterministic part: A_det = -½ M⁻¹ J_meas
+            F = -0.5 * M_inv @ J_meas
+            # Stochastic score correction: -diag(Q/2) · M
+            if has_diffusion:
+                F = F - np.diag(Q_diag / 2.0) @ M
+            return F
+
+        def _stiffness_ratio(F):
+            """R_stiff = max|Re(λᵢ)| / min|Re(λᵢ)| (Eq 11 of follow-up paper)."""
+            eigvals = np.linalg.eigvals(F)
+            re_parts = np.abs(np.real(eigvals))
+            re_min = max(np.min(re_parts), 1e-15)
+            return np.max(re_parts) / re_min
+
+        def _rhs(lam, state):
+            """ODE right-hand side [β̇, μ·∂(log R_stiff)/∂β]."""
+            beta, beta_dot = state[0], state[1]
+            R_s = _stiffness_ratio(_compute_F(beta))
+            # Central finite difference for ∂R_stiff/∂β
+            eps = 1e-7
+            R_plus = _stiffness_ratio(_compute_F(beta + eps))
+            R_minus = _stiffness_ratio(_compute_F(beta - eps))
+            dR_dbeta = (R_plus - R_minus) / (2.0 * eps)
+            # Log normalization: ∂(log R_stiff)/∂β
+            dlog_R = dR_dbeta / R_s
+            return [beta_dot, mu * dlog_R]
+
+        def _shoot(u0):
+            """Integrate ODE from λ=0 to λ=1, return β(1)."""
+            sol = solve_ivp(_rhs, [0.0, 1.0], [0.0, u0],
+                            method='Radau', rtol=1e-8, atol=1e-10)
+            if not sol.success:
+                return np.inf
+            return float(sol.y[0, -1])
+
+        # --- Find bracket [u_lo, u_hi] where _shoot(u_lo)<1<_shoot(u_hi) ---
+        u_below, u_above = None, None
+        for u0 in [0.01, 0.1, 0.5, 1.0, 1.5, 2.0, 5.0, 10.0, 20.0, 50.0]:
+            val = _shoot(u0)
+            if val < 1.0:
+                u_below = u0
+            elif val > 1.0 and val != np.inf:
+                u_above = u0
+                if u_below is not None:
+                    break
+
+        if u_below is None or u_above is None:
+            return tf.cumsum(self.lambda_steps), self.lambda_steps
+        u_lo, u_hi = u_below, u_above
+
+        for _ in range(self.bvp_config.n_bisection):
+            u_mid = (u_lo + u_hi) / 2.0
+            if _shoot(u_mid) < 1.0:
+                u_lo = u_mid
+            else:
+                u_hi = u_mid
+
+        optimal_u0 = (u_lo + u_hi) / 2.0
+
+        # --- Record β at each λ step point ---
+        lambda_cumsum = np.clip(np.cumsum(lambda_steps_np), 0.0, 1.0)
+        sol = solve_ivp(_rhs, [0.0, 1.0], [0.0, optimal_u0],
+                        method='Radau', rtol=1e-8, atol=1e-10,
+                        t_eval=lambda_cumsum)
+        if not sol.success or sol.y.shape[1] != self.n_lambda_steps:
+            return tf.cumsum(self.lambda_steps), self.lambda_steps
+
+        beta_np = sol.y[0]
+
+        dbeta_np = np.empty_like(beta_np)
+        dbeta_np[0] = beta_np[0]
+        dbeta_np[1:] = np.diff(beta_np)
+
+        return (tf.constant(beta_np, dtype=self.dtype),
+                tf.constant(dbeta_np, dtype=self.dtype))
+
+    # ------------------------------------------------------------------
     # Main filter update
     # ------------------------------------------------------------------
 
@@ -229,7 +350,10 @@ class StochasticEDHFlow(ExactDaumHuangFlow):
 
         # --- Compute optimal schedule if μ > 0 ---
         if self.schedule_mu > 0:
-            beta_vals, dbeta_vals = self._compute_optimal_schedule(P, R_inv)
+            if self.schedule_method == 'jacobian':
+                beta_vals, dbeta_vals = self._compute_jacobian_schedule(P, R_inv)
+            else:
+                beta_vals, dbeta_vals = self._compute_optimal_schedule(P, R_inv)
 
         # --- Flow loop (all TF tensor operations) ---
         lambda_val = tf.constant(0.0, dtype=self.dtype)

@@ -14,6 +14,7 @@ EXPERIMENTS=(
     hmc/kitagawa/bpf_sys
     hmc/range_bearing/ledh_sys
     hmc/range_bearing/bpf_sys
+    hmc/stochastic_volatility/bpf_sys
 )
 
 TOTAL=${#EXPERIMENTS[@]}

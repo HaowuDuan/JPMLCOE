@@ -35,6 +35,7 @@ class LEDHParticleFlowFilter:
         weight_clip_range: Optional[float] = None,
         debug_mode: bool = False,
         flow_config: FlowScheduleConfig = FlowScheduleConfig(),
+        geometric_ratio: Optional[float] = None,
         **filter_kwargs
     ):
         """
@@ -51,8 +52,11 @@ class LEDHParticleFlowFilter:
                               Typical values: 30-50. None = no clipping (MATLAB behavior).
             debug_mode: If True, store detailed diagnostics
             flow_config: Flow schedule configuration
+            geometric_ratio: If set, overrides flow_config.geometric_ratio (convenient for YAML configs)
         """
         self.model = model
+        if geometric_ratio is not None:
+            flow_config = FlowScheduleConfig(geometric_ratio=geometric_ratio)
         self.flow_config = flow_config
         self.dtype = getattr(model, 'dtype', tf.float64)
         self.state_dim = model.state_dim
@@ -181,7 +185,7 @@ class LEDHParticleFlowFilter:
 
         # Stochastic prediction - use batch method
         seed = self._next_seed()
-        eta_0_tf = self.model.state_transition_batch(self.particles_prev.value(), seed, t=t)
+        eta_0_tf = self.model.state_transition_batch(self.particles_prev.value(), seed)
         self.eta_0.assign(eta_0_tf)
 
     def update(self, y: tf.Tensor):

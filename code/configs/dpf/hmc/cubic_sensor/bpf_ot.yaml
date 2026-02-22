@@ -22,6 +22,7 @@ filter:
   hmc_resampling_method: ot_entropy
   hmc_resampling_config:
     epsilon: 0.5
+  always_resample: true
   eager_mode: false
 
 dpf:

@@ -40,6 +40,11 @@ EXPERIMENTS=(
     hmc/range_bearing/bpf_sys
     hmc/range_bearing/bpf_soft
     hmc/range_bearing/bpf_ot
+
+    # Stochastic Volatility (1D, non-Gaussian observation)
+    hmc/stochastic_volatility/bpf_sys
+    hmc/stochastic_volatility/bpf_soft
+    hmc/stochastic_volatility/bpf_ot
 )
 
 TOTAL=${#EXPERIMENTS[@]}

@@ -1,0 +1,48 @@
+{
+  "rmse": 52.08998768147526,
+  "log_likelihood": -7219.87255859375,
+  "metadata": {
+    "filter_type": "LEDHParticleFlowFilter",
+    "n_particles": 500,
+    "n_lambda_steps": 42,
+    "resampling_method": "systematic",
+    "resampling_rate": 1.0,
+    "performance": {
+      "wall_time_seconds": 226.61667683301494,
+      "time_per_timestep_ms": 2266.1667683301494,
+      "peak_memory_mb": 20.328076362609863,
+      "memory_increase_mb": 1350.984375,
+      "start_memory_mb": 1019.0625,
+      "end_memory_mb": 2370.046875,
+      "num_timesteps": 100
+    }
+  },
+  "config": {
+    "model": {
+      "_target_": "src.models.acoustic_tracking_full.AcousticTrackingFullModel",
+      "n_targets": 4,
+      "sensor_grid_size": 5,
+      "source_intensity": 10.0,
+      "regularization": 0.1,
+      "measurement_noise_std": 0.1,
+      "use_true_process_noise": false,
+      "dt": 1.0
+    },
+    "filter": {
+      "_target_": "src.filters.particle.ledh_invertible.LEDHParticleFlowFilter",
+      "n_particles": 500,
+      "n_lambda_steps": 42,
+      "resample_threshold": 0.5,
+      "geometric_ratio": 1.2
+    },
+    "seed": 42,
+    "dtype": "float32",
+    "T": 100,
+    "output_dir": "outputs/acoustic_tracking/ledh_invertible_q1.2_n42",
+    "plot": true,
+    "device": "auto",
+    "tf_log_level": 2,
+    "verbose": true,
+    "show_progress": true
+  }
+}

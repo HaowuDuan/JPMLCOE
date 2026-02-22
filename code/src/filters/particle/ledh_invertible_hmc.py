@@ -48,6 +48,7 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
         stop_gradient_resampling: bool = True,
         hmc_resampling_method: Optional[str] = None,
         hmc_resampling_config: Optional[Dict[str, Any]] = None,
+        always_resample: bool = False,
         eager_mode: bool = False,
         on_timestep: Optional[Callable] = None,
         **kwargs
@@ -65,6 +66,10 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
             hmc_resampling_config: Config dict for HMC resampling method.
                 If None and using parent's method: uses parent's config.
                 If None and using different method: empty config.
+            always_resample: If True, set resample threshold to N so every
+                timestep resamples. Eliminates tf.cond branch-switching
+                discontinuity that causes HMC step size collapse. Use with
+                soft resampling (near-no-op when ESS is already high).
             eager_mode: If True, run without @tf.function / tf.while_loop.
                 Errors appear instantly. GradientTape still works (just slower).
             on_timestep: Optional callback(t, log_lik_t, ess, max_log_theta)
@@ -74,8 +79,13 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
         """
         super().__init__(*args, **kwargs)
         self.stop_gradient_resampling = stop_gradient_resampling
+        self.always_resample = always_resample
         self.eager_mode = eager_mode
         self.on_timestep = on_timestep
+
+        # When always_resample, set threshold to N so ESS < N always triggers.
+        if always_resample:
+            self.resample_threshold = 1.0
 
         # Set up HMC-specific resampling
         method_map = {
@@ -137,6 +147,7 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
         resample_fn = self._hmc_resampling_method
         resample_cfg = self._hmc_resampling_config
         uses_transport_matrix = (self._hmc_resampling_name == 'ot_entropy')
+        always_resample = self.always_resample
 
         # Bypass nested @tf.function — inline into this trace so model
         # attributes resolve to symbolic tensors and gradients flow correctly
@@ -224,37 +235,56 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
                 # --- EKF covariance update ---
                 _, covs = _ekf_update(model, eta_bar_0, covs, y)
 
-                # --- Conditional resampling via tf.cond ---
-                ess = ess_tf(weights)
-
-                def do_resample():
+                # --- Resampling ---
+                if always_resample:
+                    # Always resample: no tf.cond, uniform computation graph.
+                    # Soft resampling is a near-no-op when ESS is high.
                     rseed = tf.stack([seed_ctr, tf.constant(0, dtype=tf.int32)])
                     result = resample_fn(
                         particles, weights, seed=rseed, **resample_cfg
                     )
-                    new_p = result.particles
-                    new_w = result.weights
+                    particles = result.particles
+                    weights = result.weights
                     if uses_transport_matrix:
-                        # OT resampling: transport covs via T @ covs (differentiable)
-                        T = result.transport_matrix
-                        new_covs = tf.einsum('ij,jkl->ikl', T, covs)
+                        covs = tf.einsum('ij,jkl->ikl', result.transport_matrix, covs)
                     else:
-                        # Index-based resampling (systematic, soft)
-                        new_covs = tf.gather(covs, result.ancestor_indices)
+                        covs = tf.gather(covs, result.ancestor_indices)
+                    seed_ctr = seed_ctr + 1
                     if stop_grad:
-                        new_p = tf.stop_gradient(new_p)
-                        new_w = tf.stop_gradient(new_w)
-                        new_covs = tf.stop_gradient(new_covs)
-                    return new_p, new_w, new_covs, seed_ctr + 1
+                        particles = tf.stop_gradient(particles)
+                        weights = tf.stop_gradient(weights)
+                        covs = tf.stop_gradient(covs)
+                else:
+                    # Conditional resampling (original): tf.cond creates
+                    # a discontinuity that can cause HMC step size collapse.
+                    ess = ess_tf(weights)
 
-                def no_resample():
-                    return particles, weights, covs, seed_ctr
+                    def do_resample():
+                        rseed = tf.stack([seed_ctr, tf.constant(0, dtype=tf.int32)])
+                        result = resample_fn(
+                            particles, weights, seed=rseed, **resample_cfg
+                        )
+                        new_p = result.particles
+                        new_w = result.weights
+                        if uses_transport_matrix:
+                            T = result.transport_matrix
+                            new_covs = tf.einsum('ij,jkl->ikl', T, covs)
+                        else:
+                            new_covs = tf.gather(covs, result.ancestor_indices)
+                        if stop_grad:
+                            new_p = tf.stop_gradient(new_p)
+                            new_w = tf.stop_gradient(new_w)
+                            new_covs = tf.stop_gradient(new_covs)
+                        return new_p, new_w, new_covs, seed_ctr + 1
 
-                particles, weights, covs, seed_ctr = tf.cond(
-                    ess < resample_thresh,
-                    do_resample,
-                    no_resample
-                )
+                    def no_resample():
+                        return particles, weights, covs, seed_ctr
+
+                    particles, weights, covs, seed_ctr = tf.cond(
+                        ess < resample_thresh,
+                        do_resample,
+                        no_resample
+                    )
 
                 return t + 1, particles, weights, covs, seed_ctr, log_lik
 

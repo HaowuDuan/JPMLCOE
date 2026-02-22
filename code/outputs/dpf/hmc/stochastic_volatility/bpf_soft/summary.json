@@ -1,0 +1,180 @@
+{
+  "summary": {
+    "alpha": {
+      "mean": 0.6185254177499981,
+      "std": 0.13059922854261605,
+      "median": 0.6431048946502695,
+      "q5": 0.4019559133360455,
+      "q25": 0.5360041204907513,
+      "q75": 0.7184590071099022,
+      "q95": 0.7657874322766998,
+      "min": 0.3699416533495547,
+      "max": 0.8000810638959482
+    },
+    "sigma": {
+      "mean": 1.492651427571657,
+      "std": 0.6823818394098516,
+      "median": 1.3381661879737587,
+      "q5": 0.7489194367772803,
+      "q25": 0.9345023267929007,
+      "q75": 1.8008095016172474,
+      "q95": 2.6746800162041375,
+      "min": 0.737820197174725,
+      "max": 2.696420742638255
+    },
+    "beta": {
+      "mean": 0.32997351558185717,
+      "std": 0.1106537472631119,
+      "median": 0.3012230372748881,
+      "q5": 0.20410030111313818,
+      "q25": 0.2379562496229491,
+      "q75": 0.39789762310863486,
+      "q95": 0.5131389231162496,
+      "min": 0.19168179971992877,
+      "max": 0.5465692707763686
+    }
+  },
+  "diagnostics": {
+    "acceptance_rate": 1.0,
+    "final_step_size": 0.12487980723381042,
+    "ess": {
+      "alpha": 5.626107899598439,
+      "sigma": 3.764133430879737,
+      "beta": 10.0
+    },
+    "rhat": {
+      "alpha": 0.8930420648327754,
+      "sigma": 0.6031548181697104,
+      "beta": 0.9142398091293494
+    }
+  },
+  "metadata": {
+    "model_type": "StochasticVolatilityModel",
+    "filter_type": "BootstrapPFHMC",
+    "sampler": "hmc",
+    "num_samples": 10,
+    "num_burnin": 15,
+    "num_leapfrog_steps": 5,
+    "num_observations": 100,
+    "timing": {
+      "step_times": [
+        1.3127744495868683,
+        1.3018402373418212,
+        1.3138598883524537,
+        1.307869179174304,
+        1.2983053447678685,
+        1.299812976270914,
+        1.3031786615028977,
+        1.3099642638117075,
+        1.308618314564228,
+        1.31916871573776,
+        1.3035289971157908,
+        1.3136043967679143,
+        1.3141950843855739,
+        1.3056074678897858,
+        1.2945746649056673,
+        1.2901881709694862,
+        1.2979049943387508,
+        1.304819980636239,
+        1.2921091299504042,
+        1.2988480925559998,
+        1.2971182791516185,
+        1.2883627582341433,
+        1.2902368968352675,
+        1.2891700342297554,
+        1.2858578143641353
+      ],
+      "total_time_seconds": 32.541518793441355,
+      "mean_step_time": 1.3016607517376542,
+      "median_step_time": 1.3018402373418212,
+      "min_step_time": 1.2858578143641353,
+      "max_step_time": 1.31916871573776,
+      "burnin_time_seconds": 19.606902642175555,
+      "sampling_time_seconds": 12.9346161512658,
+      "mean_time_per_gradient_eval": 0.2603321503475308
+    }
+  },
+  "true_params": {
+    "alpha": 0.91,
+    "sigma": 1.0,
+    "beta": 0.5
+  },
+  "config": {
+    "dtype": "float64",
+    "tf_log_level": 2,
+    "model": {
+      "_target_": "src.models.stochastic_volatility.StochasticVolatilityModel",
+      "alpha": 0.8,
+      "sigma": 1.5,
+      "beta": 0.3
+    },
+    "filter": {
+      "_target_": "src.filters.particle.bootstrap_pf_hmc.BootstrapPFHMC",
+      "n_particles": 1000,
+      "resampling_method": "soft",
+      "resampling_config": {
+        "alpha": 0.5
+      },
+      "stop_gradient_resampling": false,
+      "hmc_resampling_method": "soft",
+      "hmc_resampling_config": {
+        "alpha": 0.5
+      },
+      "eager_mode": false
+    },
+    "dpf": {
+      "sampler": "hmc",
+      "trainable_params": {
+        "alpha": {
+          "constraint": "positive",
+          "prior": {
+            "_target_": "tensorflow_probability.distributions.LogNormal",
+            "loc": -0.094,
+            "scale": 0.5
+          }
+        },
+        "sigma": {
+          "constraint": "positive",
+          "prior": {
+            "_target_": "tensorflow_probability.distributions.LogNormal",
+            "loc": 0.0,
+            "scale": 0.5
+          }
+        },
+        "beta": {
+          "constraint": "positive",
+          "prior": {
+            "_target_": "tensorflow_probability.distributions.LogNormal",
+            "loc": -0.693,
+            "scale": 0.5
+          }
+        }
+      },
+      "hmc": {
+        "num_samples": 10,
+        "num_burnin": 15,
+        "step_size": 0.001,
+        "num_leapfrog_steps": 5,
+        "max_tree_depth": 10,
+        "adaptation_rate": 0.8,
+        "target_accept_prob": 0.9,
+        "seed": 42,
+        "grad_clip_norm": 100.0
+      }
+    },
+    "data": {
+      "T": 100,
+      "seed": 42,
+      "true_params": {
+        "alpha": 0.91,
+        "sigma": 1.0,
+        "beta": 0.5
+      }
+    }
+  },
+  "performance": {
+    "wall_time_seconds": 36.988595948554575,
+    "peak_memory_mb": 5.086585998535156,
+    "memory_increase_mb": 171.5546875
+  }
+}

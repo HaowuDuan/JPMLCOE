@@ -1,0 +1,18 @@
+# @package _global_
+
+# Experiment: LEDH Invertible Flow on Acoustic Tracking Model
+# Lambda schedule: q=1.2, n_lambda_steps=29
+
+defaults:
+  - override /model: acoustic_tracking_full
+  - override /filter: ledh_invertible
+
+T: 100
+seed: 42
+dtype: float32
+plot: true
+output_dir: outputs/acoustic_tracking/ledh_invertible_q1.2_n29
+
+filter:
+  n_lambda_steps: 29
+  geometric_ratio: 1.2
