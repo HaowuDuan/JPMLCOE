@@ -182,11 +182,18 @@ def run_dpf_experiment(cfg: DictConfig) -> Dict[str, Any]:
         csmc_kwargs = OmegaConf.to_container(cfg.filter, resolve=True)
         csmc_kwargs.pop('_target_', None)
 
+        # Initialize trajectory from a BPF run (avoids σ-stalling from
+        # prior-only initialization — see hmc_dpf_notes.md)
+        from src.filters.particle.bootstrap_pf_tf import ParticleFilterTF
+        init_n_particles = csmc_kwargs.get('n_particles', 1000)
+
         runner = PGibbsRunner(
             base_model=inference_model,
             csmc_class=filter_class,
             csmc_kwargs=csmc_kwargs,
             param_specs=param_specs,
+            init_filter_class=ParticleFilterTF,
+            init_filter_kwargs={'n_particles': init_n_particles},
         )
 
         with _PerfTracker() as perf:

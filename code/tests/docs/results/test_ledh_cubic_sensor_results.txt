@@ -1,26 +1,39 @@
-============================= test session starts ==============================
-cachedir: .pytest_cache
-tests/dpf/test_ledh_cubic_sensor.py::test_ledh_runs_without_error 2026-02-21 21:27:02.559602: I metal_plugin/src/device/metal_device.cc:1154] Metal device set to: Apple M4
-PASSED
-tests/dpf/test_ledh_cubic_sensor.py::test_output_shapes_1d PASSED
-tests/dpf/test_ledh_cubic_sensor.py::test_ess_stays_healthy 
-  min ESS = 13.3, threshold = 5.0
-PASSED
-tests/dpf/test_ledh_cubic_sensor.py::test_rmse_reasonable_1d 
-  RMSE = 0.6053
-PASSED
-tests/dpf/test_ledh_cubic_sensor.py::test_log_likelihood_finite PASSED
-tests/dpf/test_ledh_cubic_sensor.py::test_gradient_connected_and_finite 2026-02-21 21:27:06.390542: I metal_plugin/src/kernels/stateless_random_op.cc:282] Note the GPU implementation does not produce the same series as CPU implementation.
-  log_lik = -50.0767
-  d(ll)/d(sigma_W) = -9.936679579318595
-PASSED
-tests/dpf/test_ledh_cubic_sensor.py::test_weight_clipping 2026-02-21 21:27:20.108904: I metal_plugin/src/kernels/stateless_random_op.cc:282] Note the GPU implementation does not produce the same series as CPU implementation.
-  clip=30: log-lik=-32.18, min_ess=13.3
-  no clip: log-lik=-32.18, min_ess=13.3
-PASSED
-tests/dpf/test_ledh_cubic_sensor.py::test_both_resampling_methods 2026-02-21 21:27:24.825900: I metal_plugin/src/kernels/stateless_random_op.cc:282] Note the GPU implementation does not produce the same series as CPU implementation.
-  systematic: RMSE=0.6053, min_ess=13.3
-  ot_entropy: RMSE=1.1966, min_ess=9.0
-PASSED
-=============================== warnings summary ===============================
-======================== 8 passed, 3 warnings in 38.57s ========================
+LEDH Cubic Sensor Tests — Improved Version (2026-02-21)
+========================================================
+
+8 tests, all PASSED in 32.48s
+Platform: macOS Apple M4, Python 3.12.12, TF 2.16 (Metal)
+Config: T=20, N=100, n_lambda_steps=15, seed=42, float64
+
+Test 1: test_output_shapes_1d — PASSED
+  means (20,1), covs (20,1,1), ess (20,), log_liks (20,)
+
+Test 2: test_ledh_beats_prior — PASSED
+  LEDH RMSE = 0.6053, prior RMSE = 2.2942
+  Threshold: RMSE < 0.5 * prior = 1.1471
+
+Test 3: test_ledh_beats_bpf_on_ess — PASSED
+  LEDH avg ESS = 61.7
+  BPF  avg ESS = 36.0
+  Flow transports particles effectively.
+
+Test 4: test_ess_stays_healthy — PASSED
+  min ESS = 13.3, threshold = 10.0 (10% of N)
+
+Test 5: test_log_likelihood_finite — PASSED
+  Total and per-timestep log-lik all finite.
+
+Test 6: test_gradient_connected_and_responsive — PASSED
+  sigma_W=0.5: ll=-46.3037, grad=-31.2832
+  sigma_W=2.0: ll=-53.0701, grad=-1.2101
+  Both finite, |grad| > 0.1, and differ from each other.
+
+Test 7: test_weight_clipping — PASSED
+  clip=50: RMSE=0.6053, min_ess=13.3
+  no clip: RMSE=0.6053, min_ess=13.3
+  Both beat prior RMSE (2.2942).
+
+Test 8: test_both_resampling_methods — PASSED
+  systematic: RMSE=0.6053, min_ess=13.3, bpf_RMSE=0.6041
+  ot_entropy: RMSE=1.1966, min_ess=9.0, bpf_RMSE=0.6041
+  Both beat prior RMSE and maintain ESS > 5% of N.
