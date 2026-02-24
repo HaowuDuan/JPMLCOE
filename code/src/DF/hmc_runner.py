@@ -200,6 +200,7 @@ class DPFRunner:
         is_accepted_list = []
         step_size_list = []
         step_times = []
+        trace_log = []
 
         with warnings.catch_warnings():
             warnings.filterwarnings('ignore', category=UserWarning)
@@ -220,7 +221,7 @@ class DPFRunner:
                 self._print_progress(
                     i, num_burnin, num_samples, total_steps,
                     dt, step_times, cur_step_size, current_state,
-                    is_accepted_list
+                    is_accepted_list, trace_log=trace_log
                 )
 
                 if i >= num_burnin:
@@ -229,7 +230,7 @@ class DPFRunner:
         return self._finalize(
             samples_list, is_accepted_list, step_size_list,
             step_times, num_burnin, num_samples, num_leapfrog_steps,
-            current_state.dtype, observations
+            current_state.dtype, observations, trace_log=trace_log
         )
 
     # Backward compat
@@ -434,6 +435,7 @@ class DPFRunner:
         is_accepted_list = []
         step_size_list = []
         step_times = []
+        trace_log = []
         n_accepted = 0
 
         for i in range(total_steps):
@@ -501,7 +503,8 @@ class DPFRunner:
 
             self._print_progress(
                 i, num_burnin, num_samples, total_steps,
-                dt, step_times, cur_eps, q, is_accepted_list
+                dt, step_times, cur_eps, q, is_accepted_list,
+                trace_log=trace_log
             )
 
             if i >= num_burnin:
@@ -510,12 +513,12 @@ class DPFRunner:
         return self._finalize(
             samples_list, is_accepted_list, step_size_list,
             step_times, num_burnin, num_samples, num_leapfrog_steps,
-            dtype, self._observations_tf.numpy()
+            dtype, self._observations_tf.numpy(), trace_log=trace_log
         )
 
     def _print_progress(self, i, num_burnin, num_samples, total_steps,
                         dt, step_times, cur_step_size, current_state,
-                        is_accepted_list):
+                        is_accepted_list, trace_log=None):
         """Print progress for HMC step."""
         phase = "burn-in" if i < num_burnin else "sample"
         idx = i - num_burnin + 1 if i >= num_burnin else i + 1
@@ -538,9 +541,22 @@ class DPFRunner:
               f"{dt:.1f}s | accept={accept_rate:.0%} | step_size={cur_step_size:.4f} | "
               f"{param_str} | ETA {eta:.0f}s")
 
+        if trace_log is not None:
+            row = {
+                'step': i,
+                'phase': phase,
+                'step_in_phase': idx,
+                'dt': dt,
+                'accept_rate': float(accept_rate),
+                'step_size': cur_step_size,
+            }
+            for n, v in constrained.items():
+                row[n] = float(v.numpy())
+            trace_log.append(row)
+
     def _finalize(self, samples_list, is_accepted_list, step_size_list,
                   step_times, num_burnin, num_samples, num_leapfrog_steps,
-                  dtype, observations):
+                  dtype, observations, trace_log=None):
         """Post-process samples and compute diagnostics."""
         samples_unconstrained = tf.constant(
             np.stack(samples_list),
@@ -587,6 +603,7 @@ class DPFRunner:
                 'num_observations': len(observations)
                     if hasattr(observations, '__len__') else 0,
                 'timing': timing,
+                'trace': trace_log or [],
             }
         )
 

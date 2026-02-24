@@ -1,0 +1,12 @@
+# @package _global_
+
+# Experiment: Unscented Kalman Filter on Cubic Sensor Model
+
+defaults:
+  - override /model: cubic_sensor
+  - override /filter: ukf
+
+T: 200
+seed: 42
+plot: true
+output_dir: outputs/cubic_sensor/cubic_sensor_ukf

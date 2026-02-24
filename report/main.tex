@@ -1107,6 +1107,19 @@ During the early stages, the tests were not structured. Now that the picture is 
      \item \textbf{MAP warm-start.} Add an SGD/Adam pre-optimization stage to find a good initialization before launching HMC. This should eliminate the parameter drift problem we currently see with bad initial guesses.
 \end{enumerate}
 
+\subsection{Benchmarking}
+
+\subsubsection{Benchmarking HMC}
+For this part, we use Kalman family to test the HMC convergence. If it works here, this is useful baseline for particle filter
+
+\subsubsection{Benchmarking OT}
+For this part, we use bootstrap particle filter to test OT resampling. 
+
+
+
+
+
+
 \subsection{Additional notes and practical considerations}
 
 \textbf{Leapfrog divergence.} The mechanism by which direct HMC fails is instructive. The leapfrog trajectory starts in a reasonable region, passes through the likelihood cliff near small noise values (where the log-density changes sign), and the enormous gradient launches the state into an extreme parameter region. The Metropolis acceptance correctly rejects such diverged proposals (with acceptance probability $e^{-\Delta H} \approx 0$), but the chain makes no progress. Two remedies exist: gradient clipping, which caps $|\nabla U|$ at a threshold $C$ (a practical hack that preserves detailed balance because the true energy is still used for acceptance), and NUTS (No U-Turn Sampler), which adaptively truncates the trajectory when it starts doubling back\cite{Neal-2012-MCMC-Hamiltonian-Dynamics-ARXIV-1206-1901v1}. Both are worth trying for particle filter likelihoods. I did not use NUTS yet due to time cost.
@@ -1605,8 +1618,140 @@ Observed dimensions maintain diversity regardless of unobserved dimension spread
 
 \newpage
 \appendix
+\section{MCMC Diagnostics}\label{APP:MCMC_Diagnostics}
 
+This appendix details the four diagnostic quantities reported after every HMC/NUTS run.
 
+\subsection{Acceptance Rate}
+
+At each HMC step a proposal $q^*$ is drawn by integrating Hamilton's equations for $L$ leapfrog
+steps from the current state $q$.  The joint state is $(q, p)$ where $p \sim \mathcal{N}(0, I)$ is
+the auxiliary momentum.  The \emph{Hamiltonian} is
+\begin{equation}
+  H(q, p) = -\log \pi(q) + \tfrac{1}{2}\|p\|^2,
+\end{equation}
+where $\pi(q)$ is the target density (here the posterior).  The Metropolis acceptance probability is
+\begin{equation}
+  \alpha = \min\!\left(1,\; e^{-\Delta H}\right), \qquad
+  \Delta H = H(q^*, p^*) - H(q, p).
+\end{equation}
+If the leapfrog integrator were exact, $\Delta H = 0$ and every proposal would be accepted.
+Numerical discretisation error causes $\Delta H \neq 0$, so some proposals are rejected.
+
+\paragraph{Example.}
+Suppose $\Delta H = 0.5$.  Then $\alpha = e^{-0.5} \approx 0.607$, i.e.\ the proposal is accepted
+with probability~61\%.  If $\Delta H < 0$ (proposal has lower energy / higher probability), the
+proposal is always accepted.
+
+\paragraph{Target acceptance rate.}
+For standard HMC, the theoretically optimal acceptance rate in high dimensions is approximately
+$0.65$~\cite{beskos2013optimal}.  For NUTS and problems with smoother posteriors, a higher target
+of $0.80$--$0.90$ is common.  Acceptance rates near $100\%$ indicate the step size is too small:
+proposals barely move and consecutive samples are highly correlated.
+
+\subsection{Step Size and Dual-Averaging Adaptation}
+
+The leapfrog step size $\varepsilon$ controls how far each sub-step moves in parameter space.
+A total HMC trajectory covers approximately $L\varepsilon$ in unconstrained space.  Too large
+$\varepsilon$ causes large $\Delta H$ and frequent rejection; too small $\varepsilon$ gives
+near-certain acceptance but slow exploration.
+
+The step size is adapted during burn-in using \emph{dual averaging} (Hoffman \& Gelman,
+2014~\cite{hoffman2014nuts}), which is the same algorithm used in our custom HMC implementation
+(\texttt{hmc\_runner.py}).  Let $\delta$ be the target acceptance probability and $\alpha_m$ the
+actual acceptance probability at step $m$.  The update equations are:
+\begin{align}
+  \bar{H}_m &= \left(1 - \frac{1}{m + t_0}\right)\bar{H}_{m-1}
+              + \frac{1}{m + t_0}(\delta - \alpha_m),
+              \label{eq:da_hbar}\\[4pt]
+  \log \varepsilon_m &= \mu - \frac{\sqrt{m}}{\gamma}\,\bar{H}_m,
+              \label{eq:da_eps}\\[4pt]
+  \log \bar{\varepsilon}_m &= m^{-\kappa}\log \varepsilon_m
+              + (1 - m^{-\kappa})\log \bar{\varepsilon}_{m-1}.
+              \label{eq:da_epsbar}
+\end{align}
+Here $\mu = \log(10\varepsilon_0)$ is a free target (set to $10\times$ the initial step size),
+$\gamma = 0.05$ is a shrinkage factor, $t_0 = 10$ stabilises early iterations, and $\kappa = 0.75$
+controls the long-run averaging weight.  The \emph{running average} $\bar{\varepsilon}_m$ is
+used as the final step size after adaptation ends; this is more stable than the instantaneous
+$\varepsilon_m$.  In our code the adaptation runs for the first $80\%$ of burn-in steps.
+
+\paragraph{Intuition.}
+When $\alpha_m < \delta$ the chain is rejecting too often, so $\bar{H}_m$ increases and
+Eq.~\eqref{eq:da_eps} decreases $\varepsilon$.  When $\alpha_m > \delta$ the opposite happens.
+The exponential averaging in Eq.~\eqref{eq:da_epsbar} smooths out this feedback.
+
+\subsection{Effective Sample Size}
+
+Because consecutive MCMC samples are correlated, $N$ correlated samples carry less information
+than $N$ independent ones.  The \emph{effective sample size} (ESS) quantifies how many
+independent samples the chain is equivalent to:
+\begin{equation}
+  \mathrm{ESS} = \frac{N}{1 + 2\displaystyle\sum_{k=1}^{\infty} \rho_k},
+\end{equation}
+where $\rho_k = \mathrm{Corr}(\theta_t, \theta_{t+k})$ is the lag-$k$ autocorrelation of the
+chain.  In practice the infinite sum is truncated where the autocorrelations become negligible.
+Our implementation calls \texttt{tfp.mcmc.effective\_sample\_size}, which estimates the sum via
+FFT-based autocorrelation.
+
+\paragraph{Demonstration: AR(1) chain.}
+Suppose $\theta_t = \phi\,\theta_{t-1} + \varepsilon_t$ with $|\phi| < 1$.  Then
+$\rho_k = \phi^k$, and the geometric series gives
+\begin{equation}
+  \mathrm{ESS} = N\,\frac{1 - \phi}{1 + \phi}.
+\end{equation}
+\begin{center}
+\begin{tabular}{ccc}
+\toprule
+Autocorrelation $\phi$ & $N = 200$ samples & ESS \\
+\midrule
+$0.0$ & 200 & $200$ \quad (independent) \\
+$0.5$ & 200 & $67$ \\
+$0.9$ & 200 & $\approx 11$ \quad (poor mixing) \\
+$0.99$ & 200 & $\approx 1$ \quad (stuck) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{Reliability.}
+With only $N = 200$ post-burn-in samples the autocorrelation estimator is itself noisy.  The
+FFT-based estimator can underestimate the true autocorrelation, causing ESS to saturate at $N$
+even when mixing is imperfect.  ESS estimates require at least several hundred samples to be
+trustworthy.
+
+\subsection{$\hat{R}$: Potential Scale Reduction Factor}
+
+The $\hat{R}$ statistic (Gelman \& Rubin, 1992) compares \emph{within-chain} variance to
+\emph{between-chain} variance to detect non-convergence.  Since we run a single chain, we follow
+the common practice of splitting the $N$ post-burn-in samples into two halves of length
+$n = N/2$ each, treating them as independent chains ($m = 2$).
+
+Let $\bar\theta_j$ and $s_j^2$ be the mean and variance of chain $j$.  Define
+\begin{align}
+  W &= \frac{1}{m}\sum_{j=1}^{m} s_j^2
+  && \text{(within-chain variance)}, \\[4pt]
+  B &= \frac{n}{m-1}\sum_{j=1}^{m}(\bar\theta_j - \bar{\bar\theta})^2
+  && \text{(between-chain variance)}, \\[4pt]
+  \hat{V} &= \frac{n-1}{n}\,W + \frac{1}{n}\,B
+  && \text{(pooled variance estimate)}.
+\end{align}
+Then
+\begin{equation}
+  \hat{R} = \sqrt{\frac{\hat{V}}{W}}.
+\end{equation}
+
+\paragraph{Interpretation.}
+If the chain has converged, both halves should look like draws from the same stationary
+distribution, so $B \approx 0$ and $\hat{V} \approx W$, giving $\hat{R} \approx 1$.
+A value $\hat{R} > 1.1$ is the standard threshold for flagging non-convergence.
+
+\paragraph{Why $\hat{R}$ can be less than 1.}
+Mathematically, $\hat{R} < 1$ requires $\hat{V} < W$, which happens when $B$ is very small
+(the two half-chains have nearly identical means) but $W$ is inflated by within-chain
+fluctuations.  With only $n = 100$ samples per half-chain, both $W$ and $B$ are estimated
+with high uncertainty, and values like $\hat{R} = 0.83$ are consistent with a correctly
+converging chain that simply has too few samples for reliable estimation.  At least
+$n \geq 200$ per chain ($N \geq 400$ total) is recommended before trusting $\hat{R}$.
 
 \bibliographystyle{unsrt}
 \bibliography{main}

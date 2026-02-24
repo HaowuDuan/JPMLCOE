@@ -8,7 +8,7 @@ model:
   _target_: src.models.cubic_sensor.CubicSensorModel
   a: 0.9
   c: 0.05
-  sigma_V: 5.0
+  sigma_V: 2.0
   sigma_W: 2.0
   initial_var: 5.0
 
@@ -44,7 +44,7 @@ dpf:
 
   hmc:
     num_samples: 200
-    num_burnin: 100
+    num_burnin: 200
     step_size: 0.001
     num_leapfrog_steps: 5
     max_tree_depth: 10

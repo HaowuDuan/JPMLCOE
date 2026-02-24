@@ -1,0 +1,51 @@
+{
+  "rmse": 0.613135657817868,
+  "log_likelihood": -413.01712423973436,
+  "metadata": {
+    "filter_type": "ParticleFilterTF",
+    "n_particles": 1000,
+    "resampling_rate": 0.64,
+    "resampling_method": "soft",
+    "resampling_config": {
+      "alpha": 0.9
+    },
+    "performance": {
+      "wall_time_seconds": 1.6044031659839675,
+      "time_per_timestep_ms": 8.022015829919837,
+      "peak_memory_mb": 4.387585639953613,
+      "memory_increase_mb": 39.265625,
+      "start_memory_mb": 410.3125,
+      "end_memory_mb": 449.578125,
+      "num_timesteps": 200
+    }
+  },
+  "config": {
+    "model": {
+      "_target_": "src.models.cubic_sensor.CubicSensorModel",
+      "a": 0.9,
+      "c": 0.05,
+      "sigma_V": 1.0,
+      "sigma_W": 1.0,
+      "initial_var": 5.0
+    },
+    "filter": {
+      "_target_": "src.filters.particle.bootstrap_pf_tf.ParticleFilterTF",
+      "_recursive_": false,
+      "n_particles": 1000,
+      "resample_threshold": 0.5,
+      "resampling_method": "soft",
+      "resampling_config": {
+        "alpha": 0.9
+      }
+    },
+    "seed": 42,
+    "dtype": "float64",
+    "T": 200,
+    "output_dir": "outputs/cubic_sensor/cubic_sensor_pf_soft",
+    "plot": true,
+    "device": "auto",
+    "tf_log_level": 2,
+    "verbose": true,
+    "show_progress": true
+  }
+}
