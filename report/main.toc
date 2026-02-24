@@ -32,7 +32,10 @@
 \contentsline {subsection}{\numberline {3.3}SGD-based parameter estimation}{28}{subsection.3.3}%
 \contentsline {subsection}{\numberline {3.4}The differentiability-bias trade-off}{29}{subsection.3.4}%
 \contentsline {subsection}{\numberline {3.5}Workflow and current status of DPF pipeline}{30}{subsection.3.5}%
-\contentsline {subsection}{\numberline {3.6}Additional notes and practical considerations}{31}{subsection.3.6}%
+\contentsline {subsection}{\numberline {3.6}Benchmarking}{31}{subsection.3.6}%
+\contentsline {subsubsection}{\numberline {3.6.1}Benchmarking HMC}{31}{subsubsection.3.6.1}%
+\contentsline {subsubsection}{\numberline {3.6.2}Benchmarking OT}{32}{subsubsection.3.6.2}%
+\contentsline {subsection}{\numberline {3.7}Additional notes and practical considerations}{32}{subsection.3.7}%
 \contentsline {section}{\numberline {A}Kalman Family}{33}{appendix.A}%
 \contentsline {section}{\numberline {B}Particle flow and particle filter}{37}{appendix.B}%
 \contentsline {subsection}{\numberline {B.1}Particle flow}{37}{subsection.B.1}%
@@ -41,3 +44,15 @@
 \contentsline {subsubsection}{\numberline {B.2.2}Deriving Optimal Velocity via Kernel Restriction}{39}{subsubsection.B.2.2}%
 \contentsline {subsubsection}{\numberline {B.2.3}Scalar Kernel}{40}{subsubsection.B.2.3}%
 \contentsline {subsubsection}{\numberline {B.2.4}Matrix-Valued Kernel}{41}{subsubsection.B.2.4}%
+\contentsline {section}{\numberline {A}MCMC Diagnostics}{42}{appendix.A}%
+\contentsline {subsection}{\numberline {A.1}Acceptance Rate}{42}{subsection.A.1}%
+\contentsline {paragraph}{Example.}{42}{section*.2}%
+\contentsline {paragraph}{Target acceptance rate.}{42}{section*.3}%
+\contentsline {subsection}{\numberline {A.2}Step Size and Dual-Averaging Adaptation}{42}{subsection.A.2}%
+\contentsline {paragraph}{Intuition.}{42}{section*.4}%
+\contentsline {subsection}{\numberline {A.3}Effective Sample Size}{42}{subsection.A.3}%
+\contentsline {paragraph}{Demonstration: AR(1) chain.}{43}{section*.5}%
+\contentsline {paragraph}{Reliability.}{43}{section*.6}%
+\contentsline {subsection}{\numberline {A.4}$\hat {R}$: Potential Scale Reduction Factor}{43}{subsection.A.4}%
+\contentsline {paragraph}{Interpretation.}{43}{section*.7}%
+\contentsline {paragraph}{Why $\hat {R}$ can be less than 1.}{43}{section*.8}%

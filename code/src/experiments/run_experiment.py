@@ -85,8 +85,8 @@ def _create_filter(cfg: DictConfig, model, initial_state: np.ndarray,
             and 'Extended' not in cfg.filter._target_
             and 'Unscented' not in cfg.filter._target_):
         filter_obj = hydra.utils.instantiate(cfg.filter)
-        initial_mean = filter_obj.mean_0.copy()
-        initial_cov = filter_obj.Sigma_0.copy()
+        initial_mean = filter_obj.mean_0
+        initial_cov = filter_obj.Sigma_0
         return filter_obj, initial_mean, initial_cov
 
     # --- Everything else (particle filters, flow filters) ---

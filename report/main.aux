@@ -123,8 +123,11 @@
 \@writefile{lof}{\contentsline {figure}{\numberline {12}{\ignorespaces HMC step size evolution on the cubic sensor model for three resampling methods. Systematic and soft resampling exhibit step size collapse due to the \texttt  {tf.cond} threshold discontinuity, while OT Sinkhorn maintains a stable step size.}}{30}{figure.12}\protected@file@percent }
 \newlabel{fig:stepsize_resampling}{{12}{30}{HMC step size evolution on the cubic sensor model for three resampling methods. Systematic and soft resampling exhibit step size collapse due to the \texttt {tf.cond} threshold discontinuity, while OT Sinkhorn maintains a stable step size}{figure.12}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.5}Workflow and current status of DPF pipeline}{30}{subsection.3.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.6}Benchmarking}{31}{subsection.3.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.6.1}Benchmarking HMC}{31}{subsubsection.3.6.1}\protected@file@percent }
 \citation{Neal-2012-MCMC-Hamiltonian-Dynamics-ARXIV-1206-1901v1}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.6}Additional notes and practical considerations}{31}{subsection.3.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.6.2}Benchmarking OT}{32}{subsubsection.3.6.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.7}Additional notes and practical considerations}{32}{subsection.3.7}\protected@file@percent }
 \@writefile{toc}{\contentsline {section}{\numberline {A}Kalman Family}{33}{appendix.A}\protected@file@percent }
 \newlabel{APP:Kalman}{{A}{33}{Kalman Family}{appendix.A}{}}
 \newlabel{eq:general-kalman-gain}{{70}{35}{Kalman Family}{equation.70}{}}
@@ -138,6 +141,19 @@
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {B.2.2}Deriving Optimal Velocity via Kernel Restriction}{39}{subsubsection.B.2.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {B.2.3}Scalar Kernel}{40}{subsubsection.B.2.3}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {B.2.4}Matrix-Valued Kernel}{41}{subsubsection.B.2.4}\protected@file@percent }
+\citation{beskos2013optimal}
+\citation{hoffman2014nuts}
+\@writefile{toc}{\contentsline {section}{\numberline {A}MCMC Diagnostics}{42}{appendix.A}\protected@file@percent }
+\newlabel{APP:MCMC_Diagnostics}{{A}{42}{MCMC Diagnostics}{appendix.A}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {A.1}Acceptance Rate}{42}{subsection.A.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Example.}{42}{section*.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Target acceptance rate.}{42}{section*.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {A.2}Step Size and Dual-Averaging Adaptation}{42}{subsection.A.2}\protected@file@percent }
+\newlabel{eq:da_hbar}{{140}{42}{Step Size and Dual-Averaging Adaptation}{equation.140}{}}
+\newlabel{eq:da_eps}{{141}{42}{Step Size and Dual-Averaging Adaptation}{equation.141}{}}
+\newlabel{eq:da_epsbar}{{142}{42}{Step Size and Dual-Averaging Adaptation}{equation.142}{}}
+\@writefile{toc}{\contentsline {paragraph}{Intuition.}{42}{section*.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {A.3}Effective Sample Size}{42}{subsection.A.3}\protected@file@percent }
 \bibstyle{unsrt}
 \bibdata{main}
 \bibcite{feng2025semiparametric}{1}
@@ -146,6 +162,11 @@
 \bibcite{Särkkä2013BayesianFilteringAndSmoothing}{4}
 \bibcite{jiang2025new}{5}
 \bibcite{arasaratnam2009cubature}{6}
+\@writefile{toc}{\contentsline {paragraph}{Demonstration: AR(1) chain.}{43}{section*.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Reliability.}{43}{section*.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {A.4}$\hat  {R}$: Potential Scale Reduction Factor}{43}{subsection.A.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Interpretation.}{43}{section*.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Why $\hat  {R}$ can be less than 1.}{43}{section*.8}\protected@file@percent }
 \bibcite{evensen-2003-ensemble-kalman-filter}{7}
 \bibcite{alghattas2024ensemble}{8}
 \bibcite{DBLP:journals/corr/abs-2107-10043}{9}
@@ -172,4 +193,4 @@
 \bibcite{Duane1987}{30}
 \bibcite{Lindsten2014}{31}
 \bibcite{karkus2018particle}{32}
-\gdef \@abspage@last{43}
+\gdef \@abspage@last{45}

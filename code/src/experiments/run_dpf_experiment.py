@@ -331,6 +331,16 @@ def save_dpf_results(results: Dict[str, Any], output_dir: Path):
     with open(output_dir / 'summary.json', 'w') as f:
         json.dump(summary, f, indent=2, default=str)
 
+    # Save per-step trace as CSV
+    trace = result.metadata.get('trace', [])
+    if trace:
+        import csv
+        trace_path = output_dir / 'trace.csv'
+        with open(trace_path, 'w', newline='') as f:
+            writer = csv.DictWriter(f, fieldnames=trace[0].keys())
+            writer.writeheader()
+            writer.writerows(trace)
+
     print(f"\nResults saved to {output_dir}")
 
 

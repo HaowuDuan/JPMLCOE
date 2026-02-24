@@ -6,7 +6,8 @@ import time
 from typing import Tuple, Union, List, Optional, Callable
 from ...core.filter_base import Filter
 from ...core.types import FilterResult
-from ...utils.linalg import symmetrize, safe_inv
+from ...core.model_base import StateSpaceModel
+from ...utils.linalg import symmetrize, safe_inv, safe_cholesky, safe_solve
 
 
 class KalmanFilter(Filter):
@@ -30,10 +31,11 @@ class KalmanFilter(Filter):
 
     def __init__(
         self,
-        F: Union[np.ndarray, List],
-        B: Union[np.ndarray, List],
-        H: Union[np.ndarray, List],
-        D: Union[np.ndarray, List],
+        model: Optional[StateSpaceModel] = None,
+        F: Optional[Union[np.ndarray, List]] = None,
+        B: Optional[Union[np.ndarray, List]] = None,
+        H: Optional[Union[np.ndarray, List]] = None,
+        D: Optional[Union[np.ndarray, List]] = None,
         mean_0: Optional[Union[np.ndarray, List]] = None,
         Sigma_0: Optional[Union[np.ndarray, List]] = None,
         use_joseph_form: bool = True,
@@ -43,6 +45,9 @@ class KalmanFilter(Filter):
         Initialize the Kalman Filter.
 
         Args:
+            model: Optional state-space model. When provided, log_marginal_likelihood_tf
+                   reads Q and R dynamically from the model (required for HMC/DPF gradient
+                   flow). The regular filter() path still uses self.Q and self.R.
             F: State transition matrix (nx, nx)
             B: Process noise matrix (nx, nv)
             H: Observation matrix (ny, nx)
@@ -51,6 +56,9 @@ class KalmanFilter(Filter):
             Sigma_0: Initial covariance matrix (nx, nx). If None, defaults to identity.
             use_joseph_form: If True, use Joseph stabilized covariance update
         """
+        self.model = model
+        if model is not None:
+            dtype = getattr(model, 'dtype', dtype)
         self.dtype = dtype
         self.np_dtype = np.float64 if dtype == tf.float64 else np.float32
 
@@ -118,6 +126,67 @@ class KalmanFilter(Filter):
         # Clear history
         for key in self.history:
             self.history[key] = []
+
+    def log_marginal_likelihood_tf(
+        self,
+        observations: tf.Tensor,
+        seed: tf.Tensor = None
+    ) -> tf.Tensor:
+        """
+        Total log marginal likelihood as a differentiable TF scalar.
+
+        Stateless predict/update loop — no side effects on self.mean/self.cov.
+        When self.model is set, reads Q and R dynamically from the model so that
+        the gradient chain is preserved when used with HMC/DPF (DifferentiableModel
+        sets noise params as tensors via setattr before each call).
+        Falls back to frozen self.Q / self.R when model is None.
+
+        NOT decorated with @tf.function — runs eagerly or is traced by TFP for HMC.
+
+        Args:
+            observations: (T, obs_dim), dtype matching filter
+            seed: Unused (KF is deterministic). Present for protocol compat.
+
+        Returns:
+            Scalar tf.Tensor: log p(y_{1:T})
+        """
+        T = observations.shape[0]
+
+        mean = tf.identity(self.mean_0)
+        cov = tf.identity(self.Sigma_0)
+        total_log_lik = tf.constant(0.0, dtype=self.dtype)
+
+        for t in range(T):
+            # === PREDICT ===
+            mean_pred = tf.linalg.matvec(self.F, mean)
+            Q = self.model.state_transition_cov(mean) if self.model is not None else self.Q
+            cov_pred = self.F @ cov @ tf.transpose(self.F) + Q
+            cov_pred = symmetrize(cov_pred)
+
+            # === UPDATE ===
+            R = self.model.observation_cov(mean_pred) if self.model is not None else self.R
+            innovation = observations[t] - tf.linalg.matvec(self.H, mean_pred)
+            S = self.H @ cov_pred @ tf.transpose(self.H) + R
+
+            # Kalman gain via Cholesky
+            L_S = safe_cholesky(S)
+            K_T = tf.linalg.cholesky_solve(L_S, self.H @ cov_pred)
+            K = tf.transpose(K_T)
+
+            # Update mean and covariance (Joseph form)
+            mean = mean_pred + tf.linalg.matvec(K, innovation)
+            I = tf.eye(self.nx, dtype=self.dtype)
+            I_KH = I - K @ self.H
+            cov = I_KH @ cov_pred @ tf.transpose(I_KH) + K @ R @ tf.transpose(K)
+            cov = symmetrize(cov)
+
+            # Log-likelihood contribution: log p(y_t | y_{1:t-1})
+            _, logdet = tf.linalg.slogdet(2.0 * np.pi * S)
+            S_inv_inn = safe_solve(S, innovation, method='cholesky')
+            mahalanobis = tf.reduce_sum(innovation * S_inv_inn)
+            total_log_lik = total_log_lik + (-0.5 * (logdet + mahalanobis))
+
+        return total_log_lik
 
     @tf.function
     def _predict_step(self, mean: tf.Tensor, cov: tf.Tensor) -> Tuple[tf.Tensor, tf.Tensor]:

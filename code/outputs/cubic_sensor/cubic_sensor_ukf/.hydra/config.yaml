@@ -1,0 +1,21 @@
+model:
+  _target_: src.models.cubic_sensor.CubicSensorModel
+  a: 0.9
+  c: 0.05
+  sigma_V: 1.0
+  sigma_W: 1.0
+  initial_var: 5.0
+filter:
+  _target_: src.filters.kalman.unscented_kalman.UnscentedKalmanFilter
+  alpha: 0.001
+  beta: 2.0
+  kappa: 0.0
+seed: 42
+dtype: float64
+T: 200
+output_dir: outputs/cubic_sensor/cubic_sensor_ukf
+plot: true
+device: auto
+tf_log_level: 2
+verbose: true
+show_progress: true

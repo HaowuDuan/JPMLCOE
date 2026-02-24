@@ -7,7 +7,7 @@ model:
   _target_: src.models.cubic_sensor.CubicSensorModel
   a: 0.9
   c: 0.05
-  sigma_V: 5.0
+  sigma_V: 2.0
   sigma_W: 2.0
   initial_var: 5.0
 

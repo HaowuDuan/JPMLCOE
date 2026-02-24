@@ -382,6 +382,7 @@ class PGibbsRunner:
         theta_accepted_list = []
         step_size_list = []
         step_times = []
+        trace_log = []
 
         for iteration in range(total_iters):
             t_start = time.perf_counter()
@@ -459,6 +460,18 @@ class PGibbsRunner:
                   f"{step_info} | {param_str} | ETA {eta:.0f}s",
                   flush=True)
 
+            row = {
+                'step': iteration,
+                'phase': phase,
+                'step_in_phase': idx,
+                'dt': dt,
+                'accept_rate': float(recent_accept),
+                'step_size': cur_eps if theta_sampler == 'hmc' else mh_proposal_std,
+            }
+            for n, v in constrained.items():
+                row[n] = float(v.numpy())
+            trace_log.append(row)
+
             # Collect post-burnin samples
             if iteration >= num_burnin:
                 samples_list.append(q.numpy().copy())
@@ -467,12 +480,12 @@ class PGibbsRunner:
         return self._finalize(
             samples_list, theta_accepted_list, step_size_list,
             step_times, num_burnin, num_samples, observations,
-            theta_sampler
+            theta_sampler, trace_log=trace_log
         )
 
     def _finalize(self, samples_list, accepted_list, step_size_list,
                   step_times, num_burnin, num_samples, observations,
-                  theta_sampler='hmc'):
+                  theta_sampler='hmc', trace_log=None):
         """Post-process samples and compute diagnostics."""
         import tensorflow_probability as tfp
         import logging
@@ -567,5 +580,6 @@ class PGibbsRunner:
                 'num_burnin': num_burnin,
                 'num_observations': len(observations),
                 'timing': timing,
+                'trace': trace_log or [],
             }
         )

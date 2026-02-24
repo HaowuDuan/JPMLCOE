@@ -247,9 +247,11 @@ class UnscentedKalmanFilter(Filter):
         # Innovation
         innovation = observation - y_pred
 
-        # Update mean and covariance
+        # Update mean and covariance (Joseph-form equivalent for UKF)
+        # P = P_pred - K @ P_xy^T - P_xy @ K^T + K @ S @ K^T
+        # Mathematically identical to P - KSK^T but numerically more stable.
         mean_updated = mean + tf.linalg.matvec(K, innovation)
-        cov_updated = cov - K @ S @ tf.transpose(K)
+        cov_updated = cov - K @ tf.transpose(P_xy) - P_xy @ tf.transpose(K) + K @ S @ tf.transpose(K)
         cov_updated = symmetrize(cov_updated)
 
         # Log-likelihood
@@ -259,6 +261,91 @@ class UnscentedKalmanFilter(Filter):
         log_lik = -0.5 * (logdet + mahalanobis)
 
         return mean_updated, cov_updated, log_lik
+
+    def log_marginal_likelihood_tf(
+        self,
+        observations: tf.Tensor,
+        seed: tf.Tensor = None
+    ) -> tf.Tensor:
+        """
+        Total log marginal likelihood as a differentiable TF scalar.
+
+        Reimplements the UKF predict/update loop using local tensor state
+        (no side effects on self.mean/self.cov). Reads Q and R from the model
+        dynamically at each step so parameter gradients are preserved.
+
+        NOT decorated with @tf.function — runs eagerly or is traced by TFP
+        internally for HMC gradient computation.
+
+        Args:
+            observations: (T, obs_dim), dtype matching filter
+            seed: Unused (UKF is deterministic). Present for protocol compat.
+
+        Returns:
+            Scalar tf.Tensor: log p(y_{1:T})
+        """
+        T = observations.shape[0]
+
+        mean = tf.identity(self.mean_0)
+        cov = tf.identity(self.Sigma_0)
+        total_log_lik = tf.constant(0.0, dtype=self.dtype)
+
+        for t in range(T):
+            # === PREDICT ===
+            sigma_pts = self._compute_sigma_points(mean, cov)
+            sigma_pred = tf.map_fn(
+                lambda sp: self.model.state_transition_mean(sp),
+                sigma_pts, dtype=self.dtype
+            )
+            mean_pred = tf.reduce_sum(
+                tf.expand_dims(self.weights_mean, -1) * sigma_pred, axis=0
+            )
+            diff = sigma_pred - mean_pred
+            Q = self.model.state_transition_cov(mean_pred)
+            cov_pred = symmetrize(
+                tf.reduce_sum(
+                    tf.expand_dims(tf.expand_dims(self.weights_cov, -1), -1) *
+                    tf.einsum('ij,ik->ijk', diff, diff), axis=0
+                ) + Q
+            )
+
+            # === UPDATE ===
+            sigma_pts2 = self._compute_sigma_points(mean_pred, cov_pred)
+            y_sigma = tf.map_fn(
+                lambda sp: self.model.observation_mean(sp),
+                sigma_pts2, dtype=self.dtype
+            )
+            y_pred = tf.reduce_sum(
+                tf.expand_dims(self.weights_mean, -1) * y_sigma, axis=0
+            )
+            diff_y = y_sigma - y_pred
+            R = self.model.observation_cov(mean_pred)
+            S = symmetrize(
+                tf.reduce_sum(
+                    tf.expand_dims(tf.expand_dims(self.weights_cov, -1), -1) *
+                    tf.einsum('ij,ik->ijk', diff_y, diff_y), axis=0
+                ) + R
+            )
+            diff_x = sigma_pts2 - mean_pred
+            P_xy = tf.reduce_sum(
+                tf.expand_dims(tf.expand_dims(self.weights_cov, -1), -1) *
+                tf.einsum('ij,ik->ijk', diff_x, diff_y), axis=0
+            )
+            K = P_xy @ safe_inv(S)
+            innovation = observations[t] - y_pred
+            mean = mean_pred + tf.linalg.matvec(K, innovation)
+            # Joseph-form equivalent: P_pred - K@P_xy^T - P_xy@K^T + K@S@K^T
+            cov = symmetrize(cov_pred - K @ tf.transpose(P_xy) - P_xy @ tf.transpose(K) + K @ S @ tf.transpose(K))
+
+            # Log-likelihood: log p(y_t | y_{1:t-1})
+            _, logdet = tf.linalg.slogdet(2.0 * np.pi * S)
+            inn_col = tf.reshape(innovation, [-1, 1])
+            mahalanobis = tf.reduce_sum(
+                innovation * tf.squeeze(tf.linalg.solve(S, inn_col), axis=-1)
+            )
+            total_log_lik = total_log_lik + (-0.5 * (logdet + mahalanobis))
+
+        return total_log_lik
 
     def predict(self):
         """Prediction step using unscented transform."""

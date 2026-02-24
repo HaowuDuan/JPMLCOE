@@ -1,0 +1,11 @@
+# Cubic Sensor Model Configuration
+# State:       x_t = a * x_{t-1} + v_t,       v_t ~ N(0, sigma_V^2)
+# Observation: y_t = x_t + c * x_t^3 + w_t,  w_t ~ N(0, sigma_W^2)
+
+_target_: src.models.cubic_sensor.CubicSensorModel
+
+a: 0.9          # AR coefficient (must satisfy |a| < 1)
+c: 0.05         # Cubic coefficient (c=0 reduces to linear-Gaussian)
+sigma_V: 1.0    # Process noise std
+sigma_W: 1.0    # Observation noise std
+initial_var: 5.0  # Initial state variance: x_0 ~ N(0, initial_var)
