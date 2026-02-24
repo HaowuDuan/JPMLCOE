@@ -32,7 +32,7 @@ dpf:
         loc: 0.0
         scale: 1.0
   hmc:
-    num_samples: 500
+    num_samples: 200
     num_burnin: 200
     step_size: 0.001
     num_leapfrog_steps: 5
