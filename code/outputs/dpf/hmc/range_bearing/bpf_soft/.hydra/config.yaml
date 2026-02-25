@@ -31,8 +31,8 @@ dpf:
         loc: -2.3
         scale: 0.5
   hmc:
-    num_samples: 10
-    num_burnin: 15
+    num_samples: 200
+    num_burnin: 100
     step_size: 0.001
     num_leapfrog_steps: 5
     max_tree_depth: 10
