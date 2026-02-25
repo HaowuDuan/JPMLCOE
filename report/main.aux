@@ -125,35 +125,51 @@
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.5}Workflow and current status of DPF pipeline}{30}{subsection.3.5}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.6}Benchmarking}{31}{subsection.3.6}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {3.6.1}Benchmarking HMC}{31}{subsubsection.3.6.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {13}{\ignorespaces EKF-based HMC posteriors across three models: Linear Gaussian, Cubic Sensor, and Range Bearing. Black lines indicate true parameter values.}}{32}{figure.13}\protected@file@percent }
+\newlabel{fig:hmc_ekf}{{13}{32}{EKF-based HMC posteriors across three models: Linear Gaussian, Cubic Sensor, and Range Bearing. Black lines indicate true parameter values}{figure.13}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {14}{\ignorespaces UKF-based HMC posteriors across three models: Linear Gaussian, Cubic Sensor, and Range Bearing. Black lines indicate true parameter values.}}{32}{figure.14}\protected@file@percent }
+\newlabel{fig:hmc_ukf}{{14}{32}{UKF-based HMC posteriors across three models: Linear Gaussian, Cubic Sensor, and Range Bearing. Black lines indicate true parameter values}{figure.14}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.6.2}Benchmarking particle filter and different resampling methods}{32}{subsubsection.3.6.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {15}{\ignorespaces BPF with systematic resampling: HMC posteriors across Linear Gaussian, Cubic Sensor, and Stochastic Volatility. }}{33}{figure.15}\protected@file@percent }
+\newlabel{fig:hmc_bpf_sys}{{15}{33}{BPF with systematic resampling: HMC posteriors across Linear Gaussian, Cubic Sensor, and Stochastic Volatility}{figure.15}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {16}{\ignorespaces BPF with soft resampling: HMC posteriors across Linear Gaussian, Cubic Sensor, and Stochastic Volatility. }}{33}{figure.16}\protected@file@percent }
+\newlabel{fig:hmc_bpf_soft}{{16}{33}{BPF with soft resampling: HMC posteriors across Linear Gaussian, Cubic Sensor, and Stochastic Volatility}{figure.16}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {17}{\ignorespaces BPF with OT resampling: HMC posteriors across Linear Gaussian, Cubic Sensor, and Stochastic Volatility. }}{34}{figure.17}\protected@file@percent }
+\newlabel{fig:hmc_bpf_ot}{{17}{34}{BPF with OT resampling: HMC posteriors across Linear Gaussian, Cubic Sensor, and Stochastic Volatility}{figure.17}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {18}{\ignorespaces Linear Gaussian: HMC posteriors across all methods (UKF, EKF, BPF with systematic, OT, and soft resampling). }}{34}{figure.18}\protected@file@percent }
+\newlabel{fig:hmc_linear_gaussian}{{18}{34}{Linear Gaussian: HMC posteriors across all methods (UKF, EKF, BPF with systematic, OT, and soft resampling)}{figure.18}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {19}{\ignorespaces Cubic Sensor: HMC posteriors across all methods.}}{35}{figure.19}\protected@file@percent }
+\newlabel{fig:hmc_cubic_sensor}{{19}{35}{Cubic Sensor: HMC posteriors across all methods}{figure.19}{}}
 \citation{Neal-2012-MCMC-Hamiltonian-Dynamics-ARXIV-1206-1901v1}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.6.2}Benchmarking OT}{32}{subsubsection.3.6.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.7}Additional notes and practical considerations}{32}{subsection.3.7}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {A}Kalman Family}{33}{appendix.A}\protected@file@percent }
-\newlabel{APP:Kalman}{{A}{33}{Kalman Family}{appendix.A}{}}
-\newlabel{eq:general-kalman-gain}{{70}{35}{Kalman Family}{equation.70}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {20}{\ignorespaces Stochastic Volatility: HMC posteriors across BPF methods (systematic, soft, OT resampling).}}{36}{figure.20}\protected@file@percent }
+\newlabel{fig:hmc_stochastic_volatility}{{20}{36}{Stochastic Volatility: HMC posteriors across BPF methods (systematic, soft, OT resampling)}{figure.20}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.7}Additional notes and practical considerations}{36}{subsection.3.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {A}Kalman Family}{38}{appendix.A}\protected@file@percent }
+\newlabel{APP:Kalman}{{A}{38}{Kalman Family}{appendix.A}{}}
+\newlabel{eq:general-kalman-gain}{{70}{40}{Kalman Family}{equation.70}{}}
 \citation{daum2010exact}
 \citation{daum2011particle}
-\@writefile{toc}{\contentsline {section}{\numberline {B}Particle flow and particle filter}{37}{appendix.B}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {B.1}Particle flow}{37}{subsection.B.1}\protected@file@percent }
-\newlabel{APP:Particle_flow}{{B.1}{37}{Particle flow}{subsection.B.1}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {B.2}Particle flow filter (kernel method)}{39}{subsection.B.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {B.2.1}Optimal Transport via Gradient Flow}{39}{subsubsection.B.2.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {B.2.2}Deriving Optimal Velocity via Kernel Restriction}{39}{subsubsection.B.2.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {B.2.3}Scalar Kernel}{40}{subsubsection.B.2.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {B.2.4}Matrix-Valued Kernel}{41}{subsubsection.B.2.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {B}Particle flow and particle filter}{42}{appendix.B}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {B.1}Particle flow}{42}{subsection.B.1}\protected@file@percent }
+\newlabel{APP:Particle_flow}{{B.1}{42}{Particle flow}{subsection.B.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {B.2}Particle flow filter (kernel method)}{44}{subsection.B.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {B.2.1}Optimal Transport via Gradient Flow}{44}{subsubsection.B.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {B.2.2}Deriving Optimal Velocity via Kernel Restriction}{44}{subsubsection.B.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {B.2.3}Scalar Kernel}{45}{subsubsection.B.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {B.2.4}Matrix-Valued Kernel}{46}{subsubsection.B.2.4}\protected@file@percent }
 \citation{beskos2013optimal}
 \citation{hoffman2014nuts}
-\@writefile{toc}{\contentsline {section}{\numberline {A}MCMC Diagnostics}{42}{appendix.A}\protected@file@percent }
-\newlabel{APP:MCMC_Diagnostics}{{A}{42}{MCMC Diagnostics}{appendix.A}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {A.1}Acceptance Rate}{42}{subsection.A.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Example.}{42}{section*.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Target acceptance rate.}{42}{section*.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {A.2}Step Size and Dual-Averaging Adaptation}{42}{subsection.A.2}\protected@file@percent }
-\newlabel{eq:da_hbar}{{140}{42}{Step Size and Dual-Averaging Adaptation}{equation.140}{}}
-\newlabel{eq:da_eps}{{141}{42}{Step Size and Dual-Averaging Adaptation}{equation.141}{}}
-\newlabel{eq:da_epsbar}{{142}{42}{Step Size and Dual-Averaging Adaptation}{equation.142}{}}
-\@writefile{toc}{\contentsline {paragraph}{Intuition.}{42}{section*.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {A.3}Effective Sample Size}{42}{subsection.A.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {A}MCMC Diagnostics}{47}{appendix.A}\protected@file@percent }
+\newlabel{APP:MCMC_Diagnostics}{{A}{47}{MCMC Diagnostics}{appendix.A}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {A.1}Acceptance Rate}{47}{subsection.A.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Example.}{47}{section*.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Target acceptance rate.}{47}{section*.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {A.2}Step Size and Dual-Averaging Adaptation}{47}{subsection.A.2}\protected@file@percent }
+\newlabel{eq:da_hbar}{{140}{47}{Step Size and Dual-Averaging Adaptation}{equation.140}{}}
+\newlabel{eq:da_eps}{{141}{47}{Step Size and Dual-Averaging Adaptation}{equation.141}{}}
+\newlabel{eq:da_epsbar}{{142}{47}{Step Size and Dual-Averaging Adaptation}{equation.142}{}}
+\@writefile{toc}{\contentsline {paragraph}{Intuition.}{47}{section*.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {A.3}Effective Sample Size}{47}{subsection.A.3}\protected@file@percent }
 \bibstyle{unsrt}
 \bibdata{main}
 \bibcite{feng2025semiparametric}{1}
@@ -162,11 +178,11 @@
 \bibcite{Särkkä2013BayesianFilteringAndSmoothing}{4}
 \bibcite{jiang2025new}{5}
 \bibcite{arasaratnam2009cubature}{6}
-\@writefile{toc}{\contentsline {paragraph}{Demonstration: AR(1) chain.}{43}{section*.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Reliability.}{43}{section*.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {A.4}$\hat  {R}$: Potential Scale Reduction Factor}{43}{subsection.A.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Interpretation.}{43}{section*.7}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Why $\hat  {R}$ can be less than 1.}{43}{section*.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Demonstration: AR(1) chain.}{48}{section*.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Reliability.}{48}{section*.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {A.4}$\hat  {R}$: Potential Scale Reduction Factor}{48}{subsection.A.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Interpretation.}{48}{section*.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Why $\hat  {R}$ can be less than 1.}{48}{section*.8}\protected@file@percent }
 \bibcite{evensen-2003-ensemble-kalman-filter}{7}
 \bibcite{alghattas2024ensemble}{8}
 \bibcite{DBLP:journals/corr/abs-2107-10043}{9}
@@ -193,4 +209,6 @@
 \bibcite{Duane1987}{30}
 \bibcite{Lindsten2014}{31}
 \bibcite{karkus2018particle}{32}
-\gdef \@abspage@last{45}
+\bibcite{beskos2013optimal}{33}
+\bibcite{hoffman2014nuts}{34}
+\gdef \@abspage@last{50}

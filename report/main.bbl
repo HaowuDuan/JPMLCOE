@@ -176,4 +176,16 @@ Peter Karkus, David Hsu, and Wee~Sun Lee.
 \newblock In {\em Conference on Robot Learning (CoRL)}, pages 169--178. PMLR,
   2018.
 
+\bibitem{beskos2013optimal}
+Alexandros Beskos, Natesh Pillai, Gareth~O. Roberts, Jes{\'u}s-Mari{\'a}
+  Sanz-Serna, and Andrew~M. Stuart.
+\newblock Optimal tuning of the hybrid {Monte Carlo} algorithm.
+\newblock {\em Bernoulli}, 19(5A):1501--1534, 2013.
+
+\bibitem{hoffman2014nuts}
+Matthew~D. Hoffman and Andrew Gelman.
+\newblock The no-u-turn sampler: Adaptively setting path lengths in hamiltonian
+  {Monte Carlo}.
+\newblock {\em Journal of Machine Learning Research}, 15(1):1593--1623, 2014.
+
 \end{thebibliography}

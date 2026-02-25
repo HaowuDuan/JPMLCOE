@@ -1110,14 +1110,71 @@ During the early stages, the tests were not structured. Now that the picture is 
 \subsection{Benchmarking}
 
 \subsubsection{Benchmarking HMC}
-For this part, we use Kalman family to test the HMC convergence. If it works here, this is useful baseline for particle filter
+For this part, we use Kalman family to test the HMC convergence. If it works here, this is useful baseline for particle filter. We used 100 burn-in steps and 200 sample, with 0.9 target acceptance rate. The blue histogram is the sample distribution and the dark vertical line is the true value corresponding to the data.
 
-\subsubsection{Benchmarking OT}
-For this part, we use bootstrap particle filter to test OT resampling. 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.45\textwidth]{hmc_ekf.pdf}
+    \caption{EKF-based HMC posteriors across three models: Linear Gaussian, Cubic Sensor, and Range Bearing. Black lines indicate true parameter values.}
+    \label{fig:hmc_ekf}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.45\textwidth]{hmc_ukf.pdf}
+    \caption{UKF-based HMC posteriors across three models: Linear Gaussian, Cubic Sensor, and Range Bearing. Black lines indicate true parameter values.}
+    \label{fig:hmc_ukf}
+\end{figure}
+
+Observation: The pipeline worked well for 1-d Gaussian linear and 2-d range bearing model. As for cubic sensor, we need careful tuning to make it better. However the pipeline is still stable. 
+
+\subsubsection{Benchmarking particle filter and different resampling methods}
+A key observation is that, if the kalman family works for a model, then differentiable resampling + particle filter combo is not appropriate architecture for Bayesian inference.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{hmc_bpf_sys.pdf}
+    \caption{BPF with systematic resampling: HMC posteriors across Linear Gaussian, Cubic Sensor, and Stochastic Volatility. }
+    \label{fig:hmc_bpf_sys}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{hmc_bpf_soft.pdf}
+    \caption{BPF with soft resampling: HMC posteriors across Linear Gaussian, Cubic Sensor, and Stochastic Volatility. }
+    \label{fig:hmc_bpf_soft}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{hmc_bpf_ot.pdf}
+    \caption{BPF with OT resampling: HMC posteriors across Linear Gaussian, Cubic Sensor, and Stochastic Volatility. }
+    \label{fig:hmc_bpf_ot}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{hmc_linear_gaussian.pdf}
+    \caption{Linear Gaussian: HMC posteriors across all methods (UKF, EKF, BPF with systematic, OT, and soft resampling). }
+    \label{fig:hmc_linear_gaussian}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{hmc_cubic_sensor.pdf}
+    \caption{Cubic Sensor: HMC posteriors across all methods.}
+    \label{fig:hmc_cubic_sensor}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{hmc_stochastic_volatility.pdf}
+    \caption{Stochastic Volatility: HMC posteriors across BPF methods (systematic, soft, OT resampling).}
+    \label{fig:hmc_stochastic_volatility}
+\end{figure}
 
 
-
-
+Observation: Gradient explosion for any differentiable bootstrap particle filter variation on cubic sensor model. Only thing that stable is the systematic resampling however it will stabilize around the "wrong" minimum. In addition, since anything requiring computing jacobian fails for stochatic volatility model, bpf based method worked really well,  (really fast too). However, the posterior is very wide and provide very little constraint, and resampling methods made absolutely no difference. 
 
 
 \subsection{Additional notes and practical considerations}
