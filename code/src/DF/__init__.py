@@ -6,6 +6,7 @@ from .differentiable_model import DifferentiableModel
 from .hmc_runner import DPFRunner
 from .pmmh_runner import PMMHRunner
 from .pgibbs_runner import PGibbsRunner
+from .mh_runner import MHRunner
 
 __all__ = [
     'ParameterSpec',
@@ -15,6 +16,7 @@ __all__ = [
     'DPFRunner',
     'PMMHRunner',
     'PGibbsRunner',
+    'MHRunner',
 ]
 
 

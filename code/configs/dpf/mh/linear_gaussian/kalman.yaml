@@ -1,0 +1,46 @@
+# @package _global_
+# MH + Kalman filter (exact likelihood) for linear Gaussian model.
+# Gold standard cross-check: exact MH with exact likelihood.
+#
+# Run: python -m src.experiments.run_dpf_experiment dpf=mh/linear_gaussian/kalman
+
+model:
+  _target_: src.models.linear_gaussian.LinearGaussianModel
+  F: [[0.9]]
+  B: [[1.0]]
+  H: [[1.0]]
+  D: [[1.0]]
+  obs_noise_std: 2.0    # Initial guess (true: 1.0)
+
+filter:
+  _target_: src.filters.kalman.kalman.KalmanFilter
+  F: [[0.9]]
+  B: [[1.0]]
+  H: [[1.0]]
+  D: [[1.0]]
+  mean_0: [0.0]
+  Sigma_0: [[1.0]]
+  use_joseph_form: true
+
+dpf:
+  sampler: mh
+
+  trainable_params:
+    obs_noise_std:
+      constraint: positive
+      prior:
+        _target_: tensorflow_probability.distributions.LogNormal
+        loc: 0.0
+        scale: 1.0
+
+  mh:
+    num_samples: 2000
+    num_burnin: 1000
+    proposal_std: 0.1
+    seed: 42
+
+data:
+  T: 50
+  seed: 42
+  true_params:
+    obs_noise_std: 1.0
