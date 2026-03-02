@@ -1,0 +1,49 @@
+# @package _global_
+# DPF: 1D Linear-Gaussian model with Bootstrap PF + soft resampling (alpha=1.0) + gradient
+
+model:
+  _target_: src.models.linear_gaussian.LinearGaussianModel
+  F: [[0.9]]
+  B: [[1.0]]
+  H: [[1.0]]
+  D: [[1.0]]
+  obs_noise_std: 2.0
+
+filter:
+  _target_: src.filters.particle.bootstrap_pf_hmc.BootstrapPFHMC
+  n_particles: 1000
+  resampling_method: soft
+  resampling_config:
+    alpha: 1.0
+  stop_gradient_resampling: false
+  hmc_resampling_method: soft
+  hmc_resampling_config:
+    alpha: 1.0
+  eager_mode: false
+
+dpf:
+  sampler: hmc
+
+  trainable_params:
+    obs_noise_std:
+      constraint: positive
+      prior:
+        _target_: tensorflow_probability.distributions.LogNormal
+        loc: 0.0
+        scale: 1.0
+
+  hmc:
+    num_samples: 200
+    num_burnin: 200
+    step_size: 0.001
+    num_leapfrog_steps: 5
+    max_tree_depth: 10
+    adaptation_rate: 0.8
+    target_accept_prob: 0.9
+    seed: 42
+
+data:
+  T: 50
+  seed: 42
+  true_params:
+    obs_noise_std: 1.0

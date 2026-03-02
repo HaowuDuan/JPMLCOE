@@ -146,7 +146,27 @@ def run_dpf_experiment(cfg: DictConfig) -> Dict[str, Any]:
     sampler = cfg.dpf.get('sampler', 'hmc')
     print(f"\nRunning {sampler.upper()} inference...")
 
-    if sampler == 'pmmh':
+    if sampler == 'mh':
+        # MH: exact log-posterior, no gradients
+        from src.DF import MHRunner
+
+        runner = MHRunner(
+            base_model=inference_model,
+            filter_class=filter_class,
+            filter_kwargs=filter_kwargs,
+            param_specs=param_specs,
+        )
+
+        mh_cfg = cfg.dpf.mh
+        with _PerfTracker() as perf:
+            result = runner.run_inference(
+                observations=observations,
+                num_samples=int(mh_cfg.get('num_samples', 2000)),
+                num_burnin=int(mh_cfg.get('num_burnin', 1000)),
+                proposal_std=float(mh_cfg.get('proposal_std', 0.1)),
+                seed=int(mh_cfg.get('seed', 42)),
+            )
+    elif sampler == 'pmmh':
         # PMMH: no DifferentiableModel, no gradients
         from src.DF import PMMHRunner
 

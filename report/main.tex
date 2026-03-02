@@ -11,6 +11,8 @@
 \usepackage{graphicx}
 \usepackage{amssymb}
 \usepackage{float}
+\usepackage{comment}
+\excludecomment{figure}  % Comment out to re-enable figures
 \renewcommand{\v}[1]{ \ensuremath{ {\mathbf{#1}} }} 
 \geometry{a4paper, margin=1in}
 \DeclareMathOperator{\Cov}{Cov}   % Add this
@@ -50,19 +52,23 @@
 \section{Literature Review}
 
 \subsection{State-Space Modeling in Financial Markets: The big Picture}
-Financial systems are driven by latent factors that shape observable market data. Problems such as stochastic volatility, limit order book dynamics, or macroeconomic regime shifts are frequently cast as Hidden Markov Models (HMMs) or continuous state-space models (SSMs). In quantitative finance, Bayesian filtering and smoothing are key tools for recovering these hidden drivers. A central example is \textit{stochastic volatility} modeling, where asset volatility is a drifting latent state. Recent semi-parametric methods employ particle filters to estimate it without rigid parametric forms, yielding more accurate option pricing and risk management~\cite{feng2025semiparametric}. Discrete state-space models, particularly HMMs, excel at \textit{regime detection}. They treat market regimes (``bull'' vs.\ ``bear'', high vs.\ low momentum) as latent states, enabling traders to estimate real-time regime-shift probabilities and adapt allocations~\cite{catello2023hidden}. Filtering techniques also tackle microstructure noise in \textit{illiquid markets}. Particle filters, for instance, reconstruct the latent ``true'' mid-price of sparsely traded assets (e.g., corporate bonds) from irregular, noisy transaction records~\cite{gueant2018mid}. As a one-dimensional demonstration, let us first write down the state-space model,
+Financial systems are driven by latent factors that shape observable market data. Problems such as stochastic volatility, limit order book dynamics, or macroeconomic regime shifts are frequently cast as Hidden Markov Models (HMMs), which are discrete, or continuous state-space models (SSMs). In this note, we focus on continuous state-space models (SSMs). \\[10pt]
+%In quantitative finance, Bayesian filtering and smoothing are key tools for recovering these hidden drivers. A central example is \textit{stochastic volatility} modeling, where asset volatility is a drifting latent state. Recent semi-parametric methods employ particle filters to estimate it without rigid parametric forms, yielding more accurate option pricing and risk management~\cite{feng2025semiparametric}. Discrete state-space models, particularly HMMs, excel at \textit{regime detection}. They treat market regimes (``bull'' vs.\ ``bear'', high vs.\ low momentum) as latent states, enabling traders to estimate real-time regime-shift probabilities and adapt allocations~\cite{catello2023hidden}. Filtering techniques also tackle microstructure noise in \textit{illiquid markets}. Particle filters, for instance, reconstruct the latent ``true'' mid-price of sparsely traded assets (e.g., corporate bonds) from irregular, noisy transaction records~\cite{gueant2018mid}. 
+As a one-dimensional demonstration, let us first write down a most generic state-space model,
 \begin{equation}
 \begin{split} \label{Eq:HMM}
      x_k &= f(x_{k-1}, w_k) \\
      z_k &= h(x_k, u_k)
 \end{split}
 \end{equation}
-where $k$ denotes the time step, $z_k$ is the observation, and $x_k$ is the unobserved latent state. The noise terms $w_k$ and $u_k$ are mutually and temporally uncorrelated. The function $f$ governs state evolution and $h$ maps the state to observations. In practice we observe only $z_k$, which may have the same or lower dimension than $x_k$ (the latter case is called partial observation and makes inference substantially harder due to information loss). Successful application of state-space models rests on two pillars:
+where $k$ denotes the time step, $z_k$ is the observation, and $x_k$ is the unobserved latent state, sometimes referred to ground truth in controlled experiments. The noise terms $w_k$ and $u_k$ are mutually and temporally uncorrelated. The function $f$ governs state evolution and $h$ maps the state to observations. In practice we observe only $z_k$, which may have the same or lower dimension than $x_k$ (the latter case is called partial observation and makes inference substantially harder due to information loss). Successful application of state-space models rests on two pillars:
 \begin{enumerate}
     \item  A well-specified model with accurate parameters — traditionally this means understanding the functional forms of $f$ and $h$ and estimating their parameters reliably
     \item An effective inference algorithm that estimate the hidden state $x_k$ from the observation $z_k$ — here, filtering algorithm.
     \end{enumerate}
-In recent years neural networks have entered both parts of the equation. We can replace the conventional maps with learned versions: $f \to f_\theta$ and $h \to h_\theta$. Neural filtering algorithms have also emerged. We will first review the conventional numerical methods then discuss what are the possible ways for improvement leveraging neural networks.
+In recent years neural networks have entered both parts of the equation. We can replace the conventional maps with learned versions: $f \to f_\theta$ and $h \to h_\theta$. Neural filtering algorithms have also emerged. In this note, we started with more traditional methods, and focuses on building a robust pipeline. 
+
+%This might be an incomplete or even biased take that neural network is icing on the cake instead of the backbone of Bayesian inference.
 
 % Financial systems are characterized by latent factors driving observable market data. Whether modeling stochastic volatility, limit order book dynamics, or macroeconomic regime shifts, the underlying problem is often formulated as a Hidden Markov Model (HMM) or a continuous State-Space Model (SSM). 
 
@@ -1674,7 +1680,7 @@ Observed dimensions maintain diversity regardless of unobserved dimension spread
 
 
 \newpage
-\appendix
+
 \section{MCMC Diagnostics}\label{APP:MCMC_Diagnostics}
 
 This appendix details the four diagnostic quantities reported after every HMC/NUTS run.

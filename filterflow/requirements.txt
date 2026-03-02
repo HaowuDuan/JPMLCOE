@@ -1,0 +1,13 @@
+absl-py
+dm-sonnet
+gast==0.3.3
+graphs
+jupyter
+matplotlib
+scipy
+seaborn
+sonnet
+tensorflow
+tensorflow_estimator
+tensorflow_probability
+tqdm
