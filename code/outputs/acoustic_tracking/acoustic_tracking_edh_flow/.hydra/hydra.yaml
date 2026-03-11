@@ -112,12 +112,11 @@ hydra:
     hydra:
     - hydra.mode=RUN
     task:
-    - device=auto
     - experiment=acoustic_tracking/acoustic_tracking_edh_flow
   job:
     name: run_experiment
     chdir: null
-    override_dirname: device=auto,experiment=acoustic_tracking/acoustic_tracking_edh_flow
+    override_dirname: experiment=acoustic_tracking/acoustic_tracking_edh_flow
     id: ???
     num: ???
     config_name: config
@@ -131,18 +130,18 @@ hydra:
   runtime:
     version: 1.3.2
     version_base: '1.3'
-    cwd: /Users/haowuduan/Documents/githubrepos/JPMLCOE/code
+    cwd: /home/haowu/JPML/code
     config_sources:
     - path: hydra.conf
       schema: pkg
       provider: hydra
-    - path: /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/configs
+    - path: /home/haowu/JPML/code/configs
       schema: file
       provider: main
     - path: ''
       schema: structured
       provider: schema
-    output_dir: /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/outputs/acoustic_tracking/acoustic_tracking_edh_flow
+    output_dir: /home/haowu/JPML/code/outputs/acoustic_tracking/acoustic_tracking_edh_flow
     choices:
       experiment: acoustic_tracking/acoustic_tracking_edh_flow
       filter: edh_flow

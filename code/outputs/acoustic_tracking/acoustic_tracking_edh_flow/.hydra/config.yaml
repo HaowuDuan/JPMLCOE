@@ -14,8 +14,11 @@ filter:
   integration_method: euler
   n_threads: null
 seed: 42
+dtype: float64
 T: 50
 output_dir: outputs/acoustic_tracking/acoustic_tracking_edh_flow
 plot: true
 device: auto
+tf_log_level: 2
 verbose: true
+show_progress: true

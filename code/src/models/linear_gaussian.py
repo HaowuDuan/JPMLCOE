@@ -39,6 +39,8 @@ class LinearGaussianModel(StateSpaceModel):
         Sigma_0: Optional[Union[np.ndarray, List, tf.Tensor]] = None,
         process_noise_std: Optional[float] = None,
         obs_noise_std: Optional[float] = None,
+        transition_coeff: Optional[float] = None,
+        observation_coeff: Optional[float] = None,
         dtype=tf.float32
     ):
         """
@@ -57,30 +59,38 @@ class LinearGaussianModel(StateSpaceModel):
                 Q = process_noise_std^2 * B@B^T. Used for HMC parameter inference.
             obs_noise_std: Optional scalar noise scale for R. When set,
                 R = obs_noise_std^2 * D@D^T. Used for HMC parameter inference.
+            transition_coeff: Optional scalar for F (1D only). When set,
+                F = [[transition_coeff]]. Used for HMC parameter inference.
+            observation_coeff: Optional scalar for H (1D only). When set,
+                H = [[observation_coeff]]. Used for HMC parameter inference.
         """
         # Store dtype
         self.dtype = dtype
         self.np_dtype = np.float64 if dtype == tf.float64 else np.float32
 
+        # Optional scalar parameters for dynamic F/H (for HMC inference)
+        self.transition_coeff = transition_coeff
+        self.observation_coeff = observation_coeff
+
         # Convert to TensorFlow tensors
-        self.F = tf.constant(F, dtype=self.dtype)
+        self._F_const = tf.constant(F, dtype=self.dtype)
         self.B = tf.constant(B, dtype=self.dtype)
-        self.H = tf.constant(H, dtype=self.dtype)
+        self._H_const = tf.constant(H, dtype=self.dtype)
         self.D = tf.constant(D, dtype=self.dtype)
 
-        # Store dimensions
-        self.nx = int(self.F.shape[0])  # State dimension
+        # Store dimensions (use constants to avoid property lookup during init)
+        self.nx = int(self._F_const.shape[0])  # State dimension
         self.nv = int(self.B.shape[1])  # Process noise dimension
-        self.ny = int(self.H.shape[0])  # Observation dimension
+        self.ny = int(self._H_const.shape[0])  # Observation dimension
         self.nw = int(self.D.shape[1])  # Observation noise dimension
 
         # Validate dimensions
-        if self.F.shape != (self.nx, self.nx):
-            raise ValueError(f"F must be ({self.nx}, {self.nx}), got {self.F.shape}")
+        if self._F_const.shape != (self.nx, self.nx):
+            raise ValueError(f"F must be ({self.nx}, {self.nx}), got {self._F_const.shape}")
         if self.B.shape != (self.nx, self.nv):
             raise ValueError(f"B must be ({self.nx}, {self.nv}), got {self.B.shape}")
-        if self.H.shape != (self.ny, self.nx):
-            raise ValueError(f"H must be ({self.ny}, {self.nx}), got {self.H.shape}")
+        if self._H_const.shape != (self.ny, self.nx):
+            raise ValueError(f"H must be ({self.ny}, {self.nx}), got {self._H_const.shape}")
         if self.D.shape != (self.ny, self.nw):
             raise ValueError(f"D must be ({self.ny}, {self.nw}), got {self.D.shape}")
 
@@ -127,6 +137,36 @@ class LinearGaussianModel(StateSpaceModel):
         return self._Sigma_0
 
     @property
+    def F(self):
+        """State transition matrix — dynamic if transition_coeff is set."""
+        if self.transition_coeff is not None:
+            tc = self.transition_coeff
+            if not isinstance(tc, tf.Tensor):
+                tc = tf.constant(float(tc), dtype=self.dtype)
+            return tf.reshape(tc, [1, 1])
+        return self._F_const
+
+    @F.setter
+    def F(self, value):
+        """Allow direct assignment for backward compat."""
+        self._F_const = value
+
+    @property
+    def H(self):
+        """Observation matrix — dynamic if observation_coeff is set."""
+        if self.observation_coeff is not None:
+            oc = self.observation_coeff
+            if not isinstance(oc, tf.Tensor):
+                oc = tf.constant(float(oc), dtype=self.dtype)
+            return tf.reshape(oc, [1, 1])
+        return self._H_const
+
+    @H.setter
+    def H(self, value):
+        """Allow direct assignment for backward compat."""
+        self._H_const = value
+
+    @property
     def Q(self):
         """Process noise covariance — dynamic if process_noise_std is set."""
         if self.process_noise_std is not None:
@@ -167,12 +207,24 @@ class LinearGaussianModel(StateSpaceModel):
     def sample_state_transition(self, x: tf.Tensor, seed: tf.Tensor) -> tf.Tensor:
         """Sample from state transition: X' = F·X + B·v, v ~ N(0, I)."""
         v = tf.random.stateless_normal([self.nv], seed=seed, dtype=self.dtype)
-        return tf.linalg.matvec(self.F, x) + tf.linalg.matvec(self.B, v)
+        noise = tf.linalg.matvec(self.B, v)
+        if self.process_noise_std is not None:
+            pns = self.process_noise_std
+            if not isinstance(pns, tf.Tensor):
+                pns = tf.constant(float(pns), dtype=self.dtype)
+            noise = pns * noise
+        return tf.linalg.matvec(self.F, x) + noise
 
     def sample_observation(self, x: tf.Tensor, seed: tf.Tensor) -> tf.Tensor:
         """Sample observation: Y = H·X + D·W, W ~ N(0, I)."""
         w = tf.random.stateless_normal([self.nw], seed=seed, dtype=self.dtype)
-        return tf.linalg.matvec(self.H, x) + tf.linalg.matvec(self.D, w)
+        noise = tf.linalg.matvec(self.D, w)
+        if self.obs_noise_std is not None:
+            ons = self.obs_noise_std
+            if not isinstance(ons, tf.Tensor):
+                ons = tf.constant(float(ons), dtype=self.dtype)
+            noise = ons * noise
+        return tf.linalg.matvec(self.H, x) + noise
 
     def state_transition_mean(self, x: tf.Tensor) -> tf.Tensor:
         """Mean of state transition: E[X' | X] = F·X."""
@@ -231,7 +283,6 @@ class LinearGaussianModel(StateSpaceModel):
 
     # Batch methods for optimized particle filtering
 
-    @tf.function
     def state_transition_mean_batch(self, particles: tf.Tensor, t=None) -> tf.Tensor:
         """Vectorized state transition mean: particles @ F^T (more efficient than transposing twice)."""
         return particles @ tf.transpose(self.F)
@@ -261,20 +312,17 @@ class LinearGaussianModel(StateSpaceModel):
         log_2pi = tf.math.log(tf.constant(2.0 * 3.14159265358979323846, dtype=observation.dtype))
         return -0.5 * (tf.cast(self.obs_dim, observation.dtype) * log_2pi + logdet + mahalanobis)
 
-    @tf.function
     def observation_jacobian_batch(self, particles: tf.Tensor) -> tf.Tensor:
-        """H is constant — broadcast to (N, ny, nx)."""
+        """H — broadcast to (N, ny, nx)."""
         N = tf.shape(particles)[0]
         return tf.tile(tf.expand_dims(self.H, 0), [N, 1, 1])
 
-    @tf.function
     def observation_function_batch(self, particles: tf.Tensor) -> tf.Tensor:
         """h(x) = H @ x, vectorized: particles @ H^T -> (N, ny)."""
         return particles @ tf.transpose(self.H)
 
-    @tf.function
     def state_jacobian_batch(self, particles: tf.Tensor) -> tf.Tensor:
-        """F is constant — broadcast to (N, nx, nx)."""
+        """F — broadcast to (N, nx, nx)."""
         N = tf.shape(particles)[0]
         return tf.tile(tf.expand_dims(self.F, 0), [N, 1, 1])
 

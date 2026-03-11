@@ -1,0 +1,129 @@
+model:
+  _target_: src.models.linear_gaussian.LinearGaussianModel
+  F:
+  - - 0.8
+    - 0.2
+    - 0.0
+    - 0.0
+    - 0.0
+  - - 0.2
+    - 0.6
+    - 0.2
+    - 0.0
+    - 0.0
+  - - 0.0
+    - 0.2
+    - 0.6
+    - 0.2
+    - 0.0
+  - - 0.0
+    - 0.0
+    - 0.2
+    - 0.6
+    - 0.2
+  - - 0.0
+    - 0.0
+    - 0.0
+    - 0.2
+    - 0.8
+  B:
+  - - 1.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+  - - 0.0
+    - 1.0
+    - 0.0
+    - 0.0
+    - 0.0
+  - - 0.0
+    - 0.0
+    - 1.0
+    - 0.0
+    - 0.0
+  - - 0.0
+    - 0.0
+    - 0.0
+    - 1.0
+    - 0.0
+  - - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 1.0
+  H:
+  - - 1.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+  - - 0.0
+    - 1.0
+    - 0.0
+    - 0.0
+    - 0.0
+  - - 0.0
+    - 0.0
+    - 1.0
+    - 0.0
+    - 0.0
+  D:
+  - - 0.1
+    - 0.0
+    - 0.0
+  - - 0.0
+    - 0.1
+    - 0.0
+  - - 0.0
+    - 0.0
+    - 0.1
+  mu_0:
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  Sigma_0:
+  - - 1.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+  - - 0.0
+    - 1.0
+    - 0.0
+    - 0.0
+    - 0.0
+  - - 0.0
+    - 0.0
+    - 1.0
+    - 0.0
+    - 0.0
+  - - 0.0
+    - 0.0
+    - 0.0
+    - 1.0
+    - 0.0
+  - - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 1.0
+filter:
+  _target_: src.filters.particle.bootstrap_pf_tf.ParticleFilterTF
+  _recursive_: false
+  n_particles: 1000
+  resample_threshold: 0.5
+  resampling_method: soft
+  resampling_config:
+    alpha: 0.9
+seed: 42
+dtype: float64
+T: 100
+output_dir: outputs/5d_linear_partial_strong/5d_partial_strong_pf_soft
+plot: true
+device: auto
+tf_log_level: 2
+verbose: true
+show_progress: true

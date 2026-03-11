@@ -1,0 +1,201 @@
+{
+  "rmse": 1.7758133535204854,
+  "log_likelihood": null,
+  "metadata": {
+    "filter_type": "StochasticEDHFlow",
+    "n_particles": 500,
+    "n_lambda_steps": 29,
+    "integration_method": "euler",
+    "performance": {
+      "wall_time_seconds": 11.796210117638111,
+      "time_per_timestep_ms": 117.96210117638111,
+      "peak_memory_mb": 3.450960159301758,
+      "memory_increase_mb": 106.30859375,
+      "start_memory_mb": 903.06640625,
+      "end_memory_mb": 1009.375,
+      "num_timesteps": 100,
+      "gpu_peak_memory_mb": 0.192138671875,
+      "gpu_current_memory_mb": 0.113037109375
+    }
+  },
+  "config": {
+    "model": {
+      "_target_": "src.models.linear_gaussian.LinearGaussianModel",
+      "F": [
+        [
+          0.95,
+          0.05,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.05,
+          0.9,
+          0.05,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.05,
+          0.9,
+          0.05,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.05,
+          0.9,
+          0.05
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.05,
+          0.95
+        ]
+      ],
+      "B": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "H": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "D": [
+        [
+          0.1,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.1,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.1
+        ]
+      ],
+      "mu_0": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "Sigma_0": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "filter": {
+      "_target_": "src.filters.particle.stochastic_edh.StochasticEDHFlow",
+      "n_particles": 500,
+      "n_lambda_steps": 29,
+      "diffusion_scale": 0.0,
+      "schedule_mu": 0.0,
+      "n_threads": null
+    },
+    "seed": 42,
+    "dtype": "float64",
+    "T": 100,
+    "output_dir": "outputs/5d_linear_partial_weak/5d_partial_weak_stochastic_edh",
+    "plot": true,
+    "device": "auto",
+    "tf_log_level": 2,
+    "verbose": true,
+    "show_progress": true
+  }
+}

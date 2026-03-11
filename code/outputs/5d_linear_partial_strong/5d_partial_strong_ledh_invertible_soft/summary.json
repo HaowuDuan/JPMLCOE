@@ -1,0 +1,204 @@
+{
+  "rmse": 1.0243061762365786,
+  "log_likelihood": -412.87304554511513,
+  "metadata": {
+    "filter_type": "LEDHParticleFlowFilter",
+    "n_particles": 500,
+    "n_lambda_steps": 29,
+    "resampling_method": "soft",
+    "resampling_rate": 0.54,
+    "performance": {
+      "wall_time_seconds": 17.402772584930062,
+      "time_per_timestep_ms": 174.02772584930062,
+      "peak_memory_mb": 4.59916877746582,
+      "memory_increase_mb": 183.32421875,
+      "start_memory_mb": 902.77734375,
+      "end_memory_mb": 1086.1015625,
+      "num_timesteps": 100,
+      "gpu_peak_memory_mb": 1.627197265625,
+      "gpu_current_memory_mb": 0.742431640625
+    }
+  },
+  "config": {
+    "model": {
+      "_target_": "src.models.linear_gaussian.LinearGaussianModel",
+      "F": [
+        [
+          0.8,
+          0.2,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.2,
+          0.6,
+          0.2,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.2,
+          0.6,
+          0.2,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.2,
+          0.6,
+          0.2
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.2,
+          0.8
+        ]
+      ],
+      "B": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "H": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "D": [
+        [
+          0.1,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.1,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.1
+        ]
+      ],
+      "mu_0": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "Sigma_0": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "filter": {
+      "_target_": "src.filters.particle.ledh_invertible.LEDHParticleFlowFilter",
+      "n_particles": 500,
+      "n_lambda_steps": 29,
+      "resample_threshold": 0.5,
+      "resampling_method": "soft",
+      "resampling_config": {
+        "alpha": 0.5
+      }
+    },
+    "seed": 42,
+    "dtype": "float64",
+    "T": 100,
+    "output_dir": "outputs/5d_linear_partial_strong/5d_partial_strong_ledh_invertible_soft",
+    "plot": true,
+    "device": "auto",
+    "tf_log_level": 2,
+    "verbose": true,
+    "show_progress": true
+  }
+}

@@ -1,0 +1,26 @@
+<frozen runpy>:128: RuntimeWarning: 'src.experiments.run_experiment' found in sys.modules after import of package 'src.experiments', but prior to execution of 'src.experiments.run_experiment'; this may result in unpredictable behaviour
+Creating model: src.models.linear_gaussian.LinearGaussianModel
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1773134212.304473 3772126 gpu_device.cc:2020] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 20997 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3090, pci bus id: 0000:01:00.0, compute capability: 8.6
+Generating 100 time steps...
+I0000 00:00:1773134212.362222 3772126 cuda_solvers.cc:175] Creating GpuSolver handles for stream 0x4233c610
+Creating filter: ParticleFilterTF
+Running ParticleFilterTF...
+
+============================================================
+RESULTS: ParticleFilterTF
+============================================================
+RMSE: 0.3368
+Log-likelihood: -2994.53
+Mean ESS: 1.2
+
+Performance:
+  Wall time: 7.429 seconds
+  Time per step: 74.29 ms
+  Peak memory: 5.9 MB
+  Memory increase: 158.7 MB
+  Peak memory (GPU): 41.2 MB
+============================================================
+
+Results saved to /home/haowu/JPML/code/outputs/5d_linear/5d_linear_pf_ot
+Plot saved to /home/haowu/JPML/code/outputs/5d_linear/5d_linear_pf_ot/plot.png

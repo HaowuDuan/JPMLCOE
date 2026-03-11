@@ -1,7 +1,8 @@
 # @package _global_
-# DPF: Range-Bearing model with Bootstrap PF + soft resampling + gradient
+# DPF: Range-Bearing model with Bootstrap PF + soft resampling
 #
-# Bootstrap PF baseline (no flow). Infers sigma_range and sigma_bearing (true: 0.1, 0.1).
+# Identity mass matrix (standard HMC, no preconditioning).
+# Infers sigma_range and sigma_bearing (true: 0.1, 0.1).
 # Soft resampling (PF-net style): blends weights with uniform distribution.
 
 model:
@@ -39,13 +40,13 @@ dpf:
         scale: 0.5
 
   hmc:
-    num_samples: 200
-    num_burnin: 100
-    step_size: 0.001
+    num_samples: 40
+    num_burnin: 160
+    step_size: 0.01
     num_leapfrog_steps: 5
     max_tree_depth: 10
     adaptation_rate: 0.8
-    target_accept_prob: 0.9
+    target_accept_prob: 0.65
     seed: 42
 
 data:

@@ -1,4 +1,4 @@
-dtype: float64
+dtype: float32
 tf_log_level: 2
 model:
   _target_: src.models.range_bearing.RangeBearingModel
@@ -6,7 +6,7 @@ model:
   sigma_bearing: 0.3
 filter:
   _target_: src.filters.particle.bootstrap_pf_hmc.BootstrapPFHMC
-  n_particles: 500
+  n_particles: 2000
   resampling_method: ot_entropy
   resampling_config:
     epsilon: 0.5
@@ -31,13 +31,13 @@ dpf:
         loc: -2.3
         scale: 0.5
   hmc:
-    num_samples: 200
-    num_burnin: 100
-    step_size: 0.001
+    num_samples: 1000
+    num_burnin: 200
+    step_size: 0.01
     num_leapfrog_steps: 5
     max_tree_depth: 10
     adaptation_rate: 0.8
-    target_accept_prob: 0.9
+    target_accept_prob: 0.65
     seed: 42
 data:
   T: 50

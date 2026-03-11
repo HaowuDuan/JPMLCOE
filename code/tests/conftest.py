@@ -2,6 +2,8 @@
 import sys
 import os
 
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+
 _tests_dir = os.path.dirname(os.path.abspath(__file__))
 _code_dir = os.path.dirname(_tests_dir)
 

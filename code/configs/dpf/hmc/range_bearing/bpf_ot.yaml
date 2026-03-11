@@ -1,8 +1,11 @@
 # @package _global_
-# DPF: Range-Bearing model with Bootstrap PF + OT resampling (epsilon=0.5) + gradient
+# DPF: Range-Bearing model with Bootstrap PF + OT resampling (epsilon=0.5)
 #
-# Bootstrap PF baseline (no flow). Infers sigma_range and sigma_bearing (true: 0.1, 0.1).
+# Identity mass matrix (standard HMC, no preconditioning).
+# Infers sigma_range and sigma_bearing (true: 0.1, 0.1).
 # Gradient flows through Sinkhorn transport matrix.
+
+dtype: float32
 
 model:
   _target_: src.models.range_bearing.RangeBearingModel
@@ -11,7 +14,7 @@ model:
 
 filter:
   _target_: src.filters.particle.bootstrap_pf_hmc.BootstrapPFHMC
-  n_particles: 500
+  n_particles: 2000
   resampling_method: ot_entropy
   resampling_config:
     epsilon: 0.5
@@ -39,13 +42,13 @@ dpf:
         scale: 0.5
 
   hmc:
-    num_samples: 200
-    num_burnin: 100
-    step_size: 0.001
+    num_samples: 1000
+    num_burnin: 200
+    step_size: 0.01
     num_leapfrog_steps: 5
     max_tree_depth: 10
     adaptation_rate: 0.8
-    target_accept_prob: 0.9
+    target_accept_prob: 0.65
     seed: 42
 
 data:

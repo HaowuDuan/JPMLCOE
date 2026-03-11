@@ -1,0 +1,200 @@
+{
+  "rmse": 1.0293747203678112,
+  "log_likelihood": 256.8808042198951,
+  "metadata": {
+    "filter_type": "EDHParticleFlowFilter",
+    "n_particles": 500,
+    "n_lambda_steps": 29,
+    "resampling_method": "systematic",
+    "resampling_rate": 0.49,
+    "performance": {
+      "wall_time_seconds": 18.51358317770064,
+      "time_per_timestep_ms": 185.1358317770064,
+      "peak_memory_mb": 4.861177444458008,
+      "memory_increase_mb": 151.515625,
+      "start_memory_mb": 902.7734375,
+      "end_memory_mb": 1054.2890625,
+      "num_timesteps": 100,
+      "gpu_peak_memory_mb": 1.05322265625,
+      "gpu_current_memory_mb": 0.666259765625
+    }
+  },
+  "config": {
+    "model": {
+      "_target_": "src.models.linear_gaussian.LinearGaussianModel",
+      "F": [
+        [
+          0.8,
+          0.2,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.2,
+          0.6,
+          0.2,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.2,
+          0.6,
+          0.2,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.2,
+          0.6,
+          0.2
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.2,
+          0.8
+        ]
+      ],
+      "B": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "H": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "D": [
+        [
+          0.1,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.1,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.1
+        ]
+      ],
+      "mu_0": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "Sigma_0": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "filter": {
+      "_target_": "src.filters.particle.edh_invertible.EDHParticleFlowFilter",
+      "n_particles": 500,
+      "n_lambda_steps": 29,
+      "resample_threshold": 0.5
+    },
+    "seed": 42,
+    "dtype": "float64",
+    "T": 100,
+    "output_dir": "outputs/5d_linear_partial_strong/5d_partial_strong_edh_invertible",
+    "plot": true,
+    "device": "auto",
+    "tf_log_level": 2,
+    "verbose": true,
+    "show_progress": true
+  }
+}

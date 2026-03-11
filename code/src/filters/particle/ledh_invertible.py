@@ -258,7 +258,7 @@ class LEDHParticleFlowFilter:
         self.weights_history.append(self.weights.value())
 
         # Log-likelihood from importance-weighted estimate
-        self.log_likelihoods.append(log_lik)
+        self.log_likelihoods.append(log_lik + max_log_theta)
 
         # Update per-particle covariances via batched EKF (all TF tensors)
         _, cov_updated = batched_ekf_update(

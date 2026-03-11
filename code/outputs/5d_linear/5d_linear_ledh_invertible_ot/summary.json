@@ -1,0 +1,238 @@
+{
+  "rmse": 0.09495126474184315,
+  "log_likelihood": -690.0343263304454,
+  "metadata": {
+    "filter_type": "LEDHParticleFlowFilter",
+    "n_particles": 500,
+    "n_lambda_steps": 29,
+    "resampling_method": "ot_entropy",
+    "resampling_rate": 0.2,
+    "performance": {
+      "wall_time_seconds": 21.227207338437438,
+      "time_per_timestep_ms": 212.27207338437438,
+      "peak_memory_mb": 4.884393692016602,
+      "memory_increase_mb": 189.11328125,
+      "start_memory_mb": 902.8515625,
+      "end_memory_mb": 1091.96484375,
+      "num_timesteps": 100,
+      "gpu_peak_memory_mb": 11.06396484375,
+      "gpu_current_memory_mb": 0.755859375
+    }
+  },
+  "config": {
+    "model": {
+      "_target_": "src.models.linear_gaussian.LinearGaussianModel",
+      "F": [
+        [
+          0.95,
+          0.05,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.05,
+          0.9,
+          0.05,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.05,
+          0.9,
+          0.05,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.05,
+          0.9,
+          0.05
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.05,
+          0.95
+        ]
+      ],
+      "B": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "H": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "D": [
+        [
+          0.1,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.1,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.1,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.1,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.1
+        ]
+      ],
+      "mu_0": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "Sigma_0": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "filter": {
+      "_target_": "src.filters.particle.ledh_invertible.LEDHParticleFlowFilter",
+      "n_particles": 500,
+      "n_lambda_steps": 29,
+      "resample_threshold": 0.5,
+      "resampling_method": "ot_entropy",
+      "resampling_config": {
+        "epsilon": 0.5
+      }
+    },
+    "seed": 42,
+    "dtype": "float64",
+    "T": 100,
+    "output_dir": "outputs/5d_linear/5d_linear_ledh_invertible_ot",
+    "plot": true,
+    "device": "auto",
+    "tf_log_level": 2,
+    "verbose": true,
+    "show_progress": true
+  }
+}

@@ -7,7 +7,7 @@ defaults:
   - override /filter: kalman
 
 # Override settings
-T: 20  # Number of time steps
+T: 100 # Number of time steps
 seed: 42
 plot: True
 output_dir: outputs/1d_linear/1d_linear_Kalman

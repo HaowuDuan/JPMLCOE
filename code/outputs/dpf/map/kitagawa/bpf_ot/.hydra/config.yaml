@@ -1,0 +1,43 @@
+dtype: float32
+tf_log_level: 2
+model:
+  _target_: src.models.kitagawa.KitagawaModel
+  sigma_V: 2.0
+  sigma_W: 2.0
+  initial_var: 5.0
+filter:
+  _target_: src.filters.particle.bootstrap_pf_hmc.BootstrapPFHMC
+  n_particles: 5000
+  resampling_method: ot_entropy
+  resampling_config:
+    epsilon: 0.5
+    extrapolation_damping: 0.5
+  stop_gradient_resampling: false
+  eager_mode: false
+dpf:
+  sampler: map
+  trainable_params:
+    sigma_V:
+      constraint: positive
+      prior:
+        _target_: tensorflow_probability.distributions.LogNormal
+        loc: 1.15
+        scale: 0.5
+    sigma_W:
+      constraint: positive
+      prior:
+        _target_: tensorflow_probability.distributions.LogNormal
+        loc: 0.0
+        scale: 1.0
+  map:
+    num_steps: 200
+    learning_rate: 0.01
+    optimizer: adam
+    random_seed: false
+    seed: 42
+data:
+  T: 100
+  seed: 42
+  true_params:
+    sigma_V: 3.162
+    sigma_W: 1.0

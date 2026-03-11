@@ -17,9 +17,8 @@ filter:
   _target_: src.filters.particle.ledh_invertible_hmc.LEDHParticleFlowFilterHMC
   n_particles: 1000
   n_lambda_steps: 15
-  resampling_method: ot_entropy       # used by filter() path (standalone filtering)
-  resampling_config:
-    epsilon: 0.5
+  resampling_method: systematic
+  resampling_config: {}
   weight_clip_range: 50.0
   stop_gradient_resampling: true      # cut gradient through resampling
   eager_mode: false

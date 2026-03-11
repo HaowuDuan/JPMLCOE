@@ -36,13 +36,13 @@ dpf:
         scale: 1.0
 
   hmc:
-    num_samples: 200
+    num_samples: 400
     num_burnin: 200
     step_size: 0.001
     num_leapfrog_steps: 5
     max_tree_depth: 10
     adaptation_rate: 0.8
-    target_accept_prob: 0.9
+    target_accept_prob: 0.65
     seed: 42
 
 data:

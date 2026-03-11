@@ -16,10 +16,12 @@ filter:
   resampling_method: ot_entropy
   resampling_config:
     epsilon: 0.5
+    extrapolation_damping: 0.5
   stop_gradient_resampling: false
   hmc_resampling_method: ot_entropy
   hmc_resampling_config:
     epsilon: 0.5
+    extrapolation_damping: 0.5
   eager_mode: false
 
 dpf:

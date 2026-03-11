@@ -3,11 +3,11 @@
 from .linalg import safe_cholesky, safe_solve, log_det, symmetrize
 from .distributions import log_gaussian_prob, log_sum_exp, normalize_log_weights, compute_flow_weights
 from .ode_solvers import euler_step, rk4_step, euler_maruyama_step
-from .device import setup_tensorflow_device, get_device_info, force_cpu, reset_device_cache
+from .device import setup_tensorflow_device
 
 __all__ = [
     'safe_cholesky', 'safe_solve', 'log_det', 'symmetrize',
     'log_gaussian_prob', 'log_sum_exp', 'normalize_log_weights', 'compute_flow_weights',
     'euler_step', 'rk4_step', 'euler_maruyama_step',
-    'setup_tensorflow_device', 'get_device_info', 'force_cpu', 'reset_device_cache',
+    'setup_tensorflow_device',
 ]

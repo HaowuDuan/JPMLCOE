@@ -16,7 +16,7 @@ push-dry:
 	rsync -avzn --progress $(EXCLUDES) $(LOCAL_DIR)/ $(REMOTE):$(REMOTE_DIR)/
 
 pull-results:
-	rsync -avz --progress $(REMOTE):$(REMOTE_DIR)/outputs/dpf/ $(LOCAL_DIR)/outputs/dpf/
+	rsync -avz --progress $(REMOTE):$(REMOTE_DIR)/outputs/ $(LOCAL_DIR)/outputs/
 
 remote-setup:
 	ssh $(REMOTE) 'cd $(REMOTE_DIR) && python3 -m venv .venv && . .venv/bin/activate && pip install --upgrade pip && pip install -r requirements.txt'

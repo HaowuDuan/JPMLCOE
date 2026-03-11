@@ -15,16 +15,18 @@ model:
 
 filter:
   _target_: src.filters.particle.ledh_invertible_hmc.LEDHParticleFlowFilterHMC
-  n_particles: 1000
+  n_particles: 500
   n_lambda_steps: 15
   resampling_method: ot_entropy
   resampling_config:
     epsilon: 0.5
+    extrapolation_damping: 0.5
   weight_clip_range: 50.0
   stop_gradient_resampling: false
   hmc_resampling_method: ot_entropy
   hmc_resampling_config:
     epsilon: 0.5
+    extrapolation_damping: 0.5
   eager_mode: false
 
 dpf:
@@ -45,7 +47,7 @@ dpf:
     num_leapfrog_steps: 5
     max_tree_depth: 10
     adaptation_rate: 0.8
-    target_accept_prob: 0.9
+    target_accept_prob: 0.65
     seed: 42
 
 data:

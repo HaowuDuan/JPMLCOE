@@ -50,7 +50,7 @@ dpf:
     num_leapfrog_steps: 5
     max_tree_depth: 10
     adaptation_rate: 0.8
-    target_accept_prob: 0.8
+    target_accept_prob: 0.65
     seed: 42
 
 data:

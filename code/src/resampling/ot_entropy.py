@@ -129,7 +129,8 @@ def sinkhorn_iteration(
     alpha_init: tf.Tensor,
     beta_init: tf.Tensor,
     max_iter: int,
-    threshold: float
+    threshold: float,
+    extrapolation_damping: float = None
 ) -> Tuple[tf.Tensor, tf.Tensor, tf.Tensor]:
     """
     Sinkhorn fixed-point iterations to compute dual potentials.
@@ -147,6 +148,9 @@ def sinkhorn_iteration(
         beta_init: Initial beta potential
         max_iter: Maximum iterations
         threshold: Convergence threshold
+        extrapolation_damping: If None (default), extrapolation returns raw
+            softmin values (serial, no damping). If a float (e.g. 0.5),
+            extrapolation returns damping * stopped + (1 - damping) * new.
 
     Returns:
         Tuple of (alpha, beta, n_iterations):
@@ -177,7 +181,7 @@ def sinkhorn_iteration(
         # Update beta: softmin over rows
         beta_new = softmin(epsilon, cost_matrix, uniform_log_weights + alpha_new / epsilon)
 
-        # Damping factor 0.5 for stability (as in filterflow)
+        # Damping factor 0.5 for stability (as in the paper)
         alpha_damped = 0.5 * (alpha_curr + alpha_new)
         beta_damped = 0.5 * (beta_curr + beta_new)
 
@@ -203,13 +207,26 @@ def sinkhorn_iteration(
     )
 
     # Final extrapolation step for better gradients (implicit function theorem)
-    # Stop gradient on converged values, then do one more iteration
+    # Stop gradient on converged values, then do one more serial step (Gauss-Seidel).
+    # Serial: beta uses alpha_extra, capturing alpha-beta coupling.
     alpha_stop = tf.stop_gradient(alpha_final)
     beta_stop = tf.stop_gradient(beta_final)
 
-    alpha_extra = softmin(epsilon, tf.transpose(cost_matrix, [0, 2, 1] if len(cost_matrix.shape) == 3 else [1, 0]),
-                          log_weights + beta_stop / epsilon)
-    beta_extra = softmin(epsilon, cost_matrix, uniform_log_weights + alpha_extra / epsilon)
+    alpha_new = softmin(epsilon, tf.transpose(cost_matrix, [0, 2, 1] if len(cost_matrix.shape) == 3 else [1, 0]),
+                        log_weights + beta_stop / epsilon)
+
+    if extrapolation_damping is not None:
+        d = extrapolation_damping
+        alpha_extra = d * alpha_stop + (1 - d) * alpha_new
+    else:
+        alpha_extra = alpha_new
+
+    beta_new = softmin(epsilon, cost_matrix, uniform_log_weights + alpha_extra / epsilon)
+
+    if extrapolation_damping is not None:
+        beta_extra = d * beta_stop + (1 - d) * beta_new
+    else:
+        beta_extra = beta_new
 
     return alpha_extra, beta_extra, n_iter
 
@@ -340,6 +357,8 @@ def compute_transport_matrix_from_potentials(
     epsilon = tf.cast(epsilon, particles.dtype)
 
     # Compute cost matrix
+    # NOTE: filterflow uses cost(particles, tf.stop_gradient(particles)) but
+    # this worsened HMC bias (MAP improved, HMC stuck at ~1.78 vs ~1.33)
     cost_matrix = compute_cost_matrix(particles, particles)
 
     # Expand potentials for broadcasting: alpha + beta^T
@@ -360,11 +379,12 @@ def compute_transport_matrix_from_potentials(
 
     log_T_normalized = log_T - tf.reduce_logsumexp(log_T, axis=-2, keepdims=True) + log_N
 
-    # Apply source weights
+    # Apply source weights per-column: T[i,j] ∝ kernel[i,j] * w_j
+    # Column j corresponds to source particle j, so weight w_j multiplies column j
     if len(log_weights.shape) == 1:
-        log_T_weighted = log_T_normalized + tf.expand_dims(log_weights, 1)
+        log_T_weighted = log_T_normalized + tf.expand_dims(log_weights, 0)
     else:
-        log_T_weighted = log_T_normalized + tf.expand_dims(log_weights, 2)
+        log_T_weighted = log_T_normalized + tf.expand_dims(log_weights, 1)
 
     # Exponentiate to get transport matrix
     T = tf.exp(log_T_weighted)
@@ -380,7 +400,9 @@ def ot_entropy_resample(
     max_iter: int = 100,
     convergence_threshold: float = 1e-3,
     epsilon_scaling: float = 0.9,
-    clip_gradients: bool = False
+    use_epsilon_scaling: bool = False,
+    clip_gradients: bool = False,
+    extrapolation_damping: float = None
 ) -> ResampleResult:
     """
     Entropy-regularized optimal transport resampling.
@@ -403,10 +425,19 @@ def ot_entropy_resample(
         max_iter: Maximum Sinkhorn iterations (default: 100)
         convergence_threshold: Stop when potential change < threshold (default: 1e-3)
         epsilon_scaling: Epsilon reduction factor for epsilon-scaling (default: 0.9)
-                        Larger = faster reduction (may be less stable)
+                        Only used when use_epsilon_scaling=True.
+        use_epsilon_scaling: If True, use epsilon annealing from diameter^2 down
+                            to target epsilon. If False (default), run Sinkhorn
+                            directly at the target epsilon with zero-initialized
+                            potentials. The default follows Corenflos et al. (2021)
+                            which recommends data normalization + fixed epsilon.
         clip_gradients: If True, clip incoming gradients element-wise to [-1, 1]
                         in the backward pass. May help SGD-style optimizers but
                         destroys gradient direction needed by HMC. Default: False.
+        extrapolation_damping: Damping factor for the extrapolation step.
+                               If None (default), no damping — extrapolation returns
+                               raw softmin values. If a float (e.g. 0.5), returns
+                               damping * stopped + (1 - damping) * new.
 
     Returns:
         ResampleResult with transported particles, uniform weights, and transport matrix T
@@ -418,48 +449,90 @@ def ot_entropy_resample(
     # Convert weights to log-space for numerical stability
     log_weights = tf.math.log(weights + tf.constant(1e-10, dtype=weights.dtype))
 
-    # Compute transport matrix with custom gradients
-    @tf.custom_gradient
-    def _compute_transport_matrix(particles, log_weights, epsilon, scaling,
-                                  max_iter, threshold):
-        # Center and scale particles for numerical stability
-        mean = tf.reduce_mean(particles, axis=0, keepdims=True)
-        centered = particles - tf.stop_gradient(mean)
+    # Compute transport matrix with custom gradients.
+    # Two paths depending on use_epsilon_scaling (Python-level branch,
+    # each traces a different graph at construction time).
+    if use_epsilon_scaling:
+        @tf.custom_gradient
+        def _compute_transport_matrix(particles, log_weights, epsilon, scaling,
+                                      max_iter, threshold):
+            mean = tf.reduce_mean(particles, axis=0, keepdims=True)
+            centered = particles - tf.stop_gradient(mean)
+            std = tf.math.reduce_std(particles)
+            dimension = tf.cast(tf.shape(particles)[-1], particles.dtype)
+            scale_factor = tf.stop_gradient(std * tf.sqrt(dimension) + tf.constant(1e-8, dtype=particles.dtype))
+            scaled = centered / scale_factor
 
-        std = tf.math.reduce_std(particles)
-        dimension = tf.cast(tf.shape(particles)[-1], particles.dtype)
-        scale_factor = tf.stop_gradient(std * tf.sqrt(dimension) + tf.constant(1e-8, dtype=particles.dtype))
-        scaled = centered / scale_factor
-
-        # Compute Sinkhorn potentials
-        alpha, beta = sinkhorn_with_epsilon_scaling(
-            log_weights, scaled, epsilon, scaling, max_iter, threshold
-        )
-
-        # Construct transport matrix
-        T = compute_transport_matrix_from_potentials(
-            scaled, alpha, beta, epsilon, log_weights
-        )
-
-        def gradient(dT):
-            if clip_gradients:
-                dT = tf.clip_by_value(dT, tf.constant(-1.0, dtype=dT.dtype), tf.constant(1.0, dtype=dT.dtype))
-
-            dparticles, dlog_weights = tf.gradients(
-                T, [particles, log_weights], dT
+            alpha, beta = sinkhorn_with_epsilon_scaling(
+                log_weights, scaled, epsilon, scaling, max_iter, threshold
             )
-            return dparticles, dlog_weights, None, None, None, None
+            T = compute_transport_matrix_from_potentials(
+                scaled, alpha, beta, epsilon, log_weights
+            )
 
-        return T, gradient
+            def gradient(dT):
+                if clip_gradients:
+                    dT = tf.clip_by_value(dT, tf.constant(-1.0, dtype=dT.dtype), tf.constant(1.0, dtype=dT.dtype))
+                dparticles, dlog_weights = tf.gradients(
+                    T, [particles, log_weights], dT
+                )
+                return dparticles, dlog_weights, None, None, None, None
 
-    T = _compute_transport_matrix(
-        particles,
-        log_weights,
-        epsilon,
-        epsilon_scaling,
-        max_iter,
-        convergence_threshold
-    )
+            return T, gradient
+
+        T = _compute_transport_matrix(
+            particles,
+            log_weights,
+            epsilon,
+            epsilon_scaling,
+            max_iter,
+            convergence_threshold
+        )
+    else:
+        @tf.custom_gradient
+        def _compute_transport_matrix_fixed(particles, log_weights, epsilon,
+                                            max_iter, threshold):
+            mean = tf.reduce_mean(particles, axis=0, keepdims=True)
+            centered = particles - tf.stop_gradient(mean)
+            std = tf.math.reduce_std(particles)
+            dimension = tf.cast(tf.shape(particles)[-1], particles.dtype)
+            scale_factor = tf.stop_gradient(std * tf.sqrt(dimension) + tf.constant(1e-8, dtype=particles.dtype))
+            scaled = centered / scale_factor
+
+            # Direct Sinkhorn at fixed epsilon — no annealing
+            # NOTE: filterflow uses cost(scaled, tf.stop_gradient(scaled)) but
+            # this worsened HMC bias (MAP improved, HMC stuck at ~1.78 vs ~1.33)
+            cost_matrix = compute_cost_matrix(scaled, scaled)
+            epsilon_tensor = tf.cast(epsilon, scaled.dtype)
+            alpha_init = tf.zeros_like(log_weights)
+            beta_init = tf.zeros_like(log_weights)
+            alpha, beta, _ = sinkhorn_iteration(
+                log_weights, cost_matrix, epsilon_tensor,
+                alpha_init, beta_init,
+                max_iter=max_iter, threshold=threshold,
+                extrapolation_damping=extrapolation_damping
+            )
+            T = compute_transport_matrix_from_potentials(
+                scaled, alpha, beta, epsilon, log_weights
+            )
+
+            def gradient(dT):
+                if clip_gradients:
+                    dT = tf.clip_by_value(dT, tf.constant(-1.0, dtype=dT.dtype), tf.constant(1.0, dtype=dT.dtype))
+                dparticles, dlog_weights = tf.gradients(
+                    T, [particles, log_weights], dT
+                )
+                return dparticles, dlog_weights, None, None, None
+
+            return T, gradient
+
+        T = _compute_transport_matrix_fixed(
+            particles,
+            log_weights,
+            epsilon,
+            max_iter,
+            convergence_threshold
+        )
 
     # Apply transport: resampled = T @ particles
     # T has shape (N, N), particles has shape (N, D)
