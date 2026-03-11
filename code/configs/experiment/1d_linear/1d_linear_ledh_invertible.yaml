@@ -7,7 +7,7 @@ defaults:
   - override /filter: ledh_invertible
 
 # Override settings
-T: 2
+T: 100
 seed: 42
 plot: true
 output_dir: outputs/1d_linear/1d_linear_ledh_invertible

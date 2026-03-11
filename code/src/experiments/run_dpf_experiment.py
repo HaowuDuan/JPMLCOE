@@ -21,6 +21,22 @@ from typing import Dict, Any
 from src.models.utils import generate_data
 
 
+def _get_gpu_memory_mb():
+    """Get current GPU memory usage in MB. Returns None if no GPU available."""
+    try:
+        import tensorflow as tf
+        gpus = tf.config.list_physical_devices('GPU')
+        if gpus:
+            info = tf.config.experimental.get_memory_info('GPU:0')
+            return {
+                'current_mb': float(info['current'] / 1024**2),
+                'peak_mb': float(info['peak'] / 1024**2),
+            }
+    except Exception:
+        pass
+    return None
+
+
 class _PerfTracker:
     """Context manager for wall-time and memory tracking."""
 
@@ -29,6 +45,8 @@ class _PerfTracker:
         self._process = psutil.Process()
         self._start_mem = self._process.memory_info().rss / 1024**2
         self._start_time = time.perf_counter()
+        # Reset GPU peak stats at start
+        self._gpu_start = _get_gpu_memory_mb()
         return self
 
     def __exit__(self, *exc):
@@ -36,14 +54,19 @@ class _PerfTracker:
         _, self._peak_mem = tracemalloc.get_traced_memory()
         tracemalloc.stop()
         self._end_mem = self._process.memory_info().rss / 1024**2
+        self._gpu_end = _get_gpu_memory_mb()
 
     def as_dict(self) -> Dict[str, float]:
         wall = self._end_time - self._start_time
-        return {
+        d = {
             'wall_time_seconds': float(wall),
             'peak_memory_mb': float(self._peak_mem / 1024**2),
             'memory_increase_mb': float(self._end_mem - self._start_mem),
         }
+        if self._gpu_end is not None:
+            d['gpu_peak_memory_mb'] = self._gpu_end['peak_mb']
+            d['gpu_current_memory_mb'] = self._gpu_end['current_mb']
+        return d
 
 
 def _build_param_specs(cfg_trainable: DictConfig, cfg_model: DictConfig) -> dict:
@@ -254,10 +277,15 @@ def run_dpf_experiment(cfg: DictConfig) -> Dict[str, Any]:
                 optimizer=map_cfg.get('optimizer', 'adam'),
                 random_seed=bool(map_cfg.get('random_seed', False)),
                 seed=int(map_cfg.get('seed', 42)),
+                print_every=int(map_cfg.get('print_every', 1)),
             )
     else:
         # HMC / NUTS / custom_hmc: needs DifferentiableModel + gradients
         from src.DF import DPFRunner
+
+        hmc_cfg = cfg.dpf.hmc
+        mass_vector = OmegaConf.to_container(hmc_cfg.mass_vector, resolve=True) \
+            if 'mass_vector' in hmc_cfg else None
 
         runner = DPFRunner(
             base_model=inference_model,
@@ -265,9 +293,8 @@ def run_dpf_experiment(cfg: DictConfig) -> Dict[str, Any]:
             filter_kwargs=filter_kwargs,
             param_specs=param_specs,
             sampler=sampler,
+            mass_vector=mass_vector,
         )
-
-        hmc_cfg = cfg.dpf.hmc
 
         with _PerfTracker() as perf:
             result = runner.run_inference(
@@ -301,15 +328,24 @@ def run_dpf_experiment(cfg: DictConfig) -> Dict[str, Any]:
             print(f"    True in 90% CI: {'YES' if in_ci else 'NO'}")
 
     print(f"\nDiagnostics:")
-    print(f"  Acceptance rate: {result.diagnostics['acceptance_rate']:.1%}")
-    print(f"  Final step size: {result.diagnostics['final_step_size']:.6f}")
-    print(f"  ESS: {result.diagnostics['ess']}")
-    print(f"  R-hat: {result.diagnostics['rhat']}")
+    if 'acceptance_rate' in result.diagnostics:
+        print(f"  Acceptance rate: {result.diagnostics['acceptance_rate']:.1%}")
+    if 'final_step_size' in result.diagnostics:
+        print(f"  Final step size: {result.diagnostics['final_step_size']:.6f}")
+    if 'ess' in result.diagnostics:
+        print(f"  ESS: {result.diagnostics['ess']}")
+    if 'rhat' in result.diagnostics:
+        print(f"  R-hat: {result.diagnostics['rhat']}")
+    for key, val in result.diagnostics.items():
+        if key not in ('acceptance_rate', 'final_step_size', 'ess', 'rhat'):
+            print(f"  {key}: {val}")
 
     perf_d = perf.as_dict()
     print(f"\nPerformance:")
     print(f"  Wall time: {perf_d['wall_time_seconds']:.1f} seconds")
-    print(f"  Peak memory: {perf_d['peak_memory_mb']:.1f} MB")
+    print(f"  Peak memory (CPU): {perf_d['peak_memory_mb']:.1f} MB")
+    if 'gpu_peak_memory_mb' in perf_d:
+        print(f"  Peak memory (GPU): {perf_d['gpu_peak_memory_mb']:.1f} MB")
     print("=" * 60)
 
     return {
@@ -360,6 +396,38 @@ def save_dpf_results(results: Dict[str, Any], output_dir: Path):
             writer = csv.DictWriter(f, fieldnames=trace[0].keys())
             writer.writeheader()
             writer.writerows(trace)
+
+    # Generate diagnostic plots
+    true_params = results['true_params']
+    sampler = result.metadata.get('sampler', '')
+
+    if sampler == 'map':
+        from src.experiments.visualization_hmc import plot_map_convergence
+        param_history = result.metadata.get('param_history', {})
+        loss_history = result.diagnostics.get('loss_history', [])
+        plot_map_convergence(
+            param_history, loss_history, true_params,
+            save_path=output_dir / 'map_convergence.png',
+        )
+    else:
+        from src.experiments.visualization_hmc import plot_trace, plot_posterior_histograms
+
+        # Extract burn-in samples from trace log for trace plot
+        burn_in_samples = None
+        if trace:
+            burn_in_rows = [r for r in trace if r.get('phase') == 'burn-in']
+            if burn_in_rows:
+                param_names = [k for k in burn_in_rows[0].keys()
+                               if k not in ('step', 'phase', 'step_in_phase',
+                                            'dt', 'accept_rate', 'step_size')]
+                burn_in_samples = {
+                    name: np.array([r[name] for r in burn_in_rows])
+                    for name in param_names
+                }
+
+        plot_trace(result.samples, true_params, save_path=output_dir / 'trace_plot.png',
+                   burn_in_samples=burn_in_samples)
+        plot_posterior_histograms(result.samples, true_params, save_path=output_dir / 'posterior_histograms.png')
 
     print(f"\nResults saved to {output_dir}")
 

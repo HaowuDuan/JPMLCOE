@@ -13,8 +13,11 @@ filter:
   n_lambda_steps: 29
   resample_threshold: 0.5
 seed: 42
+dtype: float64
 T: 50
 output_dir: outputs/acoustic_tracking/acoustic_tracking_edh_invertible
 plot: true
 device: auto
+tf_log_level: 2
 verbose: true
+show_progress: true

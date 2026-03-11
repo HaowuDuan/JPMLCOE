@@ -1,0 +1,12 @@
+# LEDH Invertible Particle Flow Filter with Soft Resampling
+# Soft resampling blends weights with uniform distribution (differentiable)
+
+_target_: src.filters.particle.ledh_invertible.LEDHParticleFlowFilter
+
+n_particles: 500
+n_lambda_steps: 29
+resample_threshold: 0.5
+
+resampling_method: 'soft'
+resampling_config:
+  alpha: 0.5

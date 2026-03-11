@@ -1,5 +1,5 @@
 # @package _global_
-# DPF: 1D Linear-Gaussian model with systematic resampling + stop_gradient
+# DPF: 1D Linear-Gaussian model with LEDH + systematic resampling + stop_gradient
 #
 # Simplest possible model — timing baseline.
 # Infers obs_noise_std (true: 1.0).
@@ -15,13 +15,14 @@ model:
 
 filter:
   _target_: src.filters.particle.ledh_invertible_hmc.LEDHParticleFlowFilterHMC
-  n_particles: 1000
+  n_particles: 500
   n_lambda_steps: 15
-  resampling_method: ot_entropy       # used by filter() path (standalone filtering)
-  resampling_config:
-    epsilon: 0.5
+  resampling_method: systematic
+  resampling_config: {}
   weight_clip_range: 50.0
   stop_gradient_resampling: true      # cut gradient through resampling
+  hmc_resampling_method: systematic
+  hmc_resampling_config: {}
   eager_mode: false
 
 dpf:
@@ -42,7 +43,7 @@ dpf:
     num_leapfrog_steps: 5
     max_tree_depth: 10
     adaptation_rate: 0.8
-    target_accept_prob: 0.9
+    target_accept_prob: 0.65
     seed: 42
 
 data:

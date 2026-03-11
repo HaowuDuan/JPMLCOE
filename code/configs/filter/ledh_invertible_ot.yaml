@@ -1,0 +1,12 @@
+# LEDH Invertible Particle Flow Filter with OT Entropy Resampling
+# OT resampling is fully differentiable via Sinkhorn transport matrix
+
+_target_: src.filters.particle.ledh_invertible.LEDHParticleFlowFilter
+
+n_particles: 500
+n_lambda_steps: 29
+resample_threshold: 0.5
+
+resampling_method: 'ot_entropy'
+resampling_config:
+  epsilon: 0.5

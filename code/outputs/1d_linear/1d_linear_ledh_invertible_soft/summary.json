@@ -1,0 +1,72 @@
+{
+  "rmse": 0.26803193690061433,
+  "log_likelihood": -30.932242043347173,
+  "metadata": {
+    "filter_type": "LEDHParticleFlowFilter",
+    "n_particles": 500,
+    "n_lambda_steps": 29,
+    "resampling_method": "soft",
+    "resampling_rate": 0.26,
+    "performance": {
+      "wall_time_seconds": 17.546336500003235,
+      "time_per_timestep_ms": 175.46336500003235,
+      "peak_memory_mb": 7.314907073974609,
+      "memory_increase_mb": 54.921875,
+      "start_memory_mb": 437.5625,
+      "end_memory_mb": 492.484375,
+      "num_timesteps": 100
+    }
+  },
+  "config": {
+    "model": {
+      "_target_": "src.models.linear_gaussian.LinearGaussianModel",
+      "F": [
+        [
+          0.95
+        ]
+      ],
+      "B": [
+        [
+          0.5
+        ]
+      ],
+      "H": [
+        [
+          1.0
+        ]
+      ],
+      "D": [
+        [
+          0.3
+        ]
+      ],
+      "mu_0": [
+        0.0
+      ],
+      "Sigma_0": [
+        [
+          1.0
+        ]
+      ]
+    },
+    "filter": {
+      "_target_": "src.filters.particle.ledh_invertible.LEDHParticleFlowFilter",
+      "n_particles": 500,
+      "n_lambda_steps": 29,
+      "resample_threshold": 0.5,
+      "resampling_method": "soft",
+      "resampling_config": {
+        "alpha": 0.5
+      }
+    },
+    "seed": 42,
+    "dtype": "float64",
+    "T": 100,
+    "output_dir": "outputs/1d_linear/1d_linear_ledh_invertible_soft",
+    "plot": true,
+    "device": "auto",
+    "tf_log_level": 2,
+    "verbose": true,
+    "show_progress": true
+  }
+}

@@ -2,6 +2,8 @@
 # MAP: Cubic Sensor with BPF + Adam optimizer
 # Infers sigma_V and sigma_W (true: 1.0, 1.0).
 
+dtype: float32
+
 model:
   _target_: src.models.cubic_sensor.CubicSensorModel
   a: 0.9
@@ -40,7 +42,7 @@ dpf:
     num_steps: 200
     learning_rate: 0.01
     optimizer: adam
-    random_seed: false
+    random_seed: true
     seed: 42
 
 data:

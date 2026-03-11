@@ -1,7 +1,7 @@
 """Hydra-based experiment runner for filter evaluation."""
 
 import os
-os.environ.setdefault('TF_CPP_MIN_LOG_LEVEL', '2')  # 0=all, 1=no DEBUG, 2=no INFO, 3=ERROR only
+os.environ.setdefault('TF_CPP_MIN_LOG_LEVEL', '3')  # 0=all, 1=no DEBUG, 2=no INFO, 3=ERROR only
 
 import hydra
 from omegaconf import DictConfig, OmegaConf
@@ -133,6 +133,22 @@ def _extract_diagnostics(result) -> Dict[str, Any]:
     return {f: getattr(result, f) for f in fields if getattr(result, f, None) is not None}
 
 
+def _get_gpu_memory_mb():
+    """Get current GPU memory usage in MB. Returns None if no GPU available."""
+    try:
+        import tensorflow as tf
+        gpus = tf.config.list_physical_devices('GPU')
+        if gpus:
+            info = tf.config.experimental.get_memory_info('GPU:0')
+            return {
+                'current_mb': float(info['current'] / 1024**2),
+                'peak_mb': float(info['peak'] / 1024**2),
+            }
+    except Exception:
+        pass
+    return None
+
+
 class _PerfTracker:
     """Context manager for wall-time and memory tracking."""
 
@@ -141,6 +157,7 @@ class _PerfTracker:
         self._process = psutil.Process()
         self._start_mem = self._process.memory_info().rss / 1024**2
         self._start_time = time.perf_counter()
+        self._gpu_start = _get_gpu_memory_mb()
         return self
 
     def __exit__(self, *exc):
@@ -148,10 +165,11 @@ class _PerfTracker:
         _, self._peak_mem = tracemalloc.get_traced_memory()
         tracemalloc.stop()
         self._end_mem = self._process.memory_info().rss / 1024**2
+        self._gpu_end = _get_gpu_memory_mb()
 
     def as_dict(self, T: int) -> Dict[str, float]:
         wall = self._end_time - self._start_time
-        return {
+        d = {
             'wall_time_seconds': float(wall),
             'time_per_timestep_ms': float(wall / T * 1000),
             'peak_memory_mb': float(self._peak_mem / 1024**2),
@@ -160,6 +178,10 @@ class _PerfTracker:
             'end_memory_mb': float(self._end_mem),
             'num_timesteps': int(T),
         }
+        if self._gpu_end is not None:
+            d['gpu_peak_memory_mb'] = self._gpu_end['peak_mb']
+            d['gpu_current_memory_mb'] = self._gpu_end['current_mb']
+        return d
 
 
 # ---------------------------------------------------------------------------
@@ -250,6 +272,8 @@ def run_filter_experiment(cfg: DictConfig) -> Dict[str, Any]:
     print(f"  Time per step: {perf_d['time_per_timestep_ms']:.2f} ms")
     print(f"  Peak memory: {perf_d['peak_memory_mb']:.1f} MB")
     print(f"  Memory increase: {perf_d['memory_increase_mb']:.1f} MB")
+    if 'gpu_peak_memory_mb' in perf_d:
+        print(f"  Peak memory (GPU): {perf_d['gpu_peak_memory_mb']:.1f} MB")
     print("=" * 60)
 
     return results

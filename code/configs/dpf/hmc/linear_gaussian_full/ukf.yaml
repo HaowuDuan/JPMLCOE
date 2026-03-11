@@ -1,0 +1,55 @@
+# @package _global_
+# DPF: 1D Linear-Gaussian model with UKF + HMC - 2 noise parameters
+#
+# UKF uses sigma-point approximation; on a linear model it is equivalent to KF.
+# Coefficients fixed at true values; infers: process_noise_std, obs_noise_std.
+
+model:
+  _target_: src.models.linear_gaussian.LinearGaussianModel
+  F: [[0.9]]
+  B: [[1.0]]
+  H: [[1.0]]
+  D: [[1.0]]
+  process_noise_std: 2.0
+  obs_noise_std: 2.0
+
+filter:
+  _target_: src.filters.kalman.unscented_kalman.UnscentedKalmanFilter
+  alpha: 1.0
+  beta: 2.0
+  kappa: 0.0
+  sample_initial_mean: false
+
+dpf:
+  sampler: hmc
+
+  trainable_params:
+    process_noise_std:
+      constraint: positive
+      prior:
+        _target_: tensorflow_probability.distributions.LogNormal
+        loc: 0.0
+        scale: 1.0
+    obs_noise_std:
+      constraint: positive
+      prior:
+        _target_: tensorflow_probability.distributions.LogNormal
+        loc: 0.0
+        scale: 1.0
+
+  hmc:
+    num_samples: 200
+    num_burnin: 100
+    step_size: 0.001
+    num_leapfrog_steps: 5
+    max_tree_depth: 10
+    adaptation_rate: 0.8
+    target_accept_prob: 0.9
+    seed: 42
+
+data:
+  T: 50
+  seed: 42
+  true_params:
+    process_noise_std: 1.0
+    obs_noise_std: 1.0

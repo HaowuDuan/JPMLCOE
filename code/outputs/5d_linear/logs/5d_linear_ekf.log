@@ -1,0 +1,27 @@
+<frozen runpy>:128: RuntimeWarning: 'src.experiments.run_experiment' found in sys.modules after import of package 'src.experiments', but prior to execution of 'src.experiments.run_experiment'; this may result in unpredictable behaviour
+Creating model: src.models.linear_gaussian.LinearGaussianModel
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1773134212.277744 3772120 gpu_device.cc:2020] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 21443 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3090, pci bus id: 0000:01:00.0, compute capability: 8.6
+Generating 100 time steps...
+I0000 00:00:1773134212.347257 3772120 cuda_solvers.cc:175] Creating GpuSolver handles for stream 0x2ed13ce0
+Creating filter: ExtendedKalmanFilter
+Initialized ExtendedKalmanFilter with sampled initial state from model distribution
+Running ExtendedKalmanFilter...
+  Step 1/100 | 1558.7 ms | elapsed 1.56s  Step 2/100 | 3.1 ms | elapsed 1.56s  Step 3/100 | 3.1 ms | elapsed 1.56s  Step 4/100 | 2.7 ms | elapsed 1.57s  Step 5/100 | 2.9 ms | elapsed 1.57s  Step 6/100 | 2.9 ms | elapsed 1.57s  Step 7/100 | 3.0 ms | elapsed 1.58s  Step 8/100 | 2.6 ms | elapsed 1.58s  Step 9/100 | 2.6 ms | elapsed 1.58s  Step 10/100 | 2.6 ms | elapsed 1.58s  Step 11/100 | 2.8 ms | elapsed 1.59s  Step 12/100 | 2.6 ms | elapsed 1.59s  Step 13/100 | 2.9 ms | elapsed 1.59s  Step 14/100 | 2.7 ms | elapsed 1.60s  Step 15/100 | 2.7 ms | elapsed 1.60s  Step 16/100 | 2.6 ms | elapsed 1.60s  Step 17/100 | 2.7 ms | elapsed 1.60s  Step 18/100 | 2.8 ms | elapsed 1.61s  Step 19/100 | 3.3 ms | elapsed 1.61s  Step 20/100 | 2.8 ms | elapsed 1.61s  Step 21/100 | 2.8 ms | elapsed 1.61s  Step 22/100 | 2.8 ms | elapsed 1.62s  Step 23/100 | 2.7 ms | elapsed 1.62s  Step 24/100 | 2.8 ms | elapsed 1.62s  Step 25/100 | 2.6 ms | elapsed 1.63s  Step 26/100 | 2.6 ms | elapsed 1.63s  Step 27/100 | 2.7 ms | elapsed 1.63s  Step 28/100 | 2.6 ms | elapsed 1.63s  Step 29/100 | 2.6 ms | elapsed 1.64s  Step 30/100 | 2.5 ms | elapsed 1.64s  Step 31/100 | 2.6 ms | elapsed 1.64s  Step 32/100 | 2.6 ms | elapsed 1.64s  Step 33/100 | 2.5 ms | elapsed 1.65s  Step 34/100 | 2.7 ms | elapsed 1.65s  Step 35/100 | 2.7 ms | elapsed 1.65s  Step 36/100 | 2.6 ms | elapsed 1.65s  Step 37/100 | 2.6 ms | elapsed 1.66s  Step 38/100 | 2.7 ms | elapsed 1.66s  Step 39/100 | 2.5 ms | elapsed 1.66s  Step 40/100 | 2.6 ms | elapsed 1.66s  Step 41/100 | 2.6 ms | elapsed 1.67s  Step 42/100 | 2.7 ms | elapsed 1.67s  Step 43/100 | 2.6 ms | elapsed 1.67s  Step 44/100 | 2.7 ms | elapsed 1.68s  Step 45/100 | 2.5 ms | elapsed 1.68s  Step 46/100 | 2.6 ms | elapsed 1.68s  Step 47/100 | 2.6 ms | elapsed 1.68s  Step 48/100 | 2.6 ms | elapsed 1.69s  Step 49/100 | 2.8 ms | elapsed 1.69s  Step 50/100 | 2.7 ms | elapsed 1.69s  Step 51/100 | 2.7 ms | elapsed 1.69s  Step 52/100 | 2.6 ms | elapsed 1.70s  Step 53/100 | 2.7 ms | elapsed 1.70s  Step 54/100 | 2.5 ms | elapsed 1.70s  Step 55/100 | 2.6 ms | elapsed 1.70s  Step 56/100 | 2.6 ms | elapsed 1.71s  Step 57/100 | 2.6 ms | elapsed 1.71s  Step 58/100 | 2.6 ms | elapsed 1.71s  Step 59/100 | 2.5 ms | elapsed 1.71s  Step 60/100 | 2.5 ms | elapsed 1.72s  Step 61/100 | 2.6 ms | elapsed 1.72s  Step 62/100 | 2.6 ms | elapsed 1.72s  Step 63/100 | 2.5 ms | elapsed 1.73s  Step 64/100 | 2.6 ms | elapsed 1.73s  Step 65/100 | 2.7 ms | elapsed 1.73s  Step 66/100 | 2.7 ms | elapsed 1.73s  Step 67/100 | 2.6 ms | elapsed 1.74s  Step 68/100 | 2.8 ms | elapsed 1.74s  Step 69/100 | 2.9 ms | elapsed 1.74s  Step 70/100 | 2.7 ms | elapsed 1.74s  Step 71/100 | 2.7 ms | elapsed 1.75s  Step 72/100 | 2.8 ms | elapsed 1.75s  Step 73/100 | 2.8 ms | elapsed 1.75s  Step 74/100 | 2.8 ms | elapsed 1.76s  Step 75/100 | 2.9 ms | elapsed 1.76s  Step 76/100 | 2.9 ms | elapsed 1.76s  Step 77/100 | 2.9 ms | elapsed 1.76s  Step 78/100 | 3.0 ms | elapsed 1.77s  Step 79/100 | 2.9 ms | elapsed 1.77s  Step 80/100 | 2.9 ms | elapsed 1.77s  Step 81/100 | 2.7 ms | elapsed 1.78s  Step 82/100 | 3.4 ms | elapsed 1.78s  Step 83/100 | 3.0 ms | elapsed 1.78s  Step 84/100 | 2.9 ms | elapsed 1.78s  Step 85/100 | 2.8 ms | elapsed 1.79s  Step 86/100 | 3.0 ms | elapsed 1.79s  Step 87/100 | 2.9 ms | elapsed 1.79s  Step 88/100 | 3.2 ms | elapsed 1.80s  Step 89/100 | 3.0 ms | elapsed 1.80s  Step 90/100 | 2.9 ms | elapsed 1.80s  Step 91/100 | 3.2 ms | elapsed 1.81s  Step 92/100 | 3.1 ms | elapsed 1.81s  Step 93/100 | 3.1 ms | elapsed 1.81s  Step 94/100 | 2.8 ms | elapsed 1.81s  Step 95/100 | 3.1 ms | elapsed 1.82s  Step 96/100 | 2.8 ms | elapsed 1.82s  Step 97/100 | 2.8 ms | elapsed 1.82s  Step 98/100 | 2.9 ms | elapsed 1.83s  Step 99/100 | 3.0 ms | elapsed 1.83s  Step 100/100 | 3.1 ms | elapsed 1.83s
+
+============================================================
+RESULTS: ExtendedKalmanFilter
+============================================================
+RMSE: 0.0951
+Log-likelihood: -688.96
+
+Performance:
+  Wall time: 1.843 seconds
+  Time per step: 18.43 ms
+  Peak memory: 2.6 MB
+  Memory increase: 104.7 MB
+  Peak memory (GPU): 0.1 MB
+============================================================
+
+Results saved to /home/haowu/JPML/code/outputs/5d_linear/5d_linear_ekf
+Plot saved to /home/haowu/JPML/code/outputs/5d_linear/5d_linear_ekf/plot.png

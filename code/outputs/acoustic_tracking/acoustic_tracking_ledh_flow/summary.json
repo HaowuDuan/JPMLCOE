@@ -1,5 +1,5 @@
 {
-  "rmse": 17.643730381985133,
+  "rmse": 15.815735638383634,
   "log_likelihood": null,
   "metadata": {
     "filter_type": "LocalExactDaumHuangFlow",
@@ -7,13 +7,15 @@
     "n_lambda_steps": 29,
     "integration_method": "euler",
     "performance": {
-      "wall_time_seconds": 86.7699719578959,
-      "time_per_timestep_ms": 1735.399439157918,
-      "peak_memory_mb": 22.794734001159668,
-      "memory_increase_mb": 1770.484375,
-      "start_memory_mb": 932.375,
-      "end_memory_mb": 2702.859375,
-      "num_timesteps": 50
+      "wall_time_seconds": 57.258573554456234,
+      "time_per_timestep_ms": 1145.1714710891247,
+      "peak_memory_mb": 19.55533504486084,
+      "memory_increase_mb": 301.6875,
+      "start_memory_mb": 1021.73046875,
+      "end_memory_mb": 1323.41796875,
+      "num_timesteps": 50,
+      "gpu_peak_memory_mb": 312.1259765625,
+      "gpu_current_memory_mb": 0.942138671875
     }
   },
   "config": {
@@ -37,10 +39,13 @@
       "n_threads": null
     },
     "seed": 42,
+    "dtype": "float64",
     "T": 50,
     "output_dir": "outputs/acoustic_tracking/acoustic_tracking_ledh_flow",
     "plot": true,
     "device": "auto",
-    "verbose": true
+    "tf_log_level": 2,
+    "verbose": true,
+    "show_progress": true
   }
 }

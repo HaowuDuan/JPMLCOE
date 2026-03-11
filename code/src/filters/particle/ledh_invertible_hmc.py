@@ -230,7 +230,7 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
                     jacobians=theta,
                     clip_range=clip_range
                 )
-                log_lik = log_lik + log_lik_step
+                log_lik = log_lik + log_lik_step + max_log_theta
 
                 # --- EKF covariance update ---
                 _, covs = _ekf_update(model, eta_bar_0, covs, y)
@@ -441,7 +441,7 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
                 clip_range=self.weight_clip_range
             )
             self.weights.assign(weights_new)
-            total_log_lik = total_log_lik + log_lik
+            total_log_lik = total_log_lik + log_lik + max_log_theta
 
             if self.on_timestep is not None:
                 ess_val = float(ess_tf(self.weights.value()).numpy())

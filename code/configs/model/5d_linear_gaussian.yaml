@@ -1,5 +1,5 @@
 # 5D Linear Gaussian Model Configuration
-# Higher dimensional test system
+# Fully observed higher dimensional test system
 
 _target_: src.models.linear_gaussian.LinearGaussianModel
 
@@ -20,14 +20,18 @@ B: [[1.0, 0.0, 0.0, 0.0, 0.0],
     [0.0, 0.0, 0.0, 1.0, 0.0],
     [0.0, 0.0, 0.0, 0.0, 1.0]]
 
-# Observe first 3 dimensions
+# Observe all 5 dimensions
 H: [[1.0, 0.0, 0.0, 0.0, 0.0],
     [0.0, 1.0, 0.0, 0.0, 0.0],
-    [0.0, 0.0, 1.0, 0.0, 0.0]]
+    [0.0, 0.0, 1.0, 0.0, 0.0],
+    [0.0, 0.0, 0.0, 1.0, 0.0],
+    [0.0, 0.0, 0.0, 0.0, 1.0]]
 
-D: [[0.1, 0.0, 0.0],
-    [0.0, 0.1, 0.0],
-    [0.0, 0.0, 0.1]]
+D: [[0.1, 0.0, 0.0, 0.0, 0.0],
+    [0.0, 0.1, 0.0, 0.0, 0.0],
+    [0.0, 0.0, 0.1, 0.0, 0.0],
+    [0.0, 0.0, 0.0, 0.1, 0.0],
+    [0.0, 0.0, 0.0, 0.0, 0.1]]
 
 # Initial state distribution
 mu_0: [0.0, 0.0, 0.0, 0.0, 0.0]

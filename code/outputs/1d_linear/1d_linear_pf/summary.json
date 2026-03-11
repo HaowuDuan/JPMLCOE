@@ -1,0 +1,68 @@
+{
+  "rmse": 0.3711251673161706,
+  "log_likelihood": -21.97831285508941,
+  "metadata": {
+    "filter_type": "ParticleFilterTF",
+    "n_particles": 1000,
+    "resampling_rate": 0.6,
+    "resampling_method": "systematic",
+    "resampling_config": {},
+    "performance": {
+      "wall_time_seconds": 1.258398792007938,
+      "time_per_timestep_ms": 62.91993960039691,
+      "peak_memory_mb": 5.011660575866699,
+      "memory_increase_mb": 31.59375,
+      "start_memory_mb": 440.84375,
+      "end_memory_mb": 472.4375,
+      "num_timesteps": 20
+    }
+  },
+  "config": {
+    "model": {
+      "_target_": "src.models.linear_gaussian.LinearGaussianModel",
+      "F": [
+        [
+          0.95
+        ]
+      ],
+      "B": [
+        [
+          0.5
+        ]
+      ],
+      "H": [
+        [
+          1.0
+        ]
+      ],
+      "D": [
+        [
+          0.3
+        ]
+      ],
+      "mu_0": [
+        0.0
+      ],
+      "Sigma_0": [
+        [
+          1.0
+        ]
+      ]
+    },
+    "filter": {
+      "_target_": "src.filters.particle.bootstrap_pf_tf.ParticleFilterTF",
+      "_recursive_": false,
+      "n_particles": 1000,
+      "resample_threshold": 0.5
+    },
+    "seed": 42,
+    "dtype": "float64",
+    "T": 20,
+    "output_dir": "outputs/1d_linear/1d_linear_pf",
+    "plot": true,
+    "device": "auto",
+    "tf_log_level": 2,
+    "verbose": true,
+    "show_progress": true
+  }
+}

@@ -35,6 +35,7 @@ class DPFRunner:
         param_specs: Dict[str, ParameterSpec],
         sampler: str = 'hmc',
         on_grad: Optional[Callable] = None,
+        mass_vector: Optional[list] = None,
     ):
         """
         Initialize DPF runner.
@@ -48,6 +49,11 @@ class DPFRunner:
             on_grad: Optional callback(step, nlp, grad) called after each
                 gradient evaluation. Useful for diagnostics without polluting
                 production logs.
+            mass_vector: Optional diagonal mass matrix as a list of floats,
+                one per parameter. Enables PreconditionedHamiltonianMonteCarlo
+                with momentum p ~ N(0, diag(mass_vector)). Large m_i means
+                smaller effective leapfrog step in dimension i — use for
+                steep/narrow posterior directions.
         """
         self.base_model = base_model
         self.filter_class = filter_class
@@ -55,6 +61,7 @@ class DPFRunner:
         self.sampler = sampler.lower()
         self.on_grad = on_grad
         self._grad_step = 0
+        self.mass_vector = mass_vector
 
         # Wrap model: tracks trainable params, delegates everything else
         trainable_param_names = list(param_specs.keys())
@@ -153,21 +160,49 @@ class DPFRunner:
         def target_log_prob_fn(unconstrained_params):
             return -self._negative_log_posterior(unconstrained_params)
 
+        # Build momentum distribution for diagonal mass matrix (if specified)
+        momentum_distribution = None
+        if self.mass_vector is not None:
+            scale_diag = tf.constant(
+                [float(m) ** 0.5 for m in self.mass_vector], dtype=dtype
+            )
+            momentum_distribution = tfp.distributions.MultivariateNormalDiag(
+                loc=tf.zeros(len(self.mass_vector), dtype=dtype),
+                scale_diag=scale_diag,
+            )
+            print(f"  mass_vector={self.mass_vector}  (p ~ N(0, diag(m)))")
+
         # Choose sampler
         if self.sampler == 'nuts':
             print(f"Using NUTS sampler (max_tree_depth={max_tree_depth})")
-            inner_kernel = tfp.mcmc.NoUTurnSampler(
-                target_log_prob_fn=target_log_prob_fn,
-                step_size=step_size,
-                max_tree_depth=max_tree_depth
-            )
+            if momentum_distribution is not None:
+                inner_kernel = tfp.experimental.mcmc.PreconditionedNoUTurnSampler(
+                    target_log_prob_fn=target_log_prob_fn,
+                    step_size=step_size,
+                    max_tree_depth=max_tree_depth,
+                    momentum_distribution=momentum_distribution,
+                )
+            else:
+                inner_kernel = tfp.mcmc.NoUTurnSampler(
+                    target_log_prob_fn=target_log_prob_fn,
+                    step_size=step_size,
+                    max_tree_depth=max_tree_depth,
+                )
         else:
             print(f"Using HMC sampler (num_leapfrog_steps={num_leapfrog_steps})")
-            inner_kernel = tfp.mcmc.HamiltonianMonteCarlo(
-                target_log_prob_fn=target_log_prob_fn,
-                step_size=step_size,
-                num_leapfrog_steps=num_leapfrog_steps
-            )
+            if momentum_distribution is not None:
+                inner_kernel = tfp.experimental.mcmc.PreconditionedHamiltonianMonteCarlo(
+                    target_log_prob_fn=target_log_prob_fn,
+                    step_size=step_size,
+                    num_leapfrog_steps=num_leapfrog_steps,
+                    momentum_distribution=momentum_distribution,
+                )
+            else:
+                inner_kernel = tfp.mcmc.HamiltonianMonteCarlo(
+                    target_log_prob_fn=target_log_prob_fn,
+                    step_size=step_size,
+                    num_leapfrog_steps=num_leapfrog_steps,
+                )
 
         # Adaptive step size
         num_adaptation_steps = int(adaptation_rate * num_burnin)

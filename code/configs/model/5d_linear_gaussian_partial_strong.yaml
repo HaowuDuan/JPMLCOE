@@ -1,0 +1,38 @@
+# 5D Linear Gaussian Model — Partial Observation, Strong Coupling
+# Only dims 1-3 observed, stronger 0.2 off-diagonal coupling in F
+
+_target_: src.models.linear_gaussian.LinearGaussianModel
+
+# X_{n} = F * X_{n-1} + B * V_n,  V_n ~ N(0, I)
+# Y_{n} = H * X_n + D * W_n,  W_n ~ N(0, I)
+
+# Nearly diagonal F with strong coupling (0.2)
+# Information propagates faster from observed dims to unobserved dims
+F: [[0.80, 0.20, 0.0,  0.0,  0.0],
+    [0.20, 0.60, 0.20, 0.0,  0.0],
+    [0.0,  0.20, 0.60, 0.20, 0.0],
+    [0.0,  0.0,  0.20, 0.60, 0.20],
+    [0.0,  0.0,  0.0,  0.20, 0.80]]
+
+B: [[1.0, 0.0, 0.0, 0.0, 0.0],
+    [0.0, 1.0, 0.0, 0.0, 0.0],
+    [0.0, 0.0, 1.0, 0.0, 0.0],
+    [0.0, 0.0, 0.0, 1.0, 0.0],
+    [0.0, 0.0, 0.0, 0.0, 1.0]]
+
+# Observe first 3 dimensions only
+H: [[1.0, 0.0, 0.0, 0.0, 0.0],
+    [0.0, 1.0, 0.0, 0.0, 0.0],
+    [0.0, 0.0, 1.0, 0.0, 0.0]]
+
+D: [[0.1, 0.0, 0.0],
+    [0.0, 0.1, 0.0],
+    [0.0, 0.0, 0.1]]
+
+# Initial state distribution
+mu_0: [0.0, 0.0, 0.0, 0.0, 0.0]
+Sigma_0: [[1.0, 0.0, 0.0, 0.0, 0.0],
+          [0.0, 1.0, 0.0, 0.0, 0.0],
+          [0.0, 0.0, 1.0, 0.0, 0.0],
+          [0.0, 0.0, 0.0, 1.0, 0.0],
+          [0.0, 0.0, 0.0, 0.0, 1.0]]

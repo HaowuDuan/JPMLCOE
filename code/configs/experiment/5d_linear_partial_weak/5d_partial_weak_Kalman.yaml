@@ -1,0 +1,13 @@
+# @package _global_
+
+# Experiment: Kalman Filter on 5D Linear Gaussian (partial_weak) model
+
+defaults:
+  - override /model: 5d_linear_gaussian_partial_weak
+  - override /filter: kalman
+
+# Override settings
+T: 100
+seed: 42
+plot: true
+output_dir: outputs/5d_linear_partial_weak/5d_partial_weak_Kalman

@@ -2,6 +2,8 @@
 # MAP: Kitagawa with LEDH + Adam optimizer
 # Infers sigma_V and sigma_W (true: 3.162, 1.0).
 
+dtype: float32
+
 model:
   _target_: src.models.kitagawa.KitagawaModel
   sigma_V: 2.0       # Initial guess (true: 3.162)
@@ -10,11 +12,12 @@ model:
 
 filter:
   _target_: src.filters.particle.ledh_invertible_hmc.LEDHParticleFlowFilterHMC
-  n_particles: 200
+  n_particles: 1000
   n_lambda_steps: 29
   resampling_method: ot_entropy
   resampling_config:
     epsilon: 0.5
+    extrapolation_damping: 0.5
   weight_clip_range: 50.0
   stop_gradient_resampling: false
   eager_mode: false
@@ -40,7 +43,7 @@ dpf:
     num_steps: 200
     learning_rate: 0.01
     optimizer: adam
-    random_seed: false
+    random_seed: true
     seed: 42
 
 data:
