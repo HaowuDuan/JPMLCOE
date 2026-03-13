@@ -1,20 +1,22 @@
 {
-  "rmse": 0.11348929265753871,
-  "log_likelihood": "522.6628",
+  "rmse": 0.08726389527657655,
+  "log_likelihood": 332.3701881550419,
   "metadata": {
     "filter_type": "ParticleFilterTF",
     "n_particles": 1000,
-    "resampling_rate": 0.702,
+    "resampling_rate": 0.826,
     "resampling_method": "systematic",
     "resampling_config": {},
     "performance": {
-      "wall_time_seconds": 98.69621341582388,
-      "time_per_timestep_ms": 197.39242683164775,
-      "peak_memory_mb": 12.66625690460205,
-      "memory_increase_mb": 1684.734375,
-      "start_memory_mb": 421.28125,
-      "end_memory_mb": 2106.015625,
-      "num_timesteps": 500
+      "wall_time_seconds": 46.05824258364737,
+      "time_per_timestep_ms": 92.11648516729474,
+      "peak_memory_mb": 14.567145347595215,
+      "memory_increase_mb": 510.2109375,
+      "start_memory_mb": 969.46875,
+      "end_memory_mb": 1479.6796875,
+      "num_timesteps": 500,
+      "gpu_peak_memory_mb": 11.09130859375,
+      "gpu_current_memory_mb": 0.02783203125
     }
   },
   "config": {
@@ -30,10 +32,13 @@
       "resample_threshold": 0.5
     },
     "seed": 42,
+    "dtype": "float64",
     "T": 500,
     "output_dir": "outputs/range_bearing/range_bearing_pf",
     "plot": true,
     "device": "auto",
-    "verbose": true
+    "tf_log_level": 2,
+    "verbose": true,
+    "show_progress": true
   }
 }

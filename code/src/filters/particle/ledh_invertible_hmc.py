@@ -19,6 +19,7 @@ from typing import Any, Callable, Dict, Optional
 
 from .ledh_invertible import LEDHParticleFlowFilter
 from ..kalman.batched_ekf import batched_ekf_predict, batched_ekf_update
+from ..kalman.batched_ukf import batched_ukf_predict, batched_ukf_update
 from ...utils.flow_params import compute_flow_params_batch
 from ...utils.distributions import compute_flow_weights
 from ...utils.linalg import (
@@ -119,6 +120,16 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
             self._hmc_resampling_name = self.resampling_method_name
             self._hmc_resampling_config = self.resampling_config
 
+        # Pre-compute UKF weights if needed (before compiled filter build)
+        if self.filter_type == 'ukf' and not hasattr(self, '_ukf_weights_mean'):
+            from ..kalman.batched_ukf import compute_ukf_weights
+            alpha = self.ukf_params.get('alpha', 1e-3)
+            beta = self.ukf_params.get('beta', 2.0)
+            kappa = self.ukf_params.get('kappa', 0.0)
+            self._ukf_weights_mean, self._ukf_weights_cov, self._ukf_lambda = (
+                compute_ukf_weights(self.state_dim, alpha, beta, kappa, self.dtype)
+            )
+
         # Build compiled filter (traced on first call)
         if not self.eager_mode:
             self._compiled_filter = self._build_compiled_filter()
@@ -152,8 +163,16 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
         # Bypass nested @tf.function — inline into this trace so model
         # attributes resolve to symbolic tensors and gradients flow correctly
         # through the full computation.
-        _ekf_predict = batched_ekf_predict.python_function
-        _ekf_update = batched_ekf_update.python_function
+        use_ukf = (self.filter_type == 'ukf')
+        if use_ukf:
+            _batched_predict_fn = batched_ukf_predict.python_function
+            _batched_update_fn = batched_ukf_update.python_function
+            _ukf_wm = self._ukf_weights_mean
+            _ukf_wc = self._ukf_weights_cov
+            _ukf_lam = self._ukf_lambda
+        else:
+            _batched_predict_fn = batched_ekf_predict.python_function
+            _batched_update_fn = batched_ekf_update.python_function
         _flow_params = compute_flow_params_batch.python_function
         _flow_weights = compute_flow_weights.python_function
         # Graph mode: use graph_safe_log_abs_det (custom gradient with pinv
@@ -181,7 +200,13 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
 
                 # --- Predict ---
                 particles_prev = particles
-                eta_bar_0, covs = _ekf_predict(model, particles, covs)
+                if use_ukf:
+                    eta_bar_0, covs = _batched_predict_fn(
+                        model, particles, covs,
+                        _ukf_wm, _ukf_wc, _ukf_lam, sd
+                    )
+                else:
+                    eta_bar_0, covs = _batched_predict_fn(model, particles, covs)
 
                 seed_tf = tf.stack([seed_ctr, tf.constant(0, dtype=tf.int32)])
                 seed_ctr = seed_ctr + 1
@@ -232,8 +257,14 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
                 )
                 log_lik = log_lik + log_lik_step + max_log_theta
 
-                # --- EKF covariance update ---
-                _, covs = _ekf_update(model, eta_bar_0, covs, y)
+                # --- Covariance update ---
+                if use_ukf:
+                    _, covs = _batched_update_fn(
+                        model, eta_bar_0, covs, y,
+                        _ukf_wm, _ukf_wc, _ukf_lam, sd
+                    )
+                else:
+                    _, covs = _batched_update_fn(model, eta_bar_0, covs, y)
 
                 # --- Resampling ---
                 if always_resample:
@@ -365,8 +396,12 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
         """Eager fallback: Python for-loop with Variable.assign."""
         # Bypass @tf.function to avoid autograph issues (e.g. isinstance in
         # _as_sigma) and ensure GradientTape tracks ops eagerly.
-        _ekf_predict = batched_ekf_predict.python_function
-        _ekf_update = batched_ekf_update.python_function
+        if self.filter_type == 'ukf':
+            _eager_predict = batched_ukf_predict.python_function
+            _eager_update = batched_ukf_update.python_function
+        else:
+            _eager_predict = batched_ekf_predict.python_function
+            _eager_update = batched_ekf_update.python_function
         _flow_params = compute_flow_params_batch.python_function
         _flow_weights = compute_flow_weights.python_function
         _log_abs_det = safe_log_abs_det.python_function
@@ -381,9 +416,16 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
             # --- Predict ---
             self.particles_prev.assign(self.particles.value())
 
-            eta_bar_0_tf, cov_pred_tf = _ekf_predict(
-                self.model, self.particles.value(), self.particle_covs.value()
-            )
+            if self.filter_type == 'ukf':
+                eta_bar_0_tf, cov_pred_tf = _eager_predict(
+                    self.model, self.particles.value(), self.particle_covs.value(),
+                    self._ukf_weights_mean, self._ukf_weights_cov,
+                    self._ukf_lambda, self.state_dim
+                )
+            else:
+                eta_bar_0_tf, cov_pred_tf = _eager_predict(
+                    self.model, self.particles.value(), self.particle_covs.value()
+                )
             self.particle_covs.assign(cov_pred_tf)
             self.eta_bar_0.assign(eta_bar_0_tf)
 
@@ -452,11 +494,19 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
                     max_log_theta=float(max_log_theta.numpy()),
                 )
 
-            # --- EKF covariance update ---
-            _, cov_updated = _ekf_update(
-                self.model, self.eta_bar_0.value(),
-                self.particle_covs.value(), y
-            )
+            # --- Covariance update ---
+            if self.filter_type == 'ukf':
+                _, cov_updated = _eager_update(
+                    self.model, self.eta_bar_0.value(),
+                    self.particle_covs.value(), y,
+                    self._ukf_weights_mean, self._ukf_weights_cov,
+                    self._ukf_lambda, self.state_dim
+                )
+            else:
+                _, cov_updated = _eager_update(
+                    self.model, self.eta_bar_0.value(),
+                    self.particle_covs.value(), y
+                )
             self.particle_covs.assign(cov_updated)
 
             # --- Resampling ---

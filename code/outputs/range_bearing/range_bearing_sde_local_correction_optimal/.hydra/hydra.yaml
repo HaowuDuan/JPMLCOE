@@ -130,18 +130,18 @@ hydra:
   runtime:
     version: 1.3.2
     version_base: '1.3'
-    cwd: /Users/haowuduan/Documents/githubrepos/JPMLCOE/code
+    cwd: /home/haowu/JPML/code
     config_sources:
     - path: hydra.conf
       schema: pkg
       provider: hydra
-    - path: /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/configs
+    - path: /home/haowu/JPML/code/configs
       schema: file
       provider: main
     - path: ''
       schema: structured
       provider: schema
-    output_dir: /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/outputs/range_bearing/range_bearing_sde_local_correction_optimal
+    output_dir: /home/haowu/JPML/code/outputs/range_bearing/range_bearing_sde_local_correction_optimal
     choices:
       experiment: range_bearing/range_bearing_sde_local_correction_optimal
       filter: sde_local_correction

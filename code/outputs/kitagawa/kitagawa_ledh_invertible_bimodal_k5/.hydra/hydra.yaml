@@ -130,18 +130,18 @@ hydra:
   runtime:
     version: 1.3.2
     version_base: '1.3'
-    cwd: /Users/haowuduan/Documents/githubrepos/JPMLCOE/code
+    cwd: /home/haowu/JPML/code
     config_sources:
     - path: hydra.conf
       schema: pkg
       provider: hydra
-    - path: /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/configs
+    - path: /home/haowu/JPML/code/configs
       schema: file
       provider: main
     - path: ''
       schema: structured
       provider: schema
-    output_dir: /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/outputs/kitagawa/kitagawa_ledh_invertible_bimodal_k5
+    output_dir: /home/haowu/JPML/code/outputs/kitagawa/kitagawa_ledh_invertible_bimodal_k5
     choices:
       experiment: kitagawa/kitagawa_ledh_invertible_bimodal_k5
       filter: ledh_invertible_bimodal

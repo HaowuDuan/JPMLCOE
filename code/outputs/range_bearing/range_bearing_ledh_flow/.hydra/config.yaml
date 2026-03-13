@@ -11,8 +11,11 @@ filter:
   regularization: 1.0e-05
   n_threads: null
 seed: 42
+dtype: float64
 T: 500
 output_dir: outputs/range_bearing/range_bearing_ledh_flow
 plot: true
 device: auto
+tf_log_level: 2
 verbose: true
+show_progress: true

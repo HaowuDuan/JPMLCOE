@@ -24,6 +24,7 @@ from typing import Optional, Dict, Any
 
 from ...core.model_base import StateSpaceModel
 from ..kalman.batched_ekf import batched_ekf_predict, batched_ekf_update
+from ..kalman.batched_ukf import batched_ukf_predict, batched_ukf_update, compute_ukf_weights
 from ...utils.flow_params import compute_flow_params_batch
 from ...utils.distributions import compute_flow_weights, sample_particles_cholesky
 from ...utils.linalg import safe_log_abs_det, safe_inv
@@ -53,8 +54,12 @@ class LEDHConditionalSMC:
         weight_clip_range: Optional[float] = None,
         ancestor_sampling: bool = True,
         flow_config: FlowScheduleConfig = FlowScheduleConfig(),
+        filter_type: str = 'ekf',
+        ukf_params: Optional[Dict[str, float]] = None,
     ):
         self.model = model
+        self.filter_type = filter_type
+        self.ukf_params = ukf_params or {}
         self.dtype = getattr(model, 'dtype', tf.float64)
         self.state_dim = model.state_dim
         self.obs_dim = model.obs_dim
@@ -81,6 +86,15 @@ class LEDHConditionalSMC:
         self.R_inv_cache = None
 
         self._generate_lambda_steps()
+
+        # Pre-compute UKF weights if needed
+        if self.filter_type == 'ukf':
+            alpha = self.ukf_params.get('alpha', 1e-3)
+            beta = self.ukf_params.get('beta', 2.0)
+            kappa = self.ukf_params.get('kappa', 0.0)
+            self._ukf_weights_mean, self._ukf_weights_cov, self._ukf_lambda = (
+                compute_ukf_weights(self.state_dim, alpha, beta, kappa, self.dtype)
+            )
 
     def _next_seed(self):
         keys = tf.random.experimental.stateless_split(self.rng_key, num=2)
@@ -174,10 +188,17 @@ class LEDHConditionalSMC:
                 log_theta_free, x_ref_t
             )
 
-            # 5. EKF update for covariances
-            _, cov_updated = batched_ekf_update(
-                self.model, eta_bar_0, particle_covs, y_t
-            )
+            # 5. EKF/UKF update for covariances
+            if self.filter_type == 'ukf':
+                _, cov_updated = batched_ukf_update(
+                    self.model, eta_bar_0, particle_covs, y_t,
+                    self._ukf_weights_mean, self._ukf_weights_cov,
+                    self._ukf_lambda, self.state_dim
+                )
+            else:
+                _, cov_updated = batched_ekf_update(
+                    self.model, eta_bar_0, particle_covs, y_t
+                )
             particle_covs = cov_updated
 
             # Store particles and diagnostics
@@ -233,10 +254,17 @@ class LEDHConditionalSMC:
         return particles, weights, particle_covs
 
     def _predict(self, particles, particle_covs, t):
-        """Batched EKF predict for covariances + deterministic means."""
-        eta_bar_0, cov_pred = batched_ekf_predict(
-            self.model, particles, particle_covs
-        )
+        """Batched EKF/UKF predict for covariances + deterministic means."""
+        if self.filter_type == 'ukf':
+            eta_bar_0, cov_pred = batched_ukf_predict(
+                self.model, particles, particle_covs,
+                self._ukf_weights_mean, self._ukf_weights_cov,
+                self._ukf_lambda, self.state_dim
+            )
+        else:
+            eta_bar_0, cov_pred = batched_ekf_predict(
+                self.model, particles, particle_covs
+            )
         return eta_bar_0, cov_pred
 
     def _flow_free_particles(self, eta_0, eta_bar_0, particle_covs, y):

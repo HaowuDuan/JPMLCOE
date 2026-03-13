@@ -1,10 +1,10 @@
 {
-  "rmse": 0.7252419678858657,
-  "log_likelihood": -521.2950664651906,
+  "rmse": 0.6196570950435909,
+  "log_likelihood": -411.4381039385628,
   "metadata": {
     "filter_type": "ParticleFilterTF",
     "n_particles": 1000,
-    "resampling_rate": 0.605,
+    "resampling_rate": 0.575,
     "resampling_method": "ot_entropy",
     "resampling_config": {
       "epsilon": 0.5,
@@ -13,13 +13,15 @@
       "epsilon_scaling": 0.9
     },
     "performance": {
-      "wall_time_seconds": 61.227600209007505,
-      "time_per_timestep_ms": 306.1380010450375,
-      "peak_memory_mb": 5.224224090576172,
-      "memory_increase_mb": 757.53125,
-      "start_memory_mb": 409.140625,
-      "end_memory_mb": 1166.671875,
-      "num_timesteps": 200
+      "wall_time_seconds": 6.844743674620986,
+      "time_per_timestep_ms": 34.22371837310493,
+      "peak_memory_mb": 5.6045989990234375,
+      "memory_increase_mb": 145.63671875,
+      "start_memory_mb": 913.44921875,
+      "end_memory_mb": 1059.0859375,
+      "num_timesteps": 200,
+      "gpu_peak_memory_mb": 41.59423828125,
+      "gpu_current_memory_mb": 0.03955078125
     }
   },
   "config": {

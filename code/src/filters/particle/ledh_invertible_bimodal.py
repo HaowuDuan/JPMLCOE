@@ -22,6 +22,7 @@ from ...utils.flow_params import compute_flow_params_batch
 from ...utils.distributions import compute_flow_weights
 from ...utils.linalg import safe_log_abs_det, safe_inv
 from ..kalman.batched_ekf import batched_ekf_update
+from ..kalman.batched_ukf import batched_ukf_update
 from ...resampling.diagnosis import effective_sample_size as ess_tf
 
 
@@ -205,10 +206,17 @@ class LEDHInvertibleBimodal(LEDHParticleFlowFilter):
         # Log-likelihood from importance-weighted estimate
         self.log_likelihoods.append(log_lik + max_log_theta)
 
-        # Update per-particle covariances via batched EKF
-        _, cov_updated = batched_ekf_update(
-            self.model, self.eta_bar_0.value(), self.particle_covs.value(), y
-        )
+        # Update per-particle covariances via batched EKF/UKF
+        if self.filter_type == 'ukf':
+            _, cov_updated = batched_ukf_update(
+                self.model, self.eta_bar_0.value(), self.particle_covs.value(), y,
+                self._ukf_weights_mean, self._ukf_weights_cov,
+                self._ukf_lambda, self.state_dim
+            )
+        else:
+            _, cov_updated = batched_ekf_update(
+                self.model, self.eta_bar_0.value(), self.particle_covs.value(), y
+            )
         self.particle_covs.assign(cov_updated)
 
         # ESS and resampling

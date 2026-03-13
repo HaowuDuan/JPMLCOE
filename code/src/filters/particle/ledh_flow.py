@@ -5,7 +5,7 @@ import numpy as np
 from typing import Optional, Tuple, Callable, Dict, Any
 
 from .flow_base import FlowFilterBase
-from ..kalman.extended_kalman import ExtendedKalmanFilter
+from ..kalman.filter_factory import create_kalman_filter
 from ...utils.flow_params import compute_flow_params, compute_flow_params_batch
 from ...utils.linalg import safe_inv, to_numpy
 from ...utils.ode_solvers import euler_step
@@ -39,7 +39,8 @@ class LocalExactDaumHuangFlow(FlowFilterBase):
                  n_threads: Optional[int] = None,
                  debug_mode: bool = False,
                  flow_config: FlowScheduleConfig = FlowScheduleConfig(),
-                 clip_config: DriftClipConfig = DriftClipConfig()):
+                 clip_config: DriftClipConfig = DriftClipConfig(),
+                 filter_type: str = 'ekf'):
         """
         Initialize Local Exact Daum-Huang flow filter.
 
@@ -57,8 +58,10 @@ class LocalExactDaumHuangFlow(FlowFilterBase):
                 For ot_entropy: {'reg': float, 'n_iter': int}
             n_threads: Number of threads for parallelization (None = auto)
             debug_mode: If True, collect detailed diagnostics
+            filter_type: 'ekf' or 'ukf' for the global covariance guidance filter
         """
         super().__init__(model, n_particles, n_lambda_steps, integration_method, n_threads)
+        self.filter_type = filter_type
         self.flow_config = flow_config
         self.clip_config = clip_config
         self.dtype = getattr(model, 'dtype', tf.float64)
@@ -148,8 +151,9 @@ class LocalExactDaumHuangFlow(FlowFilterBase):
         # Initialize global EKF for covariance guidance (constructor needs numpy)
         ensemble_mean_np = ensemble_mean.numpy()
         initial_cov_emp_np = initial_cov_emp.numpy()
-        self.global_filter = ExtendedKalmanFilter(
-            self.model, mean_0=ensemble_mean_np, Sigma_0=initial_cov_emp_np
+        self.global_filter = create_kalman_filter(
+            self.filter_type, self.model,
+            mean_0=ensemble_mean_np, Sigma_0=initial_cov_emp_np
         )
 
         self.global_filter.mean.assign(ensemble_mean)

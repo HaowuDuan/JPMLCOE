@@ -215,6 +215,13 @@ def run_filter_experiment(cfg: DictConfig) -> Dict[str, Any]:
     print(f"Generating {T} time steps...")
     initial_state, states, observations = generate_data(model, T=T, rng=rng)
 
+    # Transform observations if model requires it (e.g. log-space SV)
+    if hasattr(model, 'transform_observations'):
+        observations_for_filter = model.transform_observations(observations)
+        if not np.array_equal(observations_for_filter, observations):
+            print(f"  Observations transformed (e.g. log-space mode)")
+            observations = observations_for_filter
+
     # Create filter
     filter_name = cfg.filter._target_.split('.')[-1]
     print(f"Creating filter: {filter_name}")

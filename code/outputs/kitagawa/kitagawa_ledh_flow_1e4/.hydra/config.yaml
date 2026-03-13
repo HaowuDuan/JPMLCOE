@@ -1,6 +1,6 @@
 model:
   _target_: src.models.kitagawa.KitagawaModel
-  sigma_V: 10.0
+  sigma_V: 3.162
   sigma_W: 1.0
   initial_var: 5.0
 filter:

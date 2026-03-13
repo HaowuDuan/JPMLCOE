@@ -1,20 +1,22 @@
 {
-  "rmse": 0.11298361578785482,
-  "log_likelihood": 1040.42724609375,
+  "rmse": 0.0881635057745436,
+  "log_likelihood": 313.2142612003524,
   "metadata": {
     "filter_type": "LEDHParticleFlowFilter",
     "n_particles": 500,
     "n_lambda_steps": 29,
     "resampling_method": "systematic",
-    "resampling_rate": 0.572,
+    "resampling_rate": 0.516,
     "performance": {
-      "wall_time_seconds": 474.0571907921694,
-      "time_per_timestep_ms": 948.1143815843388,
-      "peak_memory_mb": 503.16772270202637,
-      "memory_increase_mb": 947.046875,
-      "start_memory_mb": 417.453125,
-      "end_memory_mb": 1364.5,
-      "num_timesteps": 500
+      "wall_time_seconds": 490.46340717654675,
+      "time_per_timestep_ms": 980.9268143530935,
+      "peak_memory_mb": 5.067289352416992,
+      "memory_increase_mb": 124.77734375,
+      "start_memory_mb": 971.109375,
+      "end_memory_mb": 1095.88671875,
+      "num_timesteps": 500,
+      "gpu_peak_memory_mb": 5.86962890625,
+      "gpu_current_memory_mb": 2.81494140625
     }
   },
   "config": {
@@ -30,10 +32,13 @@
       "resample_threshold": 0.5
     },
     "seed": 42,
+    "dtype": "float64",
     "T": 500,
     "output_dir": "outputs/range_bearing/range_bearing_ledh_invertible",
     "plot": true,
     "device": "auto",
-    "verbose": true
+    "tf_log_level": 2,
+    "verbose": true,
+    "show_progress": true
   }
 }

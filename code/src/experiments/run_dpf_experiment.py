@@ -147,6 +147,13 @@ def run_dpf_experiment(cfg: DictConfig) -> Dict[str, Any]:
     print(f"Generating {T} time steps with true params: {OmegaConf.to_container(cfg.data.true_params)}")
     initial_state, states, observations = generate_data(true_model, T=T, rng=rng)
 
+    # Transform observations if model requires it (e.g. log-space SV)
+    if hasattr(true_model, 'transform_observations'):
+        observations_for_filter = true_model.transform_observations(observations)
+        if not np.array_equal(observations_for_filter, observations):
+            print(f"  Observations transformed (e.g. log-space mode)")
+            observations = observations_for_filter
+
     # 2. Create inference model (with wrong initial guesses)
     print(f"Creating inference model")
     inference_model = hydra.utils.instantiate(cfg.model, dtype=dtype_tf)

@@ -5,8 +5,11 @@ model:
 filter:
   _target_: src.filters.kalman.extended_kalman.ExtendedKalmanFilter
 seed: 42
+dtype: float64
 T: 100
 output_dir: outputs/range_bearing/range_bearing_ekf
 plot: true
 device: auto
+tf_log_level: 2
 verbose: true
+show_progress: true

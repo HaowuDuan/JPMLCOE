@@ -18,4 +18,4 @@ device: auto
 tf_log_level: 2
 verbose: true
 show_progress: true
-diffusion_scale: 0.1
+diffusion_scale: 0.0

@@ -8,8 +8,11 @@ filter:
   n_lambda_steps: 29
   resample_threshold: 0.5
 seed: 42
+dtype: float64
 T: 500
 output_dir: outputs/range_bearing/range_bearing_ledh_invertible
 plot: true
 device: auto
+tf_log_level: 2
 verbose: true
+show_progress: true
