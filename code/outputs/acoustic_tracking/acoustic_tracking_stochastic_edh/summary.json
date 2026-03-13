@@ -1,0 +1,50 @@
+{
+  "rmse": 22.588974215015224,
+  "log_likelihood": null,
+  "metadata": {
+    "filter_type": "StochasticEDHFlow",
+    "n_particles": 500,
+    "n_lambda_steps": 29,
+    "integration_method": "euler",
+    "performance": {
+      "wall_time_seconds": 18.312041987664998,
+      "time_per_timestep_ms": 366.24083975329995,
+      "peak_memory_mb": 7.295963287353516,
+      "memory_increase_mb": 92.77734375,
+      "start_memory_mb": 1022.51171875,
+      "end_memory_mb": 1115.2890625,
+      "num_timesteps": 50,
+      "gpu_peak_memory_mb": 0.477294921875,
+      "gpu_current_memory_mb": 0.28759765625
+    }
+  },
+  "config": {
+    "model": {
+      "_target_": "src.models.acoustic_tracking_full.AcousticTrackingFullModel",
+      "n_targets": 4,
+      "sensor_grid_size": 5,
+      "source_intensity": 10.0,
+      "regularization": 0.1,
+      "measurement_noise_std": 0.1,
+      "use_true_process_noise": false,
+      "dt": 1.0
+    },
+    "filter": {
+      "_target_": "src.filters.particle.stochastic_edh.StochasticEDHFlow",
+      "n_particles": 500,
+      "n_lambda_steps": 29,
+      "diffusion_scale": 0.0,
+      "schedule_mu": 0.0,
+      "n_threads": null
+    },
+    "seed": 42,
+    "dtype": "float64",
+    "T": 50,
+    "output_dir": "outputs/acoustic_tracking/acoustic_tracking_stochastic_edh",
+    "plot": true,
+    "device": "auto",
+    "tf_log_level": 2,
+    "verbose": true,
+    "show_progress": true
+  }
+}

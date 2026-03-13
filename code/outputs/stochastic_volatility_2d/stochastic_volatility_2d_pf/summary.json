@@ -1,0 +1,47 @@
+{
+  "rmse": 1.1197779053396755,
+  "log_likelihood": -1014.7113768786639,
+  "metadata": {
+    "filter_type": "ParticleFilterTF",
+    "n_particles": 5000,
+    "resampling_rate": 0.698,
+    "resampling_method": "systematic",
+    "resampling_config": {},
+    "performance": {
+      "wall_time_seconds": 4.842187446542084,
+      "time_per_timestep_ms": 9.684374893084168,
+      "peak_memory_mb": 21.45981788635254,
+      "memory_increase_mb": 107.66015625,
+      "start_memory_mb": 940.76171875,
+      "end_memory_mb": 1048.421875,
+      "num_timesteps": 500,
+      "gpu_peak_memory_mb": 61.5068359375,
+      "gpu_current_memory_mb": 0.119873046875
+    }
+  },
+  "config": {
+    "model": {
+      "_target_": "src.models.stochastic_volatility_2d.StochasticVolatility2DModel",
+      "a1": 0.95,
+      "a2": 0.91,
+      "sigma1": 0.5,
+      "sigma2": 1.0,
+      "b": 1.0
+    },
+    "filter": {
+      "_target_": "src.filters.particle.bootstrap_pf_tf.ParticleFilterTF",
+      "_recursive_": false,
+      "n_particles": 5000,
+      "resample_threshold": 0.5
+    },
+    "seed": 42,
+    "dtype": "float64",
+    "T": 500,
+    "output_dir": "outputs/stochastic_volatility_2d/stochastic_volatility_2d_pf",
+    "plot": true,
+    "device": "auto",
+    "tf_log_level": 2,
+    "verbose": true,
+    "show_progress": true
+  }
+}

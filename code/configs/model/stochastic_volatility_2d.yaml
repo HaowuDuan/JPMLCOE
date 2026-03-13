@@ -1,0 +1,13 @@
+# 2D Stochastic Volatility Model Configuration
+#
+# State: x = [x_1 (level), x_2 (log-volatility)]
+# Transition: x_{t+1} = A x_t + e_t, e_t ~ N(0, Sigma)
+# Observation: y_t = b * x_1 + exp(x_2/2) * v_t, v_t ~ N(0,1)
+
+_target_: src.models.stochastic_volatility_2d.StochasticVolatility2DModel
+
+a1: 0.95     # persistence of level component
+a2: 0.91     # persistence of log-volatility component
+sigma1: 0.5  # noise std for level
+sigma2: 1.0  # noise std for log-volatility
+b: 1.0       # observation coefficient for x_1

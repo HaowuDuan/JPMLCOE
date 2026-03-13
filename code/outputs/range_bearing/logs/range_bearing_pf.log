@@ -1,0 +1,26 @@
+<frozen runpy>:128: RuntimeWarning: 'src.experiments.run_experiment' found in sys.modules after import of package 'src.experiments', but prior to execution of 'src.experiments.run_experiment'; this may result in unpredictable behaviour
+Creating model: src.models.range_bearing.RangeBearingModel
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1773135509.525588 3794347 gpu_device.cc:2020] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 20725 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3090, pci bus id: 0000:01:00.0, compute capability: 8.6
+Generating 500 time steps...
+I0000 00:00:1773135509.582431 3794468 cuda_solvers.cc:175] Creating GpuSolver handles for stream 0x20d77be0
+Creating filter: ParticleFilterTF
+Running ParticleFilterTF...
+
+============================================================
+RESULTS: ParticleFilterTF
+============================================================
+RMSE: 0.0873
+Log-likelihood: 332.37
+Mean ESS: 311.3
+
+Performance:
+  Wall time: 46.058 seconds
+  Time per step: 92.12 ms
+  Peak memory: 14.6 MB
+  Memory increase: 510.2 MB
+  Peak memory (GPU): 11.1 MB
+============================================================
+
+Results saved to /home/haowu/JPML/code/outputs/range_bearing/range_bearing_pf
+Plot saved to /home/haowu/JPML/code/outputs/range_bearing/range_bearing_pf/plot.png

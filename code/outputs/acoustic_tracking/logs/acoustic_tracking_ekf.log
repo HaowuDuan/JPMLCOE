@@ -1,0 +1,27 @@
+<frozen runpy>:128: RuntimeWarning: 'src.experiments.run_experiment' found in sys.modules after import of package 'src.experiments', but prior to execution of 'src.experiments.run_experiment'; this may result in unpredictable behaviour
+Creating model: src.models.acoustic_tracking_full.AcousticTrackingFullModel
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1773134653.371880 3780371 gpu_device.cc:2020] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 21013 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3090, pci bus id: 0000:01:00.0, compute capability: 8.6
+Generating 50 time steps...
+I0000 00:00:1773134653.443931 3780931 cuda_solvers.cc:175] Creating GpuSolver handles for stream 0x2a2d2ab0
+Creating filter: ExtendedKalmanFilter
+Initialized ExtendedKalmanFilter with perturbed state (noise std: position=10, velocity=1)
+Running ExtendedKalmanFilter...
+  Step 1/50 | 5555.9 ms | elapsed 5.56s  Step 2/50 | 10.0 ms | elapsed 5.57s  Step 3/50 | 9.9 ms | elapsed 5.58s  Step 4/50 | 10.8 ms | elapsed 5.59s  Step 5/50 | 10.2 ms | elapsed 5.60s  Step 6/50 | 10.1 ms | elapsed 5.61s  Step 7/50 | 10.3 ms | elapsed 5.62s  Step 8/50 | 10.4 ms | elapsed 5.63s  Step 9/50 | 10.4 ms | elapsed 5.64s  Step 10/50 | 10.2 ms | elapsed 5.65s  Step 11/50 | 10.4 ms | elapsed 5.66s  Step 12/50 | 12.3 ms | elapsed 5.67s  Step 13/50 | 10.5 ms | elapsed 5.68s  Step 14/50 | 14.6 ms | elapsed 5.70s  Step 15/50 | 10.5 ms | elapsed 5.71s  Step 16/50 | 10.3 ms | elapsed 5.72s  Step 17/50 | 10.3 ms | elapsed 5.73s  Step 18/50 | 11.7 ms | elapsed 5.74s  Step 19/50 | 10.3 ms | elapsed 5.75s  Step 20/50 | 13.5 ms | elapsed 5.76s  Step 21/50 | 14.3 ms | elapsed 5.78s  Step 22/50 | 10.7 ms | elapsed 5.79s  Step 23/50 | 11.1 ms | elapsed 5.80s  Step 24/50 | 10.4 ms | elapsed 5.81s  Step 25/50 | 10.3 ms | elapsed 5.82s  Step 26/50 | 11.8 ms | elapsed 5.83s  Step 27/50 | 14.0 ms | elapsed 5.85s  Step 28/50 | 9.6 ms | elapsed 5.85s  Step 29/50 | 9.5 ms | elapsed 5.86s  Step 30/50 | 13.7 ms | elapsed 5.88s  Step 31/50 | 9.7 ms | elapsed 5.89s  Step 32/50 | 9.7 ms | elapsed 5.90s  Step 33/50 | 9.7 ms | elapsed 5.91s  Step 34/50 | 14.3 ms | elapsed 5.92s  Step 35/50 | 9.6 ms | elapsed 5.93s  Step 36/50 | 13.6 ms | elapsed 5.94s  Step 37/50 | 10.9 ms | elapsed 5.96s  Step 38/50 | 13.1 ms | elapsed 5.97s  Step 39/50 | 17.6 ms | elapsed 5.99s  Step 40/50 | 12.9 ms | elapsed 6.00s  Step 41/50 | 19.6 ms | elapsed 6.02s  Step 42/50 | 14.8 ms | elapsed 6.03s  Step 43/50 | 18.1 ms | elapsed 6.05s  Step 44/50 | 16.6 ms | elapsed 6.07s  Step 45/50 | 15.9 ms | elapsed 6.08s  Step 46/50 | 17.7 ms | elapsed 6.10s  Step 47/50 | 14.2 ms | elapsed 6.12s  Step 48/50 | 15.6 ms | elapsed 6.13s  Step 49/50 | 14.6 ms | elapsed 6.15s  Step 50/50 | 13.3 ms | elapsed 6.16s
+
+============================================================
+RESULTS: ExtendedKalmanFilter
+============================================================
+RMSE: 41.2031
+Log-likelihood: -10975.89
+
+Performance:
+  Wall time: 6.167 seconds
+  Time per step: 123.33 ms
+  Peak memory: 6.1 MB
+  Memory increase: 101.3 MB
+  Peak memory (GPU): 0.3 MB
+============================================================
+
+Results saved to /home/haowu/JPML/code/outputs/acoustic_tracking/acoustic_tracking_ekf
+Plot saved to /home/haowu/JPML/code/outputs/acoustic_tracking/acoustic_tracking_ekf/plot.png

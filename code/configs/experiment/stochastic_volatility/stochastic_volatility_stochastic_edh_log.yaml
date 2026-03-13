@@ -1,0 +1,12 @@
+# @package _global_
+
+# Experiment: Stochastic EDH Flow on Stochastic Volatility Model (log-space)
+
+defaults:
+  - override /model: stochastic_volatility_log
+  - override /filter: stochastic_edh
+
+T: 500
+seed: 42
+plot: true
+output_dir: outputs/stochastic_volatility/stochastic_volatility_stochastic_edh_log

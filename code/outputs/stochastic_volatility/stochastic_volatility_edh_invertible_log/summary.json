@@ -1,0 +1,46 @@
+{
+  "rmse": 1.2763255640000961,
+  "log_likelihood": -1101.3246813506962,
+  "metadata": {
+    "filter_type": "EDHParticleFlowFilter",
+    "n_particles": 500,
+    "n_lambda_steps": 29,
+    "resampling_method": "systematic",
+    "resampling_rate": 0.312,
+    "performance": {
+      "wall_time_seconds": 64.31543043535203,
+      "time_per_timestep_ms": 128.63086087070405,
+      "peak_memory_mb": 5.245762825012207,
+      "memory_increase_mb": 143.56640625,
+      "start_memory_mb": 921.2109375,
+      "end_memory_mb": 1064.77734375,
+      "num_timesteps": 500,
+      "gpu_peak_memory_mb": 5.998046875,
+      "gpu_current_memory_mb": 2.69580078125
+    }
+  },
+  "config": {
+    "model": {
+      "_target_": "src.models.stochastic_volatility.StochasticVolatilityModel",
+      "alpha": 0.91,
+      "sigma": 1.0,
+      "beta": 0.5,
+      "log_space": true
+    },
+    "filter": {
+      "_target_": "src.filters.particle.edh_invertible.EDHParticleFlowFilter",
+      "n_particles": 500,
+      "n_lambda_steps": 29,
+      "resample_threshold": 0.5
+    },
+    "seed": 42,
+    "dtype": "float64",
+    "T": 500,
+    "output_dir": "outputs/stochastic_volatility/stochastic_volatility_edh_invertible_log",
+    "plot": true,
+    "device": "auto",
+    "tf_log_level": 2,
+    "verbose": true,
+    "show_progress": true
+  }
+}

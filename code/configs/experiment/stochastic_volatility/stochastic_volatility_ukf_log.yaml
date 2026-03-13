@@ -1,0 +1,13 @@
+# @package _global_
+
+# Experiment: UKF on Stochastic Volatility Model (log-space mode)
+# Uses log(y^2) transform so UKF can work
+
+defaults:
+  - override /model: stochastic_volatility_log
+  - override /filter: ukf
+
+T: 500
+seed: 42
+plot: true
+output_dir: outputs/stochastic_volatility/stochastic_volatility_ukf_log

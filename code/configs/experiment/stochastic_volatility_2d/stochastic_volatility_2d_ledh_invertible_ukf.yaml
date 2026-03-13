@@ -1,0 +1,15 @@
+# @package _global_
+
+# Experiment: LEDH Invertible on 2D SV (UKF global filter)
+
+defaults:
+  - override /model: stochastic_volatility_2d
+  - override /filter: ledh_invertible
+
+T: 500
+seed: 42
+plot: true
+output_dir: outputs/stochastic_volatility_2d/stochastic_volatility_2d_ledh_invertible_ukf
+
+filter:
+  filter_type: ukf

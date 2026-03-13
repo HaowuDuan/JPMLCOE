@@ -1,0 +1,13 @@
+# @package _global_
+
+# Experiment: EDH Flow on Stochastic Volatility Model (log-space)
+# Log transform makes H_x = 1 (not 0), so flow equations are non-degenerate
+
+defaults:
+  - override /model: stochastic_volatility_log
+  - override /filter: edh_flow
+
+T: 500
+seed: 42
+plot: true
+output_dir: outputs/stochastic_volatility/stochastic_volatility_edh_flow_log

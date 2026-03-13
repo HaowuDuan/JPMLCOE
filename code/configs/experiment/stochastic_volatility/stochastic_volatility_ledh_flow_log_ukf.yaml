@@ -1,0 +1,15 @@
+# @package _global_
+
+# Experiment: LEDH Flow on SV (log-space) with UKF global filter
+
+defaults:
+  - override /model: stochastic_volatility_log
+  - override /filter: ledh_flow
+
+T: 500
+seed: 42
+plot: true
+output_dir: outputs/stochastic_volatility/stochastic_volatility_ledh_flow_log_ukf
+
+filter:
+  filter_type: ukf

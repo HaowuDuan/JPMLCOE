@@ -1,0 +1,13 @@
+# @package _global_
+
+# Experiment: EKF on 2D Stochastic Volatility Model
+# EKF works because H_x = [b, 0] != 0
+
+defaults:
+  - override /model: stochastic_volatility_2d
+  - override /filter: ekf
+
+T: 500
+seed: 42
+plot: true
+output_dir: outputs/stochastic_volatility_2d/stochastic_volatility_2d_ekf

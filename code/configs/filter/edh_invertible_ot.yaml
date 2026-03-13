@@ -1,0 +1,11 @@
+# EDH Invertible Particle Flow Filter with OT Entropy Resampling
+
+_target_: src.filters.particle.edh_invertible.EDHParticleFlowFilter
+
+n_particles: 500
+n_lambda_steps: 29
+resample_threshold: 0.5
+
+resampling_method: 'ot_entropy'
+resampling_config:
+  epsilon: 0.5

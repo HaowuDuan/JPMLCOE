@@ -1,0 +1,15 @@
+# @package _global_
+
+# Experiment: Bootstrap PF on 2D Stochastic Volatility Model
+
+defaults:
+  - override /model: stochastic_volatility_2d
+  - override /filter: particle
+
+T: 500
+seed: 42
+plot: true
+output_dir: outputs/stochastic_volatility_2d/stochastic_volatility_2d_pf
+
+filter:
+  n_particles: 5000
