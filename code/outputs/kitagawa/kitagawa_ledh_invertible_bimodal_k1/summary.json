@@ -1,27 +1,29 @@
 {
-  "rmse": 11.567133126016087,
-  "log_likelihood": -205.40802502927642,
+  "rmse": 3.9337783575337295,
+  "log_likelihood": -213.7955742176461,
   "metadata": {
     "filter_type": "LEDHInvertibleBimodal",
     "n_particles": 500,
     "n_lambda_steps": 29,
     "resampling_method": "systematic",
-    "resampling_rate": 0.72,
+    "resampling_rate": 0.7,
     "lookahead_steps": 1,
     "performance": {
-      "wall_time_seconds": 18.902439500001492,
-      "time_per_timestep_ms": 189.02439500001492,
-      "peak_memory_mb": 10.315906524658203,
-      "memory_increase_mb": 61.015625,
-      "start_memory_mb": 408.9375,
-      "end_memory_mb": 469.953125,
-      "num_timesteps": 100
+      "wall_time_seconds": 23.46198359876871,
+      "time_per_timestep_ms": 234.6198359876871,
+      "peak_memory_mb": 4.427164077758789,
+      "memory_increase_mb": 162.25390625,
+      "start_memory_mb": 920.91796875,
+      "end_memory_mb": 1083.171875,
+      "num_timesteps": 100,
+      "gpu_peak_memory_mb": 0.95556640625,
+      "gpu_current_memory_mb": 0.57080078125
     }
   },
   "config": {
     "model": {
       "_target_": "src.models.kitagawa.KitagawaModel",
-      "sigma_V": 10.0,
+      "sigma_V": 3.162,
       "sigma_W": 1.0,
       "initial_var": 5.0
     },

@@ -147,16 +147,27 @@ class FlowFilterBase:
         ess_np = np.full(T, float(self.n_particles))
         weights_np = np.ones((T, self.n_particles)) / self.n_particles
 
+        # Extract guide filter's predictive log-likelihood if available
+        guide_log_likelihood = None
+        guide_log_likelihoods = None
+        if hasattr(self, 'global_filter') and self.global_filter is not None:
+            if hasattr(self.global_filter, 'log_likelihoods') and self.global_filter.log_likelihoods:
+                guide_log_liks_tf = tf.stack(self.global_filter.log_likelihoods)
+                guide_log_likelihoods = guide_log_liks_tf.numpy()
+                guide_log_likelihood = float(tf.reduce_sum(guide_log_liks_tf).numpy())
+
         return FilterResult(
             means=means_np,
             covs=covs_np,
-            log_likelihood=None,
+            log_likelihood=guide_log_likelihood,
+            log_likelihoods=guide_log_likelihoods,
             ess=ess_np,
             weights_history=weights_np,
             metadata={
                 'filter_type': self.__class__.__name__,
                 'n_particles': self.n_particles,
                 'n_lambda_steps': self.n_lambda_steps,
-                'integration_method': self.integration_method
+                'integration_method': self.integration_method,
+                'log_likelihood_source': 'guide_filter' if guide_log_likelihood is not None else None
             }
         )

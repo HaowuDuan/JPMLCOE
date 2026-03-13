@@ -10,7 +10,7 @@ model:
 filter:
   _target_: src.filters.particle.bootstrap_pf_tf.ParticleFilterTF
   _recursive_: false
-  n_particles: 1000
+  n_particles: 1000000
   resample_threshold: 0.5
 seed: 42
 dtype: float64
@@ -21,4 +21,3 @@ device: auto
 tf_log_level: 2
 verbose: true
 show_progress: true
-n_particles: 1000000

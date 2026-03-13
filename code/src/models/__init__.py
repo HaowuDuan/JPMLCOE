@@ -2,6 +2,7 @@
 
 from .linear_gaussian import LinearGaussianModel
 from .stochastic_volatility import StochasticVolatilityModel
+from .stochastic_volatility_2d import StochasticVolatility2DModel
 from .range_bearing import RangeBearingModel
 from .acoustic_tracking import AcousticTrackingModel
 from .acoustic_tracking_full import AcousticTrackingFullModel
@@ -14,6 +15,7 @@ from .utils import generate_data
 __all__ = [
     'LinearGaussianModel',
     'StochasticVolatilityModel',
+    'StochasticVolatility2DModel',
     'RangeBearingModel',
     'AcousticTrackingModel',
     'AcousticTrackingFullModel',

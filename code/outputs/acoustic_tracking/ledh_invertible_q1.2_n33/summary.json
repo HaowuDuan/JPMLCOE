@@ -1,6 +1,6 @@
 {
-  "rmse": 48.78163018871637,
-  "log_likelihood": -6595.53662109375,
+  "rmse": 45.01179878386188,
+  "log_likelihood": -33865.1015625,
   "metadata": {
     "filter_type": "LEDHParticleFlowFilter",
     "n_particles": 500,
@@ -8,13 +8,15 @@
     "resampling_method": "systematic",
     "resampling_rate": 1.0,
     "performance": {
-      "wall_time_seconds": 179.2112601249828,
-      "time_per_timestep_ms": 1792.112601249828,
-      "peak_memory_mb": 19.635509490966797,
-      "memory_increase_mb": 3451.1875,
-      "start_memory_mb": 1018.734375,
-      "end_memory_mb": 4469.921875,
-      "num_timesteps": 100
+      "wall_time_seconds": 102.35304473061115,
+      "time_per_timestep_ms": 1023.5304473061116,
+      "peak_memory_mb": 16.350435256958008,
+      "memory_increase_mb": 357.515625,
+      "start_memory_mb": 1059.4140625,
+      "end_memory_mb": 1416.9296875,
+      "num_timesteps": 100,
+      "gpu_peak_memory_mb": 160.116455078125,
+      "gpu_current_memory_mb": 2.190673828125
     }
   },
   "config": {

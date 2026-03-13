@@ -8,7 +8,7 @@ import tensorflow as tf
 import numpy as np
 from typing import Tuple, Optional, Callable, Dict, Any
 from .flow_base import FlowFilterBase
-from ..kalman.extended_kalman import ExtendedKalmanFilter
+from ..kalman.filter_factory import create_kalman_filter
 from ...utils.flow_params import compute_flow_params_global
 from ...utils.linalg import safe_inv, to_numpy
 from ...utils.ode_solvers import euler_step
@@ -38,7 +38,8 @@ class ExactDaumHuangFlowglobal(FlowFilterBase):
                  resampling_config: Optional[Dict[str, Any]] = None,
                  n_threads: Optional[int] = None,
                  debug_mode: bool = False,
-                 flow_config: FlowScheduleConfig = FlowScheduleConfig()):
+                 flow_config: FlowScheduleConfig = FlowScheduleConfig(),
+                 filter_type: str = 'ekf'):
         """
         Initialize Exact Daum-Huang flow filter.
 
@@ -57,6 +58,7 @@ class ExactDaumHuangFlowglobal(FlowFilterBase):
             flow_config: Flow schedule configuration
         """
         super().__init__(model, n_particles, n_lambda_steps, integration_method, n_threads)
+        self.filter_type = filter_type
         self.flow_config = flow_config
         self.dtype = getattr(model, 'dtype', tf.float64)
         self.np_dtype = np.float64 if self.dtype == tf.float64 else np.float32
@@ -138,7 +140,9 @@ class ExactDaumHuangFlowglobal(FlowFilterBase):
         # Initialize global EKF for covariance guidance (constructor needs numpy)
         ensemble_mean_np = ensemble_mean.numpy()
         initial_cov_emp_np = initial_cov_emp.numpy()
-        self.global_filter = ExtendedKalmanFilter(self.model, mean_0=ensemble_mean_np, Sigma_0=initial_cov_emp_np)
+        self.global_filter = create_kalman_filter(
+            self.filter_type, self.model,
+            mean_0=ensemble_mean_np, Sigma_0=initial_cov_emp_np)
 
         self.global_filter.mean.assign(ensemble_mean)
         self.global_filter.cov.assign(initial_cov_emp)

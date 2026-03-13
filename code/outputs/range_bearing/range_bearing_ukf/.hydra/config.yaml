@@ -8,8 +8,11 @@ filter:
   beta: 2.0
   kappa: 0.0
 seed: 42
+dtype: float64
 T: 100
 output_dir: outputs/range_bearing/range_bearing_ukf
 plot: true
 device: auto
+tf_log_level: 2
 verbose: true
+show_progress: true

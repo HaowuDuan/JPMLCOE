@@ -7,7 +7,7 @@ import time
 from typing import Tuple, Optional, Callable, Dict, Any
 from ...core.model_base import StateSpaceModel
 from ...core.types import FilterResult
-from ..kalman.extended_kalman import ExtendedKalmanFilter
+from ..kalman.filter_factory import create_kalman_filter
 from ...utils.flow_params import compute_flow_params
 from ...utils.distributions import compute_flow_weights
 from ...utils.linalg import safe_inv, safe_cholesky, to_numpy
@@ -36,6 +36,7 @@ class EDHParticleFlowFilter:
         resampling_config: Optional[Dict[str, Any]] = None,
         debug_mode: bool = False,
         flow_config: FlowScheduleConfig = FlowScheduleConfig(),
+        filter_type: str = 'ekf',
         **filter_kwargs
     ):
         """
@@ -52,8 +53,10 @@ class EDHParticleFlowFilter:
             resampling_config: Dict of additional parameters for resampling method
             debug_mode: If True, store detailed diagnostics
             flow_config: Flow schedule configuration
+            filter_type: 'ekf' or 'ukf' for the global covariance guidance filter
         """
         self.model = model
+        self.filter_type = filter_type
         self.flow_config = flow_config
         self.dtype = getattr(model, 'dtype', tf.float64)
         self.np_dtype = np.float64 if self.dtype == tf.float64 else np.float32
@@ -109,12 +112,12 @@ class EDHParticleFlowFilter:
         return keys[1]
 
     def _create_filter(self, initial_mean: tf.Tensor, initial_cov: tf.Tensor):
-        """Create EKF for global covariance guidance."""
+        """Create EKF/UKF for global covariance guidance."""
         initial_mean_np = to_numpy(initial_mean)
         initial_cov_np = to_numpy(initial_cov)
 
-        return ExtendedKalmanFilter(self.model, mean_0=initial_mean_np, Sigma_0=initial_cov_np,
-                                    sample_initial_mean=False)
+        return create_kalman_filter(self.filter_type, self.model,
+                                    mean_0=initial_mean_np, Sigma_0=initial_cov_np)
 
     def initialize(self, initial_mean: Optional[np.ndarray] = None,
                    initial_cov: Optional[np.ndarray] = None,

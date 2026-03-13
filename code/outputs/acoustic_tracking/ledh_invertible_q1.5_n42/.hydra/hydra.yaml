@@ -130,18 +130,18 @@ hydra:
   runtime:
     version: 1.3.2
     version_base: '1.3'
-    cwd: /Users/haowuduan/Documents/githubrepos/JPMLCOE/code
+    cwd: /home/haowu/JPML/code
     config_sources:
     - path: hydra.conf
       schema: pkg
       provider: hydra
-    - path: /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/configs
+    - path: /home/haowu/JPML/code/configs
       schema: file
       provider: main
     - path: ''
       schema: structured
       provider: schema
-    output_dir: /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/outputs/acoustic_tracking/ledh_invertible_q1.5_n42
+    output_dir: /home/haowu/JPML/code/outputs/acoustic_tracking/ledh_invertible_q1.5_n42
     choices:
       experiment: acoustic_tracking/acoustic_tracking_ledh_invertible_q1.5_n42
       filter: ledh_invertible

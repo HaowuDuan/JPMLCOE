@@ -112,12 +112,11 @@ hydra:
     hydra:
     - hydra.mode=RUN
     task:
-    - device=auto
     - experiment=acoustic_tracking/acoustic_tracking_pf_1e6
   job:
     name: run_experiment
     chdir: null
-    override_dirname: device=auto,experiment=acoustic_tracking/acoustic_tracking_pf_1e6
+    override_dirname: experiment=acoustic_tracking/acoustic_tracking_pf_1e6
     id: ???
     num: ???
     config_name: config
@@ -131,18 +130,18 @@ hydra:
   runtime:
     version: 1.3.2
     version_base: '1.3'
-    cwd: /Users/haowuduan/Documents/githubrepos/JPMLCOE/code
+    cwd: /home/haowu/JPML/code
     config_sources:
     - path: hydra.conf
       schema: pkg
       provider: hydra
-    - path: /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/configs
+    - path: /home/haowu/JPML/code/configs
       schema: file
       provider: main
     - path: ''
       schema: structured
       provider: schema
-    output_dir: /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/outputs/acoustic_tracking/acoustic_tracking_pf_1e6
+    output_dir: /home/haowu/JPML/code/outputs/acoustic_tracking/acoustic_tracking_pf_1e6
     choices:
       experiment: acoustic_tracking/acoustic_tracking_pf_1e6
       filter: particle
