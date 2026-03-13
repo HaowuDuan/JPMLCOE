@@ -1,0 +1,26 @@
+<frozen runpy>:128: RuntimeWarning: 'src.experiments.run_experiment' found in sys.modules after import of package 'src.experiments', but prior to execution of 'src.experiments.run_experiment'; this may result in unpredictable behaviour
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1773233546.966848 3906442 gpu_device.cc:2020] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 18716 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3090, pci bus id: 0000:01:00.0, compute capability: 8.6
+I0000 00:00:1773233546.997286 3906442 cuda_solvers.cc:175] Creating GpuSolver handles for stream 0x12c43e90
+Creating model: src.models.stochastic_volatility_2d.StochasticVolatility2DModel
+Generating 500 time steps...
+Creating filter: ParticleFilterTF
+Running ParticleFilterTF...
+
+============================================================
+RESULTS: ParticleFilterTF
+============================================================
+RMSE: 1.1198
+Log-likelihood: -1014.71
+Mean ESS: 2036.2
+
+Performance:
+  Wall time: 4.842 seconds
+  Time per step: 9.68 ms
+  Peak memory: 21.5 MB
+  Memory increase: 107.7 MB
+  Peak memory (GPU): 61.5 MB
+============================================================
+
+Results saved to /home/haowu/JPML/code/outputs/stochastic_volatility_2d/stochastic_volatility_2d_pf
+Plot saved to /home/haowu/JPML/code/outputs/stochastic_volatility_2d/stochastic_volatility_2d_pf/plot.png

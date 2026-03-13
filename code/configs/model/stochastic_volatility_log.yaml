@@ -1,0 +1,13 @@
+# 1D Stochastic Volatility Model - Log-space mode
+#
+# Same model as stochastic_volatility.yaml, but with log_space=True.
+# Filter-facing methods use the log-squared observation transform:
+#   z_t = log(y_t^2) = log(beta^2) + x_t + log(v_t^2)
+# This makes the observation linear in x, enabling EKF/UKF to work.
+
+_target_: src.models.stochastic_volatility.StochasticVolatilityModel
+
+alpha: 0.91  # Persistence parameter
+sigma: 1.0   # Volatility of volatility
+beta: 0.5    # Scale parameter
+log_space: true

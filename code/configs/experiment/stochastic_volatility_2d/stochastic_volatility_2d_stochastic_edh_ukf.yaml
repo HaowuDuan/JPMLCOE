@@ -1,0 +1,15 @@
+# @package _global_
+
+# Experiment: Stochastic EDH on 2D SV (UKF global filter)
+
+defaults:
+  - override /model: stochastic_volatility_2d
+  - override /filter: stochastic_edh
+
+T: 500
+seed: 42
+plot: true
+output_dir: outputs/stochastic_volatility_2d/stochastic_volatility_2d_stochastic_edh_ukf
+
+filter:
+  filter_type: ukf

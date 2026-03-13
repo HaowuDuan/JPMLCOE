@@ -1,0 +1,12 @@
+# @package _global_
+
+# Experiment: Kernel Flow (Scalar) on Stochastic Volatility Model (log-space)
+
+defaults:
+  - override /model: stochastic_volatility_log
+  - override /filter: kernel_flow_scalar
+
+T: 500
+seed: 42
+plot: true
+output_dir: outputs/stochastic_volatility/stochastic_volatility_kernel_scalar_log

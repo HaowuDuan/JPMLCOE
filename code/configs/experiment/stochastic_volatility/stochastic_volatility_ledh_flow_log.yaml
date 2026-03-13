@@ -1,0 +1,13 @@
+# @package _global_
+
+# Experiment: LEDH Flow on Stochastic Volatility Model (log-space)
+# Log transform makes H_x = 1, enabling per-particle flow with non-degenerate A(lambda)
+
+defaults:
+  - override /model: stochastic_volatility_log
+  - override /filter: ledh_flow
+
+T: 500
+seed: 42
+plot: true
+output_dir: outputs/stochastic_volatility/stochastic_volatility_ledh_flow_log

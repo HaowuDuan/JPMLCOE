@@ -1,0 +1,48 @@
+{
+  "rmse": 1.7727198884576543,
+  "log_likelihood": null,
+  "metadata": {
+    "filter_type": "ExactDaumHuangFlow",
+    "n_particles": 500,
+    "n_lambda_steps": 29,
+    "integration_method": "euler",
+    "performance": {
+      "wall_time_seconds": 86.59078827966005,
+      "time_per_timestep_ms": 173.1815765593201,
+      "peak_memory_mb": 4.559015274047852,
+      "memory_increase_mb": 91.22265625,
+      "start_memory_mb": 942.23046875,
+      "end_memory_mb": 1033.453125,
+      "num_timesteps": 500,
+      "gpu_peak_memory_mb": 0.42626953125,
+      "gpu_current_memory_mb": 0.39208984375
+    }
+  },
+  "config": {
+    "model": {
+      "_target_": "src.models.stochastic_volatility_2d.StochasticVolatility2DModel",
+      "a1": 0.95,
+      "a2": 0.91,
+      "sigma1": 0.5,
+      "sigma2": 1.0,
+      "b": 1.0
+    },
+    "filter": {
+      "_target_": "src.filters.particle.edh_flow.ExactDaumHuangFlow",
+      "n_particles": 500,
+      "n_lambda_steps": 29,
+      "integration_method": "euler",
+      "n_threads": null,
+      "filter_type": "ukf"
+    },
+    "seed": 42,
+    "dtype": "float64",
+    "T": 500,
+    "output_dir": "outputs/stochastic_volatility_2d/stochastic_volatility_2d_edh_flow_ukf",
+    "plot": true,
+    "device": "auto",
+    "tf_log_level": 2,
+    "verbose": true,
+    "show_progress": true
+  }
+}

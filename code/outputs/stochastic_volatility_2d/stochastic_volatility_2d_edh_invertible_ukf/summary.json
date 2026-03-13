@@ -1,0 +1,48 @@
+{
+  "rmse": 1.5048106740764413,
+  "log_likelihood": -2309.8350565790843,
+  "metadata": {
+    "filter_type": "EDHParticleFlowFilter",
+    "n_particles": 500,
+    "n_lambda_steps": 29,
+    "resampling_method": "systematic",
+    "resampling_rate": 0.776,
+    "performance": {
+      "wall_time_seconds": 104.21131603140384,
+      "time_per_timestep_ms": 208.42263206280768,
+      "peak_memory_mb": 5.471896171569824,
+      "memory_increase_mb": 125.25,
+      "start_memory_mb": 948.734375,
+      "end_memory_mb": 1073.984375,
+      "num_timesteps": 500,
+      "gpu_peak_memory_mb": 5.970703125,
+      "gpu_current_memory_mb": 2.8046875
+    }
+  },
+  "config": {
+    "model": {
+      "_target_": "src.models.stochastic_volatility_2d.StochasticVolatility2DModel",
+      "a1": 0.95,
+      "a2": 0.91,
+      "sigma1": 0.5,
+      "sigma2": 1.0,
+      "b": 1.0
+    },
+    "filter": {
+      "_target_": "src.filters.particle.edh_invertible.EDHParticleFlowFilter",
+      "n_particles": 500,
+      "n_lambda_steps": 29,
+      "resample_threshold": 0.5,
+      "filter_type": "ukf"
+    },
+    "seed": 42,
+    "dtype": "float64",
+    "T": 500,
+    "output_dir": "outputs/stochastic_volatility_2d/stochastic_volatility_2d_edh_invertible_ukf",
+    "plot": true,
+    "device": "auto",
+    "tf_log_level": 2,
+    "verbose": true,
+    "show_progress": true
+  }
+}

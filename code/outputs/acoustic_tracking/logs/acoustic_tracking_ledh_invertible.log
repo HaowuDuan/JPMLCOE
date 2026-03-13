@@ -1,0 +1,27 @@
+<frozen runpy>:128: RuntimeWarning: 'src.experiments.run_experiment' found in sys.modules after import of package 'src.experiments', but prior to execution of 'src.experiments.run_experiment'; this may result in unpredictable behaviour
+Creating model: src.models.acoustic_tracking_full.AcousticTrackingFullModel
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1773134653.354888 3780375 gpu_device.cc:2020] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 21637 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3090, pci bus id: 0000:01:00.0, compute capability: 8.6
+Generating 50 time steps...
+I0000 00:00:1773134653.410120 3780841 cuda_solvers.cc:175] Creating GpuSolver handles for stream 0x2bc6f150
+Creating filter: LEDHParticleFlowFilter
+Running LEDHParticleFlowFilter...
+  Step 1/50 | 18746.4 ms | elapsed 18.75s  Step 2/50 | 575.2 ms | elapsed 19.32s  Step 3/50 | 802.2 ms | elapsed 20.12s  Step 4/50 | 904.3 ms | elapsed 21.03s  Step 5/50 | 902.4 ms | elapsed 21.93s  Step 6/50 | 925.2 ms | elapsed 22.86s  Step 7/50 | 879.9 ms | elapsed 23.74s  Step 8/50 | 894.1 ms | elapsed 24.63s  Step 9/50 | 863.8 ms | elapsed 25.49s  Step 10/50 | 782.7 ms | elapsed 26.28s  Step 11/50 | 839.9 ms | elapsed 27.12s  Step 12/50 | 749.0 ms | elapsed 27.87s  Step 13/50 | 722.0 ms | elapsed 28.59s  Step 14/50 | 738.3 ms | elapsed 29.33s  Step 15/50 | 709.9 ms | elapsed 30.04s  Step 16/50 | 727.1 ms | elapsed 30.76s  Step 17/50 | 735.4 ms | elapsed 31.50s  Step 18/50 | 876.4 ms | elapsed 32.37s  Step 19/50 | 924.4 ms | elapsed 33.30s  Step 20/50 | 857.3 ms | elapsed 34.16s  Step 21/50 | 897.5 ms | elapsed 35.05s  Step 22/50 | 850.2 ms | elapsed 35.90s  Step 23/50 | 834.1 ms | elapsed 36.74s  Step 24/50 | 684.5 ms | elapsed 37.42s  Step 25/50 | 731.0 ms | elapsed 38.15s  Step 26/50 | 744.9 ms | elapsed 38.90s  Step 27/50 | 708.6 ms | elapsed 39.61s  Step 28/50 | 736.0 ms | elapsed 40.34s  Step 29/50 | 730.5 ms | elapsed 41.07s  Step 30/50 | 710.7 ms | elapsed 41.78s  Step 31/50 | 728.3 ms | elapsed 42.51s  Step 32/50 | 758.5 ms | elapsed 43.27s  Step 33/50 | 781.6 ms | elapsed 44.05s  Step 34/50 | 707.7 ms | elapsed 44.76s  Step 35/50 | 724.5 ms | elapsed 45.48s  Step 36/50 | 715.5 ms | elapsed 46.20s  Step 37/50 | 716.7 ms | elapsed 46.92s  Step 38/50 | 743.4 ms | elapsed 47.66s  Step 39/50 | 815.5 ms | elapsed 48.48s  Step 40/50 | 665.1 ms | elapsed 49.14s  Step 41/50 | 702.4 ms | elapsed 49.84s  Step 42/50 | 722.8 ms | elapsed 50.57s  Step 43/50 | 691.7 ms | elapsed 51.26s  Step 44/50 | 718.3 ms | elapsed 51.98s  Step 45/50 | 751.6 ms | elapsed 52.73s  Step 46/50 | 832.8 ms | elapsed 53.56s  Step 47/50 | 846.1 ms | elapsed 54.41s  Step 48/50 | 847.0 ms | elapsed 55.25s  Step 49/50 | 812.8 ms | elapsed 56.07s  Step 50/50 | 845.3 ms | elapsed 56.91s
+
+============================================================
+RESULTS: LEDHParticleFlowFilter
+============================================================
+RMSE: 60.0293
+Log-likelihood: -19622.45
+Mean ESS: 3.5
+
+Performance:
+  Wall time: 57.200 seconds
+  Time per step: 1144.01 ms
+  Peak memory: 16.4 MB
+  Memory increase: 356.3 MB
+  Peak memory (GPU): 159.6 MB
+============================================================
+
+Results saved to /home/haowu/JPML/code/outputs/acoustic_tracking/acoustic_tracking_ledh_invertible
+Plot saved to /home/haowu/JPML/code/outputs/acoustic_tracking/acoustic_tracking_ledh_invertible/plot.png

@@ -1,0 +1,13 @@
+# @package _global_
+
+# Experiment: EKF on Stochastic Volatility Model (log-space mode)
+# Uses log(y^2) transform so EKF can work (H_x = 1 instead of 0)
+
+defaults:
+  - override /model: stochastic_volatility_log
+  - override /filter: ekf
+
+T: 500
+seed: 42
+plot: true
+output_dir: outputs/stochastic_volatility/stochastic_volatility_ekf_log

@@ -1,0 +1,13 @@
+# @package _global_
+
+# Experiment: UKF on 2D Stochastic Volatility Model
+# UKF works because observation_mean(x) = b*x_1 != 0
+
+defaults:
+  - override /model: stochastic_volatility_2d
+  - override /filter: ukf
+
+T: 500
+seed: 42
+plot: true
+output_dir: outputs/stochastic_volatility_2d/stochastic_volatility_2d_ukf
