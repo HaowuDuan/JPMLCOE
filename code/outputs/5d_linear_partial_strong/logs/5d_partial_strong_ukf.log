@@ -1,33 +1,0 @@
-<frozen runpy>:128: RuntimeWarning: 'src.experiments.run_experiment' found in sys.modules after import of package 'src.experiments', but prior to execution of 'src.experiments.run_experiment'; this may result in unpredictable behaviour
-WARNING:tensorflow:From /home/haowu/JPML-jit/code/.venv/lib/python3.12/site-packages/tensorflow/python/util/deprecation.py:660: calling map_fn_v2 (from tensorflow.python.ops.map_fn) with dtype is deprecated and will be removed in a future version.
-Instructions for updating:
-Use fn_output_signature instead
-Creating model: src.models.linear_gaussian.LinearGaussianModel
-Generating 100 time steps...
-Creating filter: UnscentedKalmanFilter
-Initialized UnscentedKalmanFilter with sampled initial state from model distribution
-Running UnscentedKalmanFilter...
-[2026-03-13 12:50:04,742][tensorflow][WARNING] - From /home/haowu/JPML-jit/code/.venv/lib/python3.12/site-packages/tensorflow/python/util/deprecation.py:660: calling map_fn_v2 (from tensorflow.python.ops.map_fn) with dtype is deprecated and will be removed in a future version.
-Instructions for updating:
-Use fn_output_signature instead
-WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
-I0000 00:00:1773377404.990761 4029857 service.cc:145] XLA service 0x762b38006520 initialized for platform Host (this does not guarantee that XLA will be used). Devices:
-I0000 00:00:1773377404.990796 4029857 service.cc:153]   StreamExecutor device (0): Host, Default Version
-I0000 00:00:1773377405.034155 4029857 device_compiler.h:188] Compiled cluster using XLA!  This line is logged at most once for the lifetime of the process.
-  Step 1/100 | 1651.0 ms | elapsed 1.65s  Step 2/100 | 4.7 ms | elapsed 1.66s  Step 3/100 | 4.4 ms | elapsed 1.66s  Step 4/100 | 3.8 ms | elapsed 1.66s  Step 5/100 | 3.5 ms | elapsed 1.67s  Step 6/100 | 3.5 ms | elapsed 1.67s  Step 7/100 | 4.7 ms | elapsed 1.68s  Step 8/100 | 4.8 ms | elapsed 1.68s  Step 9/100 | 4.6 ms | elapsed 1.68s  Step 10/100 | 4.4 ms | elapsed 1.69s  Step 11/100 | 3.1 ms | elapsed 1.69s  Step 12/100 | 4.0 ms | elapsed 1.70s  Step 13/100 | 4.5 ms | elapsed 1.70s  Step 14/100 | 3.9 ms | elapsed 1.70s  Step 15/100 | 3.6 ms | elapsed 1.71s  Step 16/100 | 4.1 ms | elapsed 1.71s  Step 17/100 | 3.6 ms | elapsed 1.72s  Step 18/100 | 3.5 ms | elapsed 1.72s  Step 19/100 | 4.3 ms | elapsed 1.72s  Step 20/100 | 4.5 ms | elapsed 1.73s  Step 21/100 | 4.4 ms | elapsed 1.73s  Step 22/100 | 4.2 ms | elapsed 1.74s  Step 23/100 | 3.8 ms | elapsed 1.74s  Step 24/100 | 4.6 ms | elapsed 1.75s  Step 25/100 | 4.4 ms | elapsed 1.75s  Step 26/100 | 4.3 ms | elapsed 1.75s  Step 27/100 | 4.2 ms | elapsed 1.76s  Step 28/100 | 4.3 ms | elapsed 1.76s  Step 29/100 | 4.2 ms | elapsed 1.77s  Step 30/100 | 4.2 ms | elapsed 1.77s  Step 31/100 | 4.2 ms | elapsed 1.78s  Step 32/100 | 4.0 ms | elapsed 1.78s  Step 33/100 | 3.3 ms | elapsed 1.78s  Step 34/100 | 3.0 ms | elapsed 1.79s  Step 35/100 | 3.2 ms | elapsed 1.79s  Step 36/100 | 3.3 ms | elapsed 1.79s  Step 37/100 | 3.1 ms | elapsed 1.80s  Step 38/100 | 3.1 ms | elapsed 1.80s  Step 39/100 | 3.6 ms | elapsed 1.80s  Step 40/100 | 4.3 ms | elapsed 1.81s  Step 41/100 | 3.5 ms | elapsed 1.81s  Step 42/100 | 3.2 ms | elapsed 1.81s  Step 43/100 | 3.1 ms | elapsed 1.82s  Step 44/100 | 3.1 ms | elapsed 1.82s  Step 45/100 | 3.4 ms | elapsed 1.82s  Step 46/100 | 4.1 ms | elapsed 1.83s  Step 47/100 | 4.0 ms | elapsed 1.83s  Step 48/100 | 4.1 ms | elapsed 1.83s  Step 49/100 | 4.5 ms | elapsed 1.84s  Step 50/100 | 4.6 ms | elapsed 1.84s  Step 51/100 | 4.4 ms | elapsed 1.85s  Step 52/100 | 4.5 ms | elapsed 1.85s  Step 53/100 | 4.5 ms | elapsed 1.86s  Step 54/100 | 4.3 ms | elapsed 1.86s  Step 55/100 | 4.0 ms | elapsed 1.87s  Step 56/100 | 4.2 ms | elapsed 1.87s  Step 57/100 | 4.2 ms | elapsed 1.87s  Step 58/100 | 4.3 ms | elapsed 1.88s  Step 59/100 | 4.4 ms | elapsed 1.88s  Step 60/100 | 4.3 ms | elapsed 1.89s  Step 61/100 | 4.3 ms | elapsed 1.89s  Step 62/100 | 4.4 ms | elapsed 1.90s  Step 63/100 | 4.4 ms | elapsed 1.90s  Step 64/100 | 4.4 ms | elapsed 1.90s  Step 65/100 | 4.6 ms | elapsed 1.91s  Step 66/100 | 4.8 ms | elapsed 1.91s  Step 67/100 | 4.3 ms | elapsed 1.92s  Step 68/100 | 4.4 ms | elapsed 1.92s  Step 69/100 | 4.3 ms | elapsed 1.93s  Step 70/100 | 4.2 ms | elapsed 1.93s  Step 71/100 | 4.1 ms | elapsed 1.94s  Step 72/100 | 3.5 ms | elapsed 1.94s  Step 73/100 | 3.6 ms | elapsed 1.94s  Step 74/100 | 4.4 ms | elapsed 1.95s  Step 75/100 | 4.3 ms | elapsed 1.95s  Step 76/100 | 4.4 ms | elapsed 1.96s  Step 77/100 | 4.5 ms | elapsed 1.96s  Step 78/100 | 4.8 ms | elapsed 1.96s  Step 79/100 | 4.7 ms | elapsed 1.97s  Step 80/100 | 4.5 ms | elapsed 1.97s  Step 81/100 | 4.5 ms | elapsed 1.98s  Step 82/100 | 4.5 ms | elapsed 1.98s  Step 83/100 | 4.5 ms | elapsed 1.99s  Step 84/100 | 4.4 ms | elapsed 1.99s  Step 85/100 | 4.7 ms | elapsed 2.00s  Step 86/100 | 4.7 ms | elapsed 2.00s  Step 87/100 | 4.6 ms | elapsed 2.01s  Step 88/100 | 4.4 ms | elapsed 2.01s  Step 89/100 | 4.3 ms | elapsed 2.01s  Step 90/100 | 3.7 ms | elapsed 2.02s  Step 91/100 | 3.9 ms | elapsed 2.02s  Step 92/100 | 3.5 ms | elapsed 2.03s  Step 93/100 | 3.3 ms | elapsed 2.03s  Step 94/100 | 4.2 ms | elapsed 2.03s  Step 95/100 | 4.2 ms | elapsed 2.04s  Step 96/100 | 4.3 ms | elapsed 2.04s  Step 97/100 | 4.5 ms | elapsed 2.05s  Step 98/100 | 6.0 ms | elapsed 2.05s  Step 99/100 | 4.3 ms | elapsed 2.06s  Step 100/100 | 4.3 ms | elapsed 2.06s
-
-============================================================
-RESULTS: UnscentedKalmanFilter
-============================================================
-RMSE: 1.0316
-Log-likelihood: -411.27
-
-Performance:
-  Wall time: 2.072 seconds
-  Time per step: 20.72 ms
-  Peak memory: 3.1 MB
-  Memory increase: 65.7 MB
-============================================================
-
-Results saved to /home/haowu/JPML-jit/code/outputs/5d_linear_partial_strong/5d_partial_strong_ukf
-Plot saved to /home/haowu/JPML-jit/code/outputs/5d_linear_partial_strong/5d_partial_strong_ukf/plot.png

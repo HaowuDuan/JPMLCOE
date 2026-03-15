@@ -1,27 +1,0 @@
-<frozen runpy>:128: RuntimeWarning: 'src.experiments.run_experiment' found in sys.modules after import of package 'src.experiments', but prior to execution of 'src.experiments.run_experiment'; this may result in unpredictable behaviour
-Creating model: src.models.kitagawa.KitagawaModel
-Generating 100 time steps...
-WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
-I0000 00:00:1773135353.911741 3788310 gpu_device.cc:2020] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 21011 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3090, pci bus id: 0000:01:00.0, compute capability: 8.6
-Creating filter: EDHParticleFlowFilter
-Running EDHParticleFlowFilter...
-I0000 00:00:1773135355.361043 3788862 cuda_solvers.cc:175] Creating GpuSolver handles for stream 0x1a64b180
-  Step 1/100 | 4412.9 ms | elapsed 4.41s  Step 2/100 | 125.9 ms | elapsed 4.54s  Step 3/100 | 130.9 ms | elapsed 4.67s  Step 4/100 | 127.4 ms | elapsed 4.80s  Step 5/100 | 136.7 ms | elapsed 4.93s  Step 6/100 | 161.7 ms | elapsed 5.10s  Step 7/100 | 135.5 ms | elapsed 5.23s  Step 8/100 | 142.6 ms | elapsed 5.37s  Step 9/100 | 133.7 ms | elapsed 5.51s  Step 10/100 | 157.1 ms | elapsed 5.66s  Step 11/100 | 135.1 ms | elapsed 5.80s  Step 12/100 | 136.5 ms | elapsed 5.94s  Step 13/100 | 158.9 ms | elapsed 6.09s  Step 14/100 | 138.8 ms | elapsed 6.23s  Step 15/100 | 133.5 ms | elapsed 6.37s  Step 16/100 | 132.4 ms | elapsed 6.50s  Step 17/100 | 126.3 ms | elapsed 6.63s  Step 18/100 | 137.0 ms | elapsed 6.76s  Step 19/100 | 132.7 ms | elapsed 6.90s  Step 20/100 | 122.8 ms | elapsed 7.02s  Step 21/100 | 132.3 ms | elapsed 7.15s  Step 22/100 | 125.3 ms | elapsed 7.28s  Step 23/100 | 133.7 ms | elapsed 7.41s  Step 24/100 | 135.7 ms | elapsed 7.55s  Step 25/100 | 126.5 ms | elapsed 7.67s  Step 26/100 | 147.0 ms | elapsed 7.82s  Step 27/100 | 137.6 ms | elapsed 7.96s  Step 28/100 | 140.7 ms | elapsed 8.10s  Step 29/100 | 137.3 ms | elapsed 8.23s  Step 30/100 | 126.8 ms | elapsed 8.36s  Step 31/100 | 132.1 ms | elapsed 8.49s  Step 32/100 | 153.1 ms | elapsed 8.65s  Step 33/100 | 129.7 ms | elapsed 8.78s  Step 34/100 | 134.6 ms | elapsed 8.91s  Step 35/100 | 155.7 ms | elapsed 9.07s  Step 36/100 | 157.0 ms | elapsed 9.22s  Step 37/100 | 144.0 ms | elapsed 9.37s  Step 38/100 | 164.4 ms | elapsed 9.53s  Step 39/100 | 133.6 ms | elapsed 9.67s  Step 40/100 | 140.2 ms | elapsed 9.81s  Step 41/100 | 124.5 ms | elapsed 9.93s  Step 42/100 | 131.2 ms | elapsed 10.06s  Step 43/100 | 130.6 ms | elapsed 10.19s  Step 44/100 | 125.3 ms | elapsed 10.32s  Step 45/100 | 138.1 ms | elapsed 10.46s  Step 46/100 | 135.2 ms | elapsed 10.59s  Step 47/100 | 151.7 ms | elapsed 10.74s  Step 48/100 | 139.1 ms | elapsed 10.88s  Step 49/100 | 146.5 ms | elapsed 11.03s  Step 50/100 | 141.4 ms | elapsed 11.17s  Step 51/100 | 148.9 ms | elapsed 11.32s  Step 52/100 | 140.3 ms | elapsed 11.46s  Step 53/100 | 133.9 ms | elapsed 11.59s  Step 54/100 | 140.7 ms | elapsed 11.73s  Step 55/100 | 144.4 ms | elapsed 11.88s  Step 56/100 | 137.2 ms | elapsed 12.01s  Step 57/100 | 130.1 ms | elapsed 12.15s  Step 58/100 | 145.0 ms | elapsed 12.29s  Step 59/100 | 144.0 ms | elapsed 12.43s  Step 60/100 | 151.3 ms | elapsed 12.59s  Step 61/100 | 142.7 ms | elapsed 12.73s  Step 62/100 | 144.4 ms | elapsed 12.87s  Step 63/100 | 141.3 ms | elapsed 13.01s  Step 64/100 | 140.1 ms | elapsed 13.15s  Step 65/100 | 147.2 ms | elapsed 13.30s  Step 66/100 | 163.2 ms | elapsed 13.46s  Step 67/100 | 152.4 ms | elapsed 13.62s  Step 68/100 | 143.0 ms | elapsed 13.76s  Step 69/100 | 136.1 ms | elapsed 13.90s  Step 70/100 | 143.5 ms | elapsed 14.04s  Step 71/100 | 138.6 ms | elapsed 14.18s  Step 72/100 | 135.2 ms | elapsed 14.31s  Step 73/100 | 165.5 ms | elapsed 14.48s  Step 74/100 | 141.7 ms | elapsed 14.62s  Step 75/100 | 170.7 ms | elapsed 14.79s  Step 76/100 | 139.9 ms | elapsed 14.93s  Step 77/100 | 138.8 ms | elapsed 15.07s  Step 78/100 | 131.9 ms | elapsed 15.20s  Step 79/100 | 136.9 ms | elapsed 15.34s  Step 80/100 | 140.0 ms | elapsed 15.48s  Step 81/100 | 138.8 ms | elapsed 15.62s  Step 82/100 | 157.4 ms | elapsed 15.77s  Step 83/100 | 134.4 ms | elapsed 15.91s  Step 84/100 | 144.4 ms | elapsed 16.05s  Step 85/100 | 156.9 ms | elapsed 16.21s  Step 86/100 | 166.1 ms | elapsed 16.38s  Step 87/100 | 143.0 ms | elapsed 16.52s  Step 88/100 | 144.7 ms | elapsed 16.66s  Step 89/100 | 141.4 ms | elapsed 16.81s  Step 90/100 | 136.9 ms | elapsed 16.94s  Step 91/100 | 130.1 ms | elapsed 17.07s  Step 92/100 | 141.5 ms | elapsed 17.21s  Step 93/100 | 132.8 ms | elapsed 17.35s  Step 94/100 | 136.7 ms | elapsed 17.48s  Step 95/100 | 137.3 ms | elapsed 17.62s  Step 96/100 | 131.9 ms | elapsed 17.75s  Step 97/100 | 139.4 ms | elapsed 17.89s  Step 98/100 | 138.5 ms | elapsed 18.03s  Step 99/100 | 139.8 ms | elapsed 18.17s  Step 100/100 | 150.4 ms | elapsed 18.32s
-
-============================================================
-RESULTS: EDHParticleFlowFilter
-============================================================
-RMSE: 18.0333
-Log-likelihood: -308.33
-Mean ESS: 181.4
-
-Performance:
-  Wall time: 18.953 seconds
-  Time per step: 189.53 ms
-  Peak memory: 4.7 MB
-  Memory increase: 141.0 MB
-  Peak memory (GPU): 1.0 MB
-============================================================
-
-Results saved to /home/haowu/JPML/code/outputs/kitagawa/kitagawa_edh_invertible
-Plot saved to /home/haowu/JPML/code/outputs/kitagawa/kitagawa_edh_invertible/plot.png

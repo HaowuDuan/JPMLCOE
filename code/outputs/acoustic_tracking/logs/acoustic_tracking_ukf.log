@@ -1,33 +1,0 @@
-<frozen runpy>:128: RuntimeWarning: 'src.experiments.run_experiment' found in sys.modules after import of package 'src.experiments', but prior to execution of 'src.experiments.run_experiment'; this may result in unpredictable behaviour
-Creating model: src.models.acoustic_tracking_full.AcousticTrackingFullModel
-WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
-I0000 00:00:1773134852.692727 3785059 gpu_device.cc:2020] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 20289 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3090, pci bus id: 0000:01:00.0, compute capability: 8.6
-Generating 50 time steps...
-I0000 00:00:1773134852.745854 3785150 cuda_solvers.cc:175] Creating GpuSolver handles for stream 0x267f3b20
-Creating filter: UnscentedKalmanFilter
-Initialized UnscentedKalmanFilter with perturbed state (noise std: position=10, velocity=1)
-Running UnscentedKalmanFilter...
-WARNING:tensorflow:From /home/haowu/JPML/code/.venv/lib/python3.12/site-packages/tensorflow/python/util/deprecation.py:660: calling map_fn_v2 (from tensorflow.python.ops.map_fn) with dtype is deprecated and will be removed in a future version.
-Instructions for updating:
-Use fn_output_signature instead
-[2026-03-10 17:27:35,995][tensorflow][WARNING] - From /home/haowu/JPML/code/.venv/lib/python3.12/site-packages/tensorflow/python/util/deprecation.py:660: calling map_fn_v2 (from tensorflow.python.ops.map_fn) with dtype is deprecated and will be removed in a future version.
-Instructions for updating:
-Use fn_output_signature instead
-  Step 1/50 | 2455.4 ms | elapsed 2.46s  Step 2/50 | 251.6 ms | elapsed 2.71s  Step 3/50 | 268.1 ms | elapsed 2.98s  Step 4/50 | 284.5 ms | elapsed 3.26s  Step 5/50 | 256.0 ms | elapsed 3.52s  Step 6/50 | 252.3 ms | elapsed 3.77s  Step 7/50 | 278.1 ms | elapsed 4.05s  Step 8/50 | 281.9 ms | elapsed 4.33s  Step 9/50 | 264.9 ms | elapsed 4.59s  Step 10/50 | 275.8 ms | elapsed 4.87s  Step 11/50 | 266.8 ms | elapsed 5.14s  Step 12/50 | 242.5 ms | elapsed 5.38s  Step 13/50 | 277.5 ms | elapsed 5.66s  Step 14/50 | 253.8 ms | elapsed 5.91s  Step 15/50 | 233.0 ms | elapsed 6.14s  Step 16/50 | 255.7 ms | elapsed 6.40s  Step 17/50 | 262.1 ms | elapsed 6.66s  Step 18/50 | 275.0 ms | elapsed 6.93s  Step 19/50 | 265.8 ms | elapsed 7.20s  Step 20/50 | 267.4 ms | elapsed 7.47s  Step 21/50 | 257.4 ms | elapsed 7.73s  Step 22/50 | 276.3 ms | elapsed 8.00s  Step 23/50 | 247.5 ms | elapsed 8.25s  Step 24/50 | 271.4 ms | elapsed 8.52s  Step 25/50 | 265.5 ms | elapsed 8.79s  Step 26/50 | 238.9 ms | elapsed 9.03s  Step 27/50 | 293.0 ms | elapsed 9.32s  Step 28/50 | 267.7 ms | elapsed 9.59s  Step 29/50 | 270.6 ms | elapsed 9.86s  Step 30/50 | 262.4 ms | elapsed 10.12s  Step 31/50 | 272.5 ms | elapsed 10.39s  Step 32/50 | 262.0 ms | elapsed 10.65s  Step 33/50 | 240.3 ms | elapsed 10.89s  Step 34/50 | 260.3 ms | elapsed 11.15s  Step 35/50 | 269.5 ms | elapsed 11.42s  Step 36/50 | 259.8 ms | elapsed 11.68s  Step 37/50 | 286.0 ms | elapsed 11.97s  Step 38/50 | 229.7 ms | elapsed 12.20s  Step 39/50 | 208.3 ms | elapsed 12.41s  Step 40/50 | 191.2 ms | elapsed 12.60s  Step 41/50 | 205.8 ms | elapsed 12.80s  Step 42/50 | 214.2 ms | elapsed 13.02s  Step 43/50 | 196.9 ms | elapsed 13.22s  Step 44/50 | 174.9 ms | elapsed 13.39s  Step 45/50 | 169.1 ms | elapsed 13.56s  Step 46/50 | 197.3 ms | elapsed 13.76s  Step 47/50 | 199.6 ms | elapsed 13.96s  Step 48/50 | 193.0 ms | elapsed 14.15s  Step 49/50 | 173.2 ms | elapsed 14.32s  Step 50/50 | 177.0 ms | elapsed 14.50s
-
-============================================================
-RESULTS: UnscentedKalmanFilter
-============================================================
-RMSE: 39.3428
-Log-likelihood: -17594.27
-
-Performance:
-  Wall time: 14.506 seconds
-  Time per step: 290.12 ms
-  Peak memory: 2.8 MB
-  Memory increase: 60.3 MB
-  Peak memory (GPU): 0.4 MB
-============================================================
-
-Results saved to /home/haowu/JPML/code/outputs/acoustic_tracking/acoustic_tracking_ukf
-Plot saved to /home/haowu/JPML/code/outputs/acoustic_tracking/acoustic_tracking_ukf/plot.png

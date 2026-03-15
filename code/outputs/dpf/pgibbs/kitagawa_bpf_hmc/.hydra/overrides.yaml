@@ -1,3 +1,0 @@
-- dpf=pgibbs/kitagawa_bpf_hmc
-- dpf.pgibbs.num_burnin=2
-- dpf.pgibbs.num_samples=3

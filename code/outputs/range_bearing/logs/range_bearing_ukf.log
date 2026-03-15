@@ -1,33 +1,0 @@
-<frozen runpy>:128: RuntimeWarning: 'src.experiments.run_experiment' found in sys.modules after import of package 'src.experiments', but prior to execution of 'src.experiments.run_experiment'; this may result in unpredictable behaviour
-Creating model: src.models.range_bearing.RangeBearingModel
-WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
-I0000 00:00:1773135762.181580 3796823 gpu_device.cc:2020] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 20725 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3090, pci bus id: 0000:01:00.0, compute capability: 8.6
-Generating 100 time steps...
-I0000 00:00:1773135762.233142 3796929 cuda_solvers.cc:175] Creating GpuSolver handles for stream 0xd3dd970
-Creating filter: UnscentedKalmanFilter
-Initialized UnscentedKalmanFilter with sampled initial state from model distribution
-Running UnscentedKalmanFilter...
-WARNING:tensorflow:From /home/haowu/JPML/code/.venv/lib/python3.12/site-packages/tensorflow/python/util/deprecation.py:660: calling map_fn_v2 (from tensorflow.python.ops.map_fn) with dtype is deprecated and will be removed in a future version.
-Instructions for updating:
-Use fn_output_signature instead
-[2026-03-10 17:42:43,545][tensorflow][WARNING] - From /home/haowu/JPML/code/.venv/lib/python3.12/site-packages/tensorflow/python/util/deprecation.py:660: calling map_fn_v2 (from tensorflow.python.ops.map_fn) with dtype is deprecated and will be removed in a future version.
-Instructions for updating:
-Use fn_output_signature instead
-  Step 1/100 | 1951.6 ms | elapsed 1.95s  Step 2/100 | 9.4 ms | elapsed 1.96s  Step 3/100 | 8.5 ms | elapsed 1.97s  Step 4/100 | 8.3 ms | elapsed 1.98s  Step 5/100 | 7.9 ms | elapsed 1.99s  Step 6/100 | 8.7 ms | elapsed 1.99s  Step 7/100 | 6.4 ms | elapsed 2.00s  Step 8/100 | 8.0 ms | elapsed 2.01s  Step 9/100 | 6.7 ms | elapsed 2.02s  Step 10/100 | 6.3 ms | elapsed 2.02s  Step 11/100 | 6.1 ms | elapsed 2.03s  Step 12/100 | 6.0 ms | elapsed 2.03s  Step 13/100 | 4.6 ms | elapsed 2.04s  Step 14/100 | 4.4 ms | elapsed 2.04s  Step 15/100 | 4.4 ms | elapsed 2.05s  Step 16/100 | 5.4 ms | elapsed 2.05s  Step 17/100 | 4.5 ms | elapsed 2.06s  Step 18/100 | 5.1 ms | elapsed 2.06s  Step 19/100 | 6.2 ms | elapsed 2.07s  Step 20/100 | 5.7 ms | elapsed 2.07s  Step 21/100 | 6.4 ms | elapsed 2.08s  Step 22/100 | 6.3 ms | elapsed 2.09s  Step 23/100 | 6.1 ms | elapsed 2.09s  Step 24/100 | 6.2 ms | elapsed 2.10s  Step 25/100 | 6.3 ms | elapsed 2.11s  Step 26/100 | 6.1 ms | elapsed 2.11s  Step 27/100 | 7.1 ms | elapsed 2.12s  Step 28/100 | 7.8 ms | elapsed 2.13s  Step 29/100 | 7.0 ms | elapsed 2.13s  Step 30/100 | 7.2 ms | elapsed 2.14s  Step 31/100 | 6.3 ms | elapsed 2.15s  Step 32/100 | 8.0 ms | elapsed 2.16s  Step 33/100 | 7.0 ms | elapsed 2.16s  Step 34/100 | 7.8 ms | elapsed 2.17s  Step 35/100 | 7.2 ms | elapsed 2.18s  Step 36/100 | 7.2 ms | elapsed 2.18s  Step 37/100 | 7.2 ms | elapsed 2.19s  Step 38/100 | 6.9 ms | elapsed 2.20s  Step 39/100 | 7.8 ms | elapsed 2.21s  Step 40/100 | 7.0 ms | elapsed 2.21s  Step 41/100 | 7.5 ms | elapsed 2.22s  Step 42/100 | 7.7 ms | elapsed 2.23s  Step 43/100 | 6.1 ms | elapsed 2.23s  Step 44/100 | 7.3 ms | elapsed 2.24s  Step 45/100 | 6.4 ms | elapsed 2.25s  Step 46/100 | 6.8 ms | elapsed 2.26s  Step 47/100 | 5.8 ms | elapsed 2.26s  Step 48/100 | 6.1 ms | elapsed 2.27s  Step 49/100 | 5.9 ms | elapsed 2.27s  Step 50/100 | 6.0 ms | elapsed 2.28s  Step 51/100 | 6.3 ms | elapsed 2.29s  Step 52/100 | 6.2 ms | elapsed 2.29s  Step 53/100 | 5.8 ms | elapsed 2.30s  Step 54/100 | 6.8 ms | elapsed 2.30s  Step 55/100 | 6.7 ms | elapsed 2.31s  Step 56/100 | 6.2 ms | elapsed 2.32s  Step 57/100 | 6.9 ms | elapsed 2.32s  Step 58/100 | 6.0 ms | elapsed 2.33s  Step 59/100 | 6.3 ms | elapsed 2.34s  Step 60/100 | 6.6 ms | elapsed 2.34s  Step 61/100 | 6.0 ms | elapsed 2.35s  Step 62/100 | 6.8 ms | elapsed 2.36s  Step 63/100 | 6.0 ms | elapsed 2.36s  Step 64/100 | 6.3 ms | elapsed 2.37s  Step 65/100 | 6.0 ms | elapsed 2.37s  Step 66/100 | 6.3 ms | elapsed 2.38s  Step 67/100 | 6.2 ms | elapsed 2.39s  Step 68/100 | 6.7 ms | elapsed 2.39s  Step 69/100 | 6.5 ms | elapsed 2.40s  Step 70/100 | 6.5 ms | elapsed 2.41s  Step 71/100 | 6.5 ms | elapsed 2.41s  Step 72/100 | 6.1 ms | elapsed 2.42s  Step 73/100 | 6.3 ms | elapsed 2.42s  Step 74/100 | 6.4 ms | elapsed 2.43s  Step 75/100 | 6.2 ms | elapsed 2.44s  Step 76/100 | 6.1 ms | elapsed 2.44s  Step 77/100 | 5.7 ms | elapsed 2.45s  Step 78/100 | 6.2 ms | elapsed 2.46s  Step 79/100 | 6.2 ms | elapsed 2.46s  Step 80/100 | 6.2 ms | elapsed 2.47s  Step 81/100 | 6.3 ms | elapsed 2.47s  Step 82/100 | 6.3 ms | elapsed 2.48s  Step 83/100 | 6.6 ms | elapsed 2.49s  Step 84/100 | 6.8 ms | elapsed 2.49s  Step 85/100 | 6.9 ms | elapsed 2.50s  Step 86/100 | 7.1 ms | elapsed 2.51s  Step 87/100 | 6.5 ms | elapsed 2.51s  Step 88/100 | 6.9 ms | elapsed 2.52s  Step 89/100 | 6.9 ms | elapsed 2.53s  Step 90/100 | 6.7 ms | elapsed 2.53s  Step 91/100 | 6.6 ms | elapsed 2.54s  Step 92/100 | 6.0 ms | elapsed 2.55s  Step 93/100 | 6.3 ms | elapsed 2.55s  Step 94/100 | 6.4 ms | elapsed 2.56s  Step 95/100 | 6.6 ms | elapsed 2.57s  Step 96/100 | 5.5 ms | elapsed 2.57s  Step 97/100 | 5.7 ms | elapsed 2.58s  Step 98/100 | 5.4 ms | elapsed 2.58s  Step 99/100 | 5.1 ms | elapsed 2.59s  Step 100/100 | 6.3 ms | elapsed 2.59s
-
-============================================================
-RESULTS: UnscentedKalmanFilter
-============================================================
-RMSE: 0.6436
-Log-likelihood: -573.78
-
-Performance:
-  Wall time: 2.605 seconds
-  Time per step: 26.05 ms
-  Peak memory: 2.8 MB
-  Memory increase: 55.9 MB
-  Peak memory (GPU): 0.1 MB
-============================================================
-
-Results saved to /home/haowu/JPML/code/outputs/range_bearing/range_bearing_ukf
-Plot saved to /home/haowu/JPML/code/outputs/range_bearing/range_bearing_ukf/plot.png
