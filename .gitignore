@@ -3,4 +3,5 @@
 .claude
 .vscode
 .venv
+code/outputs/
 extracode/outputs/acoustic_tracking/acoustic_tracking_pf_1e6/weights_history.npy
