@@ -1,0 +1,20 @@
+# @package _global_
+
+# Experiment: Stochastic EDH on Range-Bearing Model
+# Tests stochastic exact Daum-Huang flow on range-bearing tracking
+
+defaults:
+  - override /model: range_bearing
+  - override /filter: stochastic_edh
+
+# Override settings
+T: 100
+seed: 42
+plot: true
+output_dir: outputs/range_bearing/range_bearing_stochastic_edh
+
+
+
+
+
+

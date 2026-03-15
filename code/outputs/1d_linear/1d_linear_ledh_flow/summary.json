@@ -1,0 +1,71 @@
+{
+  "rmse": 0.27227197018764443,
+  "log_likelihood": -104.84073967442487,
+  "metadata": {
+    "filter_type": "LocalExactDaumHuangFlow",
+    "n_particles": 500,
+    "n_lambda_steps": 29,
+    "integration_method": "euler",
+    "log_likelihood_source": "guide_filter",
+    "performance": {
+      "wall_time_seconds": 13.011471514590085,
+      "time_per_timestep_ms": 130.11471514590085,
+      "peak_memory_mb": 14.339522361755371,
+      "memory_increase_mb": 77.37109375,
+      "start_memory_mb": 680.06640625,
+      "end_memory_mb": 757.4375,
+      "num_timesteps": 100
+    }
+  },
+  "config": {
+    "model": {
+      "_target_": "src.models.linear_gaussian.LinearGaussianModel",
+      "F": [
+        [
+          0.95
+        ]
+      ],
+      "B": [
+        [
+          0.5
+        ]
+      ],
+      "H": [
+        [
+          1.0
+        ]
+      ],
+      "D": [
+        [
+          0.3
+        ]
+      ],
+      "mu_0": [
+        0.0
+      ],
+      "Sigma_0": [
+        [
+          1.0
+        ]
+      ]
+    },
+    "filter": {
+      "_target_": "src.filters.particle.ledh_flow.LocalExactDaumHuangFlow",
+      "n_particles": 500,
+      "n_lambda_steps": 29,
+      "integration_method": "euler",
+      "use_feedback": true,
+      "regularization": 1e-05,
+      "n_threads": null
+    },
+    "seed": 42,
+    "dtype": "float64",
+    "T": 100,
+    "output_dir": "outputs/1d_linear/1d_linear_ledh_flow",
+    "plot": true,
+    "device": "auto",
+    "tf_log_level": 2,
+    "verbose": true,
+    "show_progress": true
+  }
+}

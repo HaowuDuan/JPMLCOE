@@ -1,20 +1,20 @@
 {
-  "rmse": 0.3711251673161706,
-  "log_likelihood": -21.97831285508941,
+  "rmse": 0.26787499436039613,
+  "log_likelihood": -105.45508257224525,
   "metadata": {
     "filter_type": "ParticleFilterTF",
     "n_particles": 1000,
-    "resampling_rate": 0.6,
+    "resampling_rate": 0.66,
     "resampling_method": "systematic",
     "resampling_config": {},
     "performance": {
-      "wall_time_seconds": 1.258398792007938,
-      "time_per_timestep_ms": 62.91993960039691,
-      "peak_memory_mb": 5.011660575866699,
-      "memory_increase_mb": 31.59375,
-      "start_memory_mb": 440.84375,
-      "end_memory_mb": 472.4375,
-      "num_timesteps": 20
+      "wall_time_seconds": 2.0094418628141284,
+      "time_per_timestep_ms": 20.094418628141284,
+      "peak_memory_mb": 4.925195693969727,
+      "memory_increase_mb": 28.5625,
+      "start_memory_mb": 679.5390625,
+      "end_memory_mb": 708.1015625,
+      "num_timesteps": 100
     }
   },
   "config": {
@@ -57,7 +57,7 @@
     },
     "seed": 42,
     "dtype": "float64",
-    "T": 20,
+    "T": 100,
     "output_dir": "outputs/1d_linear/1d_linear_pf",
     "plot": true,
     "device": "auto",

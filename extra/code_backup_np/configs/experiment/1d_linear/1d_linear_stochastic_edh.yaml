@@ -1,0 +1,14 @@
+# @package _global_
+
+# Experiment: Stochastic EDH Flow (Linear Schedule) on 1D Linear Gaussian Model
+
+defaults:
+  - override /model: 1d_linear_gaussian
+  - override /filter: stochastic_edh
+
+# Override settings
+T: 20
+seed: 42
+plot: true
+output_dir: outputs/1d_linear/1d_linear_stochastic_edh
+

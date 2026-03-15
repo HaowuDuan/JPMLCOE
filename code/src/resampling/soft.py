@@ -2,6 +2,7 @@ import tensorflow as tf
 from .types import ResampleResult
 
 
+@tf.function(jit_compile=True)
 def soft_resample(particles: tf.Tensor, weights: tf.Tensor, alpha: float,
                  seed: tf.Tensor) -> ResampleResult:
     """

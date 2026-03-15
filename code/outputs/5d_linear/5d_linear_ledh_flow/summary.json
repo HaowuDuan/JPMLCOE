@@ -1,21 +1,20 @@
 {
-  "rmse": 0.10220139506561335,
-  "log_likelihood": null,
+  "rmse": 0.10220139506561486,
+  "log_likelihood": -691.4922137763975,
   "metadata": {
     "filter_type": "LocalExactDaumHuangFlow",
     "n_particles": 500,
     "n_lambda_steps": 29,
     "integration_method": "euler",
+    "log_likelihood_source": "guide_filter",
     "performance": {
-      "wall_time_seconds": 18.804748157039285,
-      "time_per_timestep_ms": 188.04748157039285,
-      "peak_memory_mb": 3.5537776947021484,
-      "memory_increase_mb": 143.6875,
-      "start_memory_mb": 903.22265625,
-      "end_memory_mb": 1046.91015625,
-      "num_timesteps": 100,
-      "gpu_peak_memory_mb": 0.72705078125,
-      "gpu_current_memory_mb": 0.11474609375
+      "wall_time_seconds": 22.626110210083425,
+      "time_per_timestep_ms": 226.26110210083425,
+      "peak_memory_mb": 14.384319305419922,
+      "memory_increase_mb": 90.03515625,
+      "start_memory_mb": 686.125,
+      "end_memory_mb": 776.16015625,
+      "num_timesteps": 100
     }
   },
   "config": {

@@ -1,26 +1,22 @@
 <frozen runpy>:128: RuntimeWarning: 'src.experiments.run_experiment' found in sys.modules after import of package 'src.experiments', but prior to execution of 'src.experiments.run_experiment'; this may result in unpredictable behaviour
 Creating model: src.models.linear_gaussian.LinearGaussianModel
-WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
-I0000 00:00:1773134212.227495 3772124 gpu_device.cc:2020] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 22244 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3090, pci bus id: 0000:01:00.0, compute capability: 8.6
 Generating 100 time steps...
-I0000 00:00:1773134212.299151 3772124 cuda_solvers.cc:175] Creating GpuSolver handles for stream 0x31ee3570
 Creating filter: ParticleFilterTF
 Running ParticleFilterTF...
 
 ============================================================
 RESULTS: ParticleFilterTF
 ============================================================
-RMSE: 0.3403
-Log-likelihood: -3001.82
-Mean ESS: 1.2
+RMSE: 0.3442
+Log-likelihood: -2879.99
+Mean ESS: 1.1
 
 Performance:
-  Wall time: 2.947 seconds
-  Time per step: 29.47 ms
-  Peak memory: 4.4 MB
-  Memory increase: 141.0 MB
-  Peak memory (GPU): 1.9 MB
+  Wall time: 2.252 seconds
+  Time per step: 22.52 ms
+  Peak memory: 4.9 MB
+  Memory increase: 35.9 MB
 ============================================================
 
-Results saved to /home/haowu/JPML/code/outputs/5d_linear/5d_linear_pf
-Plot saved to /home/haowu/JPML/code/outputs/5d_linear/5d_linear_pf/plot.png
+Results saved to /home/haowu/JPML-jit/code/outputs/5d_linear/5d_linear_pf
+Plot saved to /home/haowu/JPML-jit/code/outputs/5d_linear/5d_linear_pf/plot.png

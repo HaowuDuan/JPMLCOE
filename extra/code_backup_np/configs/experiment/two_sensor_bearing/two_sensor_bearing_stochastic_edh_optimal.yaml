@@ -1,0 +1,15 @@
+# @package _global_
+
+# Experiment: Stochastic EDH with Optimal Schedule on Two-Sensor Bearing-Only Model
+# Uses stiffness-mitigating β(λ) from BVP solver
+
+defaults:
+  - override /model: two_sensor_bearing
+  - override /filter: stochastic_edh_optimal
+
+# Override settings
+T: 1
+seed: 42
+plot: true
+output_dir: outputs/two_sensor_bearing/two_sensor_bearing_stochastic_edh_optimal
+

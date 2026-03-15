@@ -18,7 +18,7 @@ from .types import ResampleResult
 # Section 1: Utility Functions
 # =============================================================================
 
-@tf.function
+@tf.function(jit_compile=True)
 def compute_cost_matrix(x: tf.Tensor, y: tf.Tensor) -> tf.Tensor:
     """
     Compute squared Euclidean distance cost matrix.
@@ -42,7 +42,7 @@ def compute_cost_matrix(x: tf.Tensor, y: tf.Tensor) -> tf.Tensor:
     return squared_dist / 2.0
 
 
-@tf.function
+@tf.function(jit_compile=True)
 def softmin(epsilon: tf.Tensor, cost_matrix: tf.Tensor, f: tf.Tensor) -> tf.Tensor:
     """
     Softmin operation for Sinkhorn algorithm.
@@ -89,7 +89,7 @@ def softmin(epsilon: tf.Tensor, cost_matrix: tf.Tensor, f: tf.Tensor) -> tf.Tens
     return result
 
 
-@tf.function
+@tf.function(jit_compile=True)
 def compute_diameter(x: tf.Tensor) -> tf.Tensor:
     """
     Compute diameter of particle cloud for epsilon-scaling initialization.
@@ -121,7 +121,7 @@ def compute_diameter(x: tf.Tensor) -> tf.Tensor:
 # Section 2: Sinkhorn Algorithm
 # =============================================================================
 
-@tf.function
+@tf.function(jit_compile=True)
 def sinkhorn_iteration(
     log_weights: tf.Tensor,
     cost_matrix: tf.Tensor,
@@ -231,7 +231,7 @@ def sinkhorn_iteration(
     return alpha_extra, beta_extra, n_iter
 
 
-@tf.function
+@tf.function(jit_compile=True)
 def sinkhorn_with_epsilon_scaling(
     log_weights: tf.Tensor,
     particles: tf.Tensor,
@@ -330,7 +330,7 @@ def sinkhorn_with_epsilon_scaling(
 # Section 3: Transport Matrix and Main Resampling Function
 # =============================================================================
 
-@tf.function
+@tf.function(jit_compile=True)
 def compute_transport_matrix_from_potentials(
     particles: tf.Tensor,
     alpha: tf.Tensor,

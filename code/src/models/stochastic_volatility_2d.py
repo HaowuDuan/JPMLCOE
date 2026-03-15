@@ -180,6 +180,12 @@ class StochasticVolatility2DModel(StateSpaceModel):
         """Var[y | x] = exp(x_2) (state-dependent)"""
         return tf.reshape(tf.exp(x[1]), [1, 1])
 
+    def observation_cov_corrected(self, mean: tf.Tensor, cov: tf.Tensor) -> tf.Tensor:
+        """E[exp(x_2)] = exp(m_2 + P_22/2) by lognormal MGF."""
+        m2 = mean[1]
+        P22 = cov[1, 1]
+        return tf.reshape(tf.exp(m2 + P22 / 2.0), [1, 1])
+
     def observation_jacobian(self, x: tf.Tensor) -> tf.Tensor:
         """dE[y|x]/dx = [b, 0]"""
         return tf.reshape(tf.stack([self._b, tf.constant(0.0, dtype=self.dtype)]), [1, 2])
@@ -236,6 +242,22 @@ class StochasticVolatility2DModel(StateSpaceModel):
     def observation_function_batch(self, particles: tf.Tensor) -> tf.Tensor:
         """h(x) = b * x_1 for batch."""
         return tf.reshape(self._b * particles[:, 0], [-1, 1])
+
+    @property
+    def has_non_additive_obs_noise(self) -> bool:
+        return True
+
+    def observation_function_with_noise(self, x: tf.Tensor, r: tf.Tensor) -> tf.Tensor:
+        """h(x, r) = b * x_1 + exp(x_2 / 2) * r_1"""
+        return tf.reshape(self._b * x[0] + tf.exp(x[1] / 2.0) * r[0], [1])
+
+    def observation_function_with_noise_batch(self, particles: tf.Tensor,
+                                               noise: tf.Tensor) -> tf.Tensor:
+        """Batch: h(x, r) = b * x_1 + exp(x_2 / 2) * r"""
+        means = self._b * particles[:, 0]          # (N,)
+        scales = tf.exp(particles[:, 1] / 2.0)     # (N,)
+        y = means + scales * noise[:, 0]            # (N,)
+        return tf.reshape(y, [-1, 1])               # (N, 1)
 
     def state_jacobian_batch(self, particles: tf.Tensor) -> tf.Tensor:
         N = tf.shape(particles)[0]

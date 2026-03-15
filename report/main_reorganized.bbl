@@ -1,0 +1,129 @@
+\begin{thebibliography}{10}
+
+\bibitem{Särkkä2013BayesianFilteringAndSmoothing}
+Simo Särkkä.
+\newblock {\em Bayesian Filtering and Smoothing}.
+\newblock Cambridge University Press, 2013.
+
+\bibitem{daum2010exact}
+Fred Daum, Jim Huang, and Arjang Noushin.
+\newblock Exact particle flow for nonlinear filters.
+\newblock In {\em Signal processing, sensor fusion, and target recognition
+  XIX}, volume 7697, pages 92--110. SPIE, 2010.
+
+\bibitem{daum2011particle}
+Fred Daum and Jim Huang.
+\newblock Particle degeneracy: root cause and solution.
+\newblock In {\em Signal Processing, Sensor Fusion, and Target Recognition XX},
+  volume 8050, pages 367--377. SPIE, 2011.
+
+\bibitem{Li-Particle-Filtering-2017}
+Yunpeng Li and Mark Coates.
+\newblock Particle filtering with invertible particle flow, 2017.
+
+\bibitem{dai-new-2021}
+Liyi Dai and Fred Daum.
+\newblock A new parameterized family of stochastic particle flow filters, 2021.
+
+\bibitem{ding2012implementation}
+Tao Ding and Mark~J. Coates.
+\newblock Implementation of the daum-huang exact-flow particle filter.
+\newblock In {\em 2012 IEEE Statistical Signal Processing Workshop (SSP)},
+  pages 257--260. IEEE, 2012.
+
+\bibitem{Pulido2019}
+Manuel Pulido and Peter~Jan van Leeuwen.
+\newblock Sequential monte carlo with kernel embedded mappings: The mapping
+  particle filter.
+\newblock 2019.
+
+\bibitem{HuVanLeeuwen2021}
+Chih-Chi Hu and Peter~Jan Van~Leeuwen.
+\newblock A particle flow filter for high-dimensional system applications.
+\newblock 2021.
+
+\bibitem{reich2013nonparametric}
+Sebastian Reich.
+\newblock A nonparametric ensemble transform method for bayesian inference.
+\newblock {\em SIAM Journal on Scientific Computing}, 35(4):A2013--A2024, 2013.
+
+\bibitem{corenflos-differentiable-2021}
+Adrien Corenflos, James Thornton, George Deligiannidis, and Arnaud Doucet.
+\newblock Differentiable particle filtering via entropy-regularized optimal
+  transport, 2021.
+
+\bibitem{chaudhari2025gradnetot}
+Shreyas Chaudhari, Srinivasa Pranav, and Jos{\'e} M.~F. Moura.
+\newblock Gradnetot: Learning optimal transport maps with gradnets.
+\newblock {\em arXiv preprint arXiv:2507.13191}, 2025.
+\newblock v2.
+
+\bibitem{Zhu2020TowardsDR}
+Michael Zhu, Kevin~P. Murphy, and Rico Jonschkowski.
+\newblock Towards differentiable resampling.
+\newblock {\em arXiv preprint arXiv:2004.11938}, 2020.
+
+\bibitem{Lee2019SetTransformer}
+Juho Lee, Yoonho Lee, Jungtaek Kim, Adam~R. Kosiorek, Seungjin Choi, and
+  Yee~Whye Teh.
+\newblock Set transformer: A framework for attention-based
+  permutation-invariant neural networks.
+\newblock In {\em Proceedings of the 36th International Conference on Machine
+  Learning}, volume~97 of {\em Proceedings of Machine Learning Research}, pages
+  3744--3753. PMLR, 2019.
+
+\bibitem{chen2023overview}
+Xiongjie Chen and Yunpeng Li.
+\newblock An overview of differentiable particle filters for data-adaptive
+  sequential bayesian inference.
+\newblock {\em Foundations of Data Science}, 2023.
+\newblock Also available as arXiv:2302.09639.
+
+\bibitem{amos2022amortized}
+Brandon Amos.
+\newblock Tutorial on amortized optimization: Learning to optimize over
+  continuous spaces.
+\newblock {\em arXiv preprint arXiv:2202.00665}, 2022.
+\newblock Version 5, October 2025.
+
+\bibitem{amos2023meta}
+Brandon Amos, Giulia Luise, Samuel Cohen, and Ievgen Redko.
+\newblock Meta optimal transport.
+\newblock In {\em Proceedings of the 40th International Conference on Machine
+  Learning}, PMLR 202, Honolulu, Hawaii, USA, 2023.
+\newblock arXiv:2206.05262v2.
+
+\bibitem{Metropolis1953}
+Nicholas Metropolis, Arianna~W. Rosenbluth, Marshall~N. Rosenbluth, Augusta~H.
+  Teller, and Edward Teller.
+\newblock Equation of state calculations by fast computing machines.
+\newblock {\em The Journal of Chemical Physics}, 21(6):1087--1092, 1953.
+
+\bibitem{Duane1987}
+Simon Duane, A.D. Kennedy, Brian~J. Pendleton, and Duncan Roweth.
+\newblock Hybrid monte carlo.
+\newblock {\em Physics Letters B}, 195(2):216--222, 1987.
+
+\bibitem{Neal-2012-MCMC-Hamiltonian-Dynamics-ARXIV-1206-1901v1}
+Radford~M. Neal.
+\newblock Mcmc using hamiltonian dynamics, 2012.
+
+\bibitem{hoffman2014nuts}
+Matthew~D. Hoffman and Andrew Gelman.
+\newblock The no-u-turn sampler: Adaptively setting path lengths in hamiltonian
+  {Monte Carlo}.
+\newblock {\em Journal of Machine Learning Research}, 15(1):1593--1623, 2014.
+
+\bibitem{karkus2018particle}
+Peter Karkus, David Hsu, and Wee~Sun Lee.
+\newblock Particle filter networks with application to visual localization.
+\newblock In {\em Conference on Robot Learning (CoRL)}, pages 169--178. PMLR,
+  2018.
+
+\bibitem{beskos2013optimal}
+Alexandros Beskos, Natesh Pillai, Gareth~O. Roberts, Jes{\'u}s-Mari{\'a}
+  Sanz-Serna, and Andrew~M. Stuart.
+\newblock Optimal tuning of the hybrid {Monte Carlo} algorithm.
+\newblock {\em Bernoulli}, 19(5A):1501--1534, 2013.
+
+\end{thebibliography}

@@ -8,7 +8,7 @@ except ImportError:
     raise ImportError("TensorFlow is required for resampling utilities")
 
 
-@tf.function
+@tf.function(jit_compile=True)
 def effective_sample_size(weights: tf.Tensor) -> tf.Tensor:
     """
     Compute Effective Sample Size (ESS).
@@ -26,7 +26,7 @@ def effective_sample_size(weights: tf.Tensor) -> tf.Tensor:
     return 1.0 / tf.reduce_sum(weights ** 2, axis=-1)
 
 
-@tf.function
+@tf.function(jit_compile=True)
 def normalize_log_weights(log_weights: tf.Tensor) -> tf.Tensor:
     """
     Normalize weights from log-space using log-sum-exp trick.
@@ -44,7 +44,7 @@ def normalize_log_weights(log_weights: tf.Tensor) -> tf.Tensor:
     return weights
 
 
-@tf.function
+@tf.function(jit_compile=True)
 def normalize_weights(weights: tf.Tensor) -> tf.Tensor:
     """
     Normalize weights (already in regular space).

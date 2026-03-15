@@ -1,0 +1,49 @@
+This is BibTeX, Version 0.99d (TeX Live 2025)
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: main_reorganized.aux
+The style file: unsrt.bst
+Database file #1: main_reorganized.bib
+Warning--empty journal in Pulido2019
+Warning--empty journal in HuVanLeeuwen2021
+You've used 22 entries,
+            1791 wiz_defined-function locations,
+            587 strings with 7592 characters,
+and the built_in function-call counts, 5219 in all, are:
+= -- 478
+> -- 220
+< -- 8
++ -- 82
+- -- 60
+* -- 308
+:= -- 792
+add.period$ -- 71
+call.type$ -- 22
+change.case$ -- 21
+chr.to.int$ -- 0
+cite$ -- 24
+duplicate$ -- 241
+empty$ -- 521
+format.name$ -- 60
+if$ -- 1199
+int.to.chr$ -- 0
+int.to.str$ -- 22
+missing$ -- 19
+newline$ -- 113
+num.names$ -- 22
+pop$ -- 88
+preamble$ -- 1
+purify$ -- 0
+quote$ -- 0
+skip$ -- 134
+stack$ -- 0
+substring$ -- 318
+swap$ -- 74
+text.length$ -- 8
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 0
+warning$ -- 2
+while$ -- 47
+width$ -- 24
+write$ -- 240
+(There were 2 warnings)

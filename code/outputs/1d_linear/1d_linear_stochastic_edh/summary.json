@@ -1,0 +1,70 @@
+{
+  "rmse": 0.2683101993732884,
+  "log_likelihood": -104.31041156231345,
+  "metadata": {
+    "filter_type": "StochasticEDHFlow",
+    "n_particles": 500,
+    "n_lambda_steps": 29,
+    "integration_method": "euler",
+    "log_likelihood_source": "guide_filter",
+    "performance": {
+      "wall_time_seconds": 8.367309114895761,
+      "time_per_timestep_ms": 83.67309114895761,
+      "peak_memory_mb": 5.900775909423828,
+      "memory_increase_mb": 63.625,
+      "start_memory_mb": 680.34765625,
+      "end_memory_mb": 743.97265625,
+      "num_timesteps": 100
+    }
+  },
+  "config": {
+    "model": {
+      "_target_": "src.models.linear_gaussian.LinearGaussianModel",
+      "F": [
+        [
+          0.95
+        ]
+      ],
+      "B": [
+        [
+          0.5
+        ]
+      ],
+      "H": [
+        [
+          1.0
+        ]
+      ],
+      "D": [
+        [
+          0.3
+        ]
+      ],
+      "mu_0": [
+        0.0
+      ],
+      "Sigma_0": [
+        [
+          1.0
+        ]
+      ]
+    },
+    "filter": {
+      "_target_": "src.filters.particle.stochastic_edh.StochasticEDHFlow",
+      "n_particles": 500,
+      "n_lambda_steps": 29,
+      "diffusion_scale": 0.0,
+      "schedule_mu": 0.0,
+      "n_threads": null
+    },
+    "seed": 42,
+    "dtype": "float64",
+    "T": 100,
+    "output_dir": "outputs/1d_linear/1d_linear_stochastic_edh",
+    "plot": true,
+    "device": "auto",
+    "tf_log_level": 2,
+    "verbose": true,
+    "show_progress": true
+  }
+}

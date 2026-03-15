@@ -1,0 +1,25 @@
+# 2D Linear Gaussian Model Configuration
+# Position-velocity model (constant velocity with noise)
+
+_target_: src.models.linear_gaussian.LinearGaussianModel
+
+# 2D position-velocity system
+# State: [position, velocity]
+# X_{n} = F * X_{n-1} + B * V_n,  V_n ~ N(0, I)
+# Y_{n} = H * X_n + D * W_n,  W_n ~ N(0, 1)
+
+# Discrete-time constant velocity model with dt=1.0
+F: [[1.0, 1.0],   # x_n = x_{n-1} + v_{n-1} + noise
+    [0.0, 0.95]]  # v_n = 0.95 * v_{n-1} + noise (slight damping)
+
+B: [[0.5, 0.0],   # Process noise
+    [0.0, 1.0]]
+
+H: [[1.0, 0.0]]   # Observe position only
+
+D: [[0.1]]        # Observation noise
+
+# Initial state distribution
+mu_0: [0.0, 0.0]
+Sigma_0: [[1.0, 0.0],
+          [0.0, 1.0]]

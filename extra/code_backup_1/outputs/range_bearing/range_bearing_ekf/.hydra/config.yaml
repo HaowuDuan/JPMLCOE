@@ -1,0 +1,11 @@
+model:
+  _target_: src.models.range_bearing.RangeBearingModel
+  sigma_range: 0.1
+  sigma_bearing: 0.01
+filter:
+  _target_: src.filters.kalman.extended_kalman.ExtendedKalmanFilter
+seed: 42
+T: 100
+output_dir: outputs/range_bearing/range_bearing_ekf
+plot: true
+verbose: true

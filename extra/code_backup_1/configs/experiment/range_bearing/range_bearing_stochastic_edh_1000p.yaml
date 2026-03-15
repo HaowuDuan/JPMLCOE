@@ -1,0 +1,22 @@
+# @package _global_
+
+# Experiment: Stochastic EDH with 1000 particles on Range-Bearing Model
+# Tests stochastic EDH with more particles for better stability
+
+defaults:
+  - override /model: range_bearing
+  - override /filter: stochastic_edh
+
+# Override filter settings for more particles
+filter:
+  n_particles: 1000  # Double the particles
+  n_lambda_steps: 200  # Fine integration
+  diffusion_scale: 0.001
+  use_optimal_schedule: false
+  use_ekf_covariance: true
+
+# Override settings
+T: 100
+seed: 42
+plot: true
+output_dir: outputs/range_bearing/range_bearing_stochastic_edh_1000p

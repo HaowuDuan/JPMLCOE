@@ -1,7 +1,10 @@
 """Linear-Gaussian state-space model - TensorFlow version."""
 
+import warnings
+
 import tensorflow as tf
 import numpy as np
+from scipy import linalg as scipy_linalg
 from typing import Optional, Union, List
 
 from ..core.model_base import StateSpaceModel
@@ -111,7 +114,28 @@ class LinearGaussianModel(StateSpaceModel):
             self._mu_0 = tf.constant(mu_0, dtype=self.dtype)
 
         if Sigma_0 is None:
-            self._Sigma_0 = tf.eye(self.nx, dtype=self.dtype)
+            # Compute stationary covariance P = F P F^T + Q via discrete Lyapunov
+            F_np = np.array(F, dtype=np.float64)
+            Q_np = np.array(self._Q_base.numpy(), dtype=np.float64)
+            spectral_radius = np.max(np.abs(np.linalg.eigvals(F_np)))
+            if spectral_radius < 1.0:
+                try:
+                    P0_np = scipy_linalg.solve_discrete_lyapunov(F_np, Q_np)
+                    P0_np = 0.5 * (P0_np + P0_np.T)  # symmetrize
+                    self._Sigma_0 = tf.constant(P0_np, dtype=self.dtype)
+                except Exception:
+                    warnings.warn(
+                        "solve_discrete_lyapunov failed; falling back to identity Sigma_0.",
+                        RuntimeWarning,
+                    )
+                    self._Sigma_0 = tf.eye(self.nx, dtype=self.dtype)
+            else:
+                warnings.warn(
+                    f"F unstable (spectral radius={spectral_radius:.4f}); "
+                    "using identity Sigma_0.",
+                    RuntimeWarning,
+                )
+                self._Sigma_0 = tf.eye(self.nx, dtype=self.dtype)
         else:
             self._Sigma_0 = tf.constant(Sigma_0, dtype=self.dtype)
 

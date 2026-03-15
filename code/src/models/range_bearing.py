@@ -63,7 +63,7 @@ class RangeBearingModel(StateSpaceModel):
             sensor_pos: Sensor position [x_sensor, y_sensor]
             sigma_range: Standard deviation of range measurement noise
             sigma_bearing: Standard deviation of bearing measurement noise (radians)
-            mu_0: Initial state mean [x_0, y_0]. If None, uses [1.0, 1.0].
+            mu_0: Initial state mean [x_0, y_0]. If None, uses [5.0, 5.0].
             Sigma_0: Initial state covariance (2, 2). If None, uses I.
         """
         self.dtype = dtype
@@ -100,7 +100,7 @@ class RangeBearingModel(StateSpaceModel):
         self.sigma_bearing = sigma_bearing
 
         # Initial state distribution
-        mu_0_np = mu_0 if mu_0 is not None else np.array([1.0, 1.0])
+        mu_0_np = mu_0 if mu_0 is not None else np.array([5.0, 5.0])
         Sigma_0_np = Sigma_0 if Sigma_0 is not None else np.eye(2)
 
         if mu_0_np.shape != (2,):

@@ -1,0 +1,21 @@
+model:
+  _target_: src.models.stochastic_volatility.StochasticVolatilityModel
+  alpha: 0.91
+  sigma: 1.0
+  beta: 0.5
+filter:
+  _target_: src.filters.particle.bootstrap_pf_tf.ParticleFilterTF
+  _recursive_: false
+  n_particles: 1000
+  resample_threshold: 0.5
+  resampling_method: ot_entropy
+  resampling_config:
+    epsilon: 0.3
+    max_iter: 120
+    convergence_threshold: 0.001
+    epsilon_scaling: 0.87
+seed: 42
+T: 500
+output_dir: outputs/stochastic_volatility/stochastic_volatility_pf_ot_eps0.3
+plot: true
+verbose: true

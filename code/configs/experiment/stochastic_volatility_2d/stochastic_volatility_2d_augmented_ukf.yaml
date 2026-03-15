@@ -1,0 +1,14 @@
+# @package _global_
+
+# Experiment: Augmented UKF on 2D Stochastic Volatility Model
+# Uses augmented state (x, r) to properly handle non-additive observation noise
+# y = b*x_1 + exp(x_2/2)*r, so noise enters multiplicatively via exp(x_2/2)
+
+defaults:
+  - override /model: stochastic_volatility_2d
+  - override /filter: augmented_ukf
+
+T: 500
+seed: 42
+plot: true
+output_dir: outputs/stochastic_volatility_2d/stochastic_volatility_2d_augmented_ukf

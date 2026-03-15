@@ -1,0 +1,32 @@
+model:
+  _target_: src.models.linear_gaussian.LinearGaussianModel
+  F:
+  - - 0.95
+  B:
+  - - 0.5
+  H:
+  - - 1.0
+  D:
+  - - 0.3
+  mu_0:
+  - 0.0
+  Sigma_0:
+  - - 1.0
+filter:
+  _target_: src.filters.kalman.kalman.KalmanFilter
+  F: ${model.F}
+  B: ${model.B}
+  H: ${model.H}
+  D: ${model.D}
+  mean_0: ${model.mu_0}
+  Sigma_0: ${model.Sigma_0}
+  use_joseph_form: false
+seed: 42
+dtype: float64
+T: 100
+output_dir: outputs
+plot: false
+device: auto
+tf_log_level: 2
+verbose: true
+show_progress: true

@@ -1,0 +1,20 @@
+# @package _global_
+
+# Experiment: Unscented Kalman Filter on Range-Bearing Model
+# Tests UKF performance on nonlinear range-bearing observations
+
+defaults:
+  - override /model: range_bearing
+  - override /filter: ukf
+
+# Override settings
+T: 100
+seed: 42
+plot: true
+output_dir: outputs/range_bearing/range_bearing_ukf
+
+
+
+
+
+

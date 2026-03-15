@@ -12,6 +12,7 @@ EXPERIMENTS=(
     # Kalman filters (standalone)
     stochastic_volatility_2d/stochastic_volatility_2d_ekf
     stochastic_volatility_2d/stochastic_volatility_2d_ukf
+    stochastic_volatility_2d/stochastic_volatility_2d_augmented_ukf
     # Particle filter (baseline)
     stochastic_volatility_2d/stochastic_volatility_2d_pf
     # Flow filters (EKF global)

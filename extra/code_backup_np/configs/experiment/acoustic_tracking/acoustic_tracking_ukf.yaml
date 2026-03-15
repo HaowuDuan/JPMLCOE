@@ -1,0 +1,13 @@
+# @package _global_
+
+# Experiment: Unscented Kalman Filter on Acoustic Tracking Model
+
+defaults:
+  - override /model: acoustic_tracking
+  - override /filter: ukf
+
+# Override settings
+T: 50
+seed: 42
+plot: true
+output_dir: outputs/acoustic_tracking/acoustic_tracking_ukf

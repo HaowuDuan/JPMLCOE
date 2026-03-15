@@ -1,0 +1,27 @@
+<frozen runpy>:128: RuntimeWarning: 'src.experiments.run_experiment' found in sys.modules after import of package 'src.experiments', but prior to execution of 'src.experiments.run_experiment'; this may result in unpredictable behaviour
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1773376644.950906 4020248 service.cc:145] XLA service 0x2551b2d0 initialized for platform Host (this does not guarantee that XLA will be used). Devices:
+I0000 00:00:1773376644.950955 4020248 service.cc:153]   StreamExecutor device (0): Host, Default Version
+I0000 00:00:1773376644.985711 4020248 device_compiler.h:188] Compiled cluster using XLA!  This line is logged at most once for the lifetime of the process.
+Creating model: src.models.linear_gaussian.LinearGaussianModel
+Generating 100 time steps...
+Creating filter: StochasticEDHFlow
+Running StochasticEDHFlow...
+  Step 1/100 | 1615.2 ms | elapsed 1.62s  Step 2/100 | 63.1 ms | elapsed 1.68s  Step 3/100 | 63.0 ms | elapsed 1.74s  Step 4/100 | 67.5 ms | elapsed 1.81s  Step 5/100 | 64.9 ms | elapsed 1.87s  Step 6/100 | 71.2 ms | elapsed 1.94s  Step 7/100 | 66.0 ms | elapsed 2.01s  Step 8/100 | 65.0 ms | elapsed 2.08s  Step 9/100 | 66.4 ms | elapsed 2.14s  Step 10/100 | 65.6 ms | elapsed 2.21s  Step 11/100 | 64.9 ms | elapsed 2.27s  Step 12/100 | 65.7 ms | elapsed 2.34s  Step 13/100 | 65.9 ms | elapsed 2.40s  Step 14/100 | 65.3 ms | elapsed 2.47s  Step 15/100 | 70.6 ms | elapsed 2.54s  Step 16/100 | 66.9 ms | elapsed 2.61s  Step 17/100 | 66.2 ms | elapsed 2.67s  Step 18/100 | 64.1 ms | elapsed 2.74s  Step 19/100 | 63.4 ms | elapsed 2.80s  Step 20/100 | 93.4 ms | elapsed 2.89s  Step 21/100 | 70.5 ms | elapsed 2.96s  Step 22/100 | 63.4 ms | elapsed 3.03s  Step 23/100 | 63.2 ms | elapsed 3.09s  Step 24/100 | 64.3 ms | elapsed 3.16s  Step 25/100 | 67.1 ms | elapsed 3.22s  Step 26/100 | 62.8 ms | elapsed 3.29s  Step 27/100 | 62.6 ms | elapsed 3.35s  Step 28/100 | 62.2 ms | elapsed 3.41s  Step 29/100 | 84.0 ms | elapsed 3.49s  Step 30/100 | 67.4 ms | elapsed 3.56s  Step 31/100 | 61.7 ms | elapsed 3.62s  Step 32/100 | 62.2 ms | elapsed 3.69s  Step 33/100 | 63.4 ms | elapsed 3.75s  Step 34/100 | 64.5 ms | elapsed 3.81s  Step 35/100 | 64.0 ms | elapsed 3.88s  Step 36/100 | 64.2 ms | elapsed 3.94s  Step 37/100 | 63.9 ms | elapsed 4.01s  Step 38/100 | 80.4 ms | elapsed 4.09s  Step 39/100 | 61.3 ms | elapsed 4.15s  Step 40/100 | 61.4 ms | elapsed 4.21s  Step 41/100 | 61.8 ms | elapsed 4.27s  Step 42/100 | 62.8 ms | elapsed 4.33s  Step 43/100 | 63.9 ms | elapsed 4.40s  Step 44/100 | 62.7 ms | elapsed 4.46s  Step 45/100 | 61.7 ms | elapsed 4.52s  Step 46/100 | 61.9 ms | elapsed 4.58s  Step 47/100 | 62.5 ms | elapsed 4.65s  Step 48/100 | 62.9 ms | elapsed 4.71s  Step 49/100 | 86.9 ms | elapsed 4.80s  Step 50/100 | 61.2 ms | elapsed 4.86s  Step 51/100 | 62.6 ms | elapsed 4.92s  Step 52/100 | 89.1 ms | elapsed 5.01s  Step 53/100 | 62.5 ms | elapsed 5.07s  Step 54/100 | 77.5 ms | elapsed 5.15s  Step 55/100 | 61.5 ms | elapsed 5.21s  Step 56/100 | 62.7 ms | elapsed 5.27s  Step 57/100 | 64.3 ms | elapsed 5.34s  Step 58/100 | 64.1 ms | elapsed 5.40s  Step 59/100 | 63.0 ms | elapsed 5.46s  Step 60/100 | 63.4 ms | elapsed 5.53s  Step 61/100 | 76.8 ms | elapsed 5.60s  Step 62/100 | 63.3 ms | elapsed 5.67s  Step 63/100 | 63.1 ms | elapsed 5.73s  Step 64/100 | 62.6 ms | elapsed 5.79s  Step 65/100 | 62.2 ms | elapsed 5.86s  Step 66/100 | 62.9 ms | elapsed 5.92s  Step 67/100 | 61.8 ms | elapsed 5.98s  Step 68/100 | 61.8 ms | elapsed 6.04s  Step 69/100 | 62.0 ms | elapsed 6.10s  Step 70/100 | 64.0 ms | elapsed 6.17s  Step 71/100 | 64.0 ms | elapsed 6.23s  Step 72/100 | 64.4 ms | elapsed 6.30s  Step 73/100 | 78.1 ms | elapsed 6.37s  Step 74/100 | 63.2 ms | elapsed 6.44s  Step 75/100 | 63.0 ms | elapsed 6.50s  Step 76/100 | 64.4 ms | elapsed 6.57s  Step 77/100 | 63.7 ms | elapsed 6.63s  Step 78/100 | 63.3 ms | elapsed 6.69s  Step 79/100 | 82.2 ms | elapsed 6.77s  Step 80/100 | 62.2 ms | elapsed 6.84s  Step 81/100 | 62.9 ms | elapsed 6.90s  Step 82/100 | 64.2 ms | elapsed 6.96s  Step 83/100 | 80.5 ms | elapsed 7.04s  Step 84/100 | 64.3 ms | elapsed 7.11s  Step 85/100 | 77.4 ms | elapsed 7.19s  Step 86/100 | 62.7 ms | elapsed 7.25s  Step 87/100 | 62.7 ms | elapsed 7.31s  Step 88/100 | 62.8 ms | elapsed 7.37s  Step 89/100 | 61.9 ms | elapsed 7.44s  Step 90/100 | 62.0 ms | elapsed 7.50s  Step 91/100 | 62.1 ms | elapsed 7.56s  Step 92/100 | 61.8 ms | elapsed 7.62s  Step 93/100 | 75.9 ms | elapsed 7.70s  Step 94/100 | 62.9 ms | elapsed 7.76s  Step 95/100 | 62.5 ms | elapsed 7.82s  Step 96/100 | 62.7 ms | elapsed 7.89s  Step 97/100 | 62.0 ms | elapsed 7.95s  Step 98/100 | 62.1 ms | elapsed 8.01s  Step 99/100 | 62.2 ms | elapsed 8.07s  Step 100/100 | 62.6 ms | elapsed 8.13s
+
+============================================================
+RESULTS: StochasticEDHFlow
+============================================================
+RMSE: 0.2683
+Log-likelihood: -104.31
+Mean ESS: 500.0
+
+Performance:
+  Wall time: 8.367 seconds
+  Time per step: 83.67 ms
+  Peak memory: 5.9 MB
+  Memory increase: 63.6 MB
+============================================================
+
+Results saved to /home/haowu/JPML-jit/code/outputs/1d_linear/1d_linear_stochastic_edh
+Plot saved to /home/haowu/JPML-jit/code/outputs/1d_linear/1d_linear_stochastic_edh/plot.png

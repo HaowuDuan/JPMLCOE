@@ -1,0 +1,14 @@
+# Augmented Unscented Kalman Filter Configuration
+# Uses augmented state (x, r) for non-additive observation noise (Alg 5.15)
+
+_target_: src.filters.kalman.augmented_ukf.AugmentedUnscentedKalmanFilter
+
+# model: will be passed from experiment
+
+# UKF parameters — larger alpha than standard UKF
+# With n_aug = state_dim + obs_dim, alpha=1e-3 gives (n_aug + lambda) ≈ 0,
+# squashing sigma points to the mean and losing the nonlinear coupling.
+# alpha=1.0 gives meaningful spread for the augmented sigma points.
+alpha: 1.0     # Spread of sigma points (larger than standard UKF)
+beta: 2.0      # Prior knowledge (2 = Gaussian)
+kappa: 0.0     # Secondary scaling

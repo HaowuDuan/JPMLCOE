@@ -96,6 +96,7 @@ class AcousticTrackingModel(StateSpaceModel):
         self._Sigma_0 = tf.constant(
             np.diag([33.33, 33.33, 1.0, 1.0]), dtype=dtype
         )
+        self._L_Sigma0 = tf.linalg.cholesky(self._Sigma_0)
 
     @property
     def state_dim(self) -> int:
@@ -144,10 +145,8 @@ class AcousticTrackingModel(StateSpaceModel):
     # ------------------------------------------------------------------
 
     def sample_initial_state(self, seed: tf.Tensor) -> tf.Tensor:
-        s1, s2 = tf.random.experimental.stateless_split(seed)
-        xy = tf.random.stateless_uniform([2], seed=s1, minval=10.0, maxval=30.0, dtype=self.dtype)
-        v = tf.random.stateless_normal([2], seed=s2, dtype=self.dtype)
-        return tf.concat([xy, v], axis=0)
+        z = tf.random.stateless_normal([4], seed=seed, dtype=self.dtype)
+        return self._mu_0 + tf.linalg.matvec(self._L_Sigma0, z)
 
     def sample_state_transition(self, x: tf.Tensor, seed: tf.Tensor) -> tf.Tensor:
         mean = tf.linalg.matvec(self._F_tf, x)
@@ -209,10 +208,8 @@ class AcousticTrackingModel(StateSpaceModel):
     # ------------------------------------------------------------------
 
     def sample_initial_state_batch(self, n: int, seed: tf.Tensor) -> tf.Tensor:
-        s1, s2 = tf.random.experimental.stateless_split(seed)
-        xy = tf.random.stateless_uniform([n, 2], seed=s1, minval=10.0, maxval=30.0, dtype=self.dtype)
-        v = tf.random.stateless_normal([n, 2], seed=s2, dtype=self.dtype)
-        return tf.concat([xy, v], axis=1)
+        z = tf.random.stateless_normal([n, 4], seed=seed, dtype=self.dtype)
+        return self._mu_0 + tf.linalg.matmul(z, self._L_Sigma0, transpose_b=True)
 
     def state_transition_batch(self, particles: tf.Tensor, seed: tf.Tensor, t=None) -> tf.Tensor:
         mean = particles @ tf.transpose(self._F_tf)

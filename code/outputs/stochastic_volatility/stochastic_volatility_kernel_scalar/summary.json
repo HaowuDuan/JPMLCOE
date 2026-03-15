@@ -1,20 +1,20 @@
 {
-  "rmse": 2.70941785674109,
+  "rmse": 2.6923755622048233,
   "log_likelihood": null,
   "metadata": {
     "filter_type": "KernelMappingPF",
     "kernel_type": "scalar",
     "n_particles": 20,
-    "mean_iterations": 96.38,
-    "total_iterations": 48190,
+    "mean_iterations": 88.912,
+    "total_iterations": 44456,
     "n_integration_steps": 1,
     "performance": {
-      "wall_time_seconds": 224.92978166599642,
-      "time_per_timestep_ms": 449.85956333199283,
-      "peak_memory_mb": 296.7831621170044,
-      "memory_increase_mb": 416.109375,
-      "start_memory_mb": 413.703125,
-      "end_memory_mb": 829.8125,
+      "wall_time_seconds": 264.8090380616486,
+      "time_per_timestep_ms": 529.6180761232972,
+      "peak_memory_mb": 274.17841625213623,
+      "memory_increase_mb": 419.6875,
+      "start_memory_mb": 684.8046875,
+      "end_memory_mb": 1104.4921875,
       "num_timesteps": 500
     }
   },

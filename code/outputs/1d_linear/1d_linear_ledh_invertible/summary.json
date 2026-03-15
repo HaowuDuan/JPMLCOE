@@ -1,19 +1,19 @@
 {
-  "rmse": 0.2704649927336012,
-  "log_likelihood": -30.92562472686628,
+  "rmse": 0.2716243804813987,
+  "log_likelihood": -105.15466632694596,
   "metadata": {
     "filter_type": "LEDHParticleFlowFilter",
     "n_particles": 500,
     "n_lambda_steps": 29,
     "resampling_method": "systematic",
-    "resampling_rate": 0.21,
+    "resampling_rate": 0.19,
     "performance": {
-      "wall_time_seconds": 17.805800417001592,
-      "time_per_timestep_ms": 178.05800417001592,
-      "peak_memory_mb": 7.25750732421875,
-      "memory_increase_mb": 54.515625,
-      "start_memory_mb": 439.96875,
-      "end_memory_mb": 494.484375,
+      "wall_time_seconds": 13.596037694253027,
+      "time_per_timestep_ms": 135.96037694253027,
+      "peak_memory_mb": 7.002653121948242,
+      "memory_increase_mb": 75.31640625,
+      "start_memory_mb": 679.73046875,
+      "end_memory_mb": 755.046875,
       "num_timesteps": 100
     }
   },

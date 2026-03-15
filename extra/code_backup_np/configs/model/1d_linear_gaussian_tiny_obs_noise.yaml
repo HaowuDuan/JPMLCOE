@@ -1,0 +1,17 @@
+# 1D Linear Gaussian Model with Tiny Observation Noise
+# Tests numerical stability of Kalman filter covariance updates
+
+_target_: src.models.linear_gaussian.LinearGaussianModel
+
+# 1D scalar system
+# X_{n} = F * X_{n-1} + B * V_n,  V_n ~ N(0, 1)
+# Y_{n} = H * X_n + D * W_n,  W_n ~ N(0, 1)
+
+F: [[0.95]]  # State transition (slightly damped)
+B: [[0.5]]   # Process noise scale
+H: [[1.0]]   # Direct observation
+D: [[1.0e-8]]  # Extremely tiny observation noise (10^-8) - tests numerical stability
+
+# Initial state distribution
+mu_0: [0.0]
+Sigma_0: [[1.0]]

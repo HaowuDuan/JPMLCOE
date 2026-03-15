@@ -1,0 +1,20 @@
+# @package _global_
+
+# Experiment: Stochastic EDH with Optimal Schedule on Single-Target Acoustic Tracking Model
+# Uses optimal stiffness-mitigating schedule for highly informative observations
+
+defaults:
+  - override /model: acoustic_tracking_lite
+  - override /filter: stochastic_edh_optimal
+
+# Override settings
+T: 50
+seed: 42
+plot: true
+output_dir: outputs/acoustic_tracking_lite/acoustic_tracking_lite_stochastic_edh_optimal
+
+
+
+
+
+

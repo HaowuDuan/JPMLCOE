@@ -1,0 +1,16 @@
+model:
+  _target_: src.models.range_bearing.RangeBearingModel
+  sigma_range: 0.1
+  sigma_bearing: 0.01
+filter:
+  _target_: src.filters.particle.stochastic_edh.StochasticEDHFlow
+  n_particles: 500
+  n_lambda_steps: 100
+  diffusion_scale: 0.001
+  schedule_func: null
+  n_threads: null
+seed: 42
+T: 100
+output_dir: outputs/range_bearing/range_bearing_stochastic_edh
+plot: true
+verbose: true

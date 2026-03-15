@@ -5,7 +5,7 @@ from typing import Tuple
 from .linalg import safe_solve, safe_cholesky
 
 
-@tf.function
+@tf.function(jit_compile=True)
 def compute_flow_params(
     model,
     linearization_point: tf.Tensor,
@@ -97,7 +97,7 @@ def compute_flow_params(
     return A, b
 
 
-@tf.function
+@tf.function(jit_compile=True)
 def compute_flow_params_global(
     H: tf.Tensor,
     lambda_val: tf.Tensor,
@@ -164,7 +164,7 @@ def compute_flow_params_global(
     return A, b
 
 
-@tf.function
+@tf.function(jit_compile=True)
 def compute_flow_params_batch(
     model,
     linearization_points: tf.Tensor,
@@ -270,7 +270,7 @@ def compute_flow_params_batch(
     return A_batch, b_batch
 
 
-@tf.function
+@tf.function(jit_compile=True)
 def compute_flow_params_batch_global(
     H_batch: tf.Tensor,
     lambda_val: tf.Tensor,

@@ -130,18 +130,18 @@ hydra:
   runtime:
     version: 1.3.2
     version_base: '1.3'
-    cwd: /Users/haowuduan/Documents/githubrepos/JPMLCOE/code
+    cwd: /home/haowu/JPML-jit/code
     config_sources:
     - path: hydra.conf
       schema: pkg
       provider: hydra
-    - path: /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/configs
+    - path: /home/haowu/JPML-jit/code/configs
       schema: file
       provider: main
     - path: ''
       schema: structured
       provider: schema
-    output_dir: /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/outputs/stochastic_volatility/stochastic_volatility_kernel_scalar
+    output_dir: /home/haowu/JPML-jit/code/outputs/stochastic_volatility/stochastic_volatility_kernel_scalar
     choices:
       experiment: stochastic_volatility/stochastic_volatility_kernel_scalar
       filter: kernel_flow_scalar

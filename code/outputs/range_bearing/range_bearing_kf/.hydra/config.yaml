@@ -1,0 +1,44 @@
+model:
+  _target_: src.models.range_bearing.RangeBearingModel
+  sigma_range: 0.1
+  sigma_bearing: 0.1
+filter:
+  _target_: src.filters.kalman.kalman.KalmanFilter
+  F:
+  - - 1.0
+    - 0.0
+  - - 0.0
+    - 1.0
+  B:
+  - - 0.1
+    - 0.0
+  - - 0.0
+    - 0.1
+  H:
+  - - 0.7071
+    - 0.7071
+  - - -0.5
+    - 0.5
+  D:
+  - - 0.1
+    - 0.0
+  - - 0.0
+    - 0.1
+  mean_0:
+  - 1.0
+  - 1.0
+  Sigma_0:
+  - - 1.0
+    - 0.0
+  - - 0.0
+    - 1.0
+  use_joseph_form: true
+seed: 42
+dtype: float64
+T: 500
+output_dir: outputs/range_bearing/range_bearing_kf
+plot: true
+device: auto
+tf_log_level: 2
+verbose: true
+show_progress: true

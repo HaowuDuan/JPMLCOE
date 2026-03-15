@@ -1,0 +1,29 @@
+# Two-Sensor Bearing-Only Static Estimation Model Configuration
+# Based on Section 4 numerical example from the particle flow paper
+#
+# This configuration creates a "stiff" problem due to highly anisotropic prior covariance.
+# The prior has variance 1000 in x-direction but only 2 in y-direction (ratio 500:1).
+
+_target_: src.models.two_sensor_bearing.TwoSensorBearingOnlyModel
+
+# Initial state distribution (highly anisotropic - creates stiffness!)
+# Prior mean: m_0 = [3.0, 5.0]^T
+mu_0: [3.0, 5.0]
+
+# Prior covariance: P_0 = [[1000.0, 0], [0, 2.0]]
+# The huge difference in variances (1000 vs 2) creates ill-conditioned Hessian
+Sigma_0: [[1000.0, 0.0],
+          [0.0, 2.0]]
+
+# Sensor positions: two passive bearing-only sensors on x-axis
+# Sensor 1 at (3.5, 0), Sensor 2 at (-3.5, 0)
+sensor_positions: [[3.5, 0.0],
+                   [-3.5, 0.0]]
+
+# Measurement noise: R = [[0.04, 0], [0, 0.04]]
+# Standard deviation: sigma = sqrt(0.04) = 0.2 radians (~11.46 degrees)
+sigma_bearing: 0.2
+
+# Note: This is a static estimation problem (single timestep)
+# State evolution is identity: x_{t+1} = x_t (no dynamics)
+# Process noise Q = 0 (no state uncertainty growth)

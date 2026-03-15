@@ -1,0 +1,164 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\@writefile{toc}{\contentsline {section}{\numberline {1}The big picture}{3}{section.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.1}State-Space Modeling in Financial Markets}{3}{subsection.1.1}\protected@file@percent }
+\newlabel{Eq:SSM}{{1}{3}{State-Space Modeling in Financial Markets}{equation.1}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.1.1}Filtering}{3}{subsubsection.1.1.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.1.2}Bayesian Inference}{3}{subsubsection.1.1.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.2}Document Roadmap}{4}{subsection.1.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2}Kalman Filter}{5}{section.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Overview}{5}{subsection.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Algorithm}{5}{subsection.2.2}\protected@file@percent }
+\@writefile{loa}{\contentsline {algorithm}{\numberline {1}{\ignorespaces Kalman Filter (1-d, additive noise)}}{7}{algorithm.1}\protected@file@percent }
+\@writefile{loa}{\contentsline {algorithm}{\numberline {2}{\ignorespaces Kalman Filter (vector, additive noise)}}{7}{algorithm.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Numerical stability analysis for Kalman filter}{7}{subsection.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4}Numerical experiments and failure on nonlinear Models}{8}{subsection.2.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{State transition.}{8}{section*.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Observation model.}{8}{section*.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{State transition.}{8}{section*.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Observation model.}{8}{section*.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Initial distribution.}{8}{section*.6}\protected@file@percent }
+\citation{Särkkä2013BayesianFilteringAndSmoothing}
+\citation{Särkkä2013BayesianFilteringAndSmoothing}
+\@writefile{toc}{\contentsline {section}{\numberline {3}EKF and UKF}{9}{section.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}EKF}{9}{subsection.3.1}\protected@file@percent }
+\@writefile{loa}{\contentsline {algorithm}{\numberline {3}{\ignorespaces Extended Kalman Filter (EKF)}}{9}{algorithm.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}UKF}{10}{subsection.3.2}\protected@file@percent }
+\newlabel{eq:kalman-gain-cov}{{35}{10}{UKF}{equation.35}{}}
+\@writefile{loa}{\contentsline {algorithm}{\numberline {4}{\ignorespaces Unscented Kalman Filter (UKF)}}{11}{algorithm.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Parameter choice for the SV model.}{11}{section*.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}EKF/UKF on non-linear models}{12}{subsection.3.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{State transition.}{12}{section*.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Observation model.}{12}{section*.9}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4}Particle-Based Methods}{13}{section.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Importance Sampling and Sequential Monte Carlo}{13}{subsection.4.1}\protected@file@percent }
+\newlabel{eq:smc_weight}{{50}{13}{Sequential Monte Carlo}{equation.50}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Bootstrap Particle Filter}{14}{subsection.4.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.2.1}Algorithm}{14}{subsubsection.4.2.1}\protected@file@percent }
+\@writefile{loa}{\contentsline {algorithm}{\numberline {5}{\ignorespaces Bootstrap Particle Filter (BPF)}}{14}{algorithm.5}\protected@file@percent }
+\newlabel{alg:bpf}{{5}{14}{Algorithm}{algorithm.5}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.2.2}Particle Degeneracy and Resampling}{14}{subsubsection.4.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Multinomial resampling.}{14}{section*.12}\protected@file@percent }
+\citation{daum2010exact}
+\citation{daum2011particle}
+\citation{Li-Particle-Filtering-2017}
+\citation{daum2010exact}
+\citation{daum2011particle}
+\@writefile{toc}{\contentsline {paragraph}{Systematic resampling (the actual implementation).}{15}{section*.13}\protected@file@percent }
+\@writefile{loa}{\contentsline {algorithm}{\numberline {6}{\ignorespaces Systematic Resampling}}{15}{algorithm.6}\protected@file@percent }
+\newlabel{alg:systematic}{{6}{15}{Systematic resampling (the actual implementation)}{algorithm.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}EDH/LEDH Flow Filter}{15}{subsection.4.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.3.1}Use Fokker-Planck to reach the target distribution}{15}{subsubsection.4.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.3.2}Determine the evolution kernel}{16}{subsubsection.4.3.2}\protected@file@percent }
+\newlabel{sec:edh_derivation}{{4.3.2}{16}{Determine the evolution kernel}{subsubsection.4.3.2}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.3.3}EDH vs.\ LEDH: incremental improvements in linearization quality.}{16}{subsubsection.4.3.3}\protected@file@percent }
+\citation{Li-Particle-Filtering-2017}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.3.4}Algorithm}{17}{subsubsection.4.3.4}\protected@file@percent }
+\@writefile{loa}{\contentsline {algorithm}{\numberline {7}{\ignorespaces EDH Flow Filter (Fixed Global Linearization)}}{17}{algorithm.7}\protected@file@percent }
+\newlabel{alg:edh_fixed}{{7}{17}{Algorithm}{algorithm.7}{}}
+\citation{Li-Particle-Filtering-2017}
+\@writefile{loa}{\contentsline {algorithm}{\numberline {8}{\ignorespaces EDH Flow Filter (Intermediate Re-linearization)}}{18}{algorithm.8}\protected@file@percent }
+\newlabel{alg:edh_relinear}{{8}{18}{Algorithm}{algorithm.8}{}}
+\@writefile{loa}{\contentsline {algorithm}{\numberline {9}{\ignorespaces LEDH Flow Filter (Local Per-Particle Linearization)}}{18}{algorithm.9}\protected@file@percent }
+\newlabel{alg:ledh}{{9}{18}{Algorithm}{algorithm.9}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.3.5}Experiments}{18}{subsubsection.4.3.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Invertible Flow Filter}{18}{subsection.4.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.4.1}Why do we need Jacobian computation?}{18}{subsubsection.4.4.1}\protected@file@percent }
+\newlabel{eq:invertible_weight}{{68}{19}{Why do we need Jacobian computation?}{equation.68}{}}
+\@writefile{loa}{\contentsline {algorithm}{\numberline {10}{\ignorespaces EDH Invertible Particle Flow Filter (Intermediate Re-linearization)}}{20}{algorithm.10}\protected@file@percent }
+\citation{dai-new-2021}
+\citation{dai-new-2021}
+\@writefile{loa}{\contentsline {algorithm}{\numberline {11}{\ignorespaces LEDH Invertible Particle Flow Filter (Local Linearization + Jacobian Tracking)}}{21}{algorithm.11}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.5}Stochastic Flow Filter}{21}{subsection.4.5}\protected@file@percent }
+\citation{ding2012implementation}
+\citation{Pulido2019}
+\citation{HuVanLeeuwen2021}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.6}Kernel Flow Filter}{23}{subsection.4.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.6.1}Overview}{23}{subsubsection.4.6.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.6.2}Derivation}{23}{subsubsection.4.6.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Optimal Transport via Gradient Flow}{23}{section*.14}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Deriving Optimal Velocity via Kernel Restriction}{23}{section*.15}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Scalar Kernel}{24}{section*.16}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Matrix-Valued Kernel}{24}{section*.17}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.6.3}Matrix Kernel Preventing Collapse}{25}{subsubsection.4.6.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.6.4}Algorithm}{25}{subsubsection.4.6.4}\protected@file@percent }
+\@writefile{loa}{\contentsline {algorithm}{\numberline {12}{\ignorespaces Kernel Flow Filter --- Scalar Kernel}}{25}{algorithm.12}\protected@file@percent }
+\@writefile{loa}{\contentsline {algorithm}{\numberline {13}{\ignorespaces Kernel Flow Filter --- Matrix (Tensor) Kernel}}{25}{algorithm.13}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.7}Filter Comparison Summary}{25}{subsection.4.7}\protected@file@percent }
+\citation{reich2013nonparametric}
+\citation{corenflos-differentiable-2021}
+\citation{reich2013nonparametric}
+\citation{chaudhari2025gradnetot}
+\citation{Zhu2020TowardsDR}
+\citation{Lee2019SetTransformer}
+\citation{chen2023overview}
+\citation{amos2022amortized}
+\citation{amos2023meta}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Resampling and Optimal Transport}{26}{section.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Optimal Transport Resampling}{26}{subsection.5.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Soft Resampling}{27}{subsection.5.2}\protected@file@percent }
+\@writefile{loa}{\contentsline {algorithm}{\numberline {14}{\ignorespaces Soft Resampling}}{27}{algorithm.14}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Entropy-Regularized OT (Sinkhorn) Resampling}{27}{subsection.5.3}\protected@file@percent }
+\newlabel{eq:gibbs-kernel}{{97}{27}{Entropy-Regularized OT (Sinkhorn) Resampling}{equation.97}{}}
+\newlabel{eq:vanilla-sinkhorn}{{99}{28}{Entropy-Regularized OT (Sinkhorn) Resampling}{equation.99}{}}
+\@writefile{loa}{\contentsline {algorithm}{\numberline {15}{\ignorespaces Sinkhorn Iteration (Dual Potentials)}}{28}{algorithm.15}\protected@file@percent }
+\@writefile{loa}{\contentsline {algorithm}{\numberline {16}{\ignorespaces Entropy-Regularized Optimal Transport Resampling}}{28}{algorithm.16}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.4}Soft Resampling and OT Resampling Comparison}{28}{subsection.5.4}\protected@file@percent }
+\citation{Metropolis1953}
+\citation{Duane1987}
+\citation{Neal-2012-MCMC-Hamiltonian-Dynamics-ARXIV-1206-1901v1}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Parameter Estimation with Differentiable Particle Filters}{29}{section.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Markov Chain Monte Carlo}{29}{subsection.6.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.1.1}Metropolis-Hastings}{29}{subsubsection.6.1.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.1.2}Hamiltonian Monte Carlo}{29}{subsubsection.6.1.2}\protected@file@percent }
+\citation{hoffman2014nuts}
+\@writefile{toc}{\contentsline {paragraph}{Leapfrog integration.}{30}{section*.18}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Step size and tuning.}{30}{section*.19}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Mass matrix.}{30}{section*.20}\protected@file@percent }
+\citation{karkus2018particle}
+\citation{corenflos-differentiable-2021}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}MAP as a Pipeline Smoke Test}{31}{subsection.6.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.3}Differentiable Resampling and the Gradient Chain}{31}{subsection.6.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Systematic resampling with stop gradient.}{31}{section*.21}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Soft resampling.}{31}{section*.22}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{OT resampling.}{31}{section*.23}\protected@file@percent }
+\citation{beskos2013optimal}
+\citation{hoffman2014nuts}
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Resampling strategies for differentiable particle filters.}}{32}{table.1}\protected@file@percent }
+\newlabel{tab:resampling_grad}{{1}{32}{Resampling strategies for differentiable particle filters}{table.1}{}}
+\@writefile{toc}{\contentsline {paragraph}{Implications for HMC.}{32}{section*.24}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.4}Benchmark: Linear Gaussian Model}{32}{subsection.6.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.4.1}MCMC Diagnostics}{32}{subsubsection.6.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Acceptance rate.}{32}{section*.25}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Step size and dual averaging.}{33}{section*.26}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Effective sample size (ESS).}{33}{section*.27}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{$\hat  {R}$: Potential Scale Reduction Factor.}{33}{section*.28}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.4.2}1-D Model, 1 Parameter}{33}{subsubsection.6.4.2}\protected@file@percent }
+\bibstyle{unsrt}
+\bibdata{main_reorganized}
+\bibcite{Särkkä2013BayesianFilteringAndSmoothing}{1}
+\bibcite{daum2010exact}{2}
+\bibcite{daum2011particle}{3}
+\bibcite{Li-Particle-Filtering-2017}{4}
+\bibcite{dai-new-2021}{5}
+\bibcite{ding2012implementation}{6}
+\bibcite{Pulido2019}{7}
+\bibcite{HuVanLeeuwen2021}{8}
+\bibcite{reich2013nonparametric}{9}
+\bibcite{corenflos-differentiable-2021}{10}
+\bibcite{chaudhari2025gradnetot}{11}
+\bibcite{Zhu2020TowardsDR}{12}
+\bibcite{Lee2019SetTransformer}{13}
+\bibcite{chen2023overview}{14}
+\bibcite{amos2022amortized}{15}
+\bibcite{amos2023meta}{16}
+\bibcite{Metropolis1953}{17}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.4.3}Multi-Dimensional Model, 1 Parameter}{34}{subsubsection.6.4.3}\protected@file@percent }
+\bibcite{Duane1987}{18}
+\bibcite{Neal-2012-MCMC-Hamiltonian-Dynamics-ARXIV-1206-1901v1}{19}
+\bibcite{hoffman2014nuts}{20}
+\bibcite{karkus2018particle}{21}
+\bibcite{beskos2013optimal}{22}
+\gdef \@abspage@last{35}

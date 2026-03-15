@@ -81,14 +81,14 @@ class Lorenz96Model(StateSpaceModel):
             process_noise_std ** 2, dtype=dtype
         )
 
-        # Initial distribution
-        self._mu_0 = tf.constant(np.ones(state_dim) * forcing, dtype=dtype)
+        # Spinup: run numpy RK4 once to reach attractor, cache result as TF
+        self._spinup_state_tf = self._do_spinup()
+
+        # Initial distribution: centered on the spinup state (on the attractor),
+        # not the unstable equilibrium (forcing * ones).
         self._Sigma_0 = tf.eye(state_dim, dtype=dtype) * tf.constant(
             initial_spread ** 2, dtype=dtype
         )
-
-        # Spinup: run numpy RK4 once to reach attractor, cache result as TF
-        self._spinup_state_tf = self._do_spinup()
 
     def _do_spinup(self) -> tf.Tensor:
         """Run spinup in numpy (one-time), cache as TF constant."""
@@ -124,7 +124,7 @@ class Lorenz96Model(StateSpaceModel):
 
     @property
     def mu_0(self) -> tf.Tensor:
-        return self._mu_0
+        return self._spinup_state_tf
 
     @property
     def Sigma_0(self) -> tf.Tensor:

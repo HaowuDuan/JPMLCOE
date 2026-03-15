@@ -1,21 +1,20 @@
 {
-  "rmse": 1.770846571156399,
-  "log_likelihood": null,
+  "rmse": 1.7708465711563992,
+  "log_likelihood": -2168.184674708132,
   "metadata": {
     "filter_type": "StochasticEDHFlow",
     "n_particles": 500,
     "n_lambda_steps": 29,
     "integration_method": "euler",
+    "log_likelihood_source": "guide_filter",
     "performance": {
-      "wall_time_seconds": 71.74853229057044,
-      "time_per_timestep_ms": 143.49706458114088,
-      "peak_memory_mb": 4.150339126586914,
-      "memory_increase_mb": 72.84375,
-      "start_memory_mb": 953.26953125,
-      "end_memory_mb": 1026.11328125,
-      "num_timesteps": 500,
-      "gpu_peak_memory_mb": 0.423828125,
-      "gpu_current_memory_mb": 0.3896484375
+      "wall_time_seconds": 40.43070791196078,
+      "time_per_timestep_ms": 80.86141582392156,
+      "peak_memory_mb": 21.625566482543945,
+      "memory_increase_mb": 99.71875,
+      "start_memory_mb": 687.7109375,
+      "end_memory_mb": 787.4296875,
+      "num_timesteps": 500
     }
   },
   "config": {

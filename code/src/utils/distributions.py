@@ -6,7 +6,7 @@ from typing import Optional, Tuple
 from .linalg import safe_cholesky
 
 
-@tf.function
+@tf.function(jit_compile=True)
 def log_gaussian_prob(x: tf.Tensor, mean: tf.Tensor, cov: tf.Tensor) -> tf.Tensor:
     """
     Compute log probability under multivariate Gaussian (numerically stable).
@@ -35,7 +35,7 @@ def log_gaussian_prob(x: tf.Tensor, mean: tf.Tensor, cov: tf.Tensor) -> tf.Tenso
     return -0.5 * (n * tf.math.log(2.0 * tf.constant(math.pi, dtype=x.dtype)) + logdet + mahalanobis)
 
 
-@tf.function
+@tf.function(jit_compile=True)
 def log_sum_exp(log_values: tf.Tensor, axis: Optional[int] = None) -> tf.Tensor:
     """
     Compute log(sum(exp(log_values))) stably.
@@ -52,7 +52,7 @@ def log_sum_exp(log_values: tf.Tensor, axis: Optional[int] = None) -> tf.Tensor:
     return tf.reduce_logsumexp(log_values, axis=axis)
 
 
-@tf.function
+@tf.function(jit_compile=True)
 def normalize_log_weights(log_weights: tf.Tensor, clip_range: Optional[Tuple[float, float]] = None) -> tf.Tensor:
     """
     Normalize weights in log-space: w_i / sum(w_j)
@@ -77,7 +77,7 @@ def normalize_log_weights(log_weights: tf.Tensor, clip_range: Optional[Tuple[flo
     return weights_unnorm / tf.reduce_sum(weights_unnorm, axis=-1, keepdims=True)
 
 
-@tf.function
+@tf.function(jit_compile=True)
 def multivariate_normal_sample(mean: tf.Tensor, cov: tf.Tensor,
                                 n_samples: int, seed: tf.Tensor) -> tf.Tensor:
     """
@@ -114,7 +114,7 @@ def sample_particles_cholesky(
     return initial_mean + tf.linalg.matmul(z, L, transpose_b=True)
 
 
-@tf.function
+@tf.function(jit_compile=True)
 def compute_flow_weights(
     eta_1: tf.Tensor,
     eta_0: tf.Tensor,
@@ -216,12 +216,9 @@ def compute_flow_weights(
     # Normalize
     weights = normalize_log_weights(log_weights, clip_range=clip_range)
 
-    # Check for weight collapse
+    # Check for weight collapse — fall back to uniform if NaN/Inf detected
     is_finite = tf.reduce_all(tf.math.is_finite(weights))
     uniform_weights = tf.ones(n_particles, dtype=eta_1.dtype) / tf.cast(n_particles, eta_1.dtype)
-    def _warn_and_uniform():
-        tf.print("WARNING: weight collapse detected, falling back to uniform weights")
-        return uniform_weights
-    weights = tf.cond(is_finite, lambda: weights, _warn_and_uniform)
+    weights = tf.cond(is_finite, lambda: weights, lambda: uniform_weights)
 
     return weights, log_marginal_lik

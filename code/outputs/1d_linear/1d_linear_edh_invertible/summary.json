@@ -1,0 +1,68 @@
+{
+  "rmse": 0.26801326128521413,
+  "log_likelihood": -30.356937631288687,
+  "metadata": {
+    "filter_type": "EDHParticleFlowFilter",
+    "n_particles": 500,
+    "n_lambda_steps": 29,
+    "resampling_method": "systematic",
+    "resampling_rate": 0.29,
+    "performance": {
+      "wall_time_seconds": 13.735831055790186,
+      "time_per_timestep_ms": 137.35831055790186,
+      "peak_memory_mb": 7.299237251281738,
+      "memory_increase_mb": 74.98046875,
+      "start_memory_mb": 685.109375,
+      "end_memory_mb": 760.08984375,
+      "num_timesteps": 100
+    }
+  },
+  "config": {
+    "model": {
+      "_target_": "src.models.linear_gaussian.LinearGaussianModel",
+      "F": [
+        [
+          0.95
+        ]
+      ],
+      "B": [
+        [
+          0.5
+        ]
+      ],
+      "H": [
+        [
+          1.0
+        ]
+      ],
+      "D": [
+        [
+          0.3
+        ]
+      ],
+      "mu_0": [
+        0.0
+      ],
+      "Sigma_0": [
+        [
+          1.0
+        ]
+      ]
+    },
+    "filter": {
+      "_target_": "src.filters.particle.edh_invertible.EDHParticleFlowFilter",
+      "n_particles": 500,
+      "n_lambda_steps": 29,
+      "resample_threshold": 0.5
+    },
+    "seed": 42,
+    "dtype": "float64",
+    "T": 100,
+    "output_dir": "outputs/1d_linear/1d_linear_edh_invertible",
+    "plot": true,
+    "device": "auto",
+    "tf_log_level": 2,
+    "verbose": true,
+    "show_progress": true
+  }
+}

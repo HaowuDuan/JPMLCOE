@@ -1,0 +1,53 @@
+{
+  "rmse": 9.494612044602324,
+  "log_likelihood": 178.03152430313133,
+  "metadata": {
+    "filter_type": "ExtendedKalmanFilter",
+    "log_likelihoods": "[2.7553863  4.40132209 4.60252301 3.09208864 4.55663914 5.10307581\n 4.07289345 3.76036142 3.76867951 5.21005857 4.45146726 3.21089565\n 3.9748806  3.36501175 4.22356718 3.99297819 4.0458442  1.90549856\n 4.86914383 4.88383446 3.47115589 3.3988083  3.02058856 0.22177598\n 4.46762805 2.26125016 4.7346126  4.87990948 3.85853731 2.48927457\n 0.06018098 3.187486   5.23742146 5.2168336  3.82428896 4.73373921\n 1.01917403 2.381476   3.13977449 4.05505413 2.39399689 3.99929883\n 2.77151357 2.79231832 5.09099748 3.84151729 1.97093783 2.62452506\n 1.80625565 4.83504399]",
+    "performance": {
+      "wall_time_seconds": 0.007495084078982472,
+      "time_per_timestep_ms": 0.14990168157964945,
+      "peak_memory_mb": 0.03750896453857422,
+      "memory_increase_mb": 0.046875,
+      "start_memory_mb": 421.015625,
+      "end_memory_mb": 421.0625,
+      "num_timesteps": 50
+    }
+  },
+  "config": {
+    "model": {
+      "_target_": "src.models.acoustic_tracking.AcousticTrackingModel",
+      "sensor_positions": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          40.0,
+          0.0
+        ],
+        [
+          0.0,
+          40.0
+        ],
+        [
+          40.0,
+          40.0
+        ]
+      ],
+      "source_intensity": 10.0,
+      "regularization": 0.1,
+      "measurement_noise_std": 0.1,
+      "process_noise_cov": null,
+      "dt": 1.0
+    },
+    "filter": {
+      "_target_": "src.filters.kalman.extended_kalman.ExtendedKalmanFilter"
+    },
+    "seed": 42,
+    "T": 50,
+    "output_dir": "outputs/acoustic_tracking/acoustic_tracking_ekf",
+    "plot": true,
+    "verbose": true
+  }
+}

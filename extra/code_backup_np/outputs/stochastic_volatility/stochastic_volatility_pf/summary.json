@@ -1,0 +1,37 @@
+{
+  "rmse": 1.1815543437122003,
+  "log_likelihood": -436.2885353198023,
+  "metadata": {
+    "filter_type": "ParticleFilter",
+    "n_particles": 1000,
+    "resampling_rate": 0.356,
+    "performance": {
+      "wall_time_seconds": 3.6525807920843363,
+      "time_per_timestep_ms": 7.305161584168673,
+      "peak_memory_mb": 9.401446342468262,
+      "memory_increase_mb": 10.90625,
+      "start_memory_mb": 492.546875,
+      "end_memory_mb": 503.453125,
+      "num_timesteps": 500
+    }
+  },
+  "config": {
+    "model": {
+      "_target_": "src.models.stochastic_volatility.StochasticVolatilityModel",
+      "alpha": 0.91,
+      "sigma": 1.0,
+      "beta": 0.5
+    },
+    "filter": {
+      "_target_": "src.filters.particle.bootstrap_pf.ParticleFilter",
+      "_recursive_": false,
+      "n_particles": 1000,
+      "resample_threshold": 0.5
+    },
+    "seed": 42,
+    "T": 500,
+    "output_dir": "outputs/stochastic_volatility/stochastic_volatility_pf",
+    "plot": true,
+    "verbose": true
+  }
+}

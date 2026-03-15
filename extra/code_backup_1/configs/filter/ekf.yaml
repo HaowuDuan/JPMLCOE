@@ -1,0 +1,5 @@
+# Extended Kalman Filter Configuration
+
+_target_: src.filters.kalman.extended_kalman.ExtendedKalmanFilter
+
+# model: will be passed from experiment

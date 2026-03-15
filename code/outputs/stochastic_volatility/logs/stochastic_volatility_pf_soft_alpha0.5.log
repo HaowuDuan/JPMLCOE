@@ -1,0 +1,26 @@
+<frozen runpy>:128: RuntimeWarning: 'src.experiments.run_experiment' found in sys.modules after import of package 'src.experiments', but prior to execution of 'src.experiments.run_experiment'; this may result in unpredictable behaviour
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1773379242.569455 4050537 service.cc:145] XLA service 0x700ecc00ad40 initialized for platform Host (this does not guarantee that XLA will be used). Devices:
+I0000 00:00:1773379242.569496 4050537 service.cc:153]   StreamExecutor device (0): Host, Default Version
+I0000 00:00:1773379242.753705 4050537 device_compiler.h:188] Compiled cluster using XLA!  This line is logged at most once for the lifetime of the process.
+Creating model: src.models.stochastic_volatility.StochasticVolatilityModel
+Generating 500 time steps...
+Creating filter: ParticleFilterTF
+Running ParticleFilterTF...
+
+============================================================
+RESULTS: ParticleFilterTF
+============================================================
+RMSE: 1.1407
+Log-likelihood: -544.87
+Mean ESS: 486.7
+
+Performance:
+  Wall time: 3.531 seconds
+  Time per step: 7.06 ms
+  Peak memory: 5.3 MB
+  Memory increase: 168.5 MB
+============================================================
+
+Results saved to /home/haowu/JPML-jit/code/outputs/stochastic_volatility/stochastic_volatility_pf_soft_alpha0.5
+Plot saved to /home/haowu/JPML-jit/code/outputs/stochastic_volatility/stochastic_volatility_pf_soft_alpha0.5/plot.png

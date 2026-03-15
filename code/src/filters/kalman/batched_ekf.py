@@ -10,7 +10,7 @@ from typing import Tuple
 from ...utils.linalg import symmetrize, safe_cholesky
 
 
-@tf.function
+@tf.function(jit_compile=True)
 def batched_ekf_predict(
     model,
     means: tf.Tensor,
@@ -58,7 +58,7 @@ def batched_ekf_predict(
     return mean_pred, cov_pred
 
 
-@tf.function
+@tf.function(jit_compile=True)
 def batched_ekf_update(
     model,
     means: tf.Tensor,

@@ -4,10 +4,11 @@
 
 cd "$(cd "$(dirname "$0")" && pwd)"
 
-MAX_PARALLEL=${1:-4}
+MAX_PARALLEL=${1:-999}
 export TF_FORCE_GPU_ALLOW_GROWTH=true
 
 EXPERIMENTS=(
+    stochastic_volatility/stochastic_volatility_kf_log
     stochastic_volatility/stochastic_volatility_edh_flow
     stochastic_volatility/stochastic_volatility_ekf
     stochastic_volatility/stochastic_volatility_ekf_sampled_init

@@ -1,0 +1,22 @@
+# Kernel Flow Filter - Matrix-Valued Kernel
+# Hu & van Leeuwen (2021) Algorithm 1 with matrix kernel
+
+_target_: src.filters.particle.kernel_flow.KernelMappingPF
+
+n_particles: 20              # Ensemble size N_p = 20 (as in paper)
+kernel_type: matrix          # Matrix-valued kernel (Eq 20-23) - handles sparse obs
+
+# Pseudo-time flow parameters
+max_iter: 500                # Maximum iterations (paper default)
+initial_dt: 0.05             # Initial Δs for linear observations
+convergence_tol: 1e-2        # Relaxed tolerance for dimension-normalized convergence
+
+# Kernel parameters
+alpha: null                  # Auto-set to 1/N_p for matrix kernel
+
+# Localization (for Lorenz 96 cyclic domain)
+localization_radius: 4.0     # r_in = 4 (paper default)
+
+# Algorithm settings
+use_preconditioner: true     # Use B as preconditioner D (Section 2.4)
+adaptive_dt: true            # Adaptive pseudo-time stepping

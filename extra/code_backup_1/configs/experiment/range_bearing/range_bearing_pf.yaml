@@ -1,0 +1,20 @@
+# @package _global_
+
+# Experiment: Bootstrap Particle Filter on Range-Bearing Model
+# Tests standard particle filter implementation
+
+defaults:
+  - override /model: range_bearing
+  - override /filter: particle
+
+# Override settings
+T: 500
+seed: 42
+plot: true
+output_dir: outputs/range_bearing/range_bearing_pf
+
+
+
+
+
+

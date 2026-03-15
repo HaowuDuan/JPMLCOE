@@ -1,0 +1,13 @@
+# @package _global_
+
+# Debug Test: LEDH Invertible Filter
+
+defaults:
+  - override /model: acoustic_tracking_debug
+  - override /filter: ledh_invertible
+
+# Override settings
+T: 300
+seed: 42
+plot: true
+output_dir: outputs/debug_test/ledh_invertible

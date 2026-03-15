@@ -6,7 +6,7 @@
 
 cd "$(cd "$(dirname "$0")" && pwd)"
 
-MAX_PARALLEL=${1:-4}
+MAX_PARALLEL=${1:-999}
 
 # Required for multiple TF processes to share the GPU
 export TF_FORCE_GPU_ALLOW_GROWTH=true

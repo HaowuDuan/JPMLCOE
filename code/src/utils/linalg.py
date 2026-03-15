@@ -4,7 +4,7 @@ import tensorflow as tf
 import numpy as np
 
 
-@tf.function
+@tf.function(jit_compile=True)
 def safe_cholesky(A: tf.Tensor, jitter: float = 1e-10, adaptive: bool = True) -> tf.Tensor:
     """
     Compute Cholesky decomposition with optional adaptive regularization.
@@ -45,7 +45,7 @@ def safe_cholesky(A: tf.Tensor, jitter: float = 1e-10, adaptive: bool = True) ->
     return tf.linalg.cholesky(A_reg)
 
 
-@tf.function
+@tf.function(jit_compile=True)
 def safe_solve(A: tf.Tensor, b: tf.Tensor, method: str = 'default') -> tf.Tensor:
     """
     Solve linear system Ax = b with fallback strategies.
@@ -183,7 +183,7 @@ def _graph_safe_log_abs_det_impl(M_reg):
     return logabsdet, grad
 
 
-@tf.function
+@tf.function(jit_compile=True)
 def graph_safe_log_abs_det(M: tf.Tensor, jitter: float = 1e-8) -> tf.Tensor:
     """
     Like safe_log_abs_det but safe in GPU graph mode backward pass.
@@ -237,7 +237,7 @@ def _graph_safe_log_abs_det_fast_impl(M_reg):
     return logabsdet, grad
 
 
-@tf.function
+@tf.function(jit_compile=True)
 def graph_safe_log_abs_det_fast(M: tf.Tensor, jitter: float = 1e-8) -> tf.Tensor:
     """
     Like graph_safe_log_abs_det but uses fast inv with NaN guard in backward.
@@ -260,7 +260,7 @@ def graph_safe_log_abs_det_fast(M: tf.Tensor, jitter: float = 1e-8) -> tf.Tensor
 
 # -- SVD approach (not used): robust but ~4x slower due to full SVD --
 
-@tf.function
+@tf.function(jit_compile=True)
 def graph_safe_log_abs_det_svd(M: tf.Tensor, jitter: float = 1e-8) -> tf.Tensor:
     """
     log|det(M)| via SVD. Most robust but expensive (~4x slower than LU).
@@ -282,7 +282,7 @@ def graph_safe_log_abs_det_svd(M: tf.Tensor, jitter: float = 1e-8) -> tf.Tensor:
     return tf.reduce_sum(tf.math.log(tf.maximum(s, tf.constant(1e-30, dtype=s.dtype))), axis=-1)
 
 
-@tf.function
+@tf.function(jit_compile=True)
 def symmetrize(A: tf.Tensor) -> tf.Tensor:
     """
     Force matrix to be symmetric: A_sym = (A + A^T) / 2
@@ -296,7 +296,7 @@ def symmetrize(A: tf.Tensor) -> tf.Tensor:
     return 0.5 * (A + tf.linalg.matrix_transpose(A))
 
 
-@tf.function
+@tf.function(jit_compile=True)
 def matrix_sqrt(A: tf.Tensor, method: str = 'cholesky') -> tf.Tensor:
     """
     Compute matrix square root: sqrt(A) such that sqrt(A) @ sqrt(A)^T = A

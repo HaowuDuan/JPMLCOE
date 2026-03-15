@@ -1,0 +1,19 @@
+# @package _global_
+
+# Experiment: Extended Kalman Filter on Single-Target Acoustic Tracking Model (25 sensors)
+
+defaults:
+  - override /model: acoustic_tracking_lite
+  - override /filter: ekf
+
+# Override settings
+T: 50
+seed: 42
+plot: true
+output_dir: outputs/acoustic_tracking_lite/acoustic_tracking_lite_ekf
+
+
+
+
+
+

@@ -1,18 +1,19 @@
 {
-  "rmse": 2.582972252352335,
-  "log_likelihood": null,
+  "rmse": 2.5788817204973737,
+  "log_likelihood": -8336.309459792437,
   "metadata": {
     "filter_type": "ExactDaumHuangFlow",
     "n_particles": 500,
     "n_lambda_steps": 29,
     "integration_method": "euler",
+    "log_likelihood_source": "guide_filter",
     "performance": {
-      "wall_time_seconds": 33.272004790982464,
-      "time_per_timestep_ms": 66.54400958196493,
-      "peak_memory_mb": 21.225829124450684,
-      "memory_increase_mb": 64.125,
-      "start_memory_mb": 413.453125,
-      "end_memory_mb": 477.578125,
+      "wall_time_seconds": 56.653881361708045,
+      "time_per_timestep_ms": 113.30776272341609,
+      "peak_memory_mb": 21.251354217529297,
+      "memory_increase_mb": 92.1015625,
+      "start_memory_mb": 689.4921875,
+      "end_memory_mb": 781.59375,
       "num_timesteps": 500
     }
   },

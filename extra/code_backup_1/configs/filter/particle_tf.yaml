@@ -1,0 +1,9 @@
+# Bootstrap Particle Filter - TensorFlow Configuration
+
+_target_: src.filters.particle.bootstrap_pf_tf.ParticleFilterTF
+
+# Model will be passed at runtime from experiment
+_recursive_: false
+
+n_particles: 1000          # Number of particles
+resample_threshold: 0.5    # Resample when ESS/N < threshold

@@ -4,7 +4,7 @@ import tensorflow as tf
 from typing import Callable, Any, Optional
 
 
-@tf.function
+@tf.function(jit_compile=True)
 def euler_step(x: tf.Tensor, f: Callable, dt: float, *args: Any) -> tf.Tensor:
     """
     Single Euler integration step: x_{n+1} = x_n + f(x_n, *args) * dt
@@ -21,7 +21,7 @@ def euler_step(x: tf.Tensor, f: Callable, dt: float, *args: Any) -> tf.Tensor:
     return x + f(x, *args) * dt
 
 
-@tf.function
+@tf.function(jit_compile=True)
 def rk4_step(x: tf.Tensor, f: Callable, dt: float, *args: Any,
              t: Optional[float] = None) -> tf.Tensor:
     """
@@ -53,7 +53,7 @@ def rk4_step(x: tf.Tensor, f: Callable, dt: float, *args: Any,
     return x + (dt / 6.0) * (k1 + 2*k2 + 2*k3 + k4)
 
 
-@tf.function
+@tf.function(jit_compile=True)
 def euler_maruyama_step(x: tf.Tensor, f: Callable, dt: float, *args: Any,
                         diffusion_coeff: float = 0.0,
                         seed: Optional[tf.Tensor] = None) -> tf.Tensor:
@@ -84,7 +84,7 @@ def euler_maruyama_step(x: tf.Tensor, f: Callable, dt: float, *args: Any,
         return x + drift * dt
 
 
-@tf.function
+@tf.function(jit_compile=True)
 def integrate_ode(x0: tf.Tensor, f: Callable, t_span: tuple, n_steps: int,
                  method: str = 'rk4', *args: Any) -> tf.Tensor:
     """

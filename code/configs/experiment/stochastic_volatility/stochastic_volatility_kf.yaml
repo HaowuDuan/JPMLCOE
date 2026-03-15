@@ -1,0 +1,22 @@
+# @package _global_
+
+# Experiment: Standard Kalman Filter on Stochastic Volatility Model
+# H=0 since E[y|x]=0 (multiplicative noise), so K=0 and observations are ignored.
+# Acts as a prior-only baseline.
+
+defaults:
+  - override /model: stochastic_volatility
+  - override /filter: kalman_joseph
+
+T: 500
+seed: 42
+plot: true
+output_dir: outputs/stochastic_volatility/stochastic_volatility_kf
+
+filter:
+  F: [[0.91]]
+  B: [[1.0]]
+  H: [[0.0]]
+  D: [[0.5]]
+  mean_0: [0.0]
+  Sigma_0: [[5.8172]]

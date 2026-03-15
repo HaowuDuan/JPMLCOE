@@ -235,3 +235,58 @@ class StateSpaceModel(ABC):
     def has_state_dependent_noise(self) -> bool:
         """Whether process noise Q depends on state. Default: False."""
         return False
+
+    def observation_cov_corrected(self, mean: tf.Tensor, cov: tf.Tensor) -> tf.Tensor:
+        """Expected observation noise covariance E[R(x)] where x ~ N(mean, cov).
+
+        For constant R: returns R (no correction needed).
+        For state-dependent R: override to account for uncertainty in the state.
+
+        Example: if R(x) = exp(x₂), then E[R(x)] = exp(m₂ + P₂₂/2)
+        by the lognormal moment generating function.
+
+        Args:
+            mean: Predicted state mean, shape (state_dim,)
+            cov: Predicted state covariance, shape (state_dim, state_dim)
+
+        Returns:
+            (obs_dim, obs_dim) corrected observation noise covariance
+        """
+        return self.observation_cov(mean)
+
+    @property
+    def has_non_additive_obs_noise(self) -> bool:
+        """Whether observation noise enters non-additively. Default: False.
+
+        When True, the model must implement observation_function_with_noise
+        (and batch variant) for use with the Augmented UKF (Alg 5.15).
+        """
+        return False
+
+    def observation_function_with_noise(self, x: tf.Tensor, r: tf.Tensor) -> tf.Tensor:
+        """Full observation function h(x, r) including noise.
+
+        For additive noise: h(x, r) = h(x) + r.
+        Override for non-additive noise models.
+
+        Args:
+            x: State of shape (state_dim,)
+            r: Noise of shape (obs_dim,), r ~ N(0, R)
+
+        Returns:
+            Observation of shape (obs_dim,)
+        """
+        return self.observation_function(x) + r
+
+    def observation_function_with_noise_batch(self, particles: tf.Tensor,
+                                               noise: tf.Tensor) -> tf.Tensor:
+        """Batch version of observation_function_with_noise.
+
+        Args:
+            particles: (N, state_dim)
+            noise: (N, obs_dim)
+
+        Returns:
+            (N, obs_dim)
+        """
+        return self.observation_function_batch(particles) + noise

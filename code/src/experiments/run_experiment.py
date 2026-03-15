@@ -44,7 +44,7 @@ def _create_filter(cfg: DictConfig, model, initial_state: np.ndarray,
     filter_name = cfg.filter._target_.split('.')[-1]
 
     # --- EKF / UKF with tracking models: perturbed initial state ---
-    if (filter_name in ('ExtendedKalmanFilter', 'UnscentedKalmanFilter')
+    if (filter_name in ('ExtendedKalmanFilter', 'UnscentedKalmanFilter', 'AugmentedUnscentedKalmanFilter')
             and model.state_dim >= 4 and model.state_dim % 4 == 0):
 
         # Paper: perturb true initial with std=10 (pos), std=1 (vel)
@@ -70,7 +70,7 @@ def _create_filter(cfg: DictConfig, model, initial_state: np.ndarray,
         return filter_obj, perturbed_mean, initial_cov
 
     # --- EKF / UKF with non-tracking models ---
-    if filter_name in ('ExtendedKalmanFilter', 'UnscentedKalmanFilter'):
+    if filter_name in ('ExtendedKalmanFilter', 'UnscentedKalmanFilter', 'AugmentedUnscentedKalmanFilter'):
         filter_obj = hydra.utils.instantiate(
             cfg.filter, model=model, random_seed=cfg.seed,
         )

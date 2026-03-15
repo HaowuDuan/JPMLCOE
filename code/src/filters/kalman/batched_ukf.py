@@ -40,7 +40,7 @@ def compute_ukf_weights(state_dim, alpha=1e-3, beta=2.0, kappa=0.0, dtype=tf.flo
     return weights_mean, weights_cov, lambda_
 
 
-@tf.function
+@tf.function(jit_compile=True)
 def _batched_sigma_points(means, covs, lambda_, state_dim):
     """
     Generate sigma points for N (mean, cov) pairs.
@@ -72,7 +72,7 @@ def _batched_sigma_points(means, covs, lambda_, state_dim):
     return sigma_points
 
 
-@tf.function
+@tf.function(jit_compile=True)
 def batched_ukf_predict(
     model,
     means: tf.Tensor,
@@ -132,7 +132,7 @@ def batched_ukf_predict(
     return mean_pred, cov_pred
 
 
-@tf.function
+@tf.function(jit_compile=True)
 def batched_ukf_update(
     model,
     means: tf.Tensor,
