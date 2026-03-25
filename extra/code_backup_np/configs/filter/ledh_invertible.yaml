@@ -1,6 +1,0 @@
-_target_: src.filters.particle.ledh_invertible.LEDHParticleFlowFilter
-
-n_particles: 500  # Paper uses 500
-n_lambda_steps: 29  # Paper uses 29 exponential steps
-filter_type: ekf  # 'ekf' or 'ukf'
-resample_threshold: 0.5

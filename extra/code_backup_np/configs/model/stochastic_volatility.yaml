@@ -1,7 +1,0 @@
-# Stochastic Volatility Model Configuration
-
-_target_: src.models.stochastic_volatility.StochasticVolatilityModel
-
-alpha: 0.91  # Persistence parameter
-sigma: 1.0   # Volatility of volatility
-beta: 0.5    # Scale parameter
