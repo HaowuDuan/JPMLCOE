@@ -1,0 +1,65 @@
+# @package _global_
+# DPF: Stochastic Volatility model with Bootstrap PF + OT resampling (epsilon=0.5) + gradient
+#
+# Bootstrap PF baseline (no flow). Infers alpha, sigma, beta (true: 0.91, 1.0, 0.5).
+# Gradient flows through Sinkhorn transport matrix.
+
+model:
+  _target_: src.models.stochastic_volatility.StochasticVolatilityModel
+  alpha: 0.8       # Initial guess (true: 0.91)
+  sigma: 1.5       # Initial guess (true: 1.0)
+  beta: 0.3        # Initial guess (true: 0.5)
+
+filter:
+  _target_: src.filters.particle.bootstrap_pf_hmc.BootstrapPFHMC
+  n_particles: 1000
+  resampling_method: ot_entropy
+  resampling_config:
+    epsilon: 0.5
+  stop_gradient_resampling: false
+  hmc_resampling_method: ot_entropy
+  hmc_resampling_config:
+    epsilon: 0.5
+  eager_mode: false
+
+dpf:
+  sampler: hmc
+
+  trainable_params:
+    alpha:
+      constraint: positive
+      prior:
+        _target_: tensorflow_probability.distributions.LogNormal
+        loc: -0.094        # log(0.91) ~ -0.094
+        scale: 0.5
+    sigma:
+      constraint: positive
+      prior:
+        _target_: tensorflow_probability.distributions.LogNormal
+        loc: 0.0           # log(1.0) = 0
+        scale: 0.5
+    beta:
+      constraint: positive
+      prior:
+        _target_: tensorflow_probability.distributions.LogNormal
+        loc: -0.693        # log(0.5) ~ -0.693
+        scale: 0.5
+
+  hmc:
+    num_samples: 3
+    num_burnin: 2
+    step_size: 0.001
+    num_leapfrog_steps: 5
+    max_tree_depth: 10
+    adaptation_rate: 0.8
+    target_accept_prob: 0.65
+    seed: 42
+    grad_clip_norm: 100.0
+
+data:
+  T: 100
+  seed: 42
+  true_params:
+    alpha: 0.91
+    sigma: 1.0
+    beta: 0.5

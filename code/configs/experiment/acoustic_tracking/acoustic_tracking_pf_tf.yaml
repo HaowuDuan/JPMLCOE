@@ -1,0 +1,13 @@
+# @package _global_
+
+# Experiment: Bootstrap Particle Filter (TensorFlow) on Acoustic Tracking Model
+
+defaults:
+  - override /model: acoustic_tracking_full
+  - override /filter: particle
+
+# Override settings
+T: 100
+seed: 42
+plot: true
+output_dir: outputs/acoustic_tracking/acoustic_tracking_pf_tf

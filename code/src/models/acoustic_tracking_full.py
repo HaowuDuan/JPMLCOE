@@ -119,6 +119,13 @@ class AcousticTrackingFullModel(StateSpaceModel):
         R_np = np.eye(self.n_sensors, dtype=self.np_dtype) * (measurement_noise_std ** 2)
         self.R = tf.constant(R_np, dtype=self.dtype)
 
+        # Precompute log-det and inverse for diagonal R (avoids slogdet/inv in hot path)
+        variance = measurement_noise_std ** 2
+        self._R_inv_diag = tf.constant(1.0 / variance, dtype=self.dtype)
+        self._log_det_2piR = tf.constant(
+            self.n_sensors * np.log(2.0 * np.pi * variance), dtype=self.dtype
+        )
+
         # Paper's 4 initial target states (page 8, Section V-A1)
         all_initial_states = [
             [12.0, 6.0, 0.001, 0.001],      # Target 1
@@ -354,23 +361,10 @@ class AcousticTrackingFullModel(StateSpaceModel):
         h_x = self._compute_amplitudes(x)
         residual = y - h_x
 
-        # Log determinant of 2πR
-        sign, logdet = tf.linalg.slogdet(2.0 * np.pi * self.R)
-
-        if len(x.shape) == 1:
-            # Single state
-            # Mahalanobis distance
-            R_inv = tf.linalg.inv(self.R)
-            mahalanobis = tf.reduce_sum(residual * (R_inv @ residual))
-            return -0.5 * (logdet + mahalanobis)
-        else:
-            # Batch of states
-            R_inv = tf.linalg.inv(self.R)
-            mahalanobis = tf.reduce_sum(
-                residual * tf.linalg.matvec(R_inv, residual),
-                axis=1
-            )
-            return -0.5 * (logdet + mahalanobis)
+        # R = sigma^2 * I, so R_inv = (1/sigma^2) * I and logdet = n * log(2*pi*sigma^2)
+        # Using precomputed scalars avoids slogdet/inv (not supported on XLA)
+        mahalanobis = tf.reduce_sum(residual * residual * self._R_inv_diag, axis=-1)
+        return -0.5 * (self._log_det_2piR + mahalanobis)
 
     # Batch methods for optimized particle filtering
 

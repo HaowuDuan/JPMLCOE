@@ -8,7 +8,7 @@ defaults:
   - override /filter: particle_tf_ot
 
 # Override settings
-T: 500
+T: 100
 seed: 42
 plot: true
 output_dir: outputs/stochastic_volatility/stochastic_volatility_pf_ot_eps0.3

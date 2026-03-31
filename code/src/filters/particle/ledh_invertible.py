@@ -277,11 +277,13 @@ class LEDHParticleFlowFilter:
         )
         self.weights.assign(weights_new)
 
-        # Store TF tensors — convert to numpy once in filter()
-        self.weights_history.append(self.weights.value())
+        # Store as numpy immediately to avoid retaining TF graph references
+        self.weights_history.append(self.weights.numpy())
 
         # Log-likelihood from importance-weighted estimate
-        self.log_likelihoods.append(log_lik + max_log_theta)
+        # Keep TF tensor for HMC gradient path; store numpy for diagnostics
+        self._last_log_lik = log_lik + max_log_theta
+        self.log_likelihoods.append(float(self._last_log_lik.numpy()))
 
         # Update per-particle covariances via batched EKF/UKF (all TF tensors)
         if self.filter_type == 'ukf':
@@ -298,7 +300,7 @@ class LEDHParticleFlowFilter:
 
         # ESS and resampling
         ess = ess_tf(self.weights.value())
-        self.ess_history.append(ess)
+        self.ess_history.append(float(ess.numpy()))
 
         if ess < self.resample_threshold * self.n_particles:
             self._resample()
@@ -382,7 +384,8 @@ class LEDHParticleFlowFilter:
             self.update(observations[t])
 
             # Accumulate the log-likelihood already computed in update()
-            total_log_lik = total_log_lik + self.log_likelihoods[-1]
+            # Use the TF tensor (not the numpy copy in the list) to preserve gradients
+            total_log_lik = total_log_lik + self._last_log_lik
 
         return total_log_lik
 
@@ -403,25 +406,25 @@ class LEDHParticleFlowFilter:
             self.predict(t=t + 1)
             self.update(obs_tf[t])
             mean, cov = self._estimate_mean_cov()
-            self.means.append(mean)  # TF tensor
-            self.covs.append(cov)    # TF tensor
+            self.means.append(mean.numpy())
+            self.covs.append(cov.numpy())
             if progress_callback is not None:
                 progress_callback(t, T, time.perf_counter() - t0)
 
         resampling_rate = len(self.resampled_at) / T if T > 0 else 0.0
 
-        # Convert accumulated TF tensors to numpy once
-        means_np = tf.stack(self.means).numpy()
-        covs_np = tf.stack(self.covs).numpy()
-        log_liks_tf = tf.stack(self.log_likelihoods) if self.log_likelihoods else None
-        ess_np = tf.stack(self.ess_history).numpy()
-        weights_np = tf.stack(self.weights_history).numpy()
+        # All lists are already numpy — just stack
+        means_np = np.stack(self.means)
+        covs_np = np.stack(self.covs)
+        log_liks_np = np.array(self.log_likelihoods) if self.log_likelihoods else None
+        ess_np = np.array(self.ess_history)
+        weights_np = np.stack(self.weights_history)
 
         return FilterResult(
             means=means_np,
             covs=covs_np,
-            log_likelihood=float(tf.reduce_sum(log_liks_tf).numpy()) if log_liks_tf is not None else None,
-            log_likelihoods=log_liks_tf.numpy() if log_liks_tf is not None else None,
+            log_likelihood=float(np.sum(log_liks_np)) if log_liks_np is not None else None,
+            log_likelihoods=log_liks_np,
             ess=ess_np,
             weights_history=weights_np,
             resampled_at=self.resampled_at,

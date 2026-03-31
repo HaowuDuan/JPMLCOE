@@ -1,0 +1,55 @@
+# @package _global_
+# DPF: Cubic Sensor model with Particle Gibbs + Bootstrap CSMC (systematic resampling)
+#
+# theta-step: HMC on closed-form log p(theta | x_{0:T}, y_{1:T}) — smooth, no gradient cliffs
+# x-step: Bootstrap Conditional SMC with ancestor sampling
+# Infers sigma_V and sigma_W (true: 1.0, 1.0).
+
+model:
+  _target_: src.models.cubic_sensor.CubicSensorModel
+  a: 0.9
+  c: 0.05
+  sigma_V: 2.0
+  sigma_W: 2.0
+  initial_var: 5.0
+
+filter:
+  _target_: src.filters.particle.conditional_smc.BootstrapConditionalSMC
+  n_particles: 1000
+  resample_threshold: 0.5
+  ancestor_sampling: true
+
+dpf:
+  sampler: pgibbs
+
+  trainable_params:
+    sigma_V:
+      constraint: positive
+      prior:
+        _target_: tensorflow_probability.distributions.LogNormal
+        loc: 0.0
+        scale: 1.0
+    sigma_W:
+      constraint: positive
+      prior:
+        _target_: tensorflow_probability.distributions.LogNormal
+        loc: 0.0
+        scale: 1.0
+
+  pgibbs:
+    num_samples: 3
+    num_burnin: 2
+    theta_sampler: hmc
+    hmc_steps_per_iter: 3
+    hmc_step_size: 0.05
+    hmc_num_leapfrog: 10
+    target_accept_prob: 0.8
+    grad_clip_norm: 100.0
+    seed: 42
+
+data:
+  T: 50
+  seed: 42
+  true_params:
+    sigma_V: 1.0
+    sigma_W: 1.0

@@ -6,7 +6,7 @@ defaults:
   - override /model: stochastic_volatility_log
   - override /filter: edh_invertible
 
-T: 500
+T: 100
 seed: 42
 plot: true
 output_dir: outputs/stochastic_volatility/stochastic_volatility_edh_invertible_log_ukf

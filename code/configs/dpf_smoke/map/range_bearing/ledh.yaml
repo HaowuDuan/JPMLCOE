@@ -1,0 +1,52 @@
+# @package _global_
+# MAP: Range-Bearing with LEDH + Adam optimizer
+# Infers sigma_range and sigma_bearing (true: 0.1, 0.1).
+
+dtype: float32
+
+model:
+  _target_: src.models.range_bearing.RangeBearingModel
+  sigma_range: 0.3      # Initial guess (true: 0.1)
+  sigma_bearing: 0.3    # Initial guess (true: 0.1)
+
+filter:
+  _target_: src.filters.particle.ledh_invertible_hmc.LEDHParticleFlowFilterHMC
+  n_particles: 200
+  n_lambda_steps: 29
+  resampling_method: ot_entropy
+  resampling_config:
+    epsilon: 0.5
+  weight_clip_range: 50.0
+  stop_gradient_resampling: false
+  eager_mode: false
+
+dpf:
+  sampler: map
+
+  trainable_params:
+    sigma_range:
+      constraint: positive
+      prior:
+        _target_: tensorflow_probability.distributions.LogNormal
+        loc: -2.05
+        scale: 0.5
+    sigma_bearing:
+      constraint: positive
+      prior:
+        _target_: tensorflow_probability.distributions.LogNormal
+        loc: -2.05
+        scale: 0.5
+
+  map:
+    num_steps: 5
+    learning_rate: 0.01
+    optimizer: adam
+    random_seed: true
+    seed: 42
+
+data:
+  T: 100
+  seed: 42
+  true_params:
+    sigma_range: 0.1
+    sigma_bearing: 0.1

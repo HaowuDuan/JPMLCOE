@@ -8,7 +8,7 @@ defaults:
   - override /filter: ledh_flow
 
 # Override settings
-T: 500
+T: 100
 seed: 42
 plot: true
 output_dir: outputs/range_bearing/range_bearing_ledh_flow

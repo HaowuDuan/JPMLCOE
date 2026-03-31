@@ -7,7 +7,7 @@ defaults:
   - override /filter: ledh_flow
 
 # Override settings
-T: 20
+T: 100
 seed: 42
 plot: true
 output_dir: outputs/stochastic_volatility/stochastic_volatility_ledh_flow

@@ -1,0 +1,44 @@
+# @package _global_
+# MAP: 1D Linear-Gaussian with BPF + soft resampling (alpha=0.5) + Adam
+# Diagnostic: verify gradient-through-resampling works for optimization
+
+model:
+  _target_: src.models.linear_gaussian.LinearGaussianModel
+  F: [[0.9]]
+  B: [[1.0]]
+  H: [[1.0]]
+  D: [[1.0]]
+  obs_noise_std: 2.0
+
+filter:
+  _target_: src.filters.particle.bootstrap_pf_hmc.BootstrapPFHMC
+  n_particles: 1000
+  resampling_method: soft
+  resampling_config:
+    alpha: 0.5
+  stop_gradient_resampling: false
+  eager_mode: false
+
+dpf:
+  sampler: map
+
+  trainable_params:
+    obs_noise_std:
+      constraint: positive
+      prior:
+        _target_: tensorflow_probability.distributions.LogNormal
+        loc: 0.25
+        scale: 0.5
+
+  map:
+    num_steps: 5
+    learning_rate: 0.01
+    optimizer: adam
+    random_seed: true
+    seed: 42
+
+data:
+  T: 100
+  seed: 42
+  true_params:
+    obs_noise_std: 1.0

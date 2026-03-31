@@ -8,7 +8,7 @@ defaults:
   - override /filter: kernel_flow_scalar
 
 # Override settings
-T: 500
+T: 100
 seed: 42
 plot: true
 output_dir: outputs/stochastic_volatility/stochastic_volatility_kernel_scalar

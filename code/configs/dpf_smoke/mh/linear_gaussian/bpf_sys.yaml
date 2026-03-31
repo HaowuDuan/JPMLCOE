@@ -1,0 +1,43 @@
+# @package _global_
+# MH + BPF systematic resampling for linear Gaussian model.
+# Cross-check: isolates BPF likelihood quality from HMC gradient issues.
+#
+# Run: python -m src.experiments.run_dpf_experiment dpf=mh/linear_gaussian/bpf_sys
+
+model:
+  _target_: src.models.linear_gaussian.LinearGaussianModel
+  F: [[0.9]]
+  B: [[1.0]]
+  H: [[1.0]]
+  D: [[1.0]]
+  obs_noise_std: 2.0    # Initial guess (true: 1.0)
+
+filter:
+  _target_: src.filters.particle.bootstrap_pf_hmc.BootstrapPFHMC
+  n_particles: 1000
+  resampling_method: systematic
+  stop_gradient_resampling: true
+  eager_mode: true
+
+dpf:
+  sampler: mh
+
+  trainable_params:
+    obs_noise_std:
+      constraint: positive
+      prior:
+        _target_: tensorflow_probability.distributions.LogNormal
+        loc: 0.0
+        scale: 1.0
+
+  mh:
+    num_samples: 3
+    num_burnin: 2
+    proposal_std: 0.1
+    seed: 42
+
+data:
+  T: 50
+  seed: 42
+  true_params:
+    obs_noise_std: 1.0
