@@ -1,0 +1,47 @@
+# @package _global_
+# MAP: 2D SV with BPF + OT resampling — Level 0: infer sigma2 only
+# BPF baseline: faster per step than LEDH, sanity check for gradient direction.
+# True: a1=0.95, a2=0.91, sigma1=0.5, sigma2=1.0, b=1.0 (fixed)
+
+dtype: float32
+
+model:
+  _target_: src.models.stochastic_volatility_2d.StochasticVolatility2DModel
+  a1: 0.95
+  a2: 0.91
+  sigma1: 0.5
+  sigma2: 2.0       # Initial guess (true: 1.0)
+  b: 1.0
+
+filter:
+  _target_: src.filters.particle.bootstrap_pf_hmc.BootstrapPFHMC
+  n_particles: 500
+  resampling_method: ot_entropy
+  resampling_config:
+    epsilon: 0.5
+  stop_gradient_resampling: false
+  eager_mode: false
+
+dpf:
+  sampler: map
+
+  trainable_params:
+    sigma2:
+      constraint: positive
+      prior:
+        _target_: tensorflow_probability.distributions.LogNormal
+        loc: 0.0
+        scale: 0.5
+
+  map:
+    num_steps: 200
+    learning_rate: 0.05
+    optimizer: adam
+    random_seed: true
+    seed: 42
+
+data:
+  T: 50
+  seed: 42
+  true_params:
+    sigma2: 1.0

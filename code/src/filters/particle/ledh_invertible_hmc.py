@@ -353,8 +353,8 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
         Compiled path: entire filter loop runs as a single @tf.function
         with tf.while_loop. GradientTape records one op.
 
-        Eager path: Python for-loop with tf.Variable.assign. Slow but
-        errors appear instantly. Use for debugging.
+        Eager path: Python for-loop with plain tensors (no tf.Variable).
+        Slower but errors appear instantly and gradients flow correctly.
         """
         random_seed = int(seed[0].numpy()) if seed is not None else 42
         self.initialize(random_seed=random_seed)
@@ -364,8 +364,25 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
 
         if self.eager_mode:
             R_inv = safe_inv(R)
+            # Re-derive initial state from model's live tensors so gradients
+            # flow through model parameters (initialize() uses numpy which
+            # severs the gradient chain).
+            rng_key = tf.constant([random_seed, 0], dtype=tf.int32)
+            keys = tf.random.experimental.stateless_split(rng_key, num=2)
+            rng_key = keys[0]
+            init_seed = keys[1]
+            particles = self.model.sample_initial_state_batch(
+                self.n_particles, init_seed
+            )
+            initial_cov = self.model.Sigma_0
+            particle_covs = tf.tile(
+                tf.expand_dims(initial_cov, 0), [self.n_particles, 1, 1]
+            )
+            weights = (tf.ones(self.n_particles, dtype=self.dtype)
+                       / tf.cast(self.n_particles, self.dtype))
             return self._run_eager(
-                observations, R, R_inv, regularization_tf
+                observations, R, R_inv, regularization_tf,
+                particles, particle_covs, weights, rng_key
             )
 
         # Graph mode: use graph_safe_inv (pinv) to avoid MatrixInverse crash
@@ -392,10 +409,15 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
             param_values
         )
 
-    def _run_eager(self, observations, R, R_inv, regularization_tf):
-        """Eager fallback: Python for-loop with Variable.assign."""
-        # Bypass @tf.function to avoid autograph issues (e.g. isinstance in
-        # _as_sigma) and ensure GradientTape tracks ops eagerly.
+    def _run_eager(self, observations, R, R_inv, regularization_tf,
+                   particles, particle_covs, weights, rng_key):
+        """Eager fallback: Python for-loop with plain tensors.
+
+        All state (particles, weights, particle_covs) is passed as plain
+        tensors and reassigned in-place (Python rebinding, not
+        tf.Variable.assign). This preserves the gradient chain for
+        tf.GradientTape.
+        """
         if self.filter_type == 'ukf':
             _eager_predict = batched_ukf_predict.python_function
             _eager_update = batched_ukf_update.python_function
@@ -406,6 +428,12 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
         _flow_weights = compute_flow_weights.python_function
         _log_abs_det = safe_log_abs_det.python_function
 
+        # Use the rng_key passed in (not self.rng_key) to keep everything
+        # as plain tensors.
+        def _next_seed_plain(key):
+            keys = tf.random.experimental.stateless_split(key, num=2)
+            return keys[0], keys[1]
+
         T = observations.shape[0]
         total_log_lik = tf.constant(0.0, dtype=self.dtype)
 
@@ -414,31 +442,29 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
                 self.model.t = t + 1
 
             # --- Predict ---
-            self.particles_prev.assign(self.particles.value())
+            particles_prev = particles
 
             if self.filter_type == 'ukf':
-                eta_bar_0_tf, cov_pred_tf = _eager_predict(
-                    self.model, self.particles.value(), self.particle_covs.value(),
+                eta_bar_0, cov_pred = _eager_predict(
+                    self.model, particles, particle_covs,
                     self._ukf_weights_mean, self._ukf_weights_cov,
                     self._ukf_lambda, self.state_dim
                 )
             else:
-                eta_bar_0_tf, cov_pred_tf = _eager_predict(
-                    self.model, self.particles.value(), self.particle_covs.value()
+                eta_bar_0, cov_pred = _eager_predict(
+                    self.model, particles, particle_covs
                 )
-            self.particle_covs.assign(cov_pred_tf)
-            self.eta_bar_0.assign(eta_bar_0_tf)
+            particle_covs = cov_pred
 
-            seed_tf = self._next_seed()
-            eta_0_tf = self.model.state_transition_batch(
-                self.particles_prev.value(), seed_tf, t=t + 1
+            rng_key, seed_tf = _next_seed_plain(rng_key)
+            eta_0 = self.model.state_transition_batch(
+                particles_prev, seed_tf, t=t + 1
             )
-            self.eta_0.assign(eta_0_tf)
 
             # --- Flow loop ---
             y = observations[t]
-            eta_1 = self.eta_0.value()
-            eta_bar = self.eta_bar_0.value()
+            eta_1 = eta_0
+            eta_bar = eta_bar_0
             log_theta = tf.zeros([self.n_particles], dtype=self.dtype)
             lambda_val = tf.constant(0.0, dtype=self.dtype)
             I_sd = tf.eye(self.state_dim, dtype=self.dtype)
@@ -449,8 +475,8 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
 
                 A_batch, b_batch = _flow_params(
                     self.model, eta_bar, lambda_val, y,
-                    self.particle_covs.value(),
-                    R, R_inv, self.eta_bar_0.value(),
+                    particle_covs,
+                    R, R_inv, eta_bar_0,
                     self.state_dim, regularization_tf
                 )
 
@@ -469,24 +495,24 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
             log_theta = log_theta - max_log_theta
             theta = tf.exp(log_theta)
 
-            self.particles.assign(eta_1)
+            particles = eta_1
 
             # --- Weights and log-likelihood ---
             weights_new, log_lik = _flow_weights(
                 eta_1=eta_1,
-                eta_0=self.eta_0.value(),
-                particles_prev=self.particles_prev.value(),
+                eta_0=eta_0,
+                particles_prev=particles_prev,
                 observation=y,
                 model=self.model,
-                prev_weights=self.weights.value(),
+                prev_weights=weights,
                 jacobians=theta,
                 clip_range=self.weight_clip_range
             )
-            self.weights.assign(weights_new)
+            weights = weights_new
             total_log_lik = total_log_lik + log_lik + max_log_theta
 
             if self.on_timestep is not None:
-                ess_val = float(ess_tf(self.weights.value()).numpy())
+                ess_val = float(ess_tf(weights).numpy())
                 self.on_timestep(
                     t=t + 1,
                     log_lik_t=float(log_lik.numpy()),
@@ -497,59 +523,39 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
             # --- Covariance update ---
             if self.filter_type == 'ukf':
                 _, cov_updated = _eager_update(
-                    self.model, self.eta_bar_0.value(),
-                    self.particle_covs.value(), y,
+                    self.model, eta_bar_0,
+                    particle_covs, y,
                     self._ukf_weights_mean, self._ukf_weights_cov,
                     self._ukf_lambda, self.state_dim
                 )
             else:
                 _, cov_updated = _eager_update(
-                    self.model, self.eta_bar_0.value(),
-                    self.particle_covs.value(), y
+                    self.model, eta_bar_0,
+                    particle_covs, y
                 )
-            self.particle_covs.assign(cov_updated)
+            particle_covs = cov_updated
 
             # --- Resampling ---
-            ess = ess_tf(self.weights.value())
+            ess = ess_tf(weights)
             if ess < self.resample_threshold * self.n_particles:
-                self._resample_hmc()
+                rng_key, rseed = _next_seed_plain(rng_key)
+                result = self._hmc_resampling_method(
+                    particles, weights, seed=rseed,
+                    **self._hmc_resampling_config
+                )
+                if result.transport_matrix is not None:
+                    T_mat = result.transport_matrix
+                    particle_covs = tf.einsum('ij,jkl->ikl', T_mat, particle_covs)
+                elif result.ancestor_indices is not None:
+                    particle_covs = tf.gather(particle_covs, result.ancestor_indices)
+                particles = result.particles
+                weights = result.weights
+                if self.stop_gradient_resampling:
+                    particles = tf.stop_gradient(particles)
+                    weights = tf.stop_gradient(weights)
+                    particle_covs = tf.stop_gradient(particle_covs)
 
         return total_log_lik
 
-    def _resample_hmc(self):
-        """Resample with configurable method and optional stop_gradient.
-
-        Used by the eager path only. The compiled path inlines resampling
-        into the tf.while_loop body via tf.cond.
-        """
-        seed = self._next_seed()
-
-        result = self._hmc_resampling_method(
-            self.particles.value(),
-            self.weights.value(),
-            seed=seed,
-            **self._hmc_resampling_config
-        )
-
-        if result.transport_matrix is not None:
-            # OT resampling: transport covs via T @ covs (differentiable)
-            T = result.transport_matrix
-            self.particle_covs.assign(
-                tf.einsum('ij,jkl->ikl', T, self.particle_covs.value())
-            )
-        elif result.ancestor_indices is not None:
-            # Index-based resampling (systematic, soft)
-            self.particle_covs.assign(
-                tf.gather(self.particle_covs.value(), result.ancestor_indices)
-            )
-        else:
-            raise ValueError(
-                "ResampleResult has neither ancestor_indices nor transport_matrix"
-            )
-        self.particles.assign(result.particles)
-        self.weights.assign(result.weights)
-
-        if self.stop_gradient_resampling:
-            self.particles.assign(tf.stop_gradient(self.particles.value()))
-            self.weights.assign(tf.stop_gradient(self.weights.value()))
-            self.particle_covs.assign(tf.stop_gradient(self.particle_covs.value()))
+    # NOTE: _resample_hmc() removed — resampling is now inlined in
+    # _run_eager() to avoid tf.Variable.assign() which severs gradients.

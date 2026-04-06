@@ -1,0 +1,52 @@
+# @package _global_
+# HMC: 2D SV with LEDH + OT resampling — Level 1: infer a2 only
+# True: a1=0.95, a2=0.91, sigma1=0.5, sigma2=1.0, b=1.0 (fixed)
+
+dtype: float32
+
+model:
+  _target_: src.models.stochastic_volatility_2d.StochasticVolatility2DModel
+  a1: 0.95
+  a2: 0.7            # Initial guess (true: 0.91)
+  sigma1: 0.5
+  sigma2: 1.0
+  b: 1.0
+
+filter:
+  _target_: src.filters.particle.ledh_invertible_hmc.LEDHParticleFlowFilterHMC
+  n_particles: 1000
+  n_lambda_steps: 29
+  resampling_method: ot_entropy
+  resampling_config:
+    epsilon: 0.5
+  weight_clip_range: 50.0
+  stop_gradient_resampling: false
+  eager_mode: false
+
+dpf:
+  sampler: hmc
+
+  trainable_params:
+    a2:
+      constraint: [0.001, 0.999]
+      prior:
+        _target_: tensorflow_probability.distributions.Uniform
+        low: 0.0
+        high: 1.0
+
+  hmc:
+    num_samples: 500
+    num_burnin: 200
+    step_size: 0.001
+    num_leapfrog_steps: 5
+    max_tree_depth: 10
+    adaptation_rate: 0.8
+    target_accept_prob: 0.75
+    seed: 42
+    grad_clip_norm: 100.0
+
+data:
+  T: 200
+  seed: 42
+  true_params:
+    a2: 0.91

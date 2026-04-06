@@ -1,0 +1,69 @@
+# @package _global_
+# MAP: 2D SV with LEDH + OT resampling — Level 3: infer all 4 params
+# True: a1=0.95, a2=0.91, sigma1=0.5, sigma2=1.0, b=1.0 (fixed for identifiability)
+
+dtype: float32
+
+model:
+  _target_: src.models.stochastic_volatility_2d.StochasticVolatility2DModel
+  a1: 0.7            # Initial guess (true: 0.95)
+  a2: 0.7            # Initial guess (true: 0.91)
+  sigma1: 1.0        # Initial guess (true: 0.5)
+  sigma2: 2.0        # Initial guess (true: 1.0)
+  b: 1.0             # Fixed
+
+filter:
+  _target_: src.filters.particle.ledh_invertible_hmc.LEDHParticleFlowFilterHMC
+  n_particles: 1000
+  n_lambda_steps: 29
+  resampling_method: ot_entropy
+  resampling_config:
+    epsilon: 0.5
+  weight_clip_range: 50.0
+  stop_gradient_resampling: false
+  eager_mode: false
+
+dpf:
+  sampler: map
+
+  trainable_params:
+    a1:
+      constraint: [0.001, 0.999]
+      prior:
+        _target_: tensorflow_probability.distributions.Uniform
+        low: 0.0
+        high: 1.0
+    a2:
+      constraint: [0.001, 0.999]
+      prior:
+        _target_: tensorflow_probability.distributions.Uniform
+        low: 0.0
+        high: 1.0
+    sigma1:
+      constraint: positive
+      prior:
+        _target_: tensorflow_probability.distributions.LogNormal
+        loc: -0.7           # log(0.5) ~ -0.7
+        scale: 0.5
+    sigma2:
+      constraint: positive
+      prior:
+        _target_: tensorflow_probability.distributions.LogNormal
+        loc: 0.0
+        scale: 0.5
+
+  map:
+    num_steps: 500
+    learning_rate: 0.005
+    optimizer: adam
+    random_seed: true
+    seed: 42
+
+data:
+  T: 200
+  seed: 42
+  true_params:
+    a1: 0.95
+    a2: 0.91
+    sigma1: 0.5
+    sigma2: 1.0

@@ -1,0 +1,268 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{titlesec}
+
+\titleformat{\section}{\large\bfseries}{\thesection.}{0.5em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection}{0.5em}{}
+\titlespacing{\section}{0pt}{1.2em}{0.4em}
+\titlespacing{\subsection}{0pt}{0.8em}{0.3em}
+
+\setlength{\parskip}{0.4em}
+\setlength{\parindent}{0pt}
+
+\newcommand{\RR}{\mathbb{R}}
+\newcommand{\EE}{\mathbb{E}}
+\newcommand{\bw}{\mathbf{w}}
+\newcommand{\bx}{\mathbf{x}}
+\newcommand{\by}{\mathbf{y}}
+\newcommand{\bX}{\mathbf{X}}
+
+\definecolor{keypoint}{RGB}{0,80,160}
+
+\begin{document}
+
+\begin{center}
+{\Large \textbf{Neural Network--Accelerated Optimal Transport\\[3pt] for Differentiable Particle Filtering}}\\[10pt]
+{\normalsize Research Plan and Technical Summary}\\[4pt]
+{\small \today}
+\end{center}
+
+\vspace{0.5em}
+\hrule
+\vspace{1em}
+
+%--------------------------------------------------------------
+\section{Problem Statement}
+
+A differentiable particle filter requires solving an optimal transport (OT) problem at every resampling step. The standard approach~[1] uses entropy-regularized OT via the Sinkhorn algorithm: $O(LN^2)$ per step ($L$ iterations, $N$ particles). This is the computational bottleneck.
+
+\textbf{Goal.} Replace Sinkhorn with a learned map that produces the transport plan in a single forward pass, while preserving differentiability with respect to model parameters.
+
+\textbf{Constraints.} The state dimension $d$ may reach 50--100 in production, but a $d=5$ proof-of-concept is the first deliverable.
+
+%--------------------------------------------------------------
+\section{Key Distinction: Direct Map vs.\ Neural Operator}
+
+These are two different things. Conflating them causes confusion.
+
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\toprule
+& \textbf{Step 1: Direct map} & \textbf{Step 2: Neural operator} \\
+\midrule
+Input/output & $(\bw^0, \bw^1, \bX) \to \pi$ & $(\rho_0, \rho_1) \to T$ or $\psi^*$ \\
+Domain & Finite-dim: $\Delta^N \times \Delta^N \times \RR^{N \times d}$ & Function spaces: $L^2 \to L^2$ \\
+PDE & None & Monge--Amp\`ere or Schr\"odinger system \\
+Resolution & Fixed $N$ & $N$-invariant (train small, deploy large) \\
+PINN loss & No (algebraic constraints only) & Yes (PDE residual) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Step~1 is a supervised regression problem. Step~2 upgrades it to a neural operator \emph{only if} resolution invariance across particle counts is needed.
+
+%--------------------------------------------------------------
+\section{Step 1: Learn the Discrete Resampling Map}
+
+\subsection{Setup}
+
+Run the particle filter with full Sinkhorn resampling. At every resampling step, record:
+\begin{itemize}[nosep,leftmargin=1.5em]
+    \item \textbf{Input:} source weights $\bw^0 \in \Delta^N$, target weights $\bw^1 \in \Delta^N$, particle positions $\bX \in \RR^{N \times d}$.
+    \item \textbf{Output:} converged dual variables $\psi^* \in \RR^N$ (or the full transport plan $\pi \in \RR^{N \times N}$).
+\end{itemize}
+Train a neural network $f_\theta(\bw^0, \bw^1, \bX) \approx \psi^*$ with MSE loss.
+
+\subsection{Training Data Generation}
+
+\textcolor{keypoint}{\textbf{Diversity matters more than volume.}} Consecutive resampling steps within one trajectory are correlated. To cover the input space:
+\begin{enumerate}[nosep,leftmargin=1.5em]
+    \item Run many independent filtering trajectories with varied initial conditions, observation sequences, and model parameters.
+    \item Ensure the training set spans the full range of weight degeneracy---from near-uniform to highly concentrated (low ESS). This is where the transport problem varies most.
+    \item Save particle positions and weights; the KDE (if needed later) is reconstructed from these.
+\end{enumerate}
+
+\subsection{Iterative Bootstrapping (DAgger-style)}
+
+The learned map changes the filter's behavior, which shifts the distribution of inputs the map encounters. Fix this with iterative refinement:
+\begin{enumerate}[nosep,leftmargin=1.5em]
+    \item \textbf{Round 1.} Run filter with Sinkhorn. Collect $(\text{input}, \psi^*)$ pairs. Train network $f_{\theta_1}$.
+    \item \textbf{Round 2.} Run filter using $f_{\theta_1}$ for resampling (with Newton correction for safety). The filter explores new regions of state space. Collect new $(\text{input}, \psi^*)$ pairs from the Newton corrections. Retrain $f_{\theta_2}$ on the combined dataset.
+    \item \textbf{Round $k$.} Repeat. Stop when the distribution of inputs stabilizes (measure via validation loss on held-out trajectories from the previous round).
+\end{enumerate}
+
+\subsection{Data Validity Under Parameter Inference}
+
+When model parameters are known, the filter produces well-specified weights and the transport plans are unambiguously good training data. The more interesting case: the parameters are \emph{unknown} and the filter is part of an inference loop (e.g., expectation-maximization, variational inference, or gradient-based maximum likelihood through the differentiable filter).
+
+\textcolor{keypoint}{\textbf{Each transport plan is still a correct training example.}} The Sinkhorn solver takes $(\bw^0, \bw^1, \bX)$ and returns $\psi^*$. This is a pure optimization problem---it does not depend on whether the weights came from a well-specified model. The neural network is learning to approximate Sinkhorn, not to do filtering. Every $(\text{input}, \psi^*)$ pair is valid regardless of the current parameter estimates.
+
+\textbf{What changes is the input distribution.} With poor parameters, the filter produces more degenerate weights (likelihood concentrates on few particles). As parameters improve, weights become more balanced and particles better distributed. Training only on early-inference data risks poor generalization to the later regime.
+
+\textbf{This is handled by the bootstrapping loop.} Each round of DAgger-style refinement (Section~3.3) collects transport plans under the current parameter estimates. The combined dataset across rounds covers the full trajectory of the inference process---from misspecified to well-specified. In fact, the inference setting provides \emph{more} input diversity for free: different parameter values during learning produce different $(\bw, \bX)$ configurations without requiring manual data augmentation.
+
+\subsection{Architectural Constraints}
+
+The network must respect the problem structure:
+\begin{itemize}[nosep,leftmargin=1.5em]
+    \item \textbf{Permutation equivariance:} relabeling particles should relabel the output. Use set-equivariant architectures (DeepSets, Set Transformer).
+    \item \textbf{Marginal constraints:} the output $\pi$ must satisfy $\sum_j \pi_{ij} = w^0_i$ and $\sum_i \pi_{ij} = w^1_j$. Either enforce via a Sinkhorn projection layer on top of the network, or predict dual variables $\psi$ and reconstruct $\pi$ analytically (cleaner).
+\end{itemize}
+
+\subsection{Loss Function}
+
+Primary: MSE on dual variables.
+\[
+    \mathcal{L}_{\text{sup}} = \|\psi^* - f_\theta(\bw^0, \bw^1, \bX)\|^2
+\]
+Optional regularizer: marginal constraint violation (linear constraints, well-behaved).
+\[
+    \mathcal{L}_{\text{feas}} = \sum_j \Big( \int \text{softmax}_j\big((\hat\psi_j - c(\bx, \by_j))/\varepsilon\big)\,\rho_0(\bx)\,d\bx - w^1_j \Big)^2
+\]
+No PDE loss exists in this formulation. This is not a PINN.
+
+%--------------------------------------------------------------
+\section{Step 2: Semi-Discrete Neural Operator (if resolution invariance is needed)}
+
+\subsection{Formulation}
+
+Smooth one measure via KDE: $\rho_0(\bx) = \sum_i w^0_i K_h(\bx - \bx_i)$. Keep the target discrete: $\mu_1 = \sum_j w^1_j \delta_{\by_j}$. The semi-discrete OT dual is:
+\[
+    \max_\psi \; \sum_j w^1_j \psi_j + \int \min_j \Big(\tfrac{1}{2}|\bx - \by_j|^2 - \psi_j\Big)\,\rho_0(\bx)\,d\bx
+\]
+The neural operator learns $\mathcal{F}: (\rho_0, \{w^1_j, \by_j\}) \mapsto \psi^* \in \RR^N$. This is a function-to-vector map; DeepONet is the natural architecture (branch net encodes $\rho_0$, output layer gives $\psi^*$).
+
+\subsection{Differentiability Analysis}
+
+Three levels of differentiability, each with different properties:
+
+\textbf{1. Dual objective $g(\psi)$:} differentiable in $\psi$. Gradient: $\partial g/\partial\psi_j = w^1_j - \int_{L_j(\psi)} \rho_0\,d\bx$, where $L_j(\psi)$ is the Laguerre cell. Hessian well-defined when $\rho_0$ is absolutely continuous. This is what makes Newton's method work.
+
+\textbf{2. Optimal dual variables $\psi^*$:} differentiable in $(\rho_0, \bw^1, \by)$ by the implicit function theorem, provided the Hessian of $g$ at $\psi^*$ is non-degenerate.
+
+\textbf{3. The transport map $T(\bx) = \by_j$ for $\bx \in L_j$:} \emph{not} differentiable. Piecewise constant with discontinuities at cell boundaries. This breaks backpropagation.
+
+\textbf{Fix:} entropy regularization. Replace hard Laguerre cells with soft assignments:
+\[
+    \pi_j(\bx) = \rho_0(\bx) \cdot \frac{\exp\big((\psi_j - c(\bx, \by_j))/\varepsilon\big)}{\sum_k \exp\big((\psi_k - c(\bx, \by_k))/\varepsilon\big)}
+\]
+Smooth in all arguments. Resampled position $\tilde\bx_i = \sum_j \pi_j(\bx_i)\,\by_j$ is differentiable. The full pipeline---KDE $\to$ neural operator $\to$ soft assignment $\to$ resample---is end-to-end differentiable.
+
+\subsection{PINN Loss (Available Here)}
+
+The Monge--Amp\`ere residual provides a self-supervised loss:
+\[
+    \mathcal{L}_{\text{MA}} = \int \Big|\det(\nabla^2\varphi(\bx)) - \frac{\rho_0(\bx)}{\rho_1(\nabla\varphi(\bx))}\Big|^2\,d\bx
+\]
+This does not require pre-computed solutions. Use it as a regularizer alongside supervised data from Step~1:
+\[
+    \mathcal{L} = \mathcal{L}_{\text{sup}} + \lambda\,\mathcal{L}_{\text{MA}}
+\]
+This is the PINO (physics-informed neural operator) paradigm: data anchors the network to correct solutions; the PDE loss enforces consistency between data points.
+
+\subsection{Gradient Correctness}
+
+The neural operator outputs $\hat\psi \approx \psi^*$. Backpropagating through the network gives $\partial\hat\psi/\partial\bw$, not the true $\partial\psi^*/\partial\bw$. With approximation error, these differ.
+
+\textbf{Fix:} use the neural operator as a warm start for 2--3 Newton iterations, then differentiate through the iterations (implicit differentiation at the fixed point). This gives correct gradients while keeping the iteration count low.
+
+%--------------------------------------------------------------
+\section{Approximation Error Budget}
+
+Two sources of error compound in the semi-discrete formulation:
+
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Source} & \textbf{Controlled by} & \textbf{Behavior} \\
+\midrule
+KDE smoothing & Bandwidth $h$ & $\to 0$ as $h \to 0$, but ill-conditions the PDE \\
+Neural operator & Network capacity + data & Depends on regularity of $\psi^*(\rho_0, \bw, \by)$ \\
+Entropic regularization & $\varepsilon$ & Already present in Sinkhorn baseline \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Key question:} is the KDE error small relative to the entropic regularization error already incurred by Sinkhorn? If yes, the semi-discrete lifting adds negligible additional error and the resolution-invariance payoff is worth it.
+
+%--------------------------------------------------------------
+\section{Scaling Considerations ($d = 50$--$100$)}
+
+Standard particle filters fail at $d \geq 20$: the required particle count grows as $\exp(d)$~[5]. Variants that work in high dimensions---localized PF~[6], equivalent-weights PF~[7], particle flow filters---all exploit problem structure (spatial locality, low-rank observations, conditional independence).
+
+The continuous density route (Fokker--Planck + neural operator) also fails for generic $d = 50$: representing $\rho_t \in L^2(\RR^{50})$ on any grid is intractable. Neural operators do not break the curse of dimensionality without structural assumptions.
+
+\textbf{Practical path forward:} demonstrate the method at $d = 5$, where both the discrete map (Step~1) and the semi-discrete operator (Step~2) are feasible. Scaling to $d = 50$+ requires identifying and exploiting the structure of the specific target problem (low-rank observations, conditional independence, manifold concentration). The $d = 5$ result establishes that the resampling map is learnable; the structure exploitation is a separate research contribution.
+
+%--------------------------------------------------------------
+\section{Action Plan}
+
+\begin{enumerate}[leftmargin=1.5em]
+    \item \textbf{Baseline implementation} ($d=5$, fixed $N$). Implement a differentiable particle filter with Sinkhorn resampling. Validate on a standard nonlinear filtering benchmark (e.g., Lorenz-63, stochastic volatility). Record wall-clock time per resampling step.
+
+    \item \textbf{Data collection.} Run 500+ independent trajectories. Save $(\bw^0, \bw^1, \bX, \psi^*)$ at every resampling step. Stratify by ESS to ensure coverage of degenerate-weight regimes.
+
+    \item \textbf{Train direct map (Step 1).} Train a Set Transformer on the saved data with MSE loss on $\psi^*$. Measure: (a) prediction accuracy $\|\hat\psi - \psi^*\|$, (b) Sinkhorn iterations saved when $\hat\psi$ is used as warm start, (c) end-to-end filter accuracy (RMSE on state estimates).
+
+    \item \textbf{Bootstrap iteration.} Run 2--3 rounds of DAgger-style refinement. Measure whether validation loss decreases across rounds (indicates distribution shift was present and corrected).
+
+    \item \textbf{Differentiability validation.} Train model parameters end-to-end through the learned resampling step. Compare gradient estimates against finite-difference baselines. Verify that Newton correction (2--3 steps) eliminates gradient bias.
+
+    \item \textbf{Semi-discrete upgrade (Step 2, optional).} If resolution invariance across $N$ is needed: implement KDE lifting + DeepONet + soft assignment pipeline. Add PINN loss (Monge--Amp\`ere residual or entropic OT optimality conditions) as regularizer. Compare generalization across $N \in \{50, 100, 200, 500\}$.
+
+    \item \textbf{Scaling study.} Increase $d$ from 5 to 10, 15, 20. Identify where the method degrades and what structural assumptions are needed to go further.
+\end{enumerate}
+
+%--------------------------------------------------------------
+\section{Key References}
+
+\begin{thebibliography}{10}
+
+\bibitem{corenflos2021}
+A.~Corenflos, J.~Thornton, G.~Deligiannidis, and A.~Doucet.
+\newblock Differentiable particle filtering via entropy-regularized optimal transport.
+\newblock \emph{ICML}, 2021. \texttt{arXiv:2102.07850}.
+
+\bibitem{gradnetot}
+S.~Chaudhari, S.~Pranav, and J.~M.~F.~Moura.
+\newblock {GradNetOT}: Learning optimal transport maps with {GradNets}.
+\newblock 2025. \texttt{arXiv:2507.13191}.
+
+\bibitem{subedi2025}
+U.~Subedi and A.~Tewari.
+\newblock Operator learning: A statistical perspective.
+\newblock 2025. \texttt{arXiv:2504.03503}.
+
+\bibitem{jha2025}
+P.~K.~Jha.
+\newblock From theory to application: A practical introduction to neural operators in scientific computing.
+\newblock 2025. \texttt{arXiv:2503.05598}.
+
+\bibitem{snyder2008}
+C.~Snyder, T.~Bengtsson, P.~Bickel, and J.~Anderson.
+\newblock Obstacles to high-dimensional particle filtering.
+\newblock \emph{Monthly Weather Review}, 136(12):4629--4640, 2008.
+
+\bibitem{rebeschini2015}
+P.~Rebeschini and R.~van Handel.
+\newblock Can local particle filters beat the curse of dimensionality?
+\newblock \emph{Annals of Applied Probability}, 25(5):2809--2866, 2015.
+
+\bibitem{ades2015}
+M.~Ades and P.~J.~van Leeuwen.
+\newblock The equivalent-weights particle filter in a high-dimensional system.
+\newblock \emph{Quarterly Journal of the Royal Meteorological Society}, 141(687):484--503, 2015.
+
+\bibitem{pino}
+Z.~Li, H.~Zheng, N.~Kovachki, D.~Jin, H.~Chen, B.~Liu, K.~Azizzadenesheli, and A.~Anandkumar.
+\newblock Physics-informed neural operator for learning partial differential equations.
+\newblock \emph{ACM/IMS Journal of Data Science}, 2024. \texttt{arXiv:2111.03794}.
+
+\end{thebibliography}
+
+\end{document}

@@ -174,7 +174,7 @@ class TestSVLogSpace:
         alpha_var = tf.constant(0.91, dtype=tf.float64)
         with tf.GradientTape() as tape:
             tape.watch(alpha_var)
-            model_log._alpha_tf = alpha_var
+            model_log.alpha = alpha_var
             ll = ekf.log_marginal_likelihood_tf(obs_tf)
 
         grad = tape.gradient(ll, alpha_var)
@@ -212,8 +212,8 @@ class TestSV2D:
 
     def test_stationary_covariance_satisfies_lyapunov(self, model):
         """P_0 should satisfy P_0 = A P_0 A^T + Sigma."""
-        A = model._A.numpy()
-        Sigma = model._Sigma.numpy()
+        A = model.state_jacobian(tf.zeros([2], dtype=tf.float64)).numpy()
+        Sigma = model.process_noise_cov.numpy()
         P0 = model.Sigma_0.numpy()
         lhs = A @ P0 @ A.T + Sigma
         np.testing.assert_allclose(P0, lhs, atol=1e-10)
@@ -233,7 +233,8 @@ class TestSV2D:
     def test_state_jacobian_is_A(self, model):
         x = tf.constant([1.0, 0.5], dtype=tf.float64)
         F = model.state_jacobian(x)
-        np.testing.assert_allclose(F.numpy(), model._A.numpy(), atol=1e-10)
+        A_expected = np.diag([0.95, 0.91])
+        np.testing.assert_allclose(F.numpy(), A_expected, atol=1e-10)
 
     def test_observation_mean(self, model):
         """E[y|x] = b * x_1"""
@@ -363,7 +364,7 @@ class TestSV2D:
         b_var = tf.constant(1.0, dtype=tf.float64)
         with tf.GradientTape() as tape:
             tape.watch(b_var)
-            model._b = b_var
+            model.b = b_var
             ll = ekf.log_marginal_likelihood_tf(obs_tf)
 
         grad = tape.gradient(ll, b_var)
@@ -381,8 +382,109 @@ class TestSV2D:
         assert np.all(np.abs(eigvals) < 1)
 
     def test_full_Sigma_matrix(self):
-        """Should accept a full (non-diagonal) Sigma matrix."""
+        """Should accept a full Sigma matrix (extracts diagonal)."""
         Sigma = [[0.25, 0.1], [0.1, 1.0]]
         model = StochasticVolatility2DModel(a1=0.95, a2=0.91, Sigma=Sigma,
                                              b=1.0, dtype=tf.float64)
-        np.testing.assert_allclose(model._Sigma.numpy(), Sigma, atol=1e-10)
+        # Model extracts diagonal entries: sigma1=sqrt(0.25)=0.5, sigma2=sqrt(1.0)=1.0
+        np.testing.assert_allclose(model.sigma1, 0.5, atol=1e-10)
+        np.testing.assert_allclose(model.sigma2, 1.0, atol=1e-10)
+
+
+class TestSV2DGradientFlow:
+    """Verify gradients flow through all parameters for HMC compatibility."""
+
+    @pytest.fixture
+    def model_and_data(self):
+        model = StochasticVolatility2DModel(
+            a1=0.95, a2=0.91, sigma1=0.5, sigma2=1.0, b=1.0,
+            dtype=tf.float64,
+        )
+        rng = np.random.default_rng(42)
+        _, _, observations = generate_data(model, T=20, rng=rng)
+        obs_tf = tf.constant(observations, dtype=tf.float64)
+        return model, obs_tf
+
+    def _check_gradient(self, model, obs_tf, param_name, init_value):
+        """Set param to a watched tensor, compute log_obs_prob_batch, check gradient."""
+        particles = model.sample_initial_state_batch(50, tf.constant([42, 0]))
+
+        var = tf.constant(init_value, dtype=tf.float64)
+        with tf.GradientTape() as tape:
+            tape.watch(var)
+            setattr(model, param_name, var)
+            ll = tf.reduce_sum(model.log_observation_prob_batch(obs_tf[0], particles))
+        grad = tape.gradient(ll, var)
+        # Restore original
+        setattr(model, param_name, init_value)
+        return grad
+
+    def test_gradient_wrt_b(self, model_and_data):
+        model, obs_tf = model_and_data
+        grad = self._check_gradient(model, obs_tf, 'b', 1.0)
+        assert grad is not None, "Gradient w.r.t. b should not be None"
+        assert np.isfinite(grad.numpy()), f"Gradient should be finite, got {grad}"
+
+    def test_gradient_wrt_sigma2(self, model_and_data):
+        """sigma2 affects state_transition_batch, not obs directly.
+        Check gradient through full propagate-then-observe."""
+        model, obs_tf = model_and_data
+        var = tf.constant(1.0, dtype=tf.float64)
+        with tf.GradientTape() as tape:
+            tape.watch(var)
+            model.sigma2 = var
+            # Propagate: sigma2 enters through noise
+            particles = model.sample_initial_state_batch(50, tf.constant([42, 0]))
+            seed2 = tf.constant([99, 0])
+            particles = model.state_transition_batch(particles, seed2)
+            ll = tf.reduce_sum(model.log_observation_prob_batch(obs_tf[0], particles))
+        grad = tape.gradient(ll, var)
+        model.sigma2 = 1.0
+        assert grad is not None, "Gradient w.r.t. sigma2 should not be None"
+        assert np.isfinite(grad.numpy()), f"Gradient should be finite, got {grad}"
+
+    def test_gradient_wrt_a2(self, model_and_data):
+        """a2 enters through state_transition_mean_batch."""
+        model, obs_tf = model_and_data
+        var = tf.constant(0.91, dtype=tf.float64)
+        with tf.GradientTape() as tape:
+            tape.watch(var)
+            model.a2 = var
+            particles = model.sample_initial_state_batch(50, tf.constant([42, 0]))
+            seed2 = tf.constant([99, 0])
+            particles = model.state_transition_batch(particles, seed2)
+            ll = tf.reduce_sum(model.log_observation_prob_batch(obs_tf[0], particles))
+        grad = tape.gradient(ll, var)
+        model.a2 = 0.91
+        assert grad is not None, "Gradient w.r.t. a2 should not be None"
+        assert np.isfinite(grad.numpy()), f"Gradient should be finite, got {grad}"
+
+    def test_gradient_wrt_a1(self, model_and_data):
+        model, obs_tf = model_and_data
+        var = tf.constant(0.95, dtype=tf.float64)
+        with tf.GradientTape() as tape:
+            tape.watch(var)
+            model.a1 = var
+            particles = model.sample_initial_state_batch(50, tf.constant([42, 0]))
+            seed2 = tf.constant([99, 0])
+            particles = model.state_transition_batch(particles, seed2)
+            ll = tf.reduce_sum(model.log_observation_prob_batch(obs_tf[0], particles))
+        grad = tape.gradient(ll, var)
+        model.a1 = 0.95
+        assert grad is not None, "Gradient w.r.t. a1 should not be None"
+        assert np.isfinite(grad.numpy()), f"Gradient should be finite, got {grad}"
+
+    def test_gradient_wrt_sigma1(self, model_and_data):
+        model, obs_tf = model_and_data
+        var = tf.constant(0.5, dtype=tf.float64)
+        with tf.GradientTape() as tape:
+            tape.watch(var)
+            model.sigma1 = var
+            particles = model.sample_initial_state_batch(50, tf.constant([42, 0]))
+            seed2 = tf.constant([99, 0])
+            particles = model.state_transition_batch(particles, seed2)
+            ll = tf.reduce_sum(model.log_observation_prob_batch(obs_tf[0], particles))
+        grad = tape.gradient(ll, var)
+        model.sigma1 = 0.5
+        assert grad is not None, "Gradient w.r.t. sigma1 should not be None"
+        assert np.isfinite(grad.numpy()), f"Gradient should be finite, got {grad}"

@@ -1,4 +1,9 @@
-"""Stochastic Volatility model (TensorFlow)."""
+"""Stochastic Volatility model (TensorFlow).
+
+All methods compute from live scalar attributes (self.alpha, self.sigma,
+self.beta) to support differentiable parameter inference via HMC.
+No pre-computed TF constants are cached.
+"""
 
 import numpy as np
 import tensorflow as tf
@@ -58,23 +63,40 @@ class StochasticVolatilityModel(StateSpaceModel):
         self.dtype = dtype
         self.np_dtype = np.float64 if dtype == tf.float64 else np.float32
 
+        # Store as plain scalars — DifferentiableModel will overwrite with
+        # TF tensors during HMC, and all methods read from these directly.
         self.alpha = alpha
         self.sigma = sigma
         self.beta = beta
         self.log_space = log_space
         self._y_floor = y_floor
 
-        # TF constants
-        self._alpha_tf = tf.constant(alpha, dtype=dtype)
-        self._sigma_tf = tf.constant(sigma, dtype=dtype)
-        self._beta_tf = tf.constant(beta, dtype=dtype)
-        self._stationary_var = self._sigma_tf ** 2 / (1.0 - self._alpha_tf ** 2)
         self._pi2 = tf.constant(2.0 * np.pi, dtype=dtype)
 
-        # Log-space constants
+        # Log-space constants (these don't depend on parameters)
         self._log_chi2_mean = tf.constant(_LOG_CHI2_MEAN, dtype=dtype)
         self._log_chi2_var = tf.constant(_LOG_CHI2_VAR, dtype=dtype)
-        self._log_beta2 = tf.math.log(self._beta_tf ** 2)
+
+    # ------------------------------------------------------------------
+    # Helpers
+    # ------------------------------------------------------------------
+
+    def _alpha_t(self):
+        return tf.cast(self.alpha, self.dtype)
+
+    def _sigma_t(self):
+        return tf.cast(self.sigma, self.dtype)
+
+    def _beta_t(self):
+        return tf.cast(self.beta, self.dtype)
+
+    def _stationary_var(self):
+        a = self._alpha_t()
+        s = self._sigma_t()
+        return s ** 2 / (1.0 - a ** 2)
+
+    def _log_beta2(self):
+        return tf.math.log(self._beta_t() ** 2)
 
     @property
     def state_dim(self) -> int:
@@ -90,59 +112,59 @@ class StochasticVolatilityModel(StateSpaceModel):
 
     @property
     def Sigma_0(self) -> tf.Tensor:
-        return tf.reshape(self._stationary_var, [1, 1])
+        return tf.reshape(self._stationary_var(), [1, 1])
 
     @property
     def observation_noise_cov(self) -> tf.Tensor:
         if self.log_space:
             return tf.reshape(self._log_chi2_var, [1, 1])
-        return tf.reshape(self._beta_tf ** 2, [1, 1])
+        return tf.reshape(self._beta_t() ** 2, [1, 1])
 
     @property
     def process_noise_cov(self) -> tf.Tensor:
-        return tf.reshape(self._sigma_tf ** 2, [1, 1])
+        return tf.reshape(self._sigma_t() ** 2, [1, 1])
 
     # ------------------------------------------------------------------
     # Sampling methods
     # ------------------------------------------------------------------
 
     def sample_initial_state(self, seed: tf.Tensor) -> tf.Tensor:
-        std = tf.sqrt(self._stationary_var)
+        std = tf.sqrt(self._stationary_var())
         z = tf.random.stateless_normal([1], seed=seed, dtype=self.dtype)
         return z * std
 
     def sample_state_transition(self, x: tf.Tensor, seed: tf.Tensor) -> tf.Tensor:
         w = tf.random.stateless_normal([1], seed=seed, dtype=self.dtype)
-        return tf.reshape(self._alpha_tf * x[0] + self._sigma_tf * w[0], [1])
+        return tf.reshape(self._alpha_t() * x[0] + self._sigma_t() * w[0], [1])
 
     def sample_observation(self, x: tf.Tensor, seed: tf.Tensor) -> tf.Tensor:
         v = tf.random.stateless_normal([1], seed=seed, dtype=self.dtype)
-        return tf.reshape(self._beta_tf * tf.exp(x[0] / 2.0) * v[0], [1])
+        return tf.reshape(self._beta_t() * tf.exp(x[0] / 2.0) * v[0], [1])
 
     # ------------------------------------------------------------------
     # Deterministic methods
     # ------------------------------------------------------------------
 
     def state_transition_mean(self, x: tf.Tensor) -> tf.Tensor:
-        return tf.reshape(self._alpha_tf * x[0], [1])
+        return tf.reshape(self._alpha_t() * x[0], [1])
 
     def state_transition_cov(self, x: tf.Tensor) -> tf.Tensor:
         return self.process_noise_cov
 
     def state_jacobian(self, x: tf.Tensor) -> tf.Tensor:
-        return tf.reshape(self._alpha_tf, [1, 1])
+        return tf.reshape(self._alpha_t(), [1, 1])
 
     def observation_mean(self, x: tf.Tensor) -> tf.Tensor:
         """E[y | x]. In log-space: log(beta^2) + x + E[log(chi^2_1)]. Original: 0."""
         if self.log_space:
-            return tf.reshape(self._log_beta2 + x[0] + self._log_chi2_mean, [1])
+            return tf.reshape(self._log_beta2() + x[0] + self._log_chi2_mean, [1])
         return tf.zeros_like(x)
 
     def observation_cov(self, x: tf.Tensor) -> tf.Tensor:
         """Var[y | x]. In log-space: pi^2/2 (constant). Original: beta^2 * exp(x)."""
         if self.log_space:
             return tf.reshape(self._log_chi2_var, [1, 1])
-        return tf.reshape(self._beta_tf ** 2 * tf.exp(x[0]), [1, 1])
+        return tf.reshape(self._beta_t() ** 2 * tf.exp(x[0]), [1, 1])
 
     def observation_jacobian(self, x: tf.Tensor) -> tf.Tensor:
         """dh/dx. In log-space: 1 (linear). Original: 0."""
@@ -156,20 +178,19 @@ class StochasticVolatilityModel(StateSpaceModel):
     def observation_function(self, x: tf.Tensor) -> tf.Tensor:
         """h(x) for filter use. In log-space: log(beta^2) + x + E[eps]. Original: 0."""
         if self.log_space:
-            return tf.reshape(self._log_beta2 + x[0] + self._log_chi2_mean, [1])
+            return tf.reshape(self._log_beta2() + x[0] + self._log_chi2_mean, [1])
         return tf.zeros_like(x)
 
     def log_observation_prob(self, y: tf.Tensor, x: tf.Tensor) -> tf.Tensor:
         """Log p(y | x). y is raw observation (not log-transformed)."""
         if self.log_space:
-            # In log-space: z = log(y^2), model is z = log(beta^2) + x + eps
-            # where eps ~ log(chi^2_1) approx N(mean, var)
             y_clipped = tf.maximum(tf.abs(y[0]), self._y_floor)
             z = tf.math.log(y_clipped ** 2)
-            predicted = self._log_beta2 + x[0] + self._log_chi2_mean
+            predicted = self._log_beta2() + x[0] + self._log_chi2_mean
             return -0.5 * (tf.math.log(self._pi2 * self._log_chi2_var)
                            + (z - predicted) ** 2 / self._log_chi2_var)
-        var = self._beta_tf ** 2 * tf.exp(x[0])
+        beta = self._beta_t()
+        var = beta ** 2 * tf.exp(x[0])
         return -0.5 * (tf.math.log(self._pi2 * var) + y[0] ** 2 / var)
 
     # ------------------------------------------------------------------
@@ -198,15 +219,15 @@ class StochasticVolatilityModel(StateSpaceModel):
     # ------------------------------------------------------------------
 
     def sample_initial_state_batch(self, n: int, seed: tf.Tensor) -> tf.Tensor:
-        std = tf.sqrt(self._stationary_var)
+        std = tf.sqrt(self._stationary_var())
         return tf.random.stateless_normal([n, 1], seed=seed, dtype=self.dtype) * std
 
     def state_transition_batch(self, particles: tf.Tensor, seed: tf.Tensor, t=None) -> tf.Tensor:
         w = tf.random.stateless_normal(tf.shape(particles), seed=seed, dtype=self.dtype)
-        return self._alpha_tf * particles + self._sigma_tf * w
+        return self._alpha_t() * particles + self._sigma_t() * w
 
     def state_transition_mean_batch(self, particles: tf.Tensor, t=None) -> tf.Tensor:
-        return self._alpha_tf * particles
+        return self._alpha_t() * particles
 
     def state_transition_cov_batch(self, particles: tf.Tensor) -> tf.Tensor:
         return self.process_noise_cov
@@ -214,12 +235,12 @@ class StochasticVolatilityModel(StateSpaceModel):
     def log_observation_prob_batch(self, observation: tf.Tensor,
                                    particles: tf.Tensor) -> tf.Tensor:
         if self.log_space:
-            # observation is already log-transformed z = log(y^2)
-            predicted = self._log_beta2 + particles[:, 0] + self._log_chi2_mean
+            predicted = self._log_beta2() + particles[:, 0] + self._log_chi2_mean
             diff_sq = (observation[0] - predicted) ** 2
             return -0.5 * (tf.math.log(self._pi2 * self._log_chi2_var)
                            + diff_sq / self._log_chi2_var)
-        obs_vars = self._beta_tf ** 2 * tf.exp(particles[:, 0])
+        beta = self._beta_t()
+        obs_vars = beta ** 2 * tf.exp(particles[:, 0])
         diff_squared = observation[0] ** 2
         mahalanobis = diff_squared / obs_vars
         logdet = tf.math.log(self._pi2 * obs_vars)
@@ -233,9 +254,9 @@ class StochasticVolatilityModel(StateSpaceModel):
 
     def observation_function_batch(self, particles: tf.Tensor) -> tf.Tensor:
         if self.log_space:
-            return self._log_beta2 + particles + self._log_chi2_mean
+            return self._log_beta2() + particles + self._log_chi2_mean
         return tf.zeros_like(particles)
 
     def state_jacobian_batch(self, particles: tf.Tensor) -> tf.Tensor:
         N = tf.shape(particles)[0]
-        return tf.fill([N, 1, 1], self._alpha_tf)
+        return tf.fill([N, 1, 1], self._alpha_t())
