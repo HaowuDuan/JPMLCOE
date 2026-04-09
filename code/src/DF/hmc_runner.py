@@ -303,13 +303,27 @@ class DPFRunner:
         else:
             raise ValueError(f"Unknown optimizer: {optimizer}. Use 'adam' or 'sgd'.")
 
+        def _current_learning_rate() -> float:
+            lr = opt.learning_rate
+            if callable(lr):
+                lr = lr(opt.iterations)
+            try:
+                return float(tf.convert_to_tensor(lr).numpy())
+            except (TypeError, ValueError):
+                return float(learning_rate)
+
         print(f"Running MAP ({optimizer}, lr={learning_rate}, steps={num_steps}, "
               f"random_seed={random_seed})")
 
         best_loss = float('inf')
         best_q = q.numpy().copy()
         loss_history = []
+        log_likelihood_history = []
+        log_prior_history = []
+        grad_norm_history = []
+        learning_rate_history = []
         param_history = {name: [] for name in self.param_handler.param_names}
+        grad_history = {name: [] for name in self.param_handler.param_names}
         step_times = []
 
         for step in range(num_steps):
@@ -332,6 +346,15 @@ class DPFRunner:
             if grad is None:
                 grad = tf.zeros_like(q)
             grad = tf.where(tf.math.is_finite(grad), grad, tf.zeros_like(grad))
+
+            q_eval = q.numpy().copy()
+            constrained_vals = {
+                name: float(val.numpy()) for name, val in constrained.items()
+            }
+            grad_vals = grad.numpy()
+            grad_norm = float(np.linalg.norm(grad_vals))
+            lr_val = _current_learning_rate()
+
             opt.apply_gradients([(grad, q)])
 
             dt = time.perf_counter() - t0
@@ -339,20 +362,23 @@ class DPFRunner:
 
             loss_val = float(loss.numpy())
             loss_history.append(loss_val)
+            log_likelihood_history.append(float(ll.numpy()))
+            log_prior_history.append(float(lp.numpy()))
+            grad_norm_history.append(grad_norm)
+            learning_rate_history.append(lr_val)
 
-            constrained_now = self.param_handler.constrain(q)
-            for name, val in constrained_now.items():
-                param_history[name].append(float(val.numpy()))
+            for i, name in enumerate(self.param_handler.param_names):
+                param_history[name].append(constrained_vals[name])
+                grad_history[name].append(float(grad_vals[i]))
 
             if loss_val < best_loss:
                 best_loss = loss_val
-                best_q = q.numpy().copy()
+                best_q = q_eval
 
             if step % print_every == 0 or step == num_steps - 1:
                 param_str = ", ".join(
-                    f"{n}={float(v.numpy()):.4f}" for n, v in constrained_now.items()
+                    f"{n}={v:.4f}" for n, v in constrained_vals.items()
                 )
-                grad_norm = float(tf.norm(grad).numpy())
                 avg_dt = np.mean(step_times[-10:])
                 eta = avg_dt * (num_steps - step - 1)
                 print(f"  [step {step}/{num_steps}] loss={loss_val:.2f} | "
@@ -372,7 +398,9 @@ class DPFRunner:
         for name in self.param_handler.param_names:
             trace = np.array(param_history[name])
             last_n = trace[-max(1, num_steps // 5):]
+            map_estimate = float(samples[name][0])
             summary[name] = {
+                'map': map_estimate,
                 'mean': float(np.mean(last_n)),
                 'std': float(np.std(last_n)),
                 'median': float(np.median(last_n)),
@@ -386,8 +414,19 @@ class DPFRunner:
 
         step_times_arr = np.array(step_times)
         diagnostics = {
-            'final_loss': best_loss,
+            'final_loss': float(loss_history[-1]) if loss_history else float('nan'),
+            'best_loss': float(best_loss),
+            'final_log_likelihood': float(log_likelihood_history[-1])
+                if log_likelihood_history else float('nan'),
+            'final_log_prior': float(log_prior_history[-1])
+                if log_prior_history else float('nan'),
+            'final_grad_norm': float(grad_norm_history[-1])
+                if grad_norm_history else float('nan'),
             'loss_history': loss_history,
+            'log_likelihood_history': log_likelihood_history,
+            'log_prior_history': log_prior_history,
+            'grad_norm_history': grad_norm_history,
+            'learning_rate_history': learning_rate_history,
             'converged': bool(
                 np.std(loss_history[-max(1, num_steps // 10):]) < 1.0
             ),
@@ -419,6 +458,7 @@ class DPFRunner:
                     'step_times': step_times_arr.tolist(),
                 },
                 'param_history': param_history,
+                'grad_history': grad_history,
             },
         )
 

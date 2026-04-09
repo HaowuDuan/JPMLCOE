@@ -9,7 +9,7 @@ os.environ.setdefault('TF_CPP_MIN_LOG_LEVEL', '2')
 sys.path.insert(0, str(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))))
 
 import hydra
-from omegaconf import DictConfig, OmegaConf
+from omegaconf import DictConfig, ListConfig, OmegaConf
 import numpy as np
 from pathlib import Path
 import json
@@ -91,7 +91,7 @@ def _build_param_specs(cfg_trainable: DictConfig, cfg_model: DictConfig) -> dict
         param_specs[name] = ParameterSpec(
             name=name,
             init_value=init_val,
-            constraint=spec_cfg.get('constraint', None),
+            constraint=tuple(spec_cfg.constraint) if isinstance(spec_cfg.get('constraint', None), ListConfig) else spec_cfg.get('constraint', None),
             prior=prior,
         )
     return param_specs
@@ -324,15 +324,22 @@ def run_dpf_experiment(cfg: DictConfig) -> Dict[str, Any]:
     print("DPF INFERENCE RESULTS")
     print("=" * 60)
 
+    sampler = result.metadata.get('sampler', '')
+
     for name, stats in result.summary.items():
         true_val = true_params.get(name, '?')
-        in_ci = stats['q5'] <= float(true_val) <= stats['q95'] if true_val != '?' else None
         print(f"\n  {name}:")
         print(f"    True:           {true_val}")
-        print(f"    Posterior mean:  {stats['mean']:.4f} +/- {stats['std']:.4f}")
-        print(f"    90% CI:         [{stats['q5']:.4f}, {stats['q95']:.4f}]")
-        if in_ci is not None:
-            print(f"    True in 90% CI: {'YES' if in_ci else 'NO'}")
+        if sampler == 'map':
+            map_estimate = stats.get('map', stats.get('median', stats['mean']))
+            print(f"    MAP estimate:   {map_estimate:.4f}")
+            print(f"    Last-window mean: {stats['mean']:.4f} +/- {stats['std']:.4f}")
+        else:
+            in_ci = stats['q5'] <= float(true_val) <= stats['q95'] if true_val != '?' else None
+            print(f"    Posterior mean:  {stats['mean']:.4f} +/- {stats['std']:.4f}")
+            print(f"    90% CI:         [{stats['q5']:.4f}, {stats['q95']:.4f}]")
+            if in_ci is not None:
+                print(f"    True in 90% CI: {'YES' if in_ci else 'NO'}")
 
     print(f"\nDiagnostics:")
     if 'acceptance_rate' in result.diagnostics:
@@ -345,6 +352,9 @@ def run_dpf_experiment(cfg: DictConfig) -> Dict[str, Any]:
         print(f"  R-hat: {result.diagnostics['rhat']}")
     for key, val in result.diagnostics.items():
         if key not in ('acceptance_rate', 'final_step_size', 'ess', 'rhat'):
+            if key.endswith('_history'):
+                print(f"  {key}: {len(val)} values")
+                continue
             print(f"  {key}: {val}")
 
     perf_d = perf.as_dict()
@@ -372,8 +382,9 @@ def save_dpf_results(results: Dict[str, Any], output_dir: Path):
     output_dir.mkdir(parents=True, exist_ok=True)
 
     result = results['result']
+    sampler = result.metadata.get('sampler', '')
 
-    # Save posterior samples
+    # Save posterior samples, or the single MAP point for MAP runs.
     for name, samples in result.samples.items():
         np.save(output_dir / f'samples_{name}.npy', samples)
 
@@ -404,9 +415,46 @@ def save_dpf_results(results: Dict[str, Any], output_dir: Path):
             writer.writeheader()
             writer.writerows(trace)
 
+    if sampler == 'map':
+        import csv
+
+        param_history = result.metadata.get('param_history', {})
+        grad_history = result.metadata.get('grad_history', {})
+        loss_history = result.diagnostics.get('loss_history', [])
+        log_likelihood_history = result.diagnostics.get('log_likelihood_history', [])
+        log_prior_history = result.diagnostics.get('log_prior_history', [])
+        grad_norm_history = result.diagnostics.get('grad_norm_history', [])
+        learning_rate_history = result.diagnostics.get('learning_rate_history', [])
+        param_names = list(param_history.keys())
+
+        def _value_at(values, idx):
+            return values[idx] if idx < len(values) else ''
+
+        map_trace_path = output_dir / 'map_trace.csv'
+        fieldnames = ['step', 'loss', 'log_likelihood', 'log_prior',
+                      'grad_norm', 'learning_rate']
+        fieldnames += [f'param_{name}' for name in param_names]
+        fieldnames += [f'grad_{name}' for name in param_names]
+
+        with open(map_trace_path, 'w', newline='') as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer.writeheader()
+            for step in range(len(loss_history)):
+                row = {
+                    'step': step,
+                    'loss': _value_at(loss_history, step),
+                    'log_likelihood': _value_at(log_likelihood_history, step),
+                    'log_prior': _value_at(log_prior_history, step),
+                    'grad_norm': _value_at(grad_norm_history, step),
+                    'learning_rate': _value_at(learning_rate_history, step),
+                }
+                for name in param_names:
+                    row[f'param_{name}'] = _value_at(param_history[name], step)
+                    row[f'grad_{name}'] = _value_at(grad_history.get(name, []), step)
+                writer.writerow(row)
+
     # Generate diagnostic plots
     true_params = results['true_params']
-    sampler = result.metadata.get('sampler', '')
 
     if sampler == 'map':
         from src.experiments.visualization_hmc import plot_map_convergence
@@ -415,6 +463,11 @@ def save_dpf_results(results: Dict[str, Any], output_dir: Path):
         plot_map_convergence(
             param_history, loss_history, true_params,
             save_path=output_dir / 'map_convergence.png',
+            grad_norm_history=result.diagnostics.get('grad_norm_history'),
+            grad_history=result.metadata.get('grad_history'),
+            log_likelihood_history=result.diagnostics.get('log_likelihood_history'),
+            log_prior_history=result.diagnostics.get('log_prior_history'),
+            learning_rate_history=result.diagnostics.get('learning_rate_history'),
         )
     else:
         from src.experiments.visualization_hmc import plot_trace, plot_posterior_histograms

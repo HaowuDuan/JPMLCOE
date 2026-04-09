@@ -4,6 +4,10 @@ Entropy-regularized optimal transport resampling for particle filters.
 Implements differentiable particle resampling using the Sinkhorn algorithm
 to solve entropy-regularized optimal transport problems.
 
+Backward pass uses implicit differentiation at the Sinkhorn fixed point,
+following Eisenberger et al. (2022), "A Unified Framework for Implicit
+Sinkhorn Differentiation", CVPR 2022.
+
 Reference:
     Corenflos et al. (2021). Differentiable Particle Filtering via
     Entropy-Regularized Optimal Transport. ICML 2021.
@@ -392,6 +396,72 @@ def compute_transport_matrix_from_potentials(
     return T
 
 
+def _sinkhorn_implicit_vjp(dT, T, epsilon):
+    """Implicit VJP for the Sinkhorn transport matrix.
+
+    Following Eisenberger et al. (2022), "A Unified Framework for Implicit
+    Sinkhorn Differentiation", CVPR 2022.
+
+    Given upstream gradient dL/dT, computes dL/dC (cost matrix gradient)
+    and dL/da, dL/db (marginal gradients) by solving the KKT system at the
+    Sinkhorn fixed point.
+
+    Args:
+        dT: Upstream gradient dL/dT, shape (N, N)
+        T: Converged transport matrix, shape (N, N)
+        epsilon: Regularization parameter (scalar)
+
+    Returns:
+        grad_p: Gradient w.r.t. transport plan (= dL/dC after scaling),
+                shape (N, N). Chain through cost_matrix -> particles externally.
+        grad_a: Gradient w.r.t. row marginal, shape (N,)
+        grad_b: Gradient w.r.t. column marginal, shape (N,)
+    """
+    dtype = T.dtype
+    eps = tf.cast(epsilon, dtype)
+
+    # Use actual marginals from P (robust under finite convergence)
+    a = tf.reduce_sum(T, axis=1)  # row sums, shape (N,)
+    b = tf.reduce_sum(T, axis=0)  # col sums, shape (N,)
+
+    N = tf.shape(T)[0]
+
+    # R = -(dT * T) / epsilon  (Eisenberger eq.)
+    R = -dT * T / eps
+
+    # RHS: row sums and column sums of R
+    rhs_a = tf.reduce_sum(R, axis=1)        # (N,)
+    rhs_b = tf.reduce_sum(R, axis=0)        # (N,)
+
+    # Gauge fix: drop last column-potential variable (matching reference code)
+    # Build (N + N-1) x (N + N-1) system:
+    # K = [[diag(a),  T[:, :-1]],
+    #      [T[:, :-1]^T, diag(b[:-1])]]
+    T_free = T[:, :-1]                       # (N, N-1)
+    rhs = tf.concat([rhs_a, rhs_b[:-1]], axis=0)  # (2N-1,)
+
+    top = tf.concat([tf.linalg.diag(a), T_free], axis=1)           # (N, 2N-1)
+    bottom = tf.concat([tf.transpose(T_free), tf.linalg.diag(b[:-1])], axis=1)  # (N-1, 2N-1)
+    K = tf.concat([top, bottom], axis=0)     # (2N-1, 2N-1)
+
+    # Solve K @ [u; v] = rhs
+    sol = tf.linalg.solve(K, rhs[:, tf.newaxis])[:, 0]  # (2N-1,)
+
+    u = sol[:N]                              # (N,) — row potential adjoint
+    v_free = sol[N:]                         # (N-1,) — column potential adjoint
+    v = tf.concat([v_free, tf.zeros([1], dtype=dtype)], axis=0)  # (N,) gauge: v_last=0
+
+    # Gradient w.r.t. transport plan (= gradient w.r.t. cost after -1/eps scaling)
+    U = u[:, tf.newaxis] + v[tf.newaxis, :]  # (N, N)
+    grad_p = R - T * U                       # (N, N)
+
+    # Gradients w.r.t. marginals
+    grad_a = -eps * u                        # (N,)
+    grad_b = -eps * v                        # (N,)
+
+    return grad_p, grad_a, grad_b
+
+
 def ot_entropy_resample(
     particles: tf.Tensor,
     weights: tf.Tensor,
@@ -402,7 +472,8 @@ def ot_entropy_resample(
     epsilon_scaling: float = 0.9,
     use_epsilon_scaling: bool = False,
     clip_gradients: bool = False,
-    extrapolation_damping: float = None
+    extrapolation_damping: float = None,
+    zero_particle_gradient: bool = False,
 ) -> ResampleResult:
     """
     Entropy-regularized optimal transport resampling.
@@ -457,12 +528,16 @@ def ot_entropy_resample(
         def _compute_transport_matrix(particles, log_weights, epsilon, scaling,
                                       max_iter, threshold):
             mean = tf.reduce_mean(particles, axis=0, keepdims=True)
-            centered = particles - tf.stop_gradient(mean)
+            # Original: stop_gradient on mean and scale_factor (biases gradient)
+            # centered = particles - tf.stop_gradient(mean)
+            centered = particles - mean
             std = tf.math.reduce_std(particles)
             dimension = tf.cast(tf.shape(particles)[-1], particles.dtype)
-            scale_factor = tf.stop_gradient(std * tf.sqrt(dimension) + tf.constant(1e-8, dtype=particles.dtype))
+            # scale_factor = tf.stop_gradient(std * tf.sqrt(dimension) + tf.constant(1e-8, dtype=particles.dtype))
+            scale_factor = std * tf.sqrt(dimension) + tf.constant(1e-8, dtype=particles.dtype)
             scaled = centered / scale_factor
 
+            cost_matrix = compute_cost_matrix(scaled, scaled)
             alpha, beta = sinkhorn_with_epsilon_scaling(
                 log_weights, scaled, epsilon, scaling, max_iter, threshold
             )
@@ -473,9 +548,14 @@ def ot_entropy_resample(
             def gradient(dT):
                 if clip_gradients:
                     dT = tf.clip_by_value(dT, tf.constant(-1.0, dtype=dT.dtype), tf.constant(1.0, dtype=dT.dtype))
-                dparticles, dlog_weights = tf.gradients(
-                    T, [particles, log_weights], dT
-                )
+                N_float = tf.cast(tf.shape(T)[0], T.dtype)
+                P = T / N_float
+                dP = dT * N_float
+                grad_cost, _, grad_b = _sinkhorn_implicit_vjp(dP, P, epsilon)
+                dparticles = tf.gradients(cost_matrix, particles, grad_cost)[0]
+                dlog_weights = grad_b * tf.exp(log_weights)
+                if zero_particle_gradient:
+                    dparticles = tf.zeros_like(particles)
                 return dparticles, dlog_weights, None, None, None, None
 
             return T, gradient
@@ -493,10 +573,13 @@ def ot_entropy_resample(
         def _compute_transport_matrix_fixed(particles, log_weights, epsilon,
                                             max_iter, threshold):
             mean = tf.reduce_mean(particles, axis=0, keepdims=True)
-            centered = particles - tf.stop_gradient(mean)
+            # Original: stop_gradient on mean and scale_factor (biases gradient)
+            # centered = particles - tf.stop_gradient(mean)
+            centered = particles - mean
             std = tf.math.reduce_std(particles)
             dimension = tf.cast(tf.shape(particles)[-1], particles.dtype)
-            scale_factor = tf.stop_gradient(std * tf.sqrt(dimension) + tf.constant(1e-8, dtype=particles.dtype))
+            # scale_factor = tf.stop_gradient(std * tf.sqrt(dimension) + tf.constant(1e-8, dtype=particles.dtype))
+            scale_factor = std * tf.sqrt(dimension) + tf.constant(1e-8, dtype=particles.dtype)
             scaled = centered / scale_factor
 
             # Direct Sinkhorn at fixed epsilon — no annealing
@@ -519,9 +602,14 @@ def ot_entropy_resample(
             def gradient(dT):
                 if clip_gradients:
                     dT = tf.clip_by_value(dT, tf.constant(-1.0, dtype=dT.dtype), tf.constant(1.0, dtype=dT.dtype))
-                dparticles, dlog_weights = tf.gradients(
-                    T, [particles, log_weights], dT
-                )
+                N_float = tf.cast(tf.shape(T)[0], T.dtype)
+                P = T / N_float
+                dP = dT * N_float
+                grad_cost, _, grad_b = _sinkhorn_implicit_vjp(dP, P, epsilon)
+                dparticles = tf.gradients(cost_matrix, particles, grad_cost)[0]
+                dlog_weights = grad_b * tf.exp(log_weights)
+                if zero_particle_gradient:
+                    dparticles = tf.zeros_like(particles)
                 return dparticles, dlog_weights, None, None, None
 
             return T, gradient

@@ -9,12 +9,12 @@ model:
   a1: 0.95
   a2: 0.91
   sigma1: 0.5
-  sigma2: 2.0       # Initial guess (true: 1.0)
+  sigma2: 1.6       # Initial guess (true: 1.0)
   b: 1.0
 
 filter:
   _target_: src.filters.particle.ledh_invertible_hmc.LEDHParticleFlowFilterHMC
-  n_particles: 1000
+  n_particles: 500
   n_lambda_steps: 29
   resampling_method: ot_entropy
   resampling_config:

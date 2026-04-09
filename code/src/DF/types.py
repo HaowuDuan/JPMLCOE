@@ -45,7 +45,8 @@ class DPFResult:
     Result from differentiable filter parameter inference.
     
     Attributes:
-        samples: Posterior samples for each parameter, shape (num_samples,)
+        samples: Posterior samples for each parameter, or a single-element MAP
+            point estimate for MAP runs, shape (num_samples,).
         summary: Summary statistics (mean, std, quantiles) per parameter
         diagnostics: MCMC diagnostics (ESS, R_hat, acceptance_rate, etc.)
         metadata: Additional information (filter type, model type, etc.)
@@ -54,4 +55,3 @@ class DPFResult:
     summary: Dict[str, Dict[str, float]]
     diagnostics: Dict[str, Any]
     metadata: Dict[str, Any] = field(default_factory=dict)
-

@@ -1,4 +1,4 @@
-"""Visualization utilities for HMC inference results."""
+"""Visualization utilities for HMC and MAP inference results."""
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -72,9 +72,14 @@ def plot_map_convergence(
     true_params: Optional[Dict[str, float]] = None,
     save_path: Optional[Path] = None,
     title: str = "MAP Optimization",
+    grad_norm_history: Optional[list] = None,
+    grad_history: Optional[Dict[str, list]] = None,
+    log_likelihood_history: Optional[list] = None,
+    log_prior_history: Optional[list] = None,
+    learning_rate_history: Optional[list] = None,
 ):
     """
-    Plot parameter convergence and loss curve for MAP estimation.
+    Plot optimizer diagnostics for MAP estimation.
 
     Args:
         param_history: Dict mapping parameter names to list of values per step.
@@ -82,34 +87,116 @@ def plot_map_convergence(
         true_params: Optional dict of true parameter values.
         save_path: If provided, save figure to this path.
         title: Plot title.
+        grad_norm_history: Optional gradient L2 norm per step.
+        grad_history: Optional per-parameter gradient values per step. Gradients
+            are on the unconstrained optimizer scale.
+        log_likelihood_history: Optional log-likelihood values per step.
+        log_prior_history: Optional log-prior values per step.
+        learning_rate_history: Optional optimizer learning rate per step.
     """
     param_names = list(param_history.keys())
     n_params = len(param_names)
 
-    fig, axes = plt.subplots(n_params + 1, 1, figsize=(10, 3 * (n_params + 1)), squeeze=False)
+    def _has_values(values) -> bool:
+        return values is not None and len(values) > 0
+
+    has_objective_components = (
+        _has_values(log_likelihood_history) or _has_values(log_prior_history)
+    )
+    has_grad_norm = _has_values(grad_norm_history)
+    has_learning_rate = _has_values(learning_rate_history)
+    has_grad_history = grad_history is not None and any(
+        len(grad_history.get(name, [])) > 0 for name in param_names
+    )
+
+    n_rows = 1 + n_params
+    n_rows += int(has_objective_components)
+    n_rows += int(has_grad_norm)
+    n_rows += int(has_learning_rate)
+    n_rows += n_params if has_grad_history else 0
+
+    fig, axes = plt.subplots(n_rows, 1, figsize=(10, 2.6 * n_rows), squeeze=False)
+    row = 0
 
     # Loss curve
-    ax = axes[0, 0]
+    ax = axes[row, 0]
     ax.plot(loss_history, linewidth=1.0, alpha=0.8, color='C1')
     ax.set_xlabel('Step')
     ax.set_ylabel('Neg. Log Posterior')
     ax.set_title('Loss')
     ax.grid(True, alpha=0.3)
+    row += 1
+
+    # Objective decomposition
+    if has_objective_components:
+        ax = axes[row, 0]
+        if _has_values(log_likelihood_history):
+            ax.plot(log_likelihood_history, linewidth=1.0, alpha=0.8,
+                    label='Log likelihood')
+        if _has_values(log_prior_history):
+            ax.plot(log_prior_history, linewidth=1.0, alpha=0.8,
+                    label='Log prior')
+        if _has_values(loss_history):
+            ax.plot(-np.asarray(loss_history), linewidth=1.0, alpha=0.5,
+                    linestyle='--', label='Log posterior')
+        ax.set_xlabel('Step')
+        ax.set_ylabel('Log value')
+        ax.set_title('Objective Components')
+        ax.legend(loc='best')
+        ax.grid(True, alpha=0.3)
+        row += 1
+
+    # Gradient norm
+    if has_grad_norm:
+        ax = axes[row, 0]
+        grad_norm = np.asarray(grad_norm_history, dtype=float)
+        ax.semilogy(np.maximum(grad_norm, np.finfo(float).tiny),
+                    linewidth=1.0, alpha=0.8, color='C2')
+        ax.set_xlabel('Step')
+        ax.set_ylabel('L2 norm')
+        ax.set_title('Gradient Norm')
+        ax.grid(True, alpha=0.3)
+        row += 1
+
+    # Learning rate
+    if has_learning_rate:
+        ax = axes[row, 0]
+        ax.plot(learning_rate_history, linewidth=1.0, alpha=0.8, color='C3')
+        ax.set_xlabel('Step')
+        ax.set_ylabel('Learning rate')
+        ax.set_title('Learning Rate')
+        ax.grid(True, alpha=0.3)
+        row += 1
 
     # Parameter trajectories
-    for i, name in enumerate(param_names):
-        ax = axes[i + 1, 0]
+    for name in param_names:
+        ax = axes[row, 0]
         vals = param_history[name]
         ax.plot(vals, linewidth=1.0, alpha=0.7, color='C0')
 
         if true_params and name in true_params:
             ax.axhline(true_params[name], color='r', linestyle='--', linewidth=1.5,
                         label=f'True = {true_params[name]}')
+            ax.legend(loc='upper right')
 
         ax.set_xlabel('Step')
         ax.set_ylabel(name)
-        ax.legend(loc='upper right')
+        ax.set_title(f'{name} Parameter')
         ax.grid(True, alpha=0.3)
+        row += 1
+
+    # Per-parameter gradients on optimizer scale
+    if has_grad_history:
+        for name in param_names:
+            ax = axes[row, 0]
+            vals = grad_history.get(name, [])
+            ax.plot(vals, linewidth=1.0, alpha=0.8, color='C4')
+            ax.axhline(0.0, color='k', linestyle='--', linewidth=0.8, alpha=0.5)
+            ax.set_xlabel('Step')
+            ax.set_ylabel(f'grad {name}')
+            ax.set_title(f'{name} Gradient (Unconstrained)')
+            ax.grid(True, alpha=0.3)
+            row += 1
 
     fig.suptitle(title, fontsize=14, y=0.995)
     plt.tight_layout()

@@ -34,7 +34,7 @@ dpf:
         scale: 0.5
 
   map:
-    num_steps: 200
+    num_steps: 300
     learning_rate: 0.01
     optimizer: adam
     random_seed: true
