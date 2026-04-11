@@ -1380,29 +1380,24 @@ Overall, there is no one-fits-all filter option. When the model is non-linear bu
 \newpage
 \section{Resampling and Optimal Transport}
 
-\subsection{Optimal Transport Resampling}
-Previously, we have discussed the sample impoverishment problem introduced by low quality resampling. Therefore, we need to think about how to improve it. Before and after resampling, we are preserving the distribution or at latest trying to. We need to come up with the best way to do it. In\cite{reich2013nonparametric}, the author proposed to use Optimal transport to do the resampling. A easy way to see this is that, before the resampling, we have $\{\omega_i, x_i\}$, and after the resampling, we have $\{\tilde\omega_i, \tilde x_i\}$. If we think $x_i$ are basis vector and $\omega_i$ are the coefficient, we are dealing with a linear transformation problem. The transformation will preserve the vector itself, or preserve the mean at least. One should not take this analogy too far. The key benefit is that OT resampling is deterministic instead of stochastic, this will avoid the sampling noise introduced by systematic resampling therefore removing its contribution to the variance of the particle, namely increasing the quality of covariance estimation. But this method limit the use of neural network architecture in the filtering algorithm. This method is not differentiable because it relies on solving a discrete Linear Programming (LP) problem to find the optimal transport plan. One just uses LP solvers like the Simplex algorithm or Interior Point methods. These algorithms don't need derivatives of the optimal solution with respect to inputs—they only need the cost matrix (particle distances) and constraints (matching weights). They work by walking along edges of the poly-tope or navigating through its interior. The key innovation of \cite{corenflos-differentiable-2021} is to introduce an entropy regularization so that the optimal coupling $P^*$ is differentiable as function of the cost matrix therefore turning the whole resampling operation differentiable. The following is the loss function for the  transport cost,
+\subsection{Two Problems with Resampling}
+
+Previously, we have discussed the sample impoverishment problem introduced by low quality resampling. Therefore, we need to think about how to improve it. Before and after resampling, we are preserving the distribution. In \cite{reich2013nonparametric}, the author proposed to use optimal transport to do the resampling. An easy way to see this is that, before the resampling, we have $\{\omega_i, x_i\}$, and after the resampling, we have $\{\tilde\omega_i, \tilde x_i\}$. If we think $x_i$ are basis vectors and $\omega_i$ are the coefficients, we are dealing with a linear transformation problem. The transformation constructs an equal-weight approximation that reduces resampling variance and better preserves the structure of the distribution. To put it sharply, we want to make sure $\{\omega_i, x_i\}$ and $\{\tilde\omega_i, \tilde x_i\}$ represent the same distribution and $\tilde\omega_i \equiv \frac1N$, where $N$ is the total number of particles.
+
+There are two pressures on resampling that we need to address separately:
+
+\paragraph{Problem 1: Sampling noise.} OT resampling is deterministic instead of stochastic, which means it avoids the sampling noise introduced by systematic resampling, therefore removing its contribution to the variance of the particle cloud, namely increasing the quality of covariance estimation. But the classical OT formulation relies on solving a discrete Linear Programming (LP) problem to find the optimal transport plan. LP solvers like the Simplex algorithm or Interior Point methods walk along edges of the polytope or navigate through its interior. They do not need derivatives of the optimal solution with respect to inputs---they only need the cost matrix (particle distances) and constraints (matching weights). This is where the second problem comes in.
+
+\paragraph{Problem 2: Non-differentiability.} The LP-based OT plan is not differentiable with respect to the inputs. For our purpose---building a differentiable particle filter whose log-likelihood can be differentiated with respect to model parameters---this is a showstopper. The key innovation of \cite{corenflos-differentiable-2021} is to introduce entropy regularization so that the optimal coupling $P^*$ becomes differentiable as a function of the cost matrix, therefore turning the whole resampling operation differentiable in principle. The regularized transport cost is
 \begin{equation}
     W_{2, \epsilon}^2 (\alpha_N, \beta_N) = \min_{P \in S(a, b)} \sum_{i,j=1}^N p_{i,j} \left( c_{i,j} + \epsilon \log \frac{p_{i,j}}{a_i b_j} \right)
 \end{equation}
-Another key innovation is that by adding the entropy term $\epsilon \log \frac{p_{i,j}}{a_i b_j}$ instead of $\epsilon \log p_{i,j}$, the author made it possible to determine the transport plan from the result of the dual problem, which is $\mathcal{O}(N)$, instead of $\mathcal{O}(N^2)$ like\cite{reich2013nonparametric}, which open the possibility for modeling more complicated system with large number of particles.
+The practical issue is computing the gradient faithfully through the iterative Sinkhorn solver that finds $P^*$. We will see in the following subsections that the regularized OT map is differentiable in principle, but getting an accurate backward pass requires care. This is our focus for the rest of this section.
 
-More recently, people also used neural network to solve the Monge problem itself \cite{chaudhari2025gradnetot}.GradNetOT exploits Brenier's theorem, which says that under certain conditions (continuous densities, squared Euclidean cost), the Monge and Kantorovich problems are equivalent, and the unique transport map $T(x)$ is the gradient of a convex function $\phi(x)$, where $\phi(x)$ satisfies the Monge-Ampère equation
-\begin{equation}
-    p(x) = q(\nabla\varphi(x)) \det(H_{\phi}(x))
-\end{equation}
-where $H_{\phi} = J_T$ is the $N \times N$ positive semi-definite Hessian of $\phi$. But this architecture is not directly applicable to resampling because the transformation will push the continuous distribution $p(x)$ to the target distribution $q(y)$. We will discuss the possible way to make it work.
-
-In addition, there are of course alternatives to OT resampling. Notable example is Particle Transformer\cite{Zhu2020TowardsDR,Lee2019SetTransformer}, where we replaces the OT resampler with a Transformer mechanism (self-attention) to interact particles with each other and re-weight them differentiably. To make this review more focused, we will not discuss it further. The key idea is that you demand the transformer to output particles with equal weights. Therefore, it learn from the data to put particles into the right positions.
-
-Optimal transport resampling out-perform in certain scenarios but it's real power lies in that it makes it possible for entire filtering architecture differentiable. Because one can easily use neural network to model the dynamics or observation, which has been extensively discussed in \cite{chen2023overview}. I think there is no point to make comprehensive review here as it is problem specific and require careful testing, there is no one-fits-all solution. This field is exploding and there are so many different architectures that one can try. As pointed out in the Bonus question 2, it will be nice that we don't have to solve the optimal transport problem repeatedly, because each resampling is a different set of initial particle and weights. One way to deal with this problem is amortized optimization\cite{amos2022amortized}, where you train a model to predict solutions to optimization problems rather than solving each problem from scratch. It's application to OT problem is known as Meta-OT \cite{amos2023meta}. The idea is actually very easy, when we run a filtering algorithm, we need to solve the resampling a lot of times. Each time, we will have a transport schedule, from the dual problem. We simply run filter a lot of times and record what kind of transport plan we will run into in such problems. Then we train neural network to make predictions.  
-
-For the purpose of building a differentiable particle filter, we start with entropy-regularized-OT-resampling. It is one more step on top of our regular filter while fully differentiable. This is a good place for benchmarking and ensure the entire pipeline works. Any further improvement or innovative algorithm, namely neural network based algorithm are fully differentiable from the beginning. But they require additional training, for example Meta-OT. As for neural operator based approach, it will also require additional training for solving the Monge-Ampère equation. The idea is to work in parallel, first build the differentiable particle filter pipeline with model-blinded entropy-regularized-OT-resampling. Then for specific model, we can improve on the existing architecture with all the logistic components are ready. 
-
-
-
-
+By adding the entropy term $\epsilon \log \frac{p_{i,j}}{a_i b_j}$ instead of $\epsilon \log p_{i,j}$, the authors of \cite{corenflos-differentiable-2021} made it possible to recover the transport plan from the dual variables alone. Note that this objective is equivalent (up to constants under fixed marginals) to the standard entropy-regularized form $\langle \mathbf{C}, \mathbf{P}\rangle - \epsilon \mathbf{H}(\mathbf{P})$ that we will use in the Sinkhorn derivation below. The dual recovery step is $\mathcal{O}(N)$ per entry, compared to $\mathcal{O}(N^2)$ for the primal LP of \cite{reich2013nonparametric}, which opens the possibility for modeling more complicated systems with large numbers of particles.
 \subsection{Soft Resampling}
+
+Soft resampling \cite{karkus2018particle} is a compromise between fully stochastic systematic resampling and fully deterministic OT resampling. The idea is to blend the particle weights with a uniform distribution before selection, then apply an importance correction after. The algorithm is given below.
 
 \begin{algorithm}[H]
 \caption{Soft Resampling}
@@ -1423,6 +1418,8 @@ For the purpose of building a differentiable particle filter, we start with entr
 \end{algorithmic}
 \end{algorithm}
 
+The critical observation is that soft resampling is only \emph{partially} differentiable. The selection step (line 6) is still discrete---the cumulative-sum lookup picks an integer index $j_i$, and the gradient does not flow through that choice. Only the importance weight correction $w^{(j_i)} / q^{(j_i)}$ on line 9 is differentiable through $w$. The selection gradient---how $\v\theta$ affects \emph{which} particle gets picked---is still zero. We will make this precise in Section~\ref{sec:ot-derivative-chain}.
+
 \subsection{Entropy-Regularized OT (Sinkhorn) Resampling}
 
 The entropy-regularized OT resampling problem is a direct application of the Monge-Kantorovich framework. To set up the problem, recall that in the Monge-Kantorovich problem we have two probability vectors $\mathbf{a} \in \mathbb{R}^N_+$ and $\mathbf{b} \in \mathbb{R}^N_+$ and a cost matrix $\mathbf{C} \in \mathbb{R}^{N\times N}$. The goal is to find the optimal coupling matrix $\mathbf{P} \in \mathbb{R}_+^{N\times N}$, where $P_{ij}$ describes the flow of mass from bin $i$ to bin $j$, minimizing total transport cost:
@@ -1432,7 +1429,7 @@ The entropy-regularized OT resampling problem is a direct application of the Mon
 \end{equation}
 In the resampling context, we set $\mathbf{a} = \mathbf{w}$ (particle weights as the source marginal), $\mathbf{b} = \frac{1}{N}\mathbf{1}_N$ (the uniform distribution as the target marginal), and $C_{ij} = \|\tilde{\mathbf{x}}^{(i)} - \tilde{\mathbf{x}}^{(j)}\|^2/2$ as the squared-distance cost between normalized particle positions. Solving this exactly via linear programming is computationally expensive and, more importantly, non-differentiable with respect to the inputs.
 
-The key insight from Cuturi (2013) is that adding a discrete entropy regularizer to the objective,
+The key insight from \cite{Cuturi2013SinkhornDL} is that adding a discrete entropy regularizer to the objective,
 \begin{equation}
     \min_{\mathbf{P} \in \mathcal{U}(\mathbf{a}, \mathbf{b})} \langle \mathbf{C}, \mathbf{P} \rangle - \epsilon\, \mathbf{H}(\mathbf{P}), \qquad \mathbf{H}(\mathbf{P}) = -\sum_{i,j} P_{ij}(\log P_{ij} - 1),
 \end{equation}
@@ -1478,6 +1475,8 @@ and the marginal-matching updates \eqref{eq:vanilla-sinkhorn} turn into log-sum-
 \end{algorithmic}
 \end{algorithm}
 
+Lines 12--15 of the algorithm above are the \emph{extrapolation trick} for approximate differentiability. The converged potentials $(\boldsymbol{\alpha}, \boldsymbol{\beta})$ are detached from the computation graph via \texttt{stop\_gradient}, and one additional Gauss--Seidel step is taken on the live graph. This gives autodiff a single-step window into how the potentials depend on the inputs $(\mathbf{C}, \log\mathbf{w})$, without differentiating through all the preceding iterations. We will see in Section~\ref{sec:sinkhorn-backward} that this is only an approximation---accurate for weight gradients but biased for particle-position gradients---and how implicit differentiation provides the correct alternative.
+
 \begin{algorithm}[H]
 \caption{Entropy-Regularized Optimal Transport Resampling}
 \begin{algorithmic}[1]
@@ -1496,7 +1495,211 @@ and the marginal-matching updates \eqref{eq:vanilla-sinkhorn} turn into log-sum-
 \end{algorithmic}
 \end{algorithm}
 
-\subsection{Soft Resampling and OT Resampling Comparison}
+\subsection{The Derivative Chain through Resampling}
+\label{sec:ot-derivative-chain}
+
+The core difficulty in differentiating through a particle filter is the resampling step. Everything else---the transition model $p(x_k \mid x_{k-1}, \v\theta)$, the observation likelihood $p(z_k \mid x_k, \v\theta)$, and the weight computation---is differentiable. Resampling is the step where discrete particle selection breaks the gradient flow. To understand what each method does and does not give us, we need to trace the derivative chain explicitly.
+
+At time step $k$, the negative log-likelihood contribution is $-\log \sum_i \tilde{w}_k^{(i)}$ where the unnormalized weights $\tilde{w}_k^{(i)} = w_{k-1}^{(i)} \cdot p(z_k \mid x_k^{(i)}, \v\theta)$ depend on $\v\theta$ both through the observation model and through the particle positions $x_k^{(i)}$. Particle $x_k^{(i)}$ was sampled from $p(x_k \mid x_{k-1}^{(j_i)}, \v\theta)$, where $j_i$ is the index selected by resampling at step $k-1$. The derivative $\partial x_k^{(i)} / \partial \v\theta$ therefore has two contributions: the direct effect through the transition model (differentiable) and the indirect effect through which ancestor $j_i$ was selected (depends on how resampling is done).
+
+\paragraph{Systematic resampling with stop gradient.}
+We treat the selected particle indices as constants and detach the gradient at the resampling step. The derivative flows only through the weights after resampling and the transition model, but sees nothing about how $\v\theta$ affects particle selection. The gradient is:
+\begin{equation}
+    \frac{\partial L}{\partial \v\theta} = -\sum_k \sum_i \frac{\partial \log p(z_k \mid x_k^{(i)}, \v\theta)}{\partial \v\theta} + \frac{\partial \log p(x_k^{(i)} \mid x_{k-1}^{(j_i)}, \v\theta)}{\partial \v\theta}
+\end{equation}
+where $x_{k-1}^{(j_i)}$ is treated as a fixed constant. This \textit{selection gradient} is zero. The resulting gradient is biased---it misses the signal from particle selection---but bounded and continuous within each particle configuration. This makes it safe for both SGD and (in simple models) HMC.
+
+\paragraph{Soft resampling.}
+Soft resampling \cite{karkus2018particle} blends the weights with a uniform distribution before selection: $\tilde{w}_i = \alpha\, w_i + (1-\alpha)/N$. Particles are still selected discretely from $\tilde{w}_i$, but an importance correction weight $w_i / \tilde{w}_i$ is applied after selection and is differentiable with respect to $\v\theta$ through $w_i$. The gradient now flows through this correction factor in addition to the direct observation and transition terms. It does not flow through which particle was selected. Soft resampling is therefore partially differentiable---richer gradient information than stop gradient, but the selection is still invisible.
+
+\paragraph{OT resampling.}
+Optimal transport resampling \cite{corenflos-differentiable-2021} replaces discrete index selection entirely with a continuous transport map. Now that we have defined the transport matrix $T$ from the Sinkhorn algorithm, the resampled particles are the weighted average:
+\begin{equation}
+    \tilde{x}_k^{(i)} = \sum_j T_{ij}\, x_k^{(j)}.
+\end{equation}
+There is no discrete selection---every input particle contributes to every output particle through $T_{ij}$. The key point is that $T$ is itself a function of both the particle positions $\mathbf{x}_k$ (through the cost matrix $C_{ij} = \|\tilde x^{(i)} - \tilde x^{(j)}\|^2/2$) and the weights $\mathbf{w}_k$ (through the Sinkhorn marginal constraints). The total derivative of the resampled particles with respect to $\v\theta$ therefore has three terms, which we write schematically as:
+\begin{equation}
+    \frac{d\tilde{\mathbf{x}}_k}{d\v\theta} = \underbrace{\frac{\partial T}{\partial \mathbf{x}_k} \frac{d\mathbf{x}_k}{d\v\theta} \cdot \mathbf{x}_k}_{\text{Term 1: particle geometry}} + \underbrace{T \cdot \frac{d\mathbf{x}_k}{d\v\theta}}_{\text{Term 2: direct transport}} + \underbrace{\frac{\partial T}{\partial \mathbf{w}_k} \frac{d\mathbf{w}_k}{d\v\theta} \cdot \mathbf{x}_k}_{\text{Term 3: weight gradient}}
+    \label{eq:ot-three-terms}
+\end{equation}
+This is a schematic chain rule---the object $\partial T / \partial \mathbf{x}_k$ is a higher-order tensor and the contractions are suppressed for clarity. The three paths are:
+\begin{itemize}
+    \item \textbf{Term 1 (particle geometry):} A change in $\v\theta$ changes particle positions, which changes the cost matrix $C$, which changes the Sinkhorn potentials, which changes $T$, which changes the transported particles.
+    \item \textbf{Term 2 (direct transport):} A change in $\v\theta$ changes particle positions, which are directly transported by the (fixed) transport matrix $T$.
+    \item \textbf{Term 3 (weight gradient):} A change in $\v\theta$ changes the observation likelihood, which changes the weights, which changes $T$, which changes the transported particles. This is the \emph{selection gradient} that stop-gradient and soft resampling miss entirely.
+\end{itemize}
+Together, these three paths give a gradient that is correct in principle. The regularized OT map is smooth, so the loss surface is continuous. The practical issue is computing this gradient faithfully through the iterative Sinkhorn solver, which we address in Section~\ref{sec:sinkhorn-backward}.
+
+A summary of the gradient properties of each method is given in Table~\ref{tab:resampling_grad}.
+
+\begin{table}[H]
+\centering
+\caption{Resampling strategies for differentiable particle filters.}
+\label{tab:resampling_grad}
+\begin{tabular}{lcccc}
+\toprule
+Resampling & Fully diff.? & Selection gradient & Gradient bounded? & Loss continuous? \\
+\midrule
+Systematic (stop grad) & No  & None    & Yes               & No  \\
+Soft                   & Partial & Partial & Yes            & No  \\
+OT Sinkhorn            & In principle & Full    & Not guaranteed    & Yes \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Implications for HMC.}
+HMC's leapfrog integrator treats the gradient as a deterministic force field. Two properties are critical: the gradient must be bounded (a single spike can send the trajectory to infinity and waste the proposal) and the loss surface must be continuous (discontinuities in $U(\v\theta)$ cause large $\Delta H$ and rejected proposals). Systematic resampling satisfies the first but not the second, because small changes in $\v\theta$ can flip a particle across a resampling threshold, causing a jump in the log-likelihood. OT resampling satisfies both: the transport map is smooth, so the loss surface is continuous, and there is no threshold discontinuity. There is a subtlety: even with OT resampling, conditional resampling (triggered when ESS drops below a threshold) introduces a second source of non-smoothness---the branch between ``resample'' and ``don't resample'' is itself a discontinuity. OT makes this much less severe because the ESS stays closer to $N$ when transport is smooth, but it does not eliminate it entirely. For simple models where the loss surface is already mild (e.g., linear Gaussian), systematic resampling can work fine with HMC. For nonlinear models with strong particle diversity effects, OT resampling is the right choice.
+
+
+\subsection{Approximate vs Implicit Sinkhorn Backward}
+\label{sec:sinkhorn-backward}
+
+The entropy-regularized OT map is differentiable in principle. The practical question is: how do we compute the backward pass through the Sinkhorn iteration? There are two approaches, and understanding their difference is essential for getting correct gradients in the differentiable particle filter pipeline.
+
+\subsubsection{The Extrapolation Approximation}
+
+The approach used in our initial implementation (and described in the Sinkhorn algorithm above) is to run the iteration to convergence, detach the converged potentials from the computation graph, and take one more Gauss--Seidel step on the live graph:
+\begin{align}
+    \boldsymbol{\alpha}_{\mathrm{sg}} &= \mathrm{stop\_gradient}(\boldsymbol{\alpha}_{\mathrm{converged}}), \quad \boldsymbol{\beta}_{\mathrm{sg}} = \mathrm{stop\_gradient}(\boldsymbol{\beta}_{\mathrm{converged}}), \\
+    \boldsymbol{\alpha}_{\mathrm{new}} &= \mathrm{softmin}\!\left(\epsilon,\, \mathbf{C}^\top,\, \log\mathbf{w} + \boldsymbol{\beta}_{\mathrm{sg}}/\epsilon\right), \\
+    \boldsymbol{\beta}_{\mathrm{new}} &= \mathrm{softmin}\!\left(\epsilon,\, \mathbf{C},\, \log\mathbf{u} + \boldsymbol{\alpha}_{\mathrm{new}}/\epsilon\right).
+\end{align}
+Autodiff sees only this final step. The true derivative of the converged potentials with respect to the inputs $(\mathbf{C}, \log\mathbf{w})$ would require differentiating through all iterations. The one-step window is an approximation.
+
+This approximation is accurate for \textbf{Term 3} (the weight gradient), because the weights enter linearly into the marginal constraint and the one-step update captures their effect well. But it is biased for \textbf{Term 1} (the particle geometry gradient), because particle positions affect the cost matrix $C$, which feeds into every Sinkhorn iteration. The single-step window cannot capture how the potentials depend on $C$ across the full iteration history.
+
+When does this matter? It depends on whether $d\mathbf{x}_k / d\v\theta$ is zero or not. For a Bootstrap Particle Filter (BPF) on a linear Gaussian model with $\v\theta = \sigma_{\mathrm{obs}}$, the particles come from the state transition $x_k^{(i)} = F \tilde{x}_{k-1}^{(i)} + B \epsilon_k^{(i)}$, which does not depend on $\v\theta$. So $d\mathbf{x}_k/d\v\theta = 0$, Terms 1 and 2 vanish, and only Term 3 survives. The extrapolation approximation works well: we observe an autodiff-to-numerical-derivative ratio of approximately $1.08$. For LEDH (Local Exact Daum--Huang), the flow matrices depend on $\v\theta$ through $R = \sigma_{\mathrm{obs}}^2 DD^\top$, so $d\mathbf{x}_k / d\v\theta \neq 0$ and all three terms are active. The extrapolation approximation produces a ratio of approximately $1.33$---a clear bias from Term 1. These ratios are empirical validation targets on a specific model, not universal constants, but they sharply illustrate the problem.
+
+\subsubsection{Implicit Differentiation at the Fixed Point}
+
+The proper fix is implicit differentiation. At convergence, the Sinkhorn potentials satisfy a system of fixed-point equations (the marginal constraints). By the implicit function theorem, we can compute the exact Jacobian of the converged potentials with respect to the inputs without differentiating through the iteration \cite{cremers2022unifiedframeworkimplicit}.
+
+The idea is as follows. Let $\mathbf{f}$ and $\mathbf{g}$ denote the converged dual potentials (absorbing the log-scaling), and let $P_{ij} = \exp((f_i + g_j - C_{ij})/\epsilon)$ be the transport plan at the fixed point. Given an upstream gradient $\partial L / \partial T$, we need the vector-Jacobian product (VJP) $\partial L / \partial \mathbf{C}$ and $\partial L / \partial \log\mathbf{w}$. The implicit VJP reduces to solving a $(2N-1) \times (2N-1)$ linear system:
+\begin{equation}
+    \mathbf{B}\boldsymbol{\mu} = \mathbf{r},
+\end{equation}
+where $\mathbf{B}$ is formed from the transport plan $P$ and the source/target marginals $\mathbf{a}$, $\mathbf{b}$:
+\begin{equation}
+    \mathbf{B} = \begin{pmatrix} \mathrm{diag}(\mathbf{a}_{1:N-1}) & P_{1:N-1,:} \\ P_{1:N-1,:}^\top & \mathrm{diag}(\mathbf{b}) \end{pmatrix} + \rho\, \mathbf{I},
+\end{equation}
+and $\mathbf{r}$ is the right-hand side constructed from the upstream gradient $\partial L / \partial T$. The system is rank-deficient by 1 because the potentials are defined up to a global constant (a gauge freedom), so we drop one equation and add a small ridge $\rho$ for numerical stability. Once $\boldsymbol{\mu}$ is solved, the gradient with respect to the cost matrix is
+\begin{equation}
+    \frac{\partial L}{\partial C_{ij}} = -\frac{P_{ij}}{\epsilon}\left(\frac{\partial L}{\partial T_{ij}} - \mu_i^{(f)} - \mu_j^{(g)}\right),
+\end{equation}
+and the gradient with respect to the log-weights follows from the marginal constraint.
+
+The computational cost of the dense solve is $\mathcal{O}(N^3)$, which is acceptable for $N = 200$ particles (roughly 10$\times$ the cost of the forward Sinkhorn backward). For $N = 1000$ and above, a conjugate gradient (CG) solver with Jacobi preconditioning brings the cost down to $\mathcal{O}(kN^2)$ with $k \approx 50$ iterations, which is comparable to one extra Sinkhorn forward pass. The expected outcome is that the autodiff-to-numerical ratio moves from $\sim 1.33$ toward $\sim 1.0$ for LEDH, confirming that the particle-geometry gradient (Term 1) is now computed faithfully.
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{0.7\textwidth}{\centering\vspace{2cm}
+  \textbf{[PLACEHOLDER]} Sinkhorn convergence: marginal violation
+  $\|\mathbf{P}\mathbf{1} - \mathbf{a}\|_\infty$ vs.\ iteration number for
+  $\epsilon \in \{0.01, 0.05, 0.1, 0.5\}$ on a 200-particle example.
+  Smaller $\epsilon$ requires more iterations but yields a sharper transport plan.
+\vspace{2cm}}}
+\caption{Convergence of the log-stabilized Sinkhorn iteration for different regularization strengths $\epsilon$.}
+\label{fig:sinkhorn_convergence}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{0.7\textwidth}{\centering\vspace{2cm}
+  \textbf{[PLACEHOLDER]} Gradient validation: autodiff vs.\ numerical
+  (central difference) derivative of the resampled particle mean
+  $\bar{\tilde{x}}(\theta)$ with respect to $\theta$ on a 1-step
+  resampling example ($N=200$). Left: extrapolation approximation.
+  Right: implicit differentiation. The implicit method should match the
+  numerical derivative; the extrapolation shows visible bias when
+  $d\mathbf{x}/d\theta \neq 0$ (LEDH-like setup).
+\vspace{2cm}}}
+\caption{Differentiability validation: approximate (extrapolation) vs.\ exact (implicit) Sinkhorn backward. Test to be created.}
+\label{fig:gradient_validation}
+\end{figure}
+
+
+\subsection{Neural Acceleration}
+
+With the Sinkhorn backward producing faithful gradients, the OT resampling pipeline is fully differentiable. The remaining bottleneck is computational: Sinkhorn costs $\mathcal{O}(LN^2)$ per resampling step, where $L$ is the number of iterations.
+
+More recently, people also used neural networks to solve the Monge problem itself \cite{chaudhari2025gradnetot}. GradNetOT exploits Brenier's theorem, which says that under certain conditions (continuous densities, squared Euclidean cost), the Monge and Kantorovich problems are equivalent, and the unique transport map $T(x)$ is the gradient of a convex function $\phi(x)$, where $\phi(x)$ satisfies the Monge-Amp\`ere equation
+\begin{equation}
+    p(x) = q(\nabla\phi(x)) \det(H_{\phi}(x))
+\end{equation}
+where $H_{\phi} = J_T$ is the $d \times d$ positive semi-definite Hessian of $\phi$. This setup is not directly usable for resampling: the original GradNetOT solves a fixed transport problem, while the resampler must produce a transport map for every new weighted cloud the filter generates. We adapt the architecture as follows.
+
+We specialize the Brenier setup to the resampling problem. Let $\{x_i\}_{i=1}^N$ be the current particles and $\{w_i\}_{i=1}^N$ their normalized weights. Smooth both empirical measures with the same Gaussian kernel $K_h$ of scalar bandwidth $h$,
+\begin{equation}
+    p_h(x) = \frac{1}{N}\sum_{i=1}^N K_h(x - x_i), \qquad q_h(x) = \sum_{i=1}^N w_i\,K_h(x - x_i),
+\end{equation}
+so $p_h$ is the source — the equally weighted particle cloud — and $q_h$ is the target — the same particles weighted by the $w_i$. The transport map $T : \mathbb{R}^d \to \mathbb{R}^d$ we want to learn satisfies the Monge-Amp\`ere equation in this notation,
+\begin{equation}
+    p_h(x) = q_h(T(x))\,\det J(x), \qquad J(x) = \nabla T(x).
+\end{equation}
+Once $T$ is known, resampling is one forward pass: $x_i' = T(x_i)$ with uniform weights $1/N$. The original particles are themselves samples from $p_h$, so applying $T$ pushes them into samples of $q_h$.
+
+The standard route to Brenier maps is to parameterize the convex potential $\phi$ with an input-convex neural network and use $T = \nabla\phi$. Training requires two derivatives of $\phi$: first with respect to $x$ to obtain $T$, then with respect to $x$ again to obtain $J = \nabla^2\phi$, because the loss depends on $\det J$. Backpropagation therefore passes through a second derivative of the potential, and the convexity of $\phi$ is only approximate in practice, so an additional penalty is needed to keep $\nabla^2\phi$ positive semi-definite. We avoid both costs by parameterizing $T$ directly with a modular architecture, made conditional on the cloud through a context vector $c$ produced by a permutation-invariant set encoder. Each module has a pre-activation $u_m$ and an output $T_m$,
+\begin{align}
+    u_m(x; c) &= W_m\,x + U_m\,c + b_m(c), \\
+    T_m(x; c) &= W_m^{\top}\,\phi\!\left(\mathrm{softplus}(\beta_m(c))\,u_m(x; c)\right),
+\end{align}
+where $W_m$ is a state-independent learned matrix, $U_m$ is a context-mixing matrix, $b_m(c)$ and $\beta_m(c)$ are scalar shifts produced from $c$ by linear layers, and $\phi$ is a smooth scalar activation applied element-wise. The full map adds these modules to the identity with positive gates,
+\begin{equation}
+    T(x; c) = x + d(c) + \sum_m \mathrm{softplus}(\alpha_m(c))\,T_m(x; c).
+\end{equation}
+Holding $c$ fixed, the module Jacobian and the full Jacobian with respect to $x$ are
+\begin{align}
+    J_m(x; c) &= \mathrm{softplus}(\beta_m(c))\,W_m^{\top}\,\mathrm{diag}\!\left(\phi'\!\left(\mathrm{softplus}(\beta_m(c))\,u_m(x; c)\right)\right)\,W_m, \\
+    J(x; c) &= I + \sum_m \mathrm{softplus}(\alpha_m(c))\,J_m(x; c).
+\end{align}
+Each summand has the form $W^{\top} D\,W$ with diagonal $D \succeq 0$, since $\phi'$ is non-negative for monotone smooth $\phi$. The full Jacobian is therefore symmetric positive semi-definite by construction. There is no Hessian, no nested differentiation, and no convexity penalty. The matrices $W_m$ are held state-independent on purpose: only the scalar gates $\alpha_m(c), \beta_m(c)$ and the shifts $b_m(c), d(c)$ depend on $c$, which preserves the $W^{\top} D\,W$ structure for every cloud.
+
+The choice of activation $\phi$ is load-bearing for two reasons. First, the training loss contains $\log\det J(x; c)$ and the downstream local covariance transport in our LEDH variant uses $J\,\Sigma\,J^{\top}$, so $J(x; c)$ — the Jacobian with respect to $x$ for fixed $c$ — must exist everywhere and depend smoothly on $x$. Second, each module's Jacobian has the form $W_m^{\top}\,\mathrm{diag}(\phi'(\cdot))\,W_m$, which is positive semi-definite only if $\phi' \ge 0$, i.e.\ $\phi$ is monotone. The relevant scalar activations cluster as follows.
+
+\begin{center}\small
+\begin{tabular}{lccl}
+\hline
+Activation & Smoothness & Monotone & Notes \\
+\hline
+ReLU $\max(0,z)$            & $C^0$       & yes & $J$ jumps along $W_m x + b_m = 0$. Unusable when $J$ is in the loss. \\
+RePU $\max(0,z)^k$, $k\ge2$ & $C^{k-1}$   & yes & Tunable smoothness; $k{=}2$ gives $C^1$, $k{=}3$ gives $C^2$. \\
+Softplus $\log(1+e^z)$      & $C^{\infty}$& yes & Smooth, monotone, no upper bound. \\
+GELU / SiLU                 & $C^{\infty}$& no  & $\phi'$ changes sign $\Rightarrow$ breaks the $W^{\top} D\,W$ PSD construction. \\
+$\tanh(z)$                  & $C^{\infty}$& yes & Bounded, monotone, analytic. \\
+\hline
+\end{tabular}
+\end{center}
+
+We use the weighted hyperbolic tangent $\phi(z) = \gamma\,\tanh(z)$ where $\gamma$ is a learnable per-channel scale. The scale $\gamma$ lets each channel control its output magnitude without driving the pre-activation into saturation, while the underlying $\tanh$ supplies $C^{\infty}$ smoothness and the monotonicity required by the PSD construction. The vanishing-gradient concern usually associated with $\tanh$ does not apply here because the trunk has effective depth two: the modules are summed in parallel, not composed. The set encoder uses ReLU activations internally, but its output $c$ is held fixed when differentiating with respect to $x$, so encoder ReLUs do not affect the smoothness of $J(x; c)$.
+
+The training objective is the squared pointwise residual of the Monge-Amp\`ere equation. From the change-of-variables identity $\log p_h(x) = \log q_h(T(x)) + \log\det J(x)$ we define the residual and its mean square,
+\begin{equation}
+    r(x; c) = \log\det J(x; c) - \bigl(\log p_h(x) - \log q_h(T(x; c))\bigr), \qquad
+    L_{\mathrm{MA}} = \mathbb{E}_{x \sim p_h}\!\left[\,r(x; c)^2\,\right].
+\end{equation}
+The expectation is estimated by sampling collocation points from $p_h$. The loss is self-supervised: there is no external transport teacher, in particular no Sinkhorn-supervised target. Sinkhorn solves the discrete entropic optimal transport problem, which is a different and biased approximation; imitating it would import that bias rather than the continuous Brenier map we want.
+
+Architectural smoothness guarantees that $J(x; c)$ exists and is continuous, but it does not guarantee that $J$ varies slowly in $x$ — a $C^{\infty}$ function can still oscillate rapidly. We therefore add three regularizers that target the rate of variation of $J$ on the kernel scale. The first is residual initialization: the gates $\alpha_m(c)$ are initialized so that $\mathrm{softplus}(\alpha_m) \approx 0$ at step zero, giving $T \approx \mathrm{id}$ and $J \approx I$ before training begins. The second is a local-linearity penalty,
+\begin{equation}
+    L_{\mathrm{lin}} = \mathbb{E}_{x \sim p_h, \, \delta \sim K_h}\!\left[\,\|\,T(x + \delta) - T(x) - J(x)\,\delta\,\|^2\,\right].
+\end{equation}
+Let $H_i(x)$ be the $d \times d$ Hessian of the $i$-th component $T_i(x)$. Taylor expansion of $T(x + \delta)$ around $x$ gives
+\begin{align}
+    T_i(x + \delta) - T_i(x) - [J(x)\,\delta]_i &= \tfrac{1}{2}\,\delta^{\top} H_i(x)\,\delta + O(\|\delta\|^3),
+\end{align}
+so the linear term cancels by construction and the leading contribution is the second derivative. Squaring and averaging over $\delta \sim \mathcal{N}(0, h^2 I)$ scales as $h^4 \sum_i \|H_i(x)\|_F^2$, where $\|\cdot\|_F$ denotes the Frobenius norm. Intuitively, in Fourier terms, second derivatives multiply a mode at wavenumber $k$ by $k^2$, so squaring the Hessian weights modes by $k^4$. The penalty therefore acts as a soft low-pass filter with cutoff set by $1/h$, and drawing $\delta \sim K_h$ ties that cutoff to the same scale at which $p_h$ and $q_h$ resolve features. The third regularizer is a soft hinge on the smallest eigenvalue $\lambda_{\min}(J(x))$ that prevents $J$ from collapsing toward a singular configuration. In addition to these three loss terms we use bandwidth annealing: $h$ is decreased over training, so the operator solves a sequence of progressively sharper transport problems with the cutoff $1/h$ tracking it.
+
+The training distribution matters as much as the loss. Synthetic particle clouds are useful only if they reproduce the relation between position and weight that the operator will see at inference. In a particle filter the weights are induced by the likelihood and are therefore correlated with position, so training mainly on clouds with position-independent weights is not sufficient. The cleanest training data comes directly from runs of the target models. In practice we collect snapshots by running the standard LEDH filter at parameter values drawn from a Laplace approximation around the MAP estimate, since those runs are independent and can be generated in parallel. Questions of cross-model generalization, high-dimensional scaling, and end-to-end gradient quality through the compiled filter are deferred to the implementation and benchmarking sections.
+
+In addition, there are of course alternatives to OT resampling. Notable example is Particle Transformer \cite{Zhu2020TowardsDR,Lee2019SetTransformer}, where we replace the OT resampler with a Transformer mechanism (self-attention) to interact particles with each other and re-weight them differentiably. To make this review more focused, we will not discuss it further. The key idea is that you demand the transformer to output particles with equal weights. Therefore, it learns from the data to put particles into the right positions.
+
+Optimal transport resampling out-performs in certain scenarios but its real power lies in that it makes it possible for the entire filtering architecture to be differentiable. Because one can easily use neural networks to model the dynamics or observation, which has been extensively discussed in \cite{chen2023overview}. I think there is no point to make a comprehensive review here as it is problem specific and requires careful testing, there is no one-fits-all solution. This field is exploding and there are so many different architectures that one can try. As pointed out in the Bonus question 2, it will be nice that we don't have to solve the optimal transport problem repeatedly, because each resampling is a different set of initial particles and weights. One way to deal with this problem is amortized optimization \cite{amos2022amortized}, where you train a model to predict solutions to optimization problems rather than solving each problem from scratch. Its application to the OT problem is known as Meta-OT \cite{amos2023meta}. The idea is actually very easy: when we run a filtering algorithm, we need to solve the resampling a lot of times. Each time, we will have a transport schedule from the dual problem. We simply run the filter a lot of times and record what kind of transport plan we will run into in such problems. Then we train a neural network to make predictions.
+
+For the purpose of building a differentiable particle filter, we start with entropy-regularized OT resampling. It is one more step on top of our regular filter while fully differentiable. This is a good place for benchmarking and ensuring the entire pipeline works. Any further improvement or innovative algorithm, namely neural network based algorithms, are fully differentiable from the beginning. But they require additional training, for example Meta-OT. As for neural operator based approach, it will also require additional training for solving the Monge-Amp\`ere equation. The idea is to work in parallel: first build the differentiable particle filter pipeline with model-agnostic entropy-regularized OT resampling, then for specific models, we can improve on the existing architecture with all the logistic components ready.
+
+
+
+
 
 %\begin{table}[htbp]
 %\centering
@@ -1611,51 +1814,7 @@ The reason this matters is diagnostic: if MAP fails—loss diverges, gradients b
 
 \subsection{Differentiable Resampling and the Gradient Chain}
 
-The core difficulty in differentiating through a particle filter is the resampling step. Everything else—the transition model $p(x_k \mid x_{k-1}, \v\theta)$, the observation likelihood $p(z_k \mid x_k, \v\theta)$, and the weight computation—is differentiable. Resampling is the step where discrete particle selection breaks the gradient flow. To understand what each method does and does not give us, we need to trace the derivative chain explicitly.
-
-At time step $k$, the negative log-likelihood contribution is $-\log \sum_i \tilde{w}_k^{(i)}$ where the unnormalized weights $\tilde{w}_k^{(i)} = w_{k-1}^{(i)} \cdot p(z_k \mid x_k^{(i)}, \v\theta)$ depend on $\v\theta$ both through the observation model and through the particle positions $x_k^{(i)}$. Particle $x_k^{(i)}$ was sampled from $p(x_k \mid x_{k-1}^{(j_i)}, \v\theta)$, where $j_i$ is the index selected by resampling at step $k-1$. The derivative $\partial x_k^{(i)} / \partial \v\theta$ therefore has two contributions: the direct effect through the transition model (differentiable) and the indirect effect through which ancestor $j_i$ was selected (depends on how resampling is done).
-
-\paragraph{Systematic resampling with stop gradient.}
-We treat the selected particle indices as constants and detach the gradient at the resampling step. The derivative flows only through the weights after resampling and the transition model, but sees nothing about how $\v\theta$ affects particle selection. The gradient is:
-\begin{equation}
-    \frac{\partial L}{\partial \v\theta} = -\sum_k \sum_i \frac{\partial \log p(z_k \mid x_k^{(i)}, \v\theta)}{\partial \v\theta} + \frac{\partial \log p(x_k^{(i)} \mid x_{k-1}^{(j_i)}, \v\theta)}{\partial \v\theta}
-\end{equation}
-where $x_{k-1}^{(j_i)}$ is treated as a fixed constant. This \textit{selection gradient} is zero. The resulting gradient is biased—it misses the signal from particle selection—but bounded and continuous within each particle configuration. This makes it safe for both SGD and (in simple models) HMC.
-
-\paragraph{Soft resampling.}
-Soft resampling \cite{karkus2018particle} blends the weights with a uniform distribution before selection: $\tilde{w}_i = \alpha\, w_i + (1-\alpha)/N$. Particles are still selected discretely from $\tilde{w}_i$, but an importance correction weight $w_i / \tilde{w}_i$ is applied after selection and is differentiable with respect to $\v\theta$ through $w_i$. The gradient now flows through this correction factor in addition to the direct observation and transition terms. It does not flow through which particle was selected. Soft resampling is therefore partially differentiable—richer gradient information than stop gradient, but the selection is still invisible.
-
-\paragraph{OT resampling.}
-Optimal transport resampling \cite{corenflos-differentiable-2021} replaces discrete index selection entirely with a continuous transport map. Given particle weights $\{w_i\}$ and target uniform weights $\{1/N\}$, the Sinkhorn algorithm computes a doubly-stochastic transport matrix $T$ (with a small entropy regularization $\varepsilon_{\text{OT}}$) and the resampled particles are the weighted average:
-\begin{equation}
-    x_k^{\prime (i)} = \sum_j T_{ij}\, x_k^{(j)}.
-\end{equation}
-There is no discrete selection—every input particle contributes to every output particle through $T_{ij}$. The derivative chain through OT resampling has two paths:
-\begin{itemize}
-    \item \textbf{Through the transport map:} $\partial T_{ij} / \partial w_j$ is computed via implicit differentiation of the Sinkhorn fixed-point equations. A change in $\v\theta$ changes the weights, which changes the transport plan, which changes the resampled positions. This is the selection gradient that stop-gradient and soft resampling miss entirely.
-    \item \textbf{Through the particle values:} $\partial x_k^{\prime(i)} / \partial x_k^{(j)} = T_{ij}$, a weighted average. The gradient flows back through the transition model and into the previous time step's particle positions.
-\end{itemize}
-Together, these two paths give a nearly unbiased gradient. The cost is that differentiating through many Sinkhorn iterations can produce large gradient magnitudes—the gradient is correct but potentially large. In practice, the $\varepsilon_{\text{OT}}$ regularization parameter controls the smoothness of $T$: larger $\varepsilon_{\text{OT}}$ makes $T$ closer to uniform (more diffuse transport, smoother gradient) and smaller $\varepsilon_{\text{OT}}$ makes $T$ more sparse (sharper selection, closer to discrete resampling).
-
-A summary of the gradient properties of each method is given in Table~\ref{tab:resampling_grad}.
-
-\begin{table}[H]
-\centering
-\caption{Resampling strategies for differentiable particle filters.}
-\label{tab:resampling_grad}
-\begin{tabular}{lcccc}
-\toprule
-Resampling & Fully diff.? & Selection gradient & Gradient bounded? & Loss continuous? \\
-\midrule
-Systematic (stop grad) & No  & None    & Yes               & No  \\
-Soft                   & Partial & Partial & Yes            & No  \\
-OT Sinkhorn            & Yes & Full    & Not guaranteed    & Yes \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\paragraph{Implications for HMC.}
-HMC's leapfrog integrator treats the gradient as a deterministic force field. Two properties are critical: the gradient must be bounded (a single spike can send the trajectory to infinity and waste the proposal) and the loss surface must be continuous (discontinuities in $U(\v\theta)$ cause large $\Delta H$ and rejected proposals). Systematic resampling satisfies the first but not the second, because small changes in $\v\theta$ can flip a particle across a resampling threshold, causing a jump in the log-likelihood. OT resampling satisfies both: the transport map is smooth, so the loss surface is continuous, and there is no threshold discontinuity. For simple models where the loss surface is already mild (e.g., linear Gaussian), systematic resampling can work fine with HMC. For nonlinear models with strong particle diversity effects, OT resampling is the right choice.
+The core difficulty in differentiating through a particle filter is the resampling step. We have analyzed the derivative chain through resampling in detail in Section~\ref{sec:ot-derivative-chain}, showing that entropy-regularized OT resampling provides a fully differentiable (in principle) alternative to systematic and soft resampling. Here we focus on the consequences for parameter estimation.
 
 \subsection{Benchmark: Linear Gaussian Model}
 

@@ -1,10 +1,25 @@
 # HMC Pipeline Issues — Memory Leak, JIT, & Gradient Instability
 
-Date: 2026-04-08, updated 2026-04-09
+Date: 2026-04-08, updated 2026-04-10
 
 ## Summary
 
 Smoke tests show 13-18GB memory increases for moderate experiments. JIT/XLA compilation is not working end-to-end. Single HMC step takes 51s for SV2D LEDH with 500 particles + 200 timesteps. Gradient explodes after a few leapfrog steps, causing step size to collapse to zero.
+
+## Status of fixes attempted in 2026-04-10 session
+
+| ID | Issue | Status |
+|---|---|---|
+| B2 | tf.Variable creation per likelihood call | **FIXED** — `initialize()` removed from `log_marginal_likelihood_tf`, plain tensors built via `sample_initial_state_batch` |
+| B3 | Gradients severed through `Sigma_0` (LEDH only) | **FIXED** — same fix as B2; `Sigma_0` now flows through tensor path |
+| C2 (partial) | `.numpy()` seed extraction | **FIXED** — both filters use `[2]` int32 tensor + `stateless_split` |
+| C4 | No `reduce_retracing=True` | **FIXED** — added to both compiled filters |
+| (new) | Stale graph tensors leaked into model attrs after compiled call | **FIXED** — `try/finally` save/restore wrapping `_compiled_filter` |
+| (new, related to A3) | XLA-incompatible `slogdet` in Jacobian custom_gradient | **MITIGATED** — added new function `graph_safe_log_abs_det_xla` (QR forward + same NaN-guarded backward) in `linalg.py`. Used by LEDH+HMC path. Old `_fast` variant untouched. |
+| (new) | `tf.while_loop` missing `maximum_iterations` (XLA backward fails) | **FIXED** — added to LEDH outer loop, BPF outer loop, and Sinkhorn iteration |
+| C1 | XLA end-to-end with `jit_compile=True` | **HIT FUNDAMENTAL TF LIMITATION** — see new section E |
+
+All fixes are additive / no behavioral change to graph mode (verified: existing gradient tests pass). The XLA effort hit two distinct walls — see section E.
 
 ---
 
@@ -119,13 +134,75 @@ Smoke tests show 13-18GB memory increases for moderate experiments. JIT/XLA comp
 
 ---
 
-## Priority Fix Order
+## E. XLA end-to-end — investigated 2026-04-10, blocked
 
-1. Fix LEDH observation model for SV2D (A1, A2) — correctness
-2. Add gradient clipping to TFP HMC path (A6) — prevents step-size collapse
-3. Set `always_resample=True` for HMC (A5) — smooth likelihood surface
-4. Reduce tape footprint: `stop_gradient_resampling` or reduce T (B1)
-5. Stop creating tf.Variable per likelihood call (B2)
-6. Add `jit_compile=True`, remove `.python_function` (C1)
-7. Replace `.numpy()` seed extraction (C2)
-8. Regularize Jacobian backward (A3) and OT implicit VJP (A4)
+### What we tried
+
+Goal: enable `@tf.function(jit_compile=True)` on `compiled_filter` so the entire LEDH/BPF + OT pipeline runs as one XLA computation (potentially 2-5x speedup).
+
+Test infrastructure: `code/tests/jit/test_jit_compile.py` (probe + speedup) and `code/tests/jit/test_jit_value_and_grad.py` (value+grad wrapper variant). Both use a test-only `_xla_recompile()` helper or new `value_and_grad_tf()` method — no production call sites changed.
+
+### Wall 1: `tf.linalg.slogdet` not implemented for XLA_CPU_JIT
+
+- `linalg.py:218` (`_graph_safe_log_abs_det_fast_impl`) calls `tf.linalg.slogdet`
+- XLA_CPU_JIT has no kernel for `LogMatrixDeterminant`
+- **Fixed** by adding `graph_safe_log_abs_det_xla` (QR forward + same backward) and switching the LEDH HMC call site
+
+### Wall 2: TensorList crossing XLA/TF boundary (gradient via external `GradientTape`)
+
+- When `jit_compile=True` is on the outer compiled_filter, TF builds a backward graph through `tf.while_loop` that requires a TensorList for stashing intermediate states
+- That TensorList must cross from XLA-compiled forward to non-XLA backward
+- TF documents this as unsupported: `Support for TensorList crossing the XLA/TF boundary is not implemented`
+- **Forward-only XLA works**: measured **1.3x speedup** at T=20, N=200 (`speedup.ledh_ot.forward` in test results)
+
+### Wall 3: `Max_grad/Sum` requires compile-time constant (gradient via internal `GradientTape`)
+
+- Workaround for Wall 2: put `GradientTape` inside another `@tf.function(jit_compile=True)` so the whole forward+backward stays in one XLA region
+- Prototype: new method `value_and_grad_tf()` added to both filter classes (additive only — production code untouched)
+- New error: `gradients/Max_grad/Sum` requires compile-time constant axis
+- Source: `tf.reduce_max(log_theta)` in LEDH compiled_filter at line 245 (and a similar one in `compute_flow_weights` at `distributions.py:68`)
+- **Mathematically fixable** with `tf.stop_gradient(tf.reduce_max(...))` (logsumexp trick — gradient is identical) but requires touching production hot-path code
+- **Not applied** — out of scope for this session's "no production behavior changes" constraint
+
+### Why option (a) — internal GradientTape — wasn't pursued further
+
+Option (a) requires either:
+1. Adding `stop_gradient` on `max_log_theta` in production `compiled_filter` (mathematically safe via LSE trick but touches hot path)
+2. AND/OR refactoring `hmc_runner.py` to call `value_and_grad_tf()` instead of doing external `GradientTape`
+
+Both were explicitly out of scope ("don't touch working code" / "the runner refactor is unacceptable").
+
+### What stays in the repo from this XLA arc
+
+| File | What's there | Active? |
+|---|---|---|
+| `linalg.py` | `graph_safe_log_abs_det_xla` (new function) | Used by LEDH HMC path; old `_fast` variant untouched |
+| `ledh_invertible_hmc.py` | `value_and_grad_tf()` method (new, additive) | **Unused in production**; only the JIT test calls it |
+| `bootstrap_pf_hmc.py` | `value_and_grad_tf()` method (new, additive) | **Unused in production**; only the JIT test calls it |
+| `tests/jit/test_jit_compile.py` | XLA probe + forward speedup (1.3x) | Documents the wall |
+| `tests/jit/test_jit_value_and_grad.py` | Value+grad wrapper test | Documents Wall 3 |
+| Backups: `*_old.py` for `ledh_invertible_hmc`, `bootstrap_pf_hmc`, `hmc_runner` | Pre-session snapshots | For easy revert |
+
+### Expected vs measured speedup
+
+- **Forward-only XLA**: 1.3x measured. Modest. Doesn't justify the engineering effort to make gradient work.
+- **Forward+backward XLA**: would need to clear Wall 3 (stop_gradient surgery on production code) AND refactor runner (option a). Not pursued.
+
+### Conclusion
+
+XLA end-to-end on the HMC pipeline is blocked by a chain of TF/XLA limitations that compound with the existing architecture. The 1.3x forward-only speedup is not worth the integration cost. **Recommend dropping the XLA effort and focusing on the gradient instability issues (A1-A6) which have much larger expected impact** (e.g., fixing the SV2D step-size collapse from `target_accept_prob` adaptation killing the chain).
+
+---
+
+## Priority Fix Order (revised after 2026-04-10)
+
+1. ~~B2: Stop creating tf.Variable per likelihood call~~ — **DONE**
+2. ~~C2: Replace `.numpy()` seed extraction~~ — **DONE**
+3. ~~C4: Add reduce_retracing~~ — **DONE**
+4. ~~Stale tensor leak from setattr inside compiled_filter~~ — **DONE** (try/finally save/restore)
+5. Fix LEDH observation model for SV2D (A1, A2) — correctness, biggest expected win
+6. Add gradient clipping to TFP HMC path (A6) — prevents step-size collapse on SV2D
+7. Set `always_resample=True` for HMC configs (A5) — smooth likelihood surface
+8. Investigate `stop_gradient_resampling` for HMC (B1) — primary memory driver, separate investigation deferred
+9. Regularize Jacobian backward (A3) and OT implicit VJP (A4)
+10. ~~XLA end-to-end (C1)~~ — **BLOCKED, dropped**

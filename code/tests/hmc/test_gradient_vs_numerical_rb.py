@@ -1,9 +1,9 @@
-"""Gradient validation: LEDH+OT autodiff vs numerical on Range Bearing model.
+"""Gradient validation: LEDH+OT autodiff vs numerical FD on Range-Bearing model.
 
-Trainable parameter: sigma_range (observation noise — enters through R,
-like LG's obs_noise_std, but the observation model is nonlinear).
+Trainable parameter: sigma_range.
+Tolerance: TOL_RB (0.08 relative error).
 
-Same test structure as SV2D/LG tests.
+Each test case prints + saves to tests/hmc/results/test_gradient_vs_numerical_rb.json.
 
 Run: python -m pytest tests/hmc/test_gradient_vs_numerical_rb.py -v -s
 """
@@ -23,18 +23,29 @@ from src.models.utils import generate_data
 from src.filters.particle.ledh_invertible_hmc import LEDHParticleFlowFilterHMC
 from src.DF.differentiable_model import DifferentiableModel
 
+from _gradient_test_utils import (
+    TOL_RB, gradient_case, reset_results,
+)
+
 
 DTYPE = tf.float64
 N_PARTICLES = 200
 N_LAMBDA_STEPS = 15
+T = 20
 PF_SEED = tf.constant([42, 0])
 DATA_SEED = 42
-
-M_RADII = 5
-H_MAX = 0.02
-
 TRUE_SIGMA_RANGE = 0.1
 TRUE_SIGMA_BEARING = 0.01
+FD_H = 1e-4
+
+MODEL = 'range_bearing'
+FILTER = 'ledh_ot'
+
+
+@pytest.fixture(scope="module", autouse=True)
+def _reset_results():
+    reset_results(__file__)
+    yield
 
 
 @pytest.fixture(scope="module")
@@ -45,7 +56,7 @@ def obs_rb():
         dtype=DTYPE,
     )
     rng = np.random.default_rng(DATA_SEED)
-    _, _, obs = generate_data(model, T=20, rng=rng)
+    _, _, obs = generate_data(model, T=T, rng=rng)
     return tf.constant(obs, dtype=DTYPE)
 
 
@@ -70,79 +81,48 @@ def _make_filter(sr_val, n_lambda_steps=N_LAMBDA_STEPS):
     return diff_model, filt
 
 
-def _eval_ll(obs_tf, sr_val, **kwargs):
-    diff_model, filt = _make_filter(sr_val, **kwargs)
+def _eval_ll(obs_tf, sr_val, n_lambda_steps=N_LAMBDA_STEPS):
+    diff_model, filt = _make_filter(sr_val, n_lambda_steps=n_lambda_steps)
     ll = filt.log_marginal_likelihood_tf(obs_tf, seed=PF_SEED)
     return float(ll.numpy())
 
 
-def _autodiff_grad(obs_tf, sr_val, **kwargs):
-    diff_model, filt = _make_filter(sr_val, **kwargs)
-    var = tf.constant(sr_val, dtype=DTYPE)
-    with tf.GradientTape() as tape:
-        tape.watch(var)
-        diff_model.update_parameters({'sigma_range': var})
-        ll = filt.log_marginal_likelihood_tf(obs_tf, seed=PF_SEED)
-    grad = tape.gradient(ll, var)
-    diff_model.restore_parameters()
-    ad_val = grad.numpy() if grad is not None else None
-    return float(ll.numpy()), ad_val
-
-
-def _numerical_grad(obs_tf, sr_val, **kwargs):
-    radii = np.array([(k + 1) * H_MAX / M_RADII for k in range(M_RADII)])
-    slopes = np.empty(M_RADII)
-    for i, r in enumerate(radii):
-        if sr_val - r <= 0.001:
-            slopes[i] = np.nan
-            continue
-        f_plus = _eval_ll(obs_tf, sr_val + r, **kwargs)
-        f_minus = _eval_ll(obs_tf, sr_val - r, **kwargs)
-        slopes[i] = (f_plus - f_minus) / (2.0 * r)
-    valid = slopes[~np.isnan(slopes)]
-    return np.median(valid), valid
-
-
-def _report(label, obs_tf, sr_val, **kwargs):
-    ll_val, ad = _autodiff_grad(obs_tf, sr_val, **kwargs)
-    num_med, slopes = _numerical_grad(obs_tf, sr_val, **kwargs)
-    print(f"\n  [{label}]")
-    print(f"    Forward ll:       {ll_val:.4f}")
-    print(f"    Autodiff grad:    {ad}")
-    print(f"    Numerical grad:   {num_med:.4f}")
-    print(f"    Slopes:           {np.array2string(slopes, precision=4)}")
-    if ad is not None and abs(num_med) > 1e-6:
-        ratio = ad / num_med
-        print(f"    Ratio (ad/num):   {ratio:.4f}")
-    return ad, num_med
+def _run_case(case_name, obs_tf, sr_val, n_lambda_steps=N_LAMBDA_STEPS, T_used=T):
+    diff_model, filt = _make_filter(sr_val, n_lambda_steps=n_lambda_steps)
+    eval_fn = lambda x: _eval_ll(obs_tf, x, n_lambda_steps=n_lambda_steps)
+    return gradient_case(
+        test_file=__file__,
+        case_name=case_name,
+        model_name=MODEL,
+        filter_name=FILTER,
+        param_name='sigma_range',
+        param_val=sr_val,
+        eval_fn=eval_fn,
+        diff_model=diff_model,
+        filt=filt,
+        obs_tf=obs_tf,
+        dtype=DTYPE,
+        seed=PF_SEED,
+        tol=TOL_RB,
+        n_particles=N_PARTICLES,
+        T=T_used,
+        n_lambda_steps=n_lambda_steps,
+        fd_h=FD_H,
+    )
 
 
 class TestRBTimesteps:
     def test_T1(self, obs_rb):
-        ad, num = _report("RB LEDH+OT T=1", obs_rb[:1], TRUE_SIGMA_RANGE)
-        assert ad is not None
+        _run_case("RB LEDH+OT T=1", obs_rb[:1], TRUE_SIGMA_RANGE, T_used=1)
 
-    def test_T3(self, obs_rb):
-        ad, num = _report("RB LEDH+OT T=3", obs_rb[:3], TRUE_SIGMA_RANGE)
-        assert ad is not None
+    def test_T5(self, obs_rb):
+        _run_case("RB LEDH+OT T=5", obs_rb[:5], TRUE_SIGMA_RANGE, T_used=5)
 
     def test_T20(self, obs_rb):
-        ad, num = _report("RB LEDH+OT T=20", obs_rb, TRUE_SIGMA_RANGE)
-        assert ad is not None
+        _run_case("RB LEDH+OT T=20", obs_rb, TRUE_SIGMA_RANGE, T_used=T)
 
 
-class TestRBFullComparison:
-    def test_full(self, obs_rb):
-        ad, num = _report("RB LEDH+OT full", obs_rb, TRUE_SIGMA_RANGE)
-        assert ad is not None
-        if abs(num) > 0.1:
-            ratio = ad / num
-            print(f"    RATIO: {ratio:.4f} (want ~1.0)")
-
+class TestRBAtPoints:
     @pytest.mark.parametrize("sr_val", [0.05, 0.1, 0.2, 0.5])
-    def test_at_points(self, obs_rb, sr_val):
-        ad, num = _report(f"RB sigma_range={sr_val}", obs_rb, sr_val)
-        assert ad is not None
-        if abs(num) > 0.1:
-            ratio = ad / num
-            print(f"    RATIO: {ratio:.4f} (want ~1.0)")
+    def test_param_grid(self, obs_rb, sr_val):
+        _run_case(f"RB LEDH+OT sigma_range={sr_val}", obs_rb, sr_val)

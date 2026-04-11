@@ -16,8 +16,14 @@ class ResampleResult(NamedTuple):
         transport_matrix: Transport matrix T, shape (N, N).
             For OT-based methods, resampled_particles = T @ old_particles.
             None for index-based methods.
+        local_jacobians: Per-particle local Jacobians of the resampling map,
+            shape (N, d, d). For map-based methods (neural operator), this is
+            J_i = grad T(x_i). Used by LEDH for local covariance transport
+            (covs_new[i] = J_i @ covs[i] @ J_i^T). None for matrix-based and
+            index-based methods.
     """
     particles: tf.Tensor
     weights: tf.Tensor
     ancestor_indices: Optional[tf.Tensor] = None
     transport_matrix: Optional[tf.Tensor] = None
+    local_jacobians: Optional[tf.Tensor] = None

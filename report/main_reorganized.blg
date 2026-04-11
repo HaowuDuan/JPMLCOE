@@ -5,45 +5,46 @@ The style file: unsrt.bst
 Database file #1: main_reorganized.bib
 Warning--empty journal in Pulido2019
 Warning--empty journal in HuVanLeeuwen2021
-You've used 22 entries,
+Warning--empty journal in Cuturi2013SinkhornDL
+You've used 23 entries,
             1791 wiz_defined-function locations,
-            587 strings with 7592 characters,
-and the built_in function-call counts, 5219 in all, are:
-= -- 478
-> -- 220
-< -- 8
-+ -- 82
-- -- 60
-* -- 308
-:= -- 792
-add.period$ -- 71
-call.type$ -- 22
-change.case$ -- 21
+            593 strings with 7753 characters,
+and the built_in function-call counts, 5559 in all, are:
+= -- 514
+> -- 224
+< -- 9
++ -- 84
+- -- 61
+* -- 323
+:= -- 833
+add.period$ -- 74
+call.type$ -- 23
+change.case$ -- 22
 chr.to.int$ -- 0
-cite$ -- 24
-duplicate$ -- 241
-empty$ -- 521
-format.name$ -- 60
-if$ -- 1199
+cite$ -- 26
+duplicate$ -- 261
+empty$ -- 553
+format.name$ -- 61
+if$ -- 1285
 int.to.chr$ -- 0
-int.to.str$ -- 22
-missing$ -- 19
-newline$ -- 113
-num.names$ -- 22
-pop$ -- 88
+int.to.str$ -- 23
+missing$ -- 20
+newline$ -- 118
+num.names$ -- 23
+pop$ -- 93
 preamble$ -- 1
 purify$ -- 0
 quote$ -- 0
-skip$ -- 134
+skip$ -- 152
 stack$ -- 0
-substring$ -- 318
-swap$ -- 74
-text.length$ -- 8
+substring$ -- 354
+swap$ -- 85
+text.length$ -- 9
 text.prefix$ -- 0
 top$ -- 0
 type$ -- 0
-warning$ -- 2
-while$ -- 47
-width$ -- 24
-write$ -- 240
-(There were 2 warnings)
+warning$ -- 3
+while$ -- 50
+width$ -- 25
+write$ -- 250
+(There were 3 warnings)

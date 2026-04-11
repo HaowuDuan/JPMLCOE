@@ -1,7 +1,9 @@
-"""Gradient validation: LEDH+OT autodiff vs numerical on 1D SV model.
+"""Gradient validation: LEDH+OT autodiff vs numerical FD on 1D Stochastic Volatility.
 
-Trainable parameter: alpha (persistence, enters through transitions).
-Same test structure as SV2D test.
+Trainable parameter: alpha (persistence — enters transition).
+Tolerance: TOL_SV1D (0.10 relative error).
+
+Each test case prints + saves to tests/hmc/results/test_gradient_vs_numerical_sv1d.json.
 
 Run: python -m pytest tests/hmc/test_gradient_vs_numerical_sv1d.py -v -s
 """
@@ -20,22 +22,32 @@ from src.models.stochastic_volatility import StochasticVolatilityModel
 from src.models.utils import generate_data
 from src.filters.particle.ledh_invertible_hmc import LEDHParticleFlowFilterHMC
 from src.DF.differentiable_model import DifferentiableModel
-from src.utils.linalg import graph_safe_inv
+
+from _gradient_test_utils import (
+    TOL_SV1D, gradient_case, reset_results,
+)
 
 
 DTYPE = tf.float64
 N_PARTICLES = 200
 N_LAMBDA_STEPS = 15
+T = 20
 PF_SEED = tf.constant([42, 0])
 DATA_SEED = 42
 
-M_RADII = 5
-H_MAX = 0.02  # smaller for alpha since it's in (0,1)
-
-# SV1D uses log_space=True so EKF works (H_x=1 instead of 0)
 TRUE_ALPHA = 0.91
 TRUE_SIGMA = 1.0
 TRUE_BETA = 0.5
+FD_H = 1e-4
+
+MODEL = 'stochastic_volatility_1d'
+FILTER = 'ledh_ot'
+
+
+@pytest.fixture(scope="module", autouse=True)
+def _reset_results():
+    reset_results(__file__)
+    yield
 
 
 @pytest.fixture(scope="module")
@@ -45,7 +57,7 @@ def obs_sv1d():
         log_space=True, dtype=DTYPE,
     )
     rng = np.random.default_rng(DATA_SEED)
-    _, _, obs_raw = generate_data(model, T=20, rng=rng)
+    _, _, obs_raw = generate_data(model, T=T, rng=rng)
     obs = model.transform_observations(obs_raw)
     return tf.constant(obs, dtype=DTYPE)
 
@@ -70,127 +82,48 @@ def _make_filter(alpha_val, n_lambda_steps=N_LAMBDA_STEPS):
     return diff_model, filt
 
 
-def _eval_ll(obs_tf, alpha_val, **kwargs):
-    diff_model, filt = _make_filter(alpha_val, **kwargs)
+def _eval_ll(obs_tf, alpha_val, n_lambda_steps=N_LAMBDA_STEPS):
+    diff_model, filt = _make_filter(alpha_val, n_lambda_steps=n_lambda_steps)
     ll = filt.log_marginal_likelihood_tf(obs_tf, seed=PF_SEED)
     return float(ll.numpy())
 
 
-def _compiled_ll_with_current_params(obs_tf, filt):
-    """Run compiled filter without reinitializing particles/covs."""
-    R = filt.model.observation_noise_cov
-    R_inv = graph_safe_inv(R)
-    regularization_tf = tf.constant(filt.regularization, dtype=filt.dtype)
-
-    param_values = []
-    for name in filt.model.trainable_param_names:
-        val = getattr(filt.model, name)
-        val = (
-            tf.identity(val)
-            if isinstance(val, tf.Tensor)
-            else tf.constant(float(val), dtype=filt.dtype)
-        )
-        param_values.append(val)
-    param_values = tf.stack(param_values)
-
-    return filt._compiled_filter(
-        obs_tf,
-        filt.particles.value(),
-        filt.weights.value(),
-        filt.particle_covs.value(),
-        R,
-        R_inv,
-        regularization_tf,
-        filt.rng_key[0],
-        param_values,
+def _run_case(case_name, obs_tf, alpha_val, n_lambda_steps=N_LAMBDA_STEPS, T_used=T):
+    diff_model, filt = _make_filter(alpha_val, n_lambda_steps=n_lambda_steps)
+    eval_fn = lambda x: _eval_ll(obs_tf, x, n_lambda_steps=n_lambda_steps)
+    return gradient_case(
+        test_file=__file__,
+        case_name=case_name,
+        model_name=MODEL,
+        filter_name=FILTER,
+        param_name='alpha',
+        param_val=alpha_val,
+        eval_fn=eval_fn,
+        diff_model=diff_model,
+        filt=filt,
+        obs_tf=obs_tf,
+        dtype=DTYPE,
+        seed=PF_SEED,
+        tol=TOL_SV1D,
+        n_particles=N_PARTICLES,
+        T=T_used,
+        n_lambda_steps=n_lambda_steps,
+        fd_h=FD_H,
     )
-
-
-def _eval_ll_detached_init(obs_tf, base_alpha, eval_alpha, **kwargs):
-    """Evaluate LL with initial conditions baked in at base_alpha.
-
-    log_marginal_likelihood_tf() always calls initialize(), so using it after
-    update_parameters() would make Sigma_0 depend on eval_alpha. Initialize
-    here at base_alpha, then call the compiled loop directly so only the model
-    dynamics/weights see eval_alpha.
-    """
-    diff_model, filt = _make_filter(base_alpha, **kwargs)
-    filt.initialize(random_seed=int(PF_SEED[0].numpy()))
-    try:
-        diff_model.update_parameters({'alpha': tf.constant(eval_alpha, dtype=DTYPE)})
-        ll = _compiled_ll_with_current_params(obs_tf, filt)
-    finally:
-        diff_model.restore_parameters()
-    return float(ll.numpy())
-
-
-def _autodiff_grad(obs_tf, alpha_val, **kwargs):
-    diff_model, filt = _make_filter(alpha_val, **kwargs)
-    var = tf.constant(alpha_val, dtype=DTYPE)
-    with tf.GradientTape() as tape:
-        tape.watch(var)
-        diff_model.update_parameters({'alpha': var})
-        ll = filt.log_marginal_likelihood_tf(obs_tf, seed=PF_SEED)
-    grad = tape.gradient(ll, var)
-    diff_model.restore_parameters()
-    ad_val = grad.numpy() if grad is not None else None
-    return float(ll.numpy()), ad_val
-
-
-def _numerical_grad(obs_tf, alpha_val, **kwargs):
-    radii = np.array([(k + 1) * H_MAX / M_RADII for k in range(M_RADII)])
-    slopes = np.empty(M_RADII)
-    for i, r in enumerate(radii):
-        if alpha_val - r <= 0.01 or alpha_val + r >= 0.999:
-            slopes[i] = np.nan
-            continue
-        f_plus = _eval_ll_detached_init(obs_tf, alpha_val, alpha_val + r, **kwargs)
-        f_minus = _eval_ll_detached_init(obs_tf, alpha_val, alpha_val - r, **kwargs)
-        slopes[i] = (f_plus - f_minus) / (2.0 * r)
-    valid = slopes[~np.isnan(slopes)]
-    return np.median(valid), valid
-
-
-def _report(label, obs_tf, alpha_val, **kwargs):
-    ll_val, ad = _autodiff_grad(obs_tf, alpha_val, **kwargs)
-    num_med, slopes = _numerical_grad(obs_tf, alpha_val, **kwargs)
-    print(f"\n  [{label}]")
-    print(f"    Forward ll:       {ll_val:.4f}")
-    print(f"    Autodiff grad:    {ad}")
-    print(f"    Numerical grad:   {num_med:.4f}")
-    print(f"    Slopes:           {np.array2string(slopes, precision=4)}")
-    if ad is not None and abs(num_med) > 1e-6:
-        ratio = ad / num_med
-        print(f"    Ratio (ad/num):   {ratio:.4f}")
-    return ad, num_med
 
 
 class TestSV1DTimesteps:
     def test_T1(self, obs_sv1d):
-        ad, num = _report("SV1D LEDH+OT T=1", obs_sv1d[:1], TRUE_ALPHA)
-        assert ad is not None
+        _run_case("SV1D LEDH+OT T=1", obs_sv1d[:1], TRUE_ALPHA, T_used=1)
 
-    def test_T3(self, obs_sv1d):
-        ad, num = _report("SV1D LEDH+OT T=3", obs_sv1d[:3], TRUE_ALPHA)
-        assert ad is not None
+    def test_T5(self, obs_sv1d):
+        _run_case("SV1D LEDH+OT T=5", obs_sv1d[:5], TRUE_ALPHA, T_used=5)
 
     def test_T20(self, obs_sv1d):
-        ad, num = _report("SV1D LEDH+OT T=20", obs_sv1d, TRUE_ALPHA)
-        assert ad is not None
+        _run_case("SV1D LEDH+OT T=20", obs_sv1d, TRUE_ALPHA, T_used=T)
 
 
-class TestSV1DFullComparison:
-    def test_full(self, obs_sv1d):
-        ad, num = _report("SV1D LEDH+OT full", obs_sv1d, TRUE_ALPHA)
-        assert ad is not None
-        if abs(num) > 0.1:
-            ratio = ad / num
-            print(f"    RATIO: {ratio:.4f} (want ~1.0)")
-
+class TestSV1DAtPoints:
     @pytest.mark.parametrize("alpha_val", [0.5, 0.7, 0.91, 0.95])
-    def test_at_points(self, obs_sv1d, alpha_val):
-        ad, num = _report(f"SV1D alpha={alpha_val}", obs_sv1d, alpha_val)
-        assert ad is not None
-        if abs(num) > 0.1:
-            ratio = ad / num
-            print(f"    RATIO: {ratio:.4f} (want ~1.0)")
+    def test_param_grid(self, obs_sv1d, alpha_val):
+        _run_case(f"SV1D LEDH+OT alpha={alpha_val}", obs_sv1d, alpha_val)

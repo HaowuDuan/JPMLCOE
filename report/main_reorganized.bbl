@@ -52,6 +52,11 @@ Adrien Corenflos, James Thornton, George Deligiannidis, and Arnaud Doucet.
 \newblock Differentiable particle filtering via entropy-regularized optimal
   transport, 2021.
 
+\bibitem{Cuturi2013SinkhornDL}
+Marco Cuturi.
+\newblock Sinkhorn distances: Lightspeed computation of optimal transport.
+\newblock pages 2292--2300, 2013.
+
 \bibitem{chaudhari2025gradnetot}
 Shreyas Chaudhari, Srinivasa Pranav, and Jos{\'e} M.~F. Moura.
 \newblock Gradnetot: Learning optimal transport maps with gradnets.

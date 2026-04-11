@@ -24,7 +24,8 @@ from ...utils.flow_params import compute_flow_params_batch
 from ...utils.distributions import compute_flow_weights
 from ...utils.linalg import (
     safe_log_abs_det, safe_inv,
-    graph_safe_log_abs_det, graph_safe_log_abs_det_fast, graph_safe_inv,
+    graph_safe_log_abs_det, graph_safe_log_abs_det_fast, graph_safe_log_abs_det_xla,
+    graph_safe_inv,
 )
 from ...resampling import systematic_resample, soft_resample, ot_entropy_resample
 from ...resampling.diagnosis import effective_sample_size as ess_tf
@@ -175,14 +176,15 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
             _batched_update_fn = batched_ekf_update.python_function
         _flow_params = compute_flow_params_batch.python_function
         _flow_weights = compute_flow_weights.python_function
-        # Graph mode: use graph_safe_log_abs_det (custom gradient with pinv
-        # backward) to avoid MatrixInverse crash on GPU in graph mode.
-        _log_abs_det = graph_safe_log_abs_det_fast.python_function
+        # Graph mode: use the XLA-compatible variant (QR forward + NaN-guarded
+        # fast inv backward). slogdet has no XLA_CPU_JIT kernel so the _fast
+        # variant fails to compile under jit_compile=True; QR works.
+        _log_abs_det = graph_safe_log_abs_det_xla.python_function
 
         # Capture param names at build time (works for any model)
         param_names = list(self.model.trainable_param_names)
 
-        @tf.function
+        @tf.function(reduce_retracing=True)
         def compiled_filter(observations, particles, weights, covs,
                             R, R_inv, regularization, seed_start,
                             param_values):
@@ -330,7 +332,8 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
 
             final_state = tf.while_loop(
                 cond, body, initial_state,
-                parallel_iterations=1
+                parallel_iterations=1,
+                maximum_iterations=T,
             )
 
             return final_state[5]  # total_log_lik
@@ -355,34 +358,37 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
 
         Eager path: Python for-loop with plain tensors (no tf.Variable).
         Slower but errors appear instantly and gradients flow correctly.
+
+        No tf.Variable allocation — initial state is computed as plain
+        tensors from model's live properties, so gradients flow through
+        Sigma_0 and sample_initial_state_batch for all models.
         """
-        random_seed = int(seed[0].numpy()) if seed is not None else 42
-        self.initialize(random_seed=random_seed)
+        # Normalize seed as [2] int32 tensor — no .numpy() call
+        seed_tf = seed if seed is not None else tf.constant([42, 0], dtype=tf.int32)
+        seed_tf = tf.cast(seed_tf, tf.int32)
+        keys = tf.random.experimental.stateless_split(seed_tf, num=2)
+        filter_key = keys[0]
+        init_seed = keys[1]
+
+        # Plain tensor initial state — no tf.Variable, no initialize()
+        particles = self.model.sample_initial_state_batch(
+            self.n_particles, init_seed
+        )
+        initial_cov = self.model.Sigma_0
+        particle_covs = tf.tile(
+            tf.expand_dims(initial_cov, 0), [self.n_particles, 1, 1]
+        )
+        weights = (tf.ones(self.n_particles, dtype=self.dtype)
+                   / tf.cast(self.n_particles, self.dtype))
 
         R = self.model.observation_noise_cov
         regularization_tf = tf.constant(self.regularization, dtype=self.dtype)
 
         if self.eager_mode:
             R_inv = safe_inv(R)
-            # Re-derive initial state from model's live tensors so gradients
-            # flow through model parameters (initialize() uses numpy which
-            # severs the gradient chain).
-            rng_key = tf.constant([random_seed, 0], dtype=tf.int32)
-            keys = tf.random.experimental.stateless_split(rng_key, num=2)
-            rng_key = keys[0]
-            init_seed = keys[1]
-            particles = self.model.sample_initial_state_batch(
-                self.n_particles, init_seed
-            )
-            initial_cov = self.model.Sigma_0
-            particle_covs = tf.tile(
-                tf.expand_dims(initial_cov, 0), [self.n_particles, 1, 1]
-            )
-            weights = (tf.ones(self.n_particles, dtype=self.dtype)
-                       / tf.cast(self.n_particles, self.dtype))
             return self._run_eager(
                 observations, R, R_inv, regularization_tf,
-                particles, particle_covs, weights, rng_key
+                particles, particle_covs, weights, filter_key
             )
 
         # Graph mode: use graph_safe_inv (pinv) to avoid MatrixInverse crash
@@ -392,22 +398,78 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
         # as tensor inputs (not constants baked in at trace time).
         # tf.identity converts tf.Variable -> plain tensor while keeping the
         # gradient chain intact.
+        param_names = list(self.model.trainable_param_names)
         param_values = []
-        for name in self.model.trainable_param_names:
+        for name in param_names:
             val = getattr(self.model, name)
             val = tf.identity(val) if isinstance(val, tf.Tensor) else tf.constant(float(val), dtype=self.dtype)
             param_values.append(val)
         param_values = tf.stack(param_values)
 
-        return self._compiled_filter(
-            observations,
-            self.particles.value(),
-            self.weights.value(),
-            self.particle_covs.value(),
-            R, R_inv, regularization_tf,
-            self.rng_key[0],
-            param_values
-        )
+        # Save original model attributes — compiled_filter mutates them via
+        # setattr to bind to graph-local tensors during tracing. Without
+        # restoration, subsequent calls would read stale graph tensors.
+        saved_attrs = {name: getattr(self.model, name) for name in param_names}
+        try:
+            return self._compiled_filter(
+                observations,
+                particles,
+                weights,
+                particle_covs,
+                R, R_inv, regularization_tf,
+                filter_key[0],
+                param_values
+            )
+        finally:
+            for name, val in saved_attrs.items():
+                setattr(self.model, name, val)
+
+    def value_and_grad_tf(self, observations, param_dict, seed=None):
+        """XLA-compatible value-and-gradient pass.
+
+        Computes log_marginal_likelihood and its gradient w.r.t. the supplied
+        parameters in a SINGLE jit_compile=True wrapper. By keeping the
+        GradientTape inside the XLA region, the backward TensorList stays
+        inside XLA — no boundary crossing (the limitation that blocks
+        external GradientTape + jit_compile=True on the outer filter).
+
+        Args:
+            observations: (T, obs_dim) tensor.
+            param_dict: dict {name: scalar tf.Tensor} of parameters to
+                differentiate w.r.t. The values are watched and used to
+                update the model before evaluating the filter.
+            seed: optional [2] int32 tensor.
+
+        Returns:
+            (log_lik, grads_dict) where grads_dict has the same keys as
+            param_dict.
+        """
+        # Sort to make iteration order deterministic
+        names = sorted(param_dict.keys())
+        values = tuple(param_dict[n] for n in names)
+
+        # Save original Python-side attrs to restore at the end
+        saved_attrs = {n: getattr(self.model, n) for n in names}
+
+        @tf.function(jit_compile=True)
+        def _value_and_grad(*vs):
+            with tf.GradientTape() as tape:
+                for v in vs:
+                    tape.watch(v)
+                # Bind watched tensors as model attributes so the gradient
+                # chain flows through them.
+                for n, v in zip(names, vs):
+                    setattr(self.model, n, v)
+                ll = self.log_marginal_likelihood_tf(observations, seed=seed)
+            grads = tape.gradient(ll, list(vs))
+            return ll, grads
+
+        try:
+            ll, grads = _value_and_grad(*values)
+        finally:
+            for n, val in saved_attrs.items():
+                setattr(self.model, n, val)
+        return ll, dict(zip(names, grads))
 
     def _run_eager(self, observations, R, R_inv, regularization_tf,
                    particles, particle_covs, weights, rng_key):

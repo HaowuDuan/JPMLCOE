@@ -258,6 +258,70 @@ def graph_safe_log_abs_det_fast(M: tf.Tensor, jitter: float = 1e-8) -> tf.Tensor
     return _graph_safe_log_abs_det_fast_impl(M_reg)
 
 
+# -- XLA-compatible variant: QR forward + same NaN-guarded backward --
+
+@tf.custom_gradient
+def _graph_safe_log_abs_det_xla_impl(M_reg):
+    """log|det(M)| with QR forward (XLA-compatible) and NaN-guarded backward.
+
+    Forward: QR factorization. log|det(M)| = sum(log|diag(R)|).
+        XLA-compatible (unlike tf.linalg.slogdet which has no XLA_CPU_JIT kernel).
+    Backward: identical to _graph_safe_log_abs_det_fast_impl — fast inv with
+        NaN guard. NaN matrices get zero gradient.
+    """
+    # Forward: QR-based logabsdet (XLA-friendly)
+    _, r = tf.linalg.qr(M_reg, full_matrices=False)
+    diag_r = tf.linalg.diag_part(r)
+    eps = tf.constant(1e-30, dtype=M_reg.dtype)
+    logabsdet = tf.reduce_sum(
+        tf.math.log(tf.maximum(tf.abs(diag_r), eps)), axis=-1
+    )
+
+    def grad(dy):
+        is_finite = tf.reduce_all(tf.math.is_finite(M_reg), axis=[-2, -1])
+        n = tf.shape(M_reg)[-1]
+        eye = tf.eye(n, dtype=M_reg.dtype)
+        M_safe = tf.where(
+            is_finite[..., tf.newaxis, tf.newaxis], M_reg, eye
+        )
+        M_inv_T = tf.linalg.matrix_transpose(
+            tf.linalg.inv(M_safe + tf.constant(1e-6, dtype=eye.dtype) * eye)
+        )
+        M_inv_T = tf.where(
+            is_finite[..., tf.newaxis, tf.newaxis],
+            M_inv_T, tf.zeros_like(M_inv_T)
+        )
+        return dy[..., tf.newaxis, tf.newaxis] * M_inv_T
+
+    return logabsdet, grad
+
+
+@tf.function(jit_compile=True)
+def graph_safe_log_abs_det_xla(M: tf.Tensor, jitter: float = 1e-8) -> tf.Tensor:
+    """
+    XLA-compatible version of graph_safe_log_abs_det_fast.
+
+    Uses QR factorization for the forward pass instead of slogdet, since
+    LogMatrixDeterminant has no XLA_CPU_JIT kernel. Backward pass is
+    identical to the _fast variant (fast inv with NaN guard).
+
+    For well-conditioned matrices, gives bit-equivalent results to
+    graph_safe_log_abs_det_fast. For near-singular matrices, returns
+    a large negative finite number (clamped at log(eps)) instead of -inf.
+
+    Args:
+        M: Matrix of shape (..., n, n). Need not be symmetric or PD.
+        jitter: Regularization added to diagonal (default: 1e-8)
+
+    Returns:
+        log|det(M)| of shape (...)
+    """
+    n = tf.shape(M)[-1]
+    eye = tf.eye(n, dtype=M.dtype)
+    M_reg = M + jitter * eye
+    return _graph_safe_log_abs_det_xla_impl(M_reg)
+
+
 # -- SVD approach (not used): robust but ~4x slower due to full SVD --
 
 @tf.function(jit_compile=True)

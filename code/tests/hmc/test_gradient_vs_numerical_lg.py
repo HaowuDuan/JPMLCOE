@@ -1,8 +1,9 @@
-"""Gradient validation: LEDH+OT autodiff vs numerical on Linear Gaussian model.
+"""Gradient validation: LEDH+OT autodiff vs numerical FD on Linear Gaussian.
 
-Same test structure as test_gradient_vs_numerical.py (SV2D), but for the
-LG model with obs_noise_std as the trainable parameter. If this gives
-ratio ~1.0 but SV2D gives 2.5x, the bug is model-specific.
+Trainable parameter: obs_noise_std.
+Tolerance: TOL_LG (0.03 relative error) — LG should be very tight.
+
+Each test case prints + saves to tests/hmc/results/test_gradient_vs_numerical_lg.json.
 
 Run: python -m pytest tests/hmc/test_gradient_vs_numerical_lg.py -v -s
 """
@@ -22,6 +23,10 @@ from src.models.utils import generate_data
 from src.filters.particle.ledh_invertible_hmc import LEDHParticleFlowFilterHMC
 from src.DF.differentiable_model import DifferentiableModel
 
+from _gradient_test_utils import (
+    TOL_LG, gradient_case, reset_results,
+)
+
 
 # ============================================================================
 # Constants
@@ -30,27 +35,35 @@ from src.DF.differentiable_model import DifferentiableModel
 DTYPE = tf.float64
 N_PARTICLES = 200
 N_LAMBDA_STEPS = 15
+T = 20
 PF_SEED = tf.constant([42, 0])
 DATA_SEED = 42
 TRUE_OBS_NOISE_STD = 1.0
+FD_H = 1e-4
 
-M_RADII = 5
-H_MAX = 0.05
+MODEL = 'linear_gaussian'
+FILTER = 'ledh_ot'
 
 
 # ============================================================================
 # Fixtures
 # ============================================================================
 
+@pytest.fixture(scope="module", autouse=True)
+def _reset_results():
+    """Wipe the results JSON once at the start of the module run."""
+    reset_results(__file__)
+    yield
+
+
 @pytest.fixture(scope="module")
 def obs_lg():
-    """T=20 observations from LG model."""
     model = LinearGaussianModel(
         F=[[0.9]], B=[[1.0]], H=[[1.0]], D=[[1.0]],
         obs_noise_std=TRUE_OBS_NOISE_STD, dtype=DTYPE,
     )
     rng = np.random.default_rng(DATA_SEED)
-    _, _, obs = generate_data(model, T=20, rng=rng)
+    _, _, obs = generate_data(model, T=T, rng=rng)
     return tf.constant(obs, dtype=DTYPE)
 
 
@@ -59,7 +72,6 @@ def obs_lg():
 # ============================================================================
 
 def _make_filter(ons_val, n_lambda_steps=N_LAMBDA_STEPS):
-    """Create LG model + DifferentiableModel + LEDH+OT compiled filter."""
     base_model = LinearGaussianModel(
         F=[[0.9]], B=[[1.0]], H=[[1.0]], D=[[1.0]],
         obs_noise_std=ons_val, dtype=DTYPE,
@@ -79,109 +91,68 @@ def _make_filter(ons_val, n_lambda_steps=N_LAMBDA_STEPS):
     return diff_model, filt
 
 
-def _eval_ll(obs_tf, ons_val, **kwargs):
-    """Evaluate log-likelihood. Fresh model+filter per call."""
-    diff_model, filt = _make_filter(ons_val, **kwargs)
+def _eval_ll(obs_tf, ons_val, n_lambda_steps=N_LAMBDA_STEPS):
+    diff_model, filt = _make_filter(ons_val, n_lambda_steps=n_lambda_steps)
     ll = filt.log_marginal_likelihood_tf(obs_tf, seed=PF_SEED)
     return float(ll.numpy())
 
 
-def _autodiff_grad(obs_tf, ons_val, **kwargs):
-    """Autodiff gradient + forward value."""
-    diff_model, filt = _make_filter(ons_val, **kwargs)
-    var = tf.constant(ons_val, dtype=DTYPE)
-    with tf.GradientTape() as tape:
-        tape.watch(var)
-        diff_model.update_parameters({'obs_noise_std': var})
-        ll = filt.log_marginal_likelihood_tf(obs_tf, seed=PF_SEED)
-    grad = tape.gradient(ll, var)
-    diff_model.restore_parameters()
-    ad_val = grad.numpy() if grad is not None else None
-    return float(ll.numpy()), ad_val
-
-
-def _numerical_grad(obs_tf, ons_val, **kwargs):
-    """Numerical gradient via central differences."""
-    radii = np.array([(k + 1) * H_MAX / M_RADII for k in range(M_RADII)])
-    slopes = np.empty(M_RADII)
-    for i, r in enumerate(radii):
-        if ons_val - r <= 0.01:
-            slopes[i] = np.nan
-            continue
-        f_plus = _eval_ll(obs_tf, ons_val + r, **kwargs)
-        f_minus = _eval_ll(obs_tf, ons_val - r, **kwargs)
-        slopes[i] = (f_plus - f_minus) / (2.0 * r)
-    valid = slopes[~np.isnan(slopes)]
-    return np.median(valid), valid
-
-
-def _report(label, obs_tf, ons_val, **kwargs):
-    ll_val, ad = _autodiff_grad(obs_tf, ons_val, **kwargs)
-    num_med, slopes = _numerical_grad(obs_tf, ons_val, **kwargs)
-    print(f"\n  [{label}]")
-    print(f"    Forward ll:       {ll_val:.4f}")
-    print(f"    Autodiff grad:    {ad}")
-    print(f"    Numerical grad:   {num_med:.4f}")
-    print(f"    Slopes:           {np.array2string(slopes, precision=4)}")
-    if ad is not None and abs(num_med) > 1e-6:
-        ratio = ad / num_med
-        print(f"    Ratio (ad/num):   {ratio:.4f}")
-    return ad, num_med
+def _run_case(case_name, obs_tf, ons_val, n_lambda_steps=N_LAMBDA_STEPS, T_used=T):
+    diff_model, filt = _make_filter(ons_val, n_lambda_steps=n_lambda_steps)
+    eval_fn = lambda x: _eval_ll(obs_tf, x, n_lambda_steps=n_lambda_steps)
+    return gradient_case(
+        test_file=__file__,
+        case_name=case_name,
+        model_name=MODEL,
+        filter_name=FILTER,
+        param_name='obs_noise_std',
+        param_val=ons_val,
+        eval_fn=eval_fn,
+        diff_model=diff_model,
+        filt=filt,
+        obs_tf=obs_tf,
+        dtype=DTYPE,
+        seed=PF_SEED,
+        tol=TOL_LG,
+        n_particles=N_PARTICLES,
+        T=T_used,
+        n_lambda_steps=n_lambda_steps,
+        fd_h=FD_H,
+    )
 
 
 # ============================================================================
-# Tests — same structure as SV2D diagnostics
+# Tests
 # ============================================================================
 
 class TestLGForwardValues:
     def test_forward_value_match(self, obs_lg):
-        ll_ad, _ = _autodiff_grad(obs_lg, TRUE_OBS_NOISE_STD)
+        """Forward log-lik should match between autodiff and numerical paths."""
+        diff_model, filt = _make_filter(TRUE_OBS_NOISE_STD)
+        var = tf.constant(TRUE_OBS_NOISE_STD, dtype=DTYPE)
+        with tf.GradientTape() as tape:
+            tape.watch(var)
+            diff_model.update_parameters({'obs_noise_std': var})
+            ll_ad = float(filt.log_marginal_likelihood_tf(obs_lg, seed=PF_SEED).numpy())
+        diff_model.restore_parameters()
         ll_num = _eval_ll(obs_lg, TRUE_OBS_NOISE_STD)
-        print(f"\n  Forward ll (autodiff path): {ll_ad:.6f}")
-        print(f"  Forward ll (numerical path): {ll_num:.6f}")
-        print(f"  Difference: {abs(ll_ad - ll_num):.6f}")
-        assert abs(ll_ad - ll_num) < 1e-4
+        diff = abs(ll_ad - ll_num)
+        print(f"\n  ll_ad={ll_ad:.6f}  ll_num={ll_num:.6f}  diff={diff:.2e}")
+        assert diff < 1e-4, f"Forward value mismatch: {diff:.2e}"
 
 
 class TestLGTimesteps:
-    def test_ledh_ot_T1(self, obs_lg):
-        ad, num = _report("LG LEDH+OT T=1", obs_lg[:1], TRUE_OBS_NOISE_STD)
-        assert ad is not None
+    def test_T1(self, obs_lg):
+        _run_case("LG LEDH+OT T=1", obs_lg[:1], TRUE_OBS_NOISE_STD, T_used=1)
 
-    def test_ledh_ot_T3(self, obs_lg):
-        ad, num = _report("LG LEDH+OT T=3", obs_lg[:3], TRUE_OBS_NOISE_STD)
-        assert ad is not None
+    def test_T5(self, obs_lg):
+        _run_case("LG LEDH+OT T=5", obs_lg[:5], TRUE_OBS_NOISE_STD, T_used=5)
 
-    def test_ledh_ot_T20(self, obs_lg):
-        ad, num = _report("LG LEDH+OT T=20", obs_lg, TRUE_OBS_NOISE_STD)
-        assert ad is not None
+    def test_T20(self, obs_lg):
+        _run_case("LG LEDH+OT T=20", obs_lg, TRUE_OBS_NOISE_STD, T_used=T)
 
 
-class TestLGFlowSteps:
-    def test_ledh_ot_1step(self, obs_lg):
-        ad, num = _report("LG LEDH+OT n_lambda=1", obs_lg, TRUE_OBS_NOISE_STD,
-                          n_lambda_steps=1)
-        assert ad is not None
-
-    def test_ledh_ot_3steps(self, obs_lg):
-        ad, num = _report("LG LEDH+OT n_lambda=3", obs_lg, TRUE_OBS_NOISE_STD,
-                          n_lambda_steps=3)
-        assert ad is not None
-
-
-class TestLGFullComparison:
-    def test_ledh_ot_full(self, obs_lg):
-        ad, num = _report("LG LEDH+OT full (T=20, n_lambda=15)", obs_lg,
-                          TRUE_OBS_NOISE_STD)
-        assert ad is not None
-        if abs(num) > 0.1:
-            ratio = ad / num
-            print(f"    RATIO: {ratio:.4f} (want ~1.0)")
-
+class TestLGAtPoints:
     @pytest.mark.parametrize("ons_val", [0.5, 1.0, 1.5, 2.0])
-    def test_ledh_ot_at_points(self, obs_lg, ons_val):
-        ad, num = _report(f"LG LEDH+OT ons={ons_val}", obs_lg, ons_val)
-        assert ad is not None
-        if abs(num) > 0.1:
-            ratio = ad / num
-            print(f"    RATIO: {ratio:.4f} (want ~1.0)")
+    def test_param_grid(self, obs_lg, ons_val):
+        _run_case(f"LG LEDH+OT ons={ons_val}", obs_lg, ons_val)

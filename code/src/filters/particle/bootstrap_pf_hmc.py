@@ -113,7 +113,7 @@ class BootstrapPFHMC(ParticleFilterTF):
 
         param_names = list(self.model.trainable_param_names)
 
-        @tf.function
+        @tf.function(reduce_retracing=True)
         def compiled_filter(observations, particles, weights,
                             seed_start, param_values):
             # Set model params to symbolic tensors
@@ -194,7 +194,8 @@ class BootstrapPFHMC(ParticleFilterTF):
 
             final_state = tf.while_loop(
                 cond, body, initial_state,
-                parallel_iterations=1
+                parallel_iterations=1,
+                maximum_iterations=T,
             )
 
             return final_state[4]  # total_log_lik
@@ -211,11 +212,12 @@ class BootstrapPFHMC(ParticleFilterTF):
         Eager path: Python for-loop with no compilation. Slow but
         errors appear instantly. Use for debugging.
         """
-        random_seed = int(seed[0].numpy()) if seed is not None else 42
-        rng_key = tf.constant([random_seed, 0], dtype=tf.int32)
+        # Normalize seed as [2] int32 tensor — no .numpy() call
+        seed_tf = seed if seed is not None else tf.constant([42, 0], dtype=tf.int32)
+        seed_tf = tf.cast(seed_tf, tf.int32)
 
-        # Initialize particles
-        keys = tf.random.experimental.stateless_split(rng_key, num=2)
+        # Initialize particles as plain tensors
+        keys = tf.random.experimental.stateless_split(seed_tf, num=2)
         rng_key = keys[0]
         init_seed = keys[1]
         particles = self.model.sample_initial_state_batch(self.n_particles, init_seed)
@@ -227,8 +229,9 @@ class BootstrapPFHMC(ParticleFilterTF):
             return self._run_eager(observations, particles, weights, rng_key)
 
         # Gather trainable params as plain tensors
+        param_names = list(self.model.trainable_param_names)
         param_values = []
-        for name in self.model.trainable_param_names:
+        for name in param_names:
             val = getattr(self.model, name)
             val = tf.identity(val) if isinstance(val, tf.Tensor) else tf.constant(
                 float(val), dtype=self.dtype
@@ -236,13 +239,53 @@ class BootstrapPFHMC(ParticleFilterTF):
             param_values.append(val)
         param_values = tf.stack(param_values)
 
-        return self._compiled_filter(
-            observations,
-            particles,
-            weights,
-            rng_key[0],
-            param_values
-        )
+        # Save original model attributes — compiled_filter mutates them via
+        # setattr to bind to graph-local tensors during tracing. Without
+        # restoration, subsequent calls would read stale graph tensors.
+        saved_attrs = {name: getattr(self.model, name) for name in param_names}
+        try:
+            return self._compiled_filter(
+                observations,
+                particles,
+                weights,
+                rng_key[0],
+                param_values
+            )
+        finally:
+            for name, val in saved_attrs.items():
+                setattr(self.model, name, val)
+
+    def value_and_grad_tf(self, observations, param_dict, seed=None):
+        """XLA-compatible value-and-gradient pass.
+
+        Computes log_marginal_likelihood and its gradient w.r.t. the supplied
+        parameters in a SINGLE jit_compile=True wrapper. By keeping the
+        GradientTape inside the XLA region, the backward TensorList stays
+        inside XLA — no boundary crossing.
+
+        See LEDHParticleFlowFilterHMC.value_and_grad_tf for full details.
+        """
+        names = sorted(param_dict.keys())
+        values = tuple(param_dict[n] for n in names)
+        saved_attrs = {n: getattr(self.model, n) for n in names}
+
+        @tf.function(jit_compile=True)
+        def _value_and_grad(*vs):
+            with tf.GradientTape() as tape:
+                for v in vs:
+                    tape.watch(v)
+                for n, v in zip(names, vs):
+                    setattr(self.model, n, v)
+                ll = self.log_marginal_likelihood_tf(observations, seed=seed)
+            grads = tape.gradient(ll, list(vs))
+            return ll, grads
+
+        try:
+            ll, grads = _value_and_grad(*values)
+        finally:
+            for n, val in saved_attrs.items():
+                setattr(self.model, n, val)
+        return ll, dict(zip(names, grads))
 
     def _run_eager(self, observations, particles, weights, rng_key):
         """Eager fallback: Python for-loop."""

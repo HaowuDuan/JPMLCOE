@@ -207,7 +207,8 @@ def sinkhorn_iteration(
     n_iter, alpha_final, beta_final, _ = tf.while_loop(
         convergence_check,
         iteration_step,
-        loop_vars=[tf.constant(0), alpha, beta, initial_diff]
+        loop_vars=[tf.constant(0), alpha, beta, initial_diff],
+        maximum_iterations=max_iter,
     )
 
     # Final extrapolation step for better gradients (implicit function theorem)

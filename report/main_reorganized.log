@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.3.8)  6 APR 2026 13:05
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.3.8)  10 APR 2026 11:10
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -712,12 +712,6 @@ LaTeX Warning: Reference `fig:rb_sde_local' on page 22 undefined on input line
 [24]
 
 [25]
-Overfull \hbox (18.38367pt too wide) in paragraph at lines 1396--1397
-[]\OT1/cmr/m/n/10 In ad-di-tion, there are of course al-ter-na-tives to OT re-s
-am-pling. No-table ex-am-ple is Par-ti-cle Transformer[[],
- []
-
-
 
 [26]
 
@@ -725,27 +719,101 @@ am-pling. No-table ex-am-ple is Par-ti-cle Transformer[[],
 
 [28]
 
-[29
+[29]
 
-]
+LaTeX Warning: Citation `cremers2022unifiedframeworkimplicit' on page 30 undefi
+ned on input line 1575.
 
-[30]
 
-[31]
 
-[32
+[30
 pdfTeX warning (ext4): destination with the same identifier (name{table.1}) has
  been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.1681 \end{align}
-                  ]
+l.1577 T
+        he idea is as follows. Let $\mathbf{f}$ and $\mathbf{g}$ denote the ...
+] Excluding 'figure' comment.
+./main_reorganized.tex:1603: Extra }, or forgotten \endgroup.
+\@endfloatbox ...pagefalse \outer@nobreak \egroup 
+                                                  \color@endbox 
+l.1603 \end{figure}
+                   
+? 
+./main_reorganized.tex:1603: Too many }'s.
+\color@endbox ->\color@endgroup \egroup 
+                                        
+l.1603 \end{figure}
+                   
+? 
 
-[33] (./main_reorganized.bbl
+./main_reorganized.tex:1603: LaTeX Error: \begin{document} ended by \end{figure
+}.
 
-[34])
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.1603 \end{figure}
+                   
+? 
+./main_reorganized.tex:1603: Extra \endgroup.
+\end  ...end#1\endcsname \@checkend {#1}\endgroup 
+                                                  \UseHook {env/#1/after}\if...
+l.1603 \end{figure}
+                   
+? 
+Excluding 'figure' comment.
+./main_reorganized.tex:1618: Extra }, or forgotten \endgroup.
+\@endfloatbox ...pagefalse \outer@nobreak \egroup 
+                                                  \color@endbox 
+l.1618 \end{figure}
+                   
+? 
+./main_reorganized.tex:1618: Too many }'s.
+\color@endbox ->\color@endgroup \egroup 
+                                        
+l.1618 \end{figure}
+                   
+? 
 
-[35] (./main_reorganized.aux)
+./main_reorganized.tex:1618: LaTeX Error: \begin{document} ended by \end{figure
+}.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.1618 \end{figure}
+                   
+? 
+./main_reorganized.tex:1618: Extra \endgroup.
+\end  ...end#1\endcsname \@checkend {#1}\endgroup 
+                                                  \UseHook {env/#1/after}\if...
+l.1618 \end{figure}
+                   
+? 
+
+
+[31]
+
+[32]
+
+[33]
+
+[34
+
+]
+
+[35]
+
+[36] (./main_reorganized.bbl
+
+[37]
+
+[38])
+
+[39] (./main_reorganized.aux)
  ***********
 LaTeX2e <2024-11-01> patch level 2
 L3 programming layer <2025-01-18>
@@ -755,16 +823,16 @@ L3 programming layer <2025-01-18>
 LaTeX Warning: There were undefined references.
 
 Package rerunfilecheck Info: File `main_reorganized.out' has not changed.
-(rerunfilecheck)             Checksum: 8584D54D2B17B12D09103C83FBC4E416;9507.
+(rerunfilecheck)             Checksum: D6E20CB51D673964B357283602A3A799;10440.
  ) 
 Here is how much of TeX's memory you used:
- 13426 strings out of 473190
- 199318 string characters out of 5715801
- 625047 words of memory out of 5000000
- 35978 multiletter control sequences out of 15000+600000
+ 13462 strings out of 473190
+ 199858 string characters out of 5715801
+ 625278 words of memory out of 5000000
+ 35988 multiletter control sequences out of 15000+600000
  569998 words of font info for 78 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 75i,20n,79p,2002b,733s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 75i,20n,79p,1768b,733s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb
 ></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb>
 </usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx7.pfb></
@@ -787,10 +855,10 @@ ive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/local/texlive
 texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/local/texlive/2025/t
 exmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></usr/local/texlive/20
 25/texmf-dist/fonts/type1/public/cm-super/sfrm1000.pfb>
-Output written on main_reorganized.pdf (35 pages, 448669 bytes).
+Output written on main_reorganized.pdf (39 pages, 468421 bytes).
 PDF statistics:
- 1099 PDF objects out of 1200 (max. 8388607)
- 1007 compressed objects within 11 object streams
- 512 named destinations out of 1000 (max. 500000)
- 393 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 1167 PDF objects out of 1200 (max. 8388607)
+ 1071 compressed objects within 11 object streams
+ 538 named destinations out of 1000 (max. 500000)
+ 425 words of extra memory for PDF output out of 10000 (max. 10000000)
 

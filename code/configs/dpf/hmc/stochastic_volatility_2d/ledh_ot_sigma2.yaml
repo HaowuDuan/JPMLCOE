@@ -37,11 +37,11 @@ dpf:
   hmc:
     num_samples: 500
     num_burnin: 200
-    step_size: 0.001
+    step_size: 0.02         # near optimum: 1 / (num_leapfrog * |grad|) ~ 1/(5*9) for T=200
     num_leapfrog_steps: 5
     max_tree_depth: 10
     adaptation_rate: 0.8
-    target_accept_prob: 0.75
+    target_accept_prob: 0.65   # theoretical optimum for high-d HMC; pushes step_size up
     seed: 42
     grad_clip_norm: 100.0
 

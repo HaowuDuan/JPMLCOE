@@ -1,0 +1,53 @@
+# @package _global_
+# SMOKE: 2D SV with LEDH + OT — fast diagnostic for HMC step-size tuning.
+# Goal: 30 burn-in + 30 sampling, ~15 minutes wall clock.
+# Validates: chain moves toward the mode, dual averaging settles near a sane step_size.
+
+dtype: float64    # was float32; cross-model PF noise diagnostic showed float32 destroys the SV2D gradient surface (shape_corr=0.054 -> 0.997)
+
+model:
+  _target_: src.models.stochastic_volatility_2d.StochasticVolatility2DModel
+  a1: 0.95
+  a2: 0.91
+  sigma1: 0.5
+  sigma2: 1.6       # Initial guess (true: 1.0)
+  b: 1.0
+
+filter:
+  _target_: src.filters.particle.ledh_invertible_hmc.LEDHParticleFlowFilterHMC
+  n_particles: 300       # smaller than full (500) for speed
+  n_lambda_steps: 15     # smaller than full (29) for speed
+  resampling_method: ot_entropy
+  resampling_config:
+    epsilon: 0.5
+  weight_clip_range: 50.0
+  stop_gradient_resampling: false
+  eager_mode: false
+
+dpf:
+  sampler: hmc
+
+  trainable_params:
+    sigma2:
+      constraint: positive
+      prior:
+        _target_: tensorflow_probability.distributions.LogNormal
+        loc: 0.0
+        scale: 0.5
+
+  hmc:
+    num_samples: 30
+    num_burnin: 30
+    step_size: 0.02         # FIXED step (no adaptation in smoke)
+    num_leapfrog_steps: 5
+    max_tree_depth: 10
+    adaptation_rate: 0.001  # ~0 adaptation steps -> isolate chain dynamics from dual averaging
+    target_accept_prob: 0.65
+    seed: 42
+    grad_clip_norm: 100.0
+
+data:
+  T: 100         # half of full (200) for speed; still enough to inform sigma2
+  seed: 42
+  true_params:
+    sigma2: 1.0
