@@ -30,9 +30,9 @@ dpf:
     a2:
       constraint: [0.001, 0.999]
       prior:
-        _target_: tensorflow_probability.distributions.Uniform
-        low: 0.0
-        high: 1.0
+        _target_: tensorflow_probability.distributions.Beta
+        concentration1: 17.38    # mode = 0.91
+        concentration0: 2.62
 
   map:
     num_steps: 200

@@ -28,13 +28,13 @@ dpf:
       constraint: positive
       prior:
         _target_: tensorflow_probability.distributions.LogNormal
-        loc: -2.3     # log(0.1) ~ -2.3 — prior centered near true value
+        loc: -2.05    # log(0.1) + 0.25 ~ -2.05, mode=0.1
         scale: 0.5
     sigma_bearing:
       constraint: positive
       prior:
         _target_: tensorflow_probability.distributions.LogNormal
-        loc: -2.3
+        loc: -2.05    # log(0.1) + 0.25 ~ -2.05, mode=0.1
         scale: 0.5
 
   hmc:

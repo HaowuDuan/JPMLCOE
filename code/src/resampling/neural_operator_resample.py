@@ -19,21 +19,26 @@ import tensorflow as tf
 from .types import ResampleResult
 
 
-def _silverman_bandwidth_scalar(particles, weights, scale=1.0):
-    """Inlined Silverman scalar bandwidth.
+def _resolution_bandwidth_scalar(particles, scale=5.0):
+    """Inlined particle-resolution bandwidth.
 
     Kept self-contained here so this module has no import dependency on the
     neural_operator training package. Must match the formula used during
-    training (see code/neural_operator/src/kde.py).
+    training (see code/neural_operator/src/kde.py
+    `particle_resolution_bandwidth_scalar`).
+
+    The bandwidth is `scale * mean_nearest_neighbor_distance(particles)`.
+    Independent of weights, set by particle spacing only.
     """
-    d = tf.cast(tf.shape(particles)[-1], particles.dtype)
-    n_eff = 1.0 / tf.reduce_sum(weights ** 2)
-    mu = tf.reduce_sum(weights[:, None] * particles, axis=0)
-    centered = particles - mu[None, :]
-    cov = tf.einsum('n,ni,nj->ij', weights, centered, centered)
-    std = tf.reduce_mean(tf.sqrt(tf.linalg.diag_part(cov)))
-    factor = (4.0 / (d + 2.0)) ** (1.0 / (d + 4.0))
-    return scale * factor * std * tf.pow(n_eff, -1.0 / (d + 4.0))
+    diff = particles[:, None, :] - particles[None, :, :]
+    sq_dist = tf.reduce_sum(diff * diff, axis=-1)
+    N = tf.shape(particles)[0]
+    inf_diag = tf.linalg.diag(
+        tf.fill([N], tf.constant(float('inf'), dtype=particles.dtype))
+    )
+    sq_dist = sq_dist + inf_diag
+    nn_dist = tf.sqrt(tf.reduce_min(sq_dist, axis=-1))
+    return scale * tf.reduce_mean(nn_dist)
 
 
 class NeuralOperatorResampler:
@@ -56,8 +61,9 @@ class NeuralOperatorResampler:
             model: A trained neural operator exposing
                 .encode(particles, weights, h_kde=h)
                 .transport_with_jacobian(x, c)
-            h_scale: scalar multiplier on the Silverman bandwidth used at
-                inference. 1.0 matches the final h_scale used during training.
+            h_scale: scalar multiplier on the resolution-based bandwidth
+                used at inference. 1.0 matches the final h_scale used
+                during training.
         """
         self.model = model
         self.h_scale = h_scale
@@ -83,7 +89,10 @@ class NeuralOperatorResampler:
         """
         del seed  # deterministic forward pass
 
-        h = _silverman_bandwidth_scalar(particles, weights, scale=self.h_scale)
+        # Resolution-based bandwidth: weight-independent, set by particle
+        # spacing only. Multiplied by h_scale (default 5.0 inside the
+        # function, then * self.h_scale annealing multiplier).
+        h = _resolution_bandwidth_scalar(particles, scale=5.0 * self.h_scale)
         c = self.model.encode(particles, weights, h_kde=h)
         T_x, J_x = self.model.transport_with_jacobian(particles, c)
 

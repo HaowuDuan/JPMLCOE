@@ -7,21 +7,13 @@ and runs it on a held-out cloud. Verifies:
 3. local_jacobians is populated and PSD
 4. transport_matrix and ancestor_indices are None
 5. Mapped particles match a direct model.transport_with_jacobian call
-6. Trained resampler reduces moment error vs identity
+6. Resampler is deterministic on repeated calls
 
-Run: python code/neural_operator/tests/test_resampler.py
+Run: pytest code/neural_operator/tests/test_resampler.py -v -s
 """
 
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-
-import sys
-HERE = os.path.dirname(os.path.abspath(__file__))
-# Order matters: neural_operator/src must come BEFORE code/src so that
-# `from models import WTanh` finds neural_operator/src/models.py rather than
-# the state-space model package at code/src/models/.
-sys.path.insert(0, os.path.join(HERE, '..', '..', 'src'))   # code/src (so `resampling` is importable)
-sys.path.insert(0, os.path.join(HERE, '..', 'src'))         # neural_operator/src (priority)
 
 import numpy as np
 import tensorflow as tf
@@ -29,10 +21,14 @@ import tensorflow as tf
 from train import NeuralOperator, train
 from data import sample_random_cloud
 from resampling import NeuralOperatorResampler, ResampleResult
+from _result_utils import save_result, reset_results
 
 
 DTYPE = tf.float64
-tf.keras.backend.set_floatx('float64')
+
+
+def setup_module():
+    reset_results(__file__)
 
 
 def test_resampler_smoke():
@@ -73,47 +69,70 @@ def test_resampler_smoke():
     resampler = NeuralOperatorResampler(model)
     result = resampler(particles, weights, seed=tf.constant([0, 0], dtype=tf.int32))
 
-    # ---- Shape and type checks
-    assert isinstance(result, ResampleResult), f"got {type(result)}"
-    assert result.particles.shape == (200, 1), f"particles shape {result.particles.shape}"
-    assert result.weights.shape == (200,), f"weights shape {result.weights.shape}"
-    assert result.local_jacobians is not None, "local_jacobians is None"
-    assert result.local_jacobians.shape == (200, 1, 1), (
-        f"local_jacobians shape {result.local_jacobians.shape}"
-    )
-    assert result.transport_matrix is None, "transport_matrix should be None"
-    assert result.ancestor_indices is None, "ancestor_indices should be None"
-    print(f"  Shapes OK: particles={result.particles.shape}, "
-          f"J={result.local_jacobians.shape}")
+    metrics = {}
+    failures = []
 
-    # ---- Uniform weights
+    # Shape and type checks
+    if not isinstance(result, ResampleResult):
+        failures.append(f"got type {type(result).__name__}, expected ResampleResult")
+    metrics['particles_shape'] = list(result.particles.shape)
+    metrics['weights_shape'] = list(result.weights.shape)
+    if result.local_jacobians is None:
+        failures.append("local_jacobians is None")
+        metrics['local_jacobians_shape'] = None
+    else:
+        metrics['local_jacobians_shape'] = list(result.local_jacobians.shape)
+        if list(result.local_jacobians.shape) != [200, 1, 1]:
+            failures.append(f"local_jacobians shape {result.local_jacobians.shape}")
+    if result.transport_matrix is not None:
+        failures.append("transport_matrix is not None")
+    if result.ancestor_indices is not None:
+        failures.append("ancestor_indices is not None")
+    print(f"  Shapes OK: particles={metrics['particles_shape']}, J={metrics['local_jacobians_shape']}")
+
+    # Uniform weights
     expected_w = 1.0 / 200.0
     max_w_diff = float(tf.reduce_max(tf.abs(result.weights - expected_w)))
-    assert max_w_diff < 1e-12, f"weights not uniform: max diff = {max_w_diff}"
     w_sum = float(tf.reduce_sum(result.weights))
-    assert abs(w_sum - 1.0) < 1e-12, f"weights don't sum to 1: {w_sum}"
-    print(f"  Weights uniform OK (sum={w_sum:.6f})")
+    metrics['max_w_diff'] = max_w_diff
+    metrics['w_sum'] = w_sum
+    if max_w_diff >= 1e-12:
+        failures.append(f"weights not uniform: max diff {max_w_diff}")
+    if abs(w_sum - 1.0) >= 1e-12:
+        failures.append(f"weights don't sum to 1: {w_sum}")
+    print(f"  Weights uniform OK (sum={w_sum:.6f}, max diff={max_w_diff:.2e})")
 
-    # ---- Jacobians PSD
-    eigvals = tf.linalg.eigvalsh(result.local_jacobians)  # (N, d)
+    # Jacobians PSD
+    eigvals = tf.linalg.eigvalsh(result.local_jacobians)
     min_eig = float(tf.reduce_min(eigvals))
-    assert min_eig > 0.0, f"non-PSD Jacobian: min_eig={min_eig}"
+    metrics['min_eig'] = min_eig
+    if min_eig <= 0.0:
+        failures.append(f"non-PSD Jacobian: min_eig={min_eig}")
     print(f"  J PSD OK: min_eig={min_eig:.4f}")
 
-    # ---- Determinism: run twice, same input -> same output
+    # Determinism
     result2 = resampler(particles, weights, seed=tf.constant([42, 0], dtype=tf.int32))
-    diff = float(tf.reduce_max(tf.abs(result.particles - result2.particles)))
-    assert diff < 1e-12, f"resampler not deterministic: diff={diff}"
-    print(f"  Deterministic OK")
+    determinism_diff = float(tf.reduce_max(tf.abs(result.particles - result2.particles)))
+    metrics['determinism_diff'] = determinism_diff
+    if determinism_diff >= 1e-12:
+        failures.append(f"resampler not deterministic: diff={determinism_diff}")
+    print(f"  Deterministic OK (diff={determinism_diff:.2e})")
 
-    # NOTE: Quality (moment matching, KL, etc.) is intentionally NOT checked
-    # here. This smoke test only validates the resampler INTERFACE
-    # (shapes, weights, PSD Jacobians, determinism, ResampleResult fields).
-    # Model-quality assertions live in dedicated quality tests on fixed
-    # low-ESS clouds.
+    passed = (len(failures) == 0)
 
+    save_result(__file__, {
+        'case_name': 'resampler_smoke',
+        'description': 'NeuralOperatorResampler interface smoke test',
+        'config': {
+            'n_particles': 200,
+            'd': 1,
+            'training_steps': 200,
+            'cloud_seed': [9999, 0],
+        },
+        'metrics': metrics,
+        'failures': failures,
+        'passed': passed,
+    })
+
+    assert passed, "resampler smoke test failed: " + "; ".join(failures)
     print("\n=== Resampler smoke test passed ===\n")
-
-
-if __name__ == '__main__':
-    test_resampler_smoke()

@@ -28,14 +28,14 @@ dpf:
       constraint: positive
       prior:
         _target_: tensorflow_probability.distributions.LogNormal
-        loc: 1.15          # log(sqrt(10)) ~ 1.15
+        loc: 1.40          # log(sqrt(10)) + 0.25 ~ 1.40, mode=sqrt(10)
         scale: 0.5
     sigma_W:
       constraint: positive
       prior:
         _target_: tensorflow_probability.distributions.LogNormal
-        loc: 0.0
-        scale: 1.0
+        loc: 0.25
+        scale: 0.5
 
   map:
     num_steps: 200

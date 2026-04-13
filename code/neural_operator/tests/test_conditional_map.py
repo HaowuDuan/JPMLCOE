@@ -8,14 +8,11 @@ Verify:
 5. Different contexts give different transport maps
 6. Differentiable through context (gradient flows from T back to c)
 
-Run: python code/neural_operator/tests/test_conditional_map.py
+Run: pytest code/neural_operator/tests/test_conditional_map.py
 """
 
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-
-import sys
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'src'))
 
 import numpy as np
 import tensorflow as tf
@@ -24,7 +21,6 @@ from conditional_map import ConditionalConvexPotentialMap
 
 
 DTYPE = tf.float64
-tf.keras.backend.set_floatx('float64')
 
 
 def test_forward_shape():
@@ -138,16 +134,3 @@ def test_differentiable_through_context():
     print(f"  test_differentiable_through_context PASS: grad norm = {float(tf.norm(grad)):.4f}")
 
 
-if __name__ == '__main__':
-    print("\n=== ConditionalConvexPotentialMap tests ===\n")
-    tf.random.set_seed(42)
-
-    test_forward_shape()
-    test_analytic_vs_autodiff_jacobian()
-    test_jacobian_symmetric()
-    test_jacobian_psd()
-    test_residual_near_identity_at_init()
-    test_context_changes_map()
-    test_differentiable_through_context()
-
-    print("\n=== All conditional map tests passed ===\n")

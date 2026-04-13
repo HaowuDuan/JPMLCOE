@@ -7,14 +7,11 @@ Verify:
 4. Differentiable through particles and weights
 5. Context responds to changes in input distribution
 
-Run: python code/neural_operator/tests/test_encoder.py
+Run: pytest code/neural_operator/tests/test_encoder.py
 """
 
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-
-import sys
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'src'))
 
 import numpy as np
 import tensorflow as tf
@@ -23,7 +20,6 @@ from encoder import WeightedDeepSetsEncoder
 
 
 DTYPE = tf.float64
-tf.keras.backend.set_floatx('float64')
 
 
 def test_output_shape():
@@ -109,14 +105,3 @@ def test_context_responds_to_input():
     print(f"  test_context_responds_to_input PASS: diff = {diff:.4f}")
 
 
-if __name__ == '__main__':
-    print("\n=== WeightedDeepSetsEncoder tests ===\n")
-    tf.random.set_seed(42)
-
-    test_output_shape()
-    test_permutation_invariance()
-    test_variable_N()
-    test_differentiable()
-    test_context_responds_to_input()
-
-    print("\n=== All encoder tests passed ===\n")

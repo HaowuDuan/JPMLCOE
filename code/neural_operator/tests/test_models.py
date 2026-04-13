@@ -6,14 +6,11 @@ Verify:
 3. Jacobian is symmetric and PSD (the convex potential property)
 4. Residual init: T(x) ~ x at initialization
 
-Run: python code/neural_operator/src/test_models.py
+Run: pytest code/neural_operator/tests/test_models.py
 """
 
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-
-import sys
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'src'))
 
 import numpy as np
 import tensorflow as tf
@@ -22,7 +19,6 @@ from models import ConvexPotentialMap, ConvexPotentialModule, WTanh
 
 
 DTYPE = tf.float64
-tf.keras.backend.set_floatx('float64')
 
 
 def test_forward_shape():
@@ -123,17 +119,3 @@ def test_module_only_jacobian():
     print(f"  test_module_only_jacobian PASS: rel_diff = {rel_diff:.2e}")
 
 
-if __name__ == '__main__':
-    print("\n=== ConvexPotentialMap tests ===\n")
-    tf.random.set_seed(42)
-    np.random.seed(42)
-
-    test_forward_shape()
-    test_jacobian_shape()
-    test_module_only_jacobian()
-    test_analytic_vs_autodiff_jacobian()
-    test_jacobian_symmetric()
-    test_jacobian_psd()
-    test_residual_near_identity_at_init()
-
-    print("\n=== All tests passed ===\n")

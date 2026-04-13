@@ -296,10 +296,16 @@ class DPFRunner:
 
         q = tf.Variable(self.param_handler.unconstrained_init, dtype=dtype)
 
+        # Warmup → constant → cosine decay LR schedule
+        from .lr_schedules import WarmupConstantCosineDecay
+        lr_schedule = WarmupConstantCosineDecay(
+            peak_lr=learning_rate, total_steps=num_steps,
+        )
+
         if optimizer == 'adam':
-            opt = tf.keras.optimizers.Adam(learning_rate)
+            opt = tf.keras.optimizers.Adam(lr_schedule)
         elif optimizer == 'sgd':
-            opt = tf.keras.optimizers.SGD(learning_rate)
+            opt = tf.keras.optimizers.SGD(lr_schedule)
         else:
             raise ValueError(f"Unknown optimizer: {optimizer}. Use 'adam' or 'sgd'.")
 
@@ -313,6 +319,7 @@ class DPFRunner:
                 return float(learning_rate)
 
         print(f"Running MAP ({optimizer}, lr={learning_rate}, steps={num_steps}, "
+              f"warmup={lr_schedule.warmup_steps}, decay_start={lr_schedule.warmup_steps + lr_schedule.constant_steps}, "
               f"random_seed={random_seed})")
 
         best_loss = float('inf')

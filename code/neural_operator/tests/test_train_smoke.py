@@ -8,14 +8,11 @@ Runs a tiny training (100 steps, d=1) to verify:
 
 NOT a quality test — just verifies the training pipeline runs.
 
-Run: python code/neural_operator/tests/test_train_smoke.py
+Run: pytest code/neural_operator/tests/test_train_smoke.py -s
 """
 
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-
-import sys
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'src'))
 
 import numpy as np
 import tensorflow as tf
@@ -25,9 +22,14 @@ from data import sample_random_cloud
 from kde import silverman_bandwidth_scalar
 from losses import ma_residual_loss
 
+from _result_utils import save_result, reset_results
+
 
 DTYPE = tf.float64
-tf.keras.backend.set_floatx('float64')
+
+
+def setup_module():
+    reset_results(__file__)
 
 
 def test_smoke_training():
@@ -62,15 +64,10 @@ def test_smoke_training():
     losses = [h['loss'] for h in history]
     initial_loss = losses[0]
     final_loss = losses[-1]
+    reduction = initial_loss / max(final_loss, 1e-30)
     print(f"\n  Initial loss: {initial_loss:.4e}")
     print(f"  Final loss:   {final_loss:.4e}")
-    print(f"  Reduction:    {initial_loss / max(final_loss, 1e-30):.2f}x")
-
-    # Sanity checks
-    assert np.isfinite(final_loss), f"Final loss not finite: {final_loss}"
-    assert final_loss < initial_loss * 2, (
-        f"Loss did not decrease: {initial_loss:.4e} -> {final_loss:.4e}"
-    )
+    print(f"  Reduction:    {reduction:.2f}x")
 
     # Verify forward pass still works after training
     seed = tf.constant([99, 0], dtype=tf.int32)
@@ -79,14 +76,38 @@ def test_smoke_training():
     c = model.encode(particles, weights, h_kde=h)
     x_test = particles[:5]  # use first 5 particles
     T_x, J_x = model.transport_with_jacobian(x_test, c)
+    print(f"  Post-training forward pass: T_x shape {T_x.shape}, J_x shape {J_x.shape}")
+
+    # Compute passed before asserting — cast to Python bool for JSON
+    passed = bool(
+        np.isfinite(final_loss)
+        and final_loss < initial_loss * 2
+        and T_x.shape == (5, 1)
+        and J_x.shape == (5, 1, 1)
+        and bool(tf.reduce_all(tf.math.is_finite(T_x)).numpy())
+        and bool(tf.reduce_all(tf.math.is_finite(J_x)).numpy())
+    )
+
+    save_result(__file__, {
+        'case_name': 'smoke_training',
+        'metrics': {
+            'initial_loss': float(initial_loss),
+            'final_loss': float(final_loss),
+            'reduction': float(reduction),
+            'T_x_shape': list(T_x.shape),
+            'J_x_shape': list(J_x.shape),
+        },
+        'passed': passed,
+    })
+
+    # Sanity checks
+    assert np.isfinite(final_loss), f"Final loss not finite: {final_loss}"
+    assert final_loss < initial_loss * 2, (
+        f"Loss did not decrease: {initial_loss:.4e} -> {final_loss:.4e}"
+    )
     assert T_x.shape == (5, 1)
     assert J_x.shape == (5, 1, 1)
     assert tf.reduce_all(tf.math.is_finite(T_x)).numpy()
     assert tf.reduce_all(tf.math.is_finite(J_x)).numpy()
-    print(f"  Post-training forward pass: T_x shape {T_x.shape}, J_x shape {J_x.shape}")
 
     print("\n=== Smoke test passed ===\n")
-
-
-if __name__ == '__main__':
-    test_smoke_training()

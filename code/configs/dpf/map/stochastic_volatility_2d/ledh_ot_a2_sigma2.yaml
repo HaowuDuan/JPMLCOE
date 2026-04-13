@@ -30,14 +30,14 @@ dpf:
     a2:
       constraint: [0.001, 0.999]
       prior:
-        _target_: tensorflow_probability.distributions.Uniform
-        low: 0.0
-        high: 1.0
+        _target_: tensorflow_probability.distributions.Beta
+        concentration1: 17.38    # mode = 0.91
+        concentration0: 2.62
     sigma2:
       constraint: positive
       prior:
         _target_: tensorflow_probability.distributions.LogNormal
-        loc: 0.0
+        loc: 0.25          # log(1.0) + 0.25, mode=1.0
         scale: 0.5
 
   map:

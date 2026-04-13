@@ -415,6 +415,95 @@ This redesign should be done **before** the next quality-test run, not
 after. Otherwise we will spend more compute confirming that unsolvable
 inputs are unsolvable.
 
+### 7d. Graded ladder result + training instability is the dominant problem
+
+After the test was redesigned into a smooth-cloud graded ladder
+(`test_resampler_quality.py` now has tiers 1–4 at increasing weight skew
+on the same broad Gaussian particle distribution), we re-ran with the
+existing model and **no other changes**.
+
+**Cloud ladder:**
+
+| Tier | β (exp tilt) | ESS/N | weighted mean |
+|---|---|---|---|
+| 1 (easy)        | 0.10 | 0.96 | +0.45 |
+| 2 (easy-medium) | 0.30 | 0.73 | +1.18 |
+| 3 (medium)      | 0.40 | 0.57 | +1.53 |
+| 4 (hard)        | 0.55 | 0.36 | +2.05 |
+
+**Per-tier results (run 1, no other changes):**
+
+| Tier | identity_mean | T_mean | verdict |
+|---|---|---|---|
+| 1 (easy) | 0.81 | **1.80** | fail (T much worse than identity) |
+| 2 | 0.93 | 1.22 | fail |
+| 3 | 0.94 | 1.11 | fail |
+| 4 (hard) | 0.96 | 1.01 | fail (T converges to identity) |
+
+The model fails on **every tier**, including the easiest (`ESS/N = 0.96`,
+the cloud is barely skewed). On easy tiers T is much worse than identity;
+on hard tiers it regresses to identity. The pattern is consistent with a
+weakly-context-sensitive map applying nearly the same correction to
+every cloud — that correction overshoots on easy clouds and is masked by
+the worse identity baseline on hard ones.
+
+**Training is wildly unstable.** Loss varies by 100×–1000× across steps,
+gradient norms hit several thousand at peak, and the bandwidth `h`
+swings 24× across steps:
+
+```
+step  200: loss=0.24    |grad|=2.3      h=3.13
+step  400: loss=19.6    |grad|=18       h=0.81
+step  600: loss=0.05    |grad|=0.4      h=1.84
+step  800: loss=3.6     |grad|=35       h=0.54
+step 1000: loss=42.0    |grad|=2896     h=0.13   <- biggest spike
+step 1400: loss=11.3    |grad|=252      h=0.45
+```
+
+The spikes correlate cleanly with small `h` (smoking gun: step 1000 has
+the smallest `h` and the biggest gradient norm). To confirm this with a
+full per-step record we instrumented `train_step` and `train` to write a
+CSV trace of `(step, loss, grad_norm, h, h_scale, n_eff,
+weighted_std, unweighted_std, residual_abs_mean, …)` to
+`code/neural_operator/tests/traces/baseline.csv`. Pure logging, no
+behavior change.
+
+**Diagnosis (Codex confirmed).** The mechanism is the **weighted std**
+inside `silverman_bandwidth_scalar` collapsing onto the heavy-weight
+region of skewed clouds. Each training cloud has different weights, so
+each cloud gets a different `h`. Sharp clouds give a tiny `h`, which
+makes the KDE peaked, the loss stiff, and the gradient huge. Calm clouds
+give a normal `h`. The optimizer takes a giant step on a sharp cloud,
+relaxes on a calm one, then spikes again — never settles.
+
+(Important correction: my earlier guess that `N_eff^{-1/(d+4)}` was the
+collapse driver was wrong. That factor actually *grows* as ESS drops,
+which would *increase* `h`. The actual collapse driver is the weighted
+covariance shrinking onto the heavy region.)
+
+**Codex's ranked single-fix list (apply one at a time):**
+
+1. **Source-based bandwidth** in `kde.py`: replace weighted std + `N_eff`
+   with **unweighted** std + raw `N`. The bandwidth then describes the
+   particle cloud's geometry, not its weight skew, so all training
+   clouds at the same particle spread get the same `h`. Most likely
+   root cause.
+2. **`h` floor** at `0.15 × std_unweighted` as a safety net.
+3. **Lower learning rate** from `1e-3` to `3e-4`.
+4. **Tighten gradient clipping** from `10` to `5`.
+5. **Turn on small local-linearity penalty** (`linearity_weight = 1e-2`),
+   currently zero.
+
+(The earlier proposal to add an auxiliary moment loss is deferred until
+the bandwidth fix has been tested. Sobolev / Gaussian-to-Gaussian
+pretraining is filed as a contingency in
+`3_gradient_supervision.md` — use it only if the bandwidth fix and the
+moment loss both fail to recover the easy tier.)
+
+The graded test now lazily caches the trained model to
+`code/neural_operator/tests/checkpoints/operator_v1`. To force a retrain
+after a single fix, delete that directory before running.
+
 ---
 
 ## 8. What is *not* known (open questions)
@@ -437,35 +526,69 @@ inputs are unsolvable.
 
 ## 9. Concrete next-session pickup list
 
-Ordered. Each step is small and reversible.
+Ordered. Each step is small, reversible, and **applies exactly one
+change before re-running**. No bundles. The discipline is: change one
+variable, observe, decide. See `~/.claude/.../feedback_one_fix_at_a_time.md`.
 
-1. **Redesign the four quality-test clouds** in `test_resampler_quality.py`
-   into the smooth-cloud regime per §7c. Three of the four current clouds
-   are unsolvable inputs and must be replaced before any further runs.
-2. Implement the JIT acceleration plan (Codex-approved) in `train.py`:
-   - Module-level `_make_compiled_train_step(model, optimizer,
-     linearity_weight, eig_weight, eig_threshold, use_xla)`
-   - Module-level `_warmup_model_and_optimizer(...)`
-   - Keep eager `train_step(...)` unchanged
-   - In `train(...)`: optimizer → warmup → build compiled step → loop
-   - Try `jit_compile=True`, fall back to `jit_compile=False`, fall back to
-     eager
-3. Run `test_train_smoke.py` to confirm JIT did not break the eager path.
-4. Run `test_resampler.py` (smoke test) to confirm the resampler interface
-   still passes.
-5. Run `test_resampler_quality.py` (2000 steps, redesigned clouds) with
-   the JIT-accelerated training.
-5. **Decision point:** read the four-cloud numbers.
-   - If trained T beats identity on average — Step 11 is done. Update the
-     plan, mark Step 11 complete, move to Step 12.
-   - If trained T still hugs identity — switch to interpretation 7b: add
-     normalized moment loss to `losses.py`, wire it into `train_step`,
-     retrain, re-run the quality test.
-6. Either way, write a follow-up entry in this file with the outcome and
-   the interpretation that was confirmed.
+**State already in place (do not redo):**
+- Graded ladder test (`test_resampler_quality.py`, 4 tiers, ESS/N from
+  0.96 to 0.36).
+- Lazy checkpoint at `code/neural_operator/tests/checkpoints/operator_v1`.
+- Per-step trace dumped to
+  `code/neural_operator/tests/traces/baseline.csv` whenever training runs.
+- Baseline trace from the graded ladder run is committed to office.
 
-Do **not** try to do step 5's "if branch" speculatively before step 4. The
-whole point is to learn which interpretation was right.
+**Next steps:**
+
+1. **Apply Codex's fix #1: source-based bandwidth in `kde.py`.**
+   In `silverman_bandwidth_scalar`, replace
+   `weighted_covariance(particles, weights)` with the unweighted
+   covariance, and replace `n_eff = 1 / Σ wᵢ²` with the raw particle
+   count `N`. Two-line change. The bandwidth then depends on the
+   particle cloud's geometry only, not on the weight skew.
+2. Delete the cached checkpoint to force a retrain:
+   `rm -rf code/neural_operator/tests/checkpoints/operator_v1`.
+3. Run `python neural_operator/tests/test_resampler_quality.py`. The
+   trace will be written to `traces/baseline.csv`, overwriting the
+   previous baseline.
+4. **Decision point** (compare against the previous baseline):
+   - **If `h` is now stable across steps and the gradient spikes are
+     gone**, the diagnosis is confirmed. Look at the per-tier results.
+     - **Tier 1 PASSES**: the bandwidth fix was sufficient. Move on
+       to evaluating the higher tiers, then to Step 12 of the main
+       neural operator plan.
+     - **Tier 1 still fails but training is now stable**: training is
+       fine, the loss is just not strong enough. Apply Codex's next
+       single change (h floor → lower LR → tighter clip → local
+       linearity penalty), one at a time.
+     - **Tier 1 still fails AND training is still wild**: bandwidth
+       was not the (only) instability source. Look at the new trace
+       to find what changed and what didn't.
+   - **If `h` is now stable but the per-tier numbers are unchanged**,
+     the bandwidth was a real bug but not the root cause. Move down
+     Codex's list.
+5. Whatever happens in step 4, **write a follow-up entry in §10 below**
+   with the new per-tier numbers, the new training-trace summary, and
+   the next single change to try.
+
+**Deferred work** (do not start until tier 1 passes):
+- JIT acceleration of `train_step` (Codex-approved plan: module-level
+  `_make_compiled_train_step` factory, warmup, XLA-first fallback).
+  Speeds the iteration loop from ~10 min per training run to ~30 sec.
+  Touch only after the model is actually learning.
+- Step 12 onwards: LEDH local-Jacobian covariance transport, end-to-end
+  gradient test through the compiled filter, benchmark vs implicit
+  Sinkhorn, scale to d=2.
+
+## 10. Run history
+
+Each entry is one training run with one change applied. Add to the
+bottom; do not edit prior entries.
+
+| Date | Change applied | Trace file | Tier 1 | Tier 2 | Tier 3 | Tier 4 | Notes |
+|---|---|---|---|---|---|---|---|
+| 2026-04-10 | None (graded ladder + instrumentation only) | `traces/baseline.csv` | fail (id 0.81 → T 1.80) | fail (0.93 → 1.22) | fail (0.94 → 1.11) | fail (0.96 → 1.01) | Training wildly unstable. Loss jumps 100×, grad spikes to 475. h varies 24× across steps. Spikes correlate with small h. |
+| 2026-04-11 | Same — second run for instrumentation reproducibility | `traces/baseline.csv` (overwritten) | fail (0.81 → 1.34) | fail (0.93 → 1.00) | fail (0.94 → 0.95) | PASS by luck (0.96 → 0.88) | Same instability. Spike at step 1000 hit `\|grad\|=2896`, 6× the previous run. Random seed dictates which tier passes. |
 
 ---
 

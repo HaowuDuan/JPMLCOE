@@ -14,7 +14,7 @@ model:
 
 filter:
   _target_: src.filters.particle.bootstrap_pf_hmc.BootstrapPFHMC
-  n_particles: 1000
+  n_particles: 500
   resampling_method: ot_entropy
   resampling_config:
     epsilon: 0.5

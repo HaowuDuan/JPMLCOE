@@ -128,13 +128,23 @@ class ConditionalGNMModule(tf.keras.layers.Layer):
 
 
 class ConditionalConvexPotentialMap(tf.keras.Model):
-    """Conditional T(x; c) parameterized by context c from the encoder.
+    """Conditional T(x; c) with trainable base scale.
 
-    T(x; c) = x + d(c) + sum_m softplus(alpha_m(c)) * T_m(x, c)
+    T(x; c) = λ(c) x + d(c) + sum_m softplus(α_m(c)) T_m(x, c)
 
-    The output bias d(c) and the per-module gates alpha_m(c) are produced
-    from c via linear projections. The W_m weights inside each module are
-    fixed (not context-dependent), preserving PSD Jacobian.
+    where λ(c) = softplus(lambda_raw(c)) is a context-dependent positive
+    scalar. At init, λ ≈ 1 (near-identity). During training, λ can
+    decrease below 1, allowing the map to compress (J < I).
+
+    Previous version had T(x; c) = x + ..., which forced J ≥ I everywhere
+    — the map could only expand, never compress. See
+    issues_to_be_addressed/4_jacobian_lower_bound.md.
+
+    J(x; c) = λ(c) I + sum_m softplus(α_m(c)) J_m(x, c)
+
+    This is PSD because λ > 0 and each J_m ≥ 0. The W_m weights inside
+    each module are fixed (not context-dependent), preserving the
+    W^T D W PSD structure.
     """
 
     def __init__(self, in_dim: int, embed_dim: int, num_modules: int,
@@ -156,8 +166,7 @@ class ConditionalConvexPotentialMap(tf.keras.Model):
 
     def build(self, input_shape):
         # Context-to-alpha projection (one scalar per module)
-        # Initialize with negative bias so softplus(alpha) ~ 0 at init,
-        # giving T(x; c) ~ x (residual near identity).
+        # Initialize with negative bias so softplus(alpha) ~ 0 at init.
         self.alpha_proj = tf.keras.layers.Dense(
             self.num_modules,
             use_bias=True,
@@ -172,12 +181,25 @@ class ConditionalConvexPotentialMap(tf.keras.Model):
             bias_initializer='zeros',
             name='out_bias_proj',
         )
+        # Context-to-lambda projection (scalar base scale)
+        # softplus(0.5413) ≈ 1.0, so λ ≈ 1 at init → near-identity.
+        self.lambda_proj = tf.keras.layers.Dense(
+            1,
+            use_bias=True,
+            kernel_initializer='zeros',
+            bias_initializer=tf.keras.initializers.Constant(0.5413),
+            name='lambda_proj',
+        )
 
     def _alpha_pos(self, c):
         """Per-module positive gate from context."""
-        # alpha_proj input: (1, context_dim) -> (1, num_modules)
         alpha_raw = self.alpha_proj(c[None, :])[0]
         return tf.nn.softplus(alpha_raw)
+
+    def _lambda_pos(self, c):
+        """Positive base scale from context. λ ≈ 1 at init."""
+        lambda_raw = self.lambda_proj(c[None, :])[0, 0]
+        return tf.nn.softplus(lambda_raw)
 
     def call(self, x, c):
         """Forward pass.
@@ -188,16 +210,17 @@ class ConditionalConvexPotentialMap(tf.keras.Model):
         Returns: (batch, in_dim)
         """
         alpha_pos = self._alpha_pos(c)
+        lambda_pos = self._lambda_pos(c)
         out_bias = self.out_bias_proj(c[None, :])[0]  # (in_dim,)
 
         z = tf.zeros_like(x)
         for i, mod in enumerate(self.modules_list):
             z = z + alpha_pos[i] * mod(x, c)
         z = z + out_bias[None, :]
-        return x + z  # residual
+        return lambda_pos * x + z  # trainable base scale
 
     def jacobian(self, x, c):
-        """Analytic Jacobian J(x; c) = I + sum_m alpha_m(c) * J_m(x, c).
+        """Analytic Jacobian J(x; c) = λ(c) I + sum_m α_m(c) J_m(x, c).
 
         x: (batch, in_dim)
         c: (context_dim,)
@@ -205,9 +228,10 @@ class ConditionalConvexPotentialMap(tf.keras.Model):
         Returns: (batch, in_dim, in_dim)
         """
         alpha_pos = self._alpha_pos(c)
+        lambda_pos = self._lambda_pos(c)
         batch_size = tf.shape(x)[0]
         I = tf.eye(self.in_dim, dtype=x.dtype, batch_shape=[batch_size])
-        J = I
+        J = lambda_pos * I
         for i, mod in enumerate(self.modules_list):
             J = J + alpha_pos[i] * mod.jacobian(x, c)
         return J

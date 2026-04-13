@@ -7,14 +7,11 @@ Verify:
 4. Samples from q_h are distributed like q_h
 5. log_kde is differentiable through h and particles
 
-Run: python code/neural_operator/src/test_kde.py
+Run: pytest code/neural_operator/tests/test_kde.py
 """
 
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-
-import sys
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'src'))
 
 import math
 import numpy as np
@@ -33,7 +30,6 @@ from kde import (
 
 
 DTYPE = tf.float64
-tf.keras.backend.set_floatx('float64')
 
 
 def test_effective_sample_size():
@@ -161,16 +157,3 @@ def test_log_kde_differentiable():
     print(f"  test_log_kde_differentiable PASS: grad norm = {float(tf.norm(grad)):.4f}")
 
 
-if __name__ == '__main__':
-    print("\n=== KDE utility tests ===\n")
-    tf.random.set_seed(42)
-
-    test_effective_sample_size()
-    test_weighted_moments()
-    test_silverman_bandwidth_scalar()
-    test_log_kde_weighted_normalization()
-    test_log_kde_at_centers_vs_far()
-    test_sample_from_uniform_kde_distribution()
-    test_log_kde_differentiable()
-
-    print("\n=== All KDE tests passed ===\n")

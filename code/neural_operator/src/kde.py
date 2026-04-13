@@ -35,25 +35,115 @@ def weighted_covariance(particles, weights):
     return cov
 
 
+def particle_resolution_bandwidth_scalar(particles, scale: float = 5.0):
+    """Bandwidth as a multiple of the mean nearest-neighbor distance.
+
+    Independent of weights, independent of any density-estimation heuristic.
+    Set by the actual particle spacing, which is the resolution at which
+    the cloud can be smoothed without blurring out structure that the
+    particles are physically able to represent.
+
+    For 200 equally-spaced particles on [-5, 5], the mean nearest-neighbor
+    distance is 10 / 199 ≈ 0.05, so `scale=5` gives `h ≈ 0.25`.
+
+    For random particle clouds, the mean nearest-neighbor distance is the
+    natural local resolution of the cloud, varying smoothly with cloud
+    geometry but completely decoupled from how the weights happen to be
+    distributed.
+
+    Args:
+        particles: (N, d) tensor.
+        scale: multiplier on the mean nearest-neighbor distance. Default 5.
+
+    Returns:
+        scalar bandwidth h.
+    """
+    # Pairwise squared distances, mask the diagonal so a particle isn't its
+    # own nearest neighbor.
+    diff = particles[:, None, :] - particles[None, :, :]      # (N, N, d)
+    sq_dist = tf.reduce_sum(diff * diff, axis=-1)             # (N, N)
+    N = tf.shape(particles)[0]
+    inf_diag = tf.linalg.diag(
+        tf.fill([N], tf.constant(float('inf'), dtype=particles.dtype))
+    )
+    sq_dist = sq_dist + inf_diag
+    nn_dist = tf.sqrt(tf.reduce_min(sq_dist, axis=-1))        # (N,)
+    return scale * tf.reduce_mean(nn_dist)
+
+
+def compute_bandwidth_scalar(particles, weights=None, policy: str = 'resolution',
+                              scale: float = 1.0):
+    """Dispatcher for the scalar KDE bandwidth.
+
+    Two policies are supported:
+
+    - 'resolution' (default): weight-independent bandwidth proportional to
+      the mean nearest-neighbor particle distance. Right tool when the
+      particles are not i.i.d. samples from a smooth density (e.g. particle
+      filter outputs, equally-spaced grids, two-different-weight schemes on
+      the same particles). Used by the neural operator path.
+
+    - 'silverman': classical Silverman's rule using the unweighted source
+      cloud spread and raw N. Right tool for density estimation when you
+      believe the particles are i.i.d. samples from a smooth density and
+      you want a good density estimate.
+
+    The `scale` argument is an external multiplier on top of the policy's
+    own default — used by the bandwidth annealing schedule, where
+    `scale = h_scale` ranges over the schedule.
+
+    Args:
+        particles: (N, d) tensor.
+        weights: (N,) tensor — only used by the silverman policy. Ignored
+            by the resolution policy.
+        policy: 'resolution' or 'silverman'.
+        scale: external annealing multiplier (default 1.0 = no annealing).
+
+    Returns:
+        scalar bandwidth h.
+    """
+    if policy == 'resolution':
+        # 5 * mean nearest-neighbor distance is the default for the
+        # resolution policy; the external `scale` multiplies that base.
+        return particle_resolution_bandwidth_scalar(particles, scale=5.0 * scale)
+    elif policy == 'silverman':
+        return silverman_bandwidth_scalar(particles, weights, scale=scale)
+    else:
+        raise ValueError(
+            f"Unknown bandwidth policy {policy!r}. "
+            f"Choose 'resolution' or 'silverman'."
+        )
+
+
 def silverman_bandwidth_scalar(particles, weights, scale: float = 1.0):
-    """Silverman's rule: scalar bandwidth using N_eff and weighted std.
+    """Silverman's rule: scalar bandwidth from the unweighted source cloud.
 
-    h = scale * (4/(d+2))^(1/(d+4)) * std * N_eff^(-1/(d+4))
+    h = scale * (4/(d+2))^(1/(d+4)) * std_unweighted * N^(-1/(d+4))
 
-    Returns a scalar h. Uses the average weighted standard deviation across
-    dimensions. For per-dimension or full-covariance bandwidth, use
-    silverman_bandwidth_matrix.
+    The bandwidth is intentionally computed from the **unweighted** particle
+    spread and the **raw** particle count, not from the weighted covariance
+    and N_eff. The same bandwidth is used to smooth both the source KDE
+    `p_h(x) = (1/N) sum_i K_h(x - x_i)` (uniform-weighted) and the target
+    KDE `q_h(x) = sum_i w_i K_h(x - x_i)` (weighted), so it should describe
+    the geometry of the particle cloud, not the weight skew.
+
+    The `weights` argument is kept in the signature for backward
+    compatibility but is intentionally unused — see history at
+    `code/neural_operator/issues_to_be_addressed/2_quality_test.md` §7d for
+    why the previous "weighted Silverman" form caused training instability.
 
     The `scale` parameter lets you anneal: scale=1.0 starts (default Silverman),
     scale=0.5 makes it half, etc.
     """
+    del weights  # intentionally unused; bandwidth is a geometric property of the cloud
     d = tf.cast(tf.shape(particles)[-1], particles.dtype)
-    n_eff = effective_sample_size(weights)
-    cov = weighted_covariance(particles, weights)
-    # Average diagonal std (geometric mean would also work)
+    N = tf.cast(tf.shape(particles)[0], particles.dtype)
+    mu = tf.reduce_mean(particles, axis=0)
+    centered = particles - mu[None, :]
+    cov = tf.matmul(centered, centered, transpose_a=True) / N
     std = tf.reduce_mean(tf.sqrt(tf.linalg.diag_part(cov)))
     factor = (4.0 / (d + 2.0)) ** (1.0 / (d + 4.0))
-    h = scale * factor * std * tf.pow(n_eff, -1.0 / (d + 4.0))
+    h = scale * factor * std * tf.pow(N, -1.0 / (d + 4.0))
     return h
 
 

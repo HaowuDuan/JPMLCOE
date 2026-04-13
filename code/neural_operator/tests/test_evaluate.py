@@ -6,24 +6,25 @@ Verifies:
 - Trained model is meaningfully better than untrained on KL and moment error
 - J conditioning: lambda_min > 0, no logdet failures
 
-Run: python code/neural_operator/tests/test_evaluate.py
+Run: pytest code/neural_operator/tests/test_evaluate.py -v
 """
 
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-
-import sys
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'src'))
 
 import numpy as np
 import tensorflow as tf
 
 from train import NeuralOperator, train
 from evaluate import evaluate, print_summary
+from _result_utils import save_result, reset_results
 
 
 DTYPE = tf.float64
-tf.keras.backend.set_floatx('float64')
+
+
+def setup_module():
+    reset_results(__file__)
 
 
 def test_evaluate_trained_model():
@@ -73,18 +74,50 @@ def test_evaluate_trained_model():
     )
     print_summary(summary_trained)
 
-    # ---- Sanity checks
+    # ---- Compute all passed flags before any assertion
     metrics_to_finite_check = [
         'ma_residual_mse_mean', 'kl_p_r_mean', 'mmd2_mean',
         'mean_err_rel_mean', 'cov_err_rel_mean',
         'lambda_min_mean_mean', 'lambda_min_min_mean',
     ]
+    all_finite = all(np.isfinite(summary_trained[k]) for k in metrics_to_finite_check)
+
+    ma_residual_decreased = (
+        summary_trained['ma_residual_mse_mean'] < summary_untrained['ma_residual_mse_mean']
+    )
+    mean_err_decreased = (
+        summary_trained['mean_err_rel_mean'] < summary_untrained['mean_err_rel_mean'] + 1e-6
+    )
+    lambda_min_positive = summary_trained['lambda_min_min_mean'] > 0.0
+    no_logdet_failures = summary_trained['logdet_failures_mean'] == 0.0
+
+    trained_passed = (
+        all_finite
+        and ma_residual_decreased
+        and mean_err_decreased
+        and lambda_min_positive
+        and no_logdet_failures
+    )
+
+    # ---- Save results for both cases
+    save_result(__file__, {
+        'case_name': 'untrained_baseline',
+        'metrics': dict(summary_untrained),
+        'passed': True,  # baseline evaluation always "passes" — it's just a reference
+    })
+    save_result(__file__, {
+        'case_name': 'trained_model',
+        'metrics': dict(summary_trained),
+        'passed': trained_passed,
+    })
+
+    # ---- Assertions
     for k in metrics_to_finite_check:
         v = summary_trained[k]
         assert np.isfinite(v), f"{k} not finite: {v}"
 
     # Trained should beat untrained on the MA residual (the loss it was trained on)
-    assert summary_trained['ma_residual_mse_mean'] < summary_untrained['ma_residual_mse_mean'], (
+    assert ma_residual_decreased, (
         f"MA residual did not improve: "
         f"{summary_untrained['ma_residual_mse_mean']:.4e} -> "
         f"{summary_trained['ma_residual_mse_mean']:.4e}"
@@ -94,17 +127,17 @@ def test_evaluate_trained_model():
     # Untrained T ~ identity transports particles to themselves with uniform weights,
     # so the transported empirical mean is the unweighted mean of the original
     # particles, NOT the weighted target. Trained T should fix this.
-    assert summary_trained['mean_err_rel_mean'] < summary_untrained['mean_err_rel_mean'] + 1e-6, (
+    assert mean_err_decreased, (
         f"Mean error did not improve: "
         f"{summary_untrained['mean_err_rel_mean']:.4f} -> "
         f"{summary_trained['mean_err_rel_mean']:.4f}"
     )
 
     # J conditioning
-    assert summary_trained['lambda_min_min_mean'] > 0.0, (
+    assert lambda_min_positive, (
         f"lambda_min went non-positive: {summary_trained['lambda_min_min_mean']}"
     )
-    assert summary_trained['logdet_failures_mean'] == 0.0, (
+    assert no_logdet_failures, (
         f"logdet failures: {summary_trained['logdet_failures_mean']}"
     )
 
@@ -117,7 +150,3 @@ def test_evaluate_trained_model():
           f"{summary_trained['mean_err_rel_mean']:.4f}")
     print(f"  Cov err:      {summary_untrained['cov_err_rel_mean']:.4f} -> "
           f"{summary_trained['cov_err_rel_mean']:.4f}")
-
-
-if __name__ == '__main__':
-    test_evaluate_trained_model()

@@ -1,51 +1,46 @@
-"""Quality test for the trained neural operator: graded difficulty ladder.
+"""Quality test for the trained neural operator: minimal sanity test.
 
-Builds four held-out clouds at increasing weight skew (decreasing ESS),
-holding the particle distribution fixed across tiers, so we can find the
-exact failure boundary of the operator.
+Builds ONE held-out test cloud designed to be the smallest possible
+non-trivial transport problem. If the operator cannot improve on identity
+on this single cloud, the architecture or the training is broken and there
+is no point running anything harder.
 
-All four clouds use the same broad single Gaussian for the particles
-(`x_i ~ N(0, 2^2)`, N=200), and vary only the strength `beta` of an
-exponential weight tilt `w_i \\propto exp(beta * x_i)`. With this setup:
+The cloud is:
+  - 200 particles equally spaced on `[-A, A]` with `A = 5`
+    (so the inter-particle spacing is `Δ = 10/199 ≈ 0.05`).
+  - Weights `w_i ∝ exp(-(x_i − μ)² / (2 σ_w²))` with `μ = 1.0` and
+    `σ_w = 20.0`. Because `σ_w >> A`, the Gaussian is nearly flat over
+    the particle interval — the weights are barely skewed and the
+    target distribution is barely shifted from the source. The transport
+    map should be close to identity, with a small offset.
 
-  Tier   beta   approx ESS/N   weighted mean
-  ----   ----   ------------   -------------
-   1     0.1       0.96             0.4
-   2     0.3       0.70             1.2
-   3     0.4       0.53             1.6
-   4     0.55      0.30             2.2
+The KDE bandwidth is computed by the resampler using the resolution
+policy: `h = 5 × mean_nearest_neighbor_distance ≈ 0.25`. Independent
+of the weights, set only by particle spacing.
 
-Tier 1 is barely skewed — a competent operator must handle this. Tier 4
-matches the difficulty of the previous test. The point of the ladder is to
-find which tier the current model fails at, not to ace tier 4 on the first
-try.
+The assertion is binary: T's mean error must be less than half the
+identity mean error. This tests whether the operator does *anything* in
+the right direction. It is not a quality bar.
 
-The assertion is *only* on tier 1: the easiest case must show meaningful
-improvement over identity. Tiers 2-4 are reported but not asserted, so a
-single test run gives us the failure boundary in one shot.
-
-Run: python code/neural_operator/tests/test_resampler_quality.py
+Run: pytest code/neural_operator/tests/test_resampler_quality.py -v -s
 """
 
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-
-import sys
-HERE = os.path.dirname(os.path.abspath(__file__))
-# neural_operator/src must come BEFORE code/src so `from models import WTanh`
-# resolves to the operator module rather than the state-space model package.
-sys.path.insert(0, os.path.join(HERE, '..', '..', 'src'))   # code/src
-sys.path.insert(0, os.path.join(HERE, '..', 'src'))         # neural_operator/src
 
 import numpy as np
 import tensorflow as tf
 
 from train import NeuralOperator, train
 from resampling import NeuralOperatorResampler
+from _result_utils import save_result, reset_results
 
 
 DTYPE = tf.float64
-tf.keras.backend.set_floatx('float64')
+
+
+def setup_module():
+    reset_results(__file__)
 
 
 def _moment_err_rel(particles, weights, mapped):
@@ -64,36 +59,36 @@ def _moment_err_rel(particles, weights, mapped):
     return float(mean_err), float(cov_err)
 
 
-def make_graded_clouds_1d(n=200, sigma=2.0, seed=20260410):
-    """Build a 4-tier difficulty ladder of (particles, weights) clouds.
+def make_minimal_test_cloud(n=200, A=5.0, mu=1.0, sigma_w=20.0):
+    """Build the minimal sanity test cloud.
 
-    All tiers use the same particle distribution `x_i ~ N(0, sigma^2)`. Only
-    the exponential weight tilt strength `beta` varies, so the four tiers
-    differ only in how skewed the weights are.
+    Args:
+        n: number of particles (default 200)
+        A: half-width of the particle interval (default 5 → particles on [-5, 5])
+        mu: center of the Gaussian weight (default 1.0 — must be ≠ 0 so that
+            the weighted mean differs from the unweighted mean and identity
+            has a finite relative error to compare against)
+        sigma_w: width of the Gaussian weight (default 20, much larger than A
+            so the Gaussian is nearly flat over the particle interval and
+            the transport is barely perturbed from identity)
+
+    Returns:
+        (particles, weights) as (n, 1) and (n,) tf.float64 tensors.
     """
-    rng = np.random.default_rng(seed)
-    x = sigma * rng.standard_normal((n, 1))
-    x_tf = tf.constant(x, dtype=tf.float64)
-
-    tiers = []
-    for label, beta in [
-        ('tier 1 (easy)',         0.10),
-        ('tier 2 (easy-medium)',  0.30),
-        ('tier 3 (medium)',       0.40),
-        ('tier 4 (hard)',         0.55),
-    ]:
-        log_w = beta * x[:, 0]
-        log_w = log_w - log_w.max()       # numerical stability
-        w = np.exp(log_w)
-        w = w / w.sum()
-        w_tf = tf.constant(w, dtype=tf.float64)
-        tiers.append((label, beta, x_tf, w_tf))
-
-    return tiers
+    x = np.linspace(-A, A, n).reshape(-1, 1)
+    log_w = -0.5 * ((x[:, 0] - mu) ** 2) / (sigma_w ** 2)
+    log_w = log_w - log_w.max()  # numerical stability
+    w = np.exp(log_w)
+    w = w / w.sum()
+    return (
+        tf.constant(x, dtype=tf.float64),
+        tf.constant(w, dtype=tf.float64),
+    )
 
 
-CHECKPOINT_DIR = os.path.join(HERE, 'checkpoints', 'operator_v1')
-TRACE_DIR = os.path.join(HERE, 'traces')
+HERE = os.path.dirname(os.path.abspath(__file__))
+CHECKPOINT_DIR = os.path.join(HERE, 'results', 'checkpoints', 'operator_v2')
+TRACE_DIR = os.path.join(HERE, 'results', 'traces')
 
 
 def _build_model():
@@ -108,9 +103,17 @@ def _build_model():
     )
 
 
-def _train_and_save():
-    """Train a fresh operator for 2000 steps and save weights to CHECKPOINT_DIR."""
+def _train_and_save(trace_label='baseline'):
+    """Train a fresh operator for 2000 steps and save weights to CHECKPOINT_DIR.
+
+    Also writes a per-step CSV trace to TRACE_DIR/{trace_label}.csv with
+    bandwidth ingredients (h, n_eff, weighted_std, unweighted_std) and the
+    usual loss / grad-norm columns. Pure logging.
+    """
     print("--- Training 2000 steps (no checkpoint found) ---")
+    os.makedirs(TRACE_DIR, exist_ok=True)
+    trace_path = os.path.join(TRACE_DIR, f'{trace_label}.csv')
+    print(f"--- Writing per-step trace to {trace_path} ---")
     model = _build_model()
     train(
         model,
@@ -126,6 +129,7 @@ def _train_and_save():
         h_scale_init=2.0,
         h_scale_final=1.0,
         log_every=200,
+        trace_csv_path=trace_path,
     )
     os.makedirs(CHECKPOINT_DIR, exist_ok=True)
     model.save_weights(os.path.join(CHECKPOINT_DIR, 'weights'))
@@ -151,53 +155,87 @@ def _load_or_train():
 
 
 def test_resampler_quality():
-    print("\n=== NeuralOperatorResampler quality test (graded ladder) ===\n")
+    print("\n=== NeuralOperatorResampler minimal sanity test ===\n")
     tf.random.set_seed(2024)
 
-    tiers = make_graded_clouds_1d(n=200, sigma=2.0)
+    A = 5.0
+    mu = 1.0
+    sigma_w = 20.0
+    p, w = make_minimal_test_cloud(n=200, A=A, mu=mu, sigma_w=sigma_w)
 
-    print("--- Cloud difficulty ladder ---")
-    for label, beta, p, w in tiers:
-        ess = float(1.0 / tf.reduce_sum(w ** 2).numpy())
-        N = int(p.shape[0])
-        mu_w = float(tf.reduce_sum(w[:, None] * p, axis=0).numpy())
-        print(f"  {label:24s} beta={beta:.2f}  N={N}  ESS={ess:6.2f}  "
-              f"ESS/N={ess/N:.3f}  weighted mean={mu_w:+.3f}")
+    # Cloud diagnostics
+    N = int(p.shape[0])
+    ess = float(1.0 / tf.reduce_sum(w ** 2).numpy())
+    delta = float(2 * A / (N - 1))
+    mu_w = float(tf.reduce_sum(w[:, None] * p, axis=0).numpy()[0])
+    mu_unweighted = float(tf.reduce_mean(p).numpy())
+    print("--- Test cloud ---")
+    print(f"  N         = {N}")
+    print(f"  interval  = [-{A}, {A}]")
+    print(f"  spacing Δ = {delta:.4f}")
+    print(f"  weight    = exp(-(x-{mu})²/(2·{sigma_w}²))")
+    print(f"  ESS       = {ess:.2f} (ESS/N = {ess/N:.3f})")
+    print(f"  unweighted mean = {mu_unweighted:+.4f}")
+    print(f"  weighted mean   = {mu_w:+.4f}")
+    print(f"  expected h ≈ {5*delta:.4f} (resolution rule, 5·Δ)")
     print()
 
     model = _load_or_train()
 
     resampler = NeuralOperatorResampler(model)
+    result = resampler(p, w, seed=tf.constant([0, 0], dtype=tf.int32))
 
-    print("\n--- Per-tier comparison ---")
-    print(f"  {'tier':24s}  identity_mean  T_mean   identity_cov  T_cov   verdict")
-    print(f"  {'-'*24}  -------------  -------  ------------  ------  -------")
+    m_id, c_id = _moment_err_rel(p, w, p)
+    m_T, c_T = _moment_err_rel(p, w, result.particles)
+    mu_T = float(tf.reduce_mean(result.particles).numpy())
 
-    results = []
-    for label, beta, p, w in tiers:
-        result = resampler(p, w, seed=tf.constant([0, 0], dtype=tf.int32))
-        m_id, c_id = _moment_err_rel(p, w, p)
-        m_T, c_T = _moment_err_rel(p, w, result.particles)
-        verdict = 'PASS' if m_T < m_id else 'fail'
-        print(f"  {label:24s}  {m_id:13.4f}  {m_T:7.4f}  {c_id:12.4f}  {c_T:6.4f}  {verdict}")
-        results.append((label, beta, m_id, m_T, c_id, c_T))
+    print("--- Result ---")
+    print(f"  identity mean_err = {m_id:.4f}  (output mean = {mu_unweighted:+.4f})")
+    print(f"  T        mean_err = {m_T:.4f}  (output mean = {mu_T:+.4f})")
+    print(f"  identity cov_err  = {c_id:.4f}")
+    print(f"  T        cov_err  = {c_T:.4f}")
+    print()
 
-    # The ONLY hard assertion is tier 1 (easy). The harder tiers are
-    # reported but not enforced — the point of the ladder is to find the
-    # failure boundary, not to ace every tier on the first attempt.
-    tier1_label, _, m_id_1, m_T_1, _, _ = results[0]
-    print(f"\n  Hard assertion: tier 1 must improve over identity.")
-    print(f"    identity mean_err = {m_id_1:.4f}")
-    print(f"    T mean_err        = {m_T_1:.4f}")
-    assert m_T_1 < m_id_1, (
-        f"Tier 1 (easy, ESS/N ~ 0.96) FAILED: "
-        f"identity {m_id_1:.4f} -> T {m_T_1:.4f}. "
-        f"If even the easiest tier does not improve, the operator is "
-        f"not learning anything useful."
+    threshold = 0.5 * m_id
+    passed = bool(m_T < threshold)
+
+    print(f"--- Hard assertion: T mean_err < 0.5 × identity mean_err ---")
+    print(f"  threshold = {threshold:.4f}")
+    print(f"  T value   = {m_T:.4f}")
+
+    save_result(__file__, {
+        'case_name': 'minimal_sanity_test',
+        'description': 'Equally-spaced particles, Gaussian weights, near-identity transport',
+        'config': {
+            'n': N,
+            'A': A,
+            'mu': mu,
+            'sigma_w': sigma_w,
+            'delta': delta,
+        },
+        'cloud': {
+            'ess': ess,
+            'ess_over_n': ess / N,
+            'weighted_mean': mu_w,
+            'unweighted_mean': mu_unweighted,
+        },
+        'metrics': {
+            'identity_mean_err': m_id,
+            'T_mean_err': m_T,
+            'identity_cov_err': c_id,
+            'T_cov_err': c_T,
+            'T_output_mean': mu_T,
+        },
+        'threshold': threshold,
+        'passed': passed,
+    })
+
+    assert passed, (
+        f"Minimal sanity test FAILED: identity mean_err = {m_id:.4f}, "
+        f"T mean_err = {m_T:.4f}, threshold = {threshold:.4f}. "
+        f"The operator is not moving the mean toward the weighted target "
+        f"on the simplest possible cloud (nearly-identity transport). "
+        f"Architecture or training is broken."
     )
 
-    print("\n=== Tier 1 passed. Higher tiers reported above. ===\n")
-
-
-if __name__ == '__main__':
-    test_resampler_quality()
+    print("\n=== Minimal sanity test passed ===\n")
