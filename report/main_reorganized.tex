@@ -57,20 +57,20 @@
 \section{The big picture}
 
 \subsection{State-Space Modeling in Financial Markets}
-Financial systems are driven by latent factors that shape observable market data. A canonical example is stochastic volatility: the variance of asset returns is not constant but evolves as a hidden process, so what we observe (returns) is a noisy function of a latent state (log-variance) that we cannot directly measure. Similar structure appears in limit order book dynamics and macroeconomic regime shifts. These problems are naturally cast as continuous state-space models (SSMs), which is the focus of this document.
+Financial systems are driven by latent factors that shape observable market data. A canonical example is stochastic volatility: the variance of asset returns is not constant but evolves as a hidden process, so observed returns are a noisy function of a latent state (log-variance) that cannot be measured directly. Similar structure appears in limit order book dynamics and macroeconomic regime shifts. These problems are naturally cast as continuous state-space models (SSMs), which is the focus of this document.
 
-The setup is as following: we observe a time series $\{z_k\}$, $k = 1, 2, \ldots, T$. The real driver is a hidden state $\{x_k\}$ that we cannot observe directly. The most general SSM writes:
+The setup is simple: I observe a time series $\{z_k\}$, $k = 1, 2, \ldots, T$. The real driver is a hidden state $\{x_k\}$ that I cannot observe directly. The most general SSM writes:
 \begin{equation}
 \begin{split} \label{Eq:SSM}
      x_k &= f(x_{k-1}, w_k) \\
      z_k &= h(x_k, u_k)
 \end{split}
 \end{equation}
-where $w_k$ and $u_k$ are mutually and temporally uncorrelated noises, $f$ governs state evolution, and $h$ maps states to observations. We only ever see $z_k$. The state $x_k$ may have the same dimension as $z_k$ or higher --- the latter case (partial observation) makes inference harder because information is lost in the mapping $h$.
+where $w_k$ and $u_k$ are mutually and temporally uncorrelated noises, $f$ governs state evolution, and $h$ maps states to observations. I only ever see $z_k$. The state $x_k$ may have the same dimension as $z_k$ or higher --- the latter case (partial observation) makes inference harder because information is lost in the mapping $h$.
 
-A model has two components: a functional form and its parameters. In practice both are unknown. What we do is make an ansatz about the functional form, fit the parameters to data, and treat that ansatz as our best current understanding until a better one comes along. The observations themselves are agnostic to the model choice.
+A model has two components: a functional form and its parameters. In practice both are unknown. I choose an ansatz for the functional form, fit the parameters to data, and treat that ansatz as provisional until a better one comes along. The observations themselves are agnostic to the model choice.
 
-To develop and test numerical methods rigorously, we work in controlled experiments: fix a model and its parameters, generate synthetic data, and check whether our algorithms recover the known ground truth. This is the scope of this project. The two core tasks are \textbf{filtering} --- estimating the hidden state $x_k$ from observations --- and \textbf{Bayesian inference} --- estimating the model parameters $\theta$ from the same observations.
+To develop and test numerical methods rigorously, I work in controlled experiments: fix a model and its parameters, generate synthetic data, and check whether the algorithms recover the known ground truth. This is the scope of this project. The two core tasks are \textbf{filtering} --- estimating the hidden state $x_k$ from observations --- and \textbf{Bayesian inference} --- estimating the model parameters $\theta$ from the same observations.
 
 
 
@@ -80,7 +80,7 @@ To develop and test numerical methods rigorously, we work in controlled experime
 
 \subsubsection{Filtering}
 
-Having a good model is only half the battle; we also need a reliable implementation. I use synthetic models first because the truth is known. Given the state evolution $f$ and observation model $h$, the goal is to estimate the hidden state $x_k$ via the filtering distribution $p(x_k \mid z_{1:k})$. This is obtained recursively:
+Having a good model is only half the battle; I also need a reliable implementation. I use synthetic models first because the truth is known. Given the state evolution $f$ and observation model $h$, the goal is to estimate the hidden state $x_k$ via the filtering distribution $p(x_k \mid z_{1:k})$. This is obtained recursively:
 
 \begin{equation}
 \begin{split}
@@ -89,15 +89,15 @@ Having a good model is only half the battle; we also need a reliable implementat
 \end{split}
 \end{equation}
 
-In financial applications (and most real-world settings), we do not aim to recover an exact deterministic value of $x_k$. Instead, the useful quantities are typically the mean $m_k$ and covariance $P_k$ of the filtering distribution. The filtering problem is generally a high-dimensional path integral and is intractable except in special cases (e.g., linear Gaussian SSMs). Different filtering methods (EKF, UKF, particle filters, etc.) use distinct approximations and mathematical frameworks. The filter has one job: approximate the posterior and stay numerically stable.
+In financial applications, I do not try to recover an exact deterministic value of $x_k$. The useful quantities are usually the mean $m_k$ and covariance $P_k$ of the filtering distribution. The filtering problem is generally a high-dimensional path integral and is intractable except in special cases (e.g., linear Gaussian SSMs). Different filtering methods (EKF, UKF, particle filters, etc.) use distinct approximations and mathematical frameworks. The filter has one job: approximate the posterior and stay numerically stable.
 
 \subsubsection{Bayesian Inference}
 
-Once we have a reliable filter, we can use it to estimate the model parameters $\theta$. We keep the functional forms of $f$ and $h$ fixed and treat their parameters as unknowns to be learned. A good $\theta$ should make the observed sequence probable. This means maximizing the marginal likelihood $p_\theta(z_{1:T})$, or equivalently minimizing the negative log-likelihood:
+Once the filter is reliable, I can use it to estimate the model parameters $\theta$. I keep the functional forms of $f$ and $h$ fixed and treat their parameters as unknowns to be learned. A good $\theta$ should make the observed sequence probable. This means maximizing the marginal likelihood $p_\theta(z_{1:T})$, or equivalently minimizing the negative log-likelihood:
 \begin{equation}
     L_{\mathrm{MLE}}(\theta) = -\sum_{k=1}^{T} \log \, p_\theta(z_k \mid z_{1:k-1}).
 \end{equation}
-This is MLE. In a Bayesian setting we also have a prior $p(\theta)$ encoding any hard knowledge about the parameters --- for instance, a variance must be positive, or a correlation must lie in $(-1, 1)$. We then minimize:
+This is MLE. The Bayesian version adds a prior $p(\theta)$ encoding any hard knowledge about the parameters --- for instance, a variance must be positive, or a correlation must lie in $(-1, 1)$. I then minimize:
 \begin{equation}
     L_{\mathrm{MAP}}(\theta) = -\sum_{k=1}^{T} \log \, p_\theta(z_k \mid z_{1:k-1}) - \log p(\theta),
 \end{equation}
@@ -105,10 +105,10 @@ which gives MAP estimation. MAP is strictly more informative than MLE: the prior
 
 
 \subsection{Document Roadmap}
-We cover the two tasks in sequence. 
+The report follows the two tasks in sequence. 
 \begin{enumerate}
-\item First, filtering. We start with the Kalman filter on linear Gaussian models --- the only case where the prediction and update integrals are analytically tractable --- and use it as a baseline throughout. We then cover the nonlinear extensions: EKF and UKF, which linearize or approximate the model to stay within the Gaussian framework. Next, particle-based methods, which abandon the Gaussian assumption entirely and represent the filtering distribution as a weighted set of samples. Within that family we discuss the Bootstrap Particle Filter (BPF), the EDH and LEDH flow filters (which move particles via a continuous transport rather than reweighting them), and their invertible variants. 
-\item Second, Bayesian inference. Once the filter is differentiable, we can backpropagate through it to learn $\theta$. We cover MAP estimation as a diagnostic baseline and HMC for full posterior sampling. The central challenge is making the resampling step differentiable so that gradients can flow back to $\theta$. We discuss stop-gradient systematic resampling and soft resampling as reference points, but the main target is OT resampling and its neural-accelerated variant, which provides the richest gradient signal and is the primary method we will develop.
+\item First, filtering. I start with the Kalman filter on linear Gaussian models --- the only case where the prediction and update integrals are analytically tractable --- and use it as a baseline throughout. I then cover the nonlinear extensions: EKF and UKF, which linearize or approximate the model to stay within the Gaussian framework. Next come particle-based methods, which abandon the Gaussian assumption entirely and represent the filtering distribution as a weighted set of samples. Within that family I discuss the Bootstrap Particle Filter (BPF), the EDH and LEDH flow filters (which move particles via a continuous transport rather than reweighting them), and their invertible variants. 
+\item Second, Bayesian inference. Once the filter is differentiable, I can backpropagate through it to learn $\theta$. I cover MAP estimation as a diagnostic baseline and HMC for full posterior sampling. The central challenge is making the resampling step differentiable so that gradients can flow back to $\theta$. I discuss stop-gradient systematic resampling and soft resampling as reference points, but the main target is OT resampling. Neural acceleration is exploratory scaffolding for reducing the OT cost; it is not a claimed result in this report.
 \end{enumerate}
 
 
@@ -117,18 +117,18 @@ We cover the two tasks in sequence.
 \newpage
 \section{Kalman Filter}
 \subsection{Overview}
-Linear Gaussian models are the easiest state space models. Take the following 1-d dimensional model for example, 
+Linear Gaussian models are the easiest state space models. Start with the following 1-d dimensional model, 
 \begin{equation}
 \begin{split}
 x_k =& f x_{k-1} + w_{k-1}, \quad w_{k-1} \sim \mathcal{N}(0, Q) \\
 z_k =& h x_k + v_k, \quad v_k \sim \mathcal{N}(0, R)
 \end{split}
 \end{equation}
-where $f$ and $h$ are constant. Of course to ensure the stability of the sequence, both of them has to be smaller or equal to one. This problem can be exactly solved as we will later demonstrate that the distribution for $x_k$ and $z_k$ will stay as Gaussian through out the process and all quantities are analytically computable. The corresponding algorithm that is derived for linear gaussian models is the Kalman Filter (KF). In real life, we are not so lucky, prediction or observation model could become non-linear,
+where $f$ and $h$ are constant. To ensure the stability of the sequence, both must be smaller or equal to one. This problem can be solved exactly: I later show that the distributions for $x_k$ and $z_k$ stay Gaussian throughout the process and all quantities are analytically computable. The corresponding algorithm for linear Gaussian models is the Kalman Filter (KF). In real life, the prediction or observation model can become non-linear,
 \begin{equation}
 \begin{split}
 f x_{k-1}  &\rightarrow \mathbf{f}(x_{k-1})  \\
-h x_{k}  &\rightarrow \mathbf{h}(x_{k-1})
+h x_{k}  &\rightarrow \mathbf{h}(x_k)
 \end{split}
 \end{equation}
 here I am using $\mathbf{f}/\mathbf{h}$ to indicate they are generic functions so that they are distinguished from constants $f/h$. It is also possible that  the noises are non-Gaussian, or even non-additive. A good example of the later case is stochastic volatility model, 
@@ -136,7 +136,7 @@ here I am using $\mathbf{f}/\mathbf{h}$ to indicate they are generic functions s
 x_{k} &= a x_{k-1} +  w_{k-1}, \quad w_{k-1} \sim \mathcal{N}(0, 1) \\
 z_k &= b \exp(x_k/2) \cdot v_k, \quad v_k \sim \mathcal{N}(0, 1)
 \end{align}
-where we have pure multiplicative noise for the observation process, and  $a,b$ are just some constant. There is really no one-fits-all filter algorithm for the most generic problems. We will start with additive gaussian noise but non-linear observation function, and understand two basic non-linear generalization of Kalman filter, namely Extended Kalman Filter (EKF) and Unscented Kalman Filter (UKF). EKF and UKF will be very important for later applications. 
+where the observation process has pure multiplicative noise, and $a,b$ are constants. There is no universal filter for the fully nonlinear, non-additive case. I start with additive Gaussian noise but a non-linear observation function, and use two basic non-linear generalizations of the Kalman filter: Extended Kalman Filter (EKF) and Unscented Kalman Filter (UKF). EKF and UKF will be important for later applications. 
 
 
 
@@ -159,35 +159,35 @@ Recall the most general framework for the filter,
    \textbf{Update: }     & \quad p(x_k \mid z_{1:k}) = \frac{p(z_k \mid x_k) \, p(x_k \mid z_{1:k-1})}{p(z_k \mid z_{1:k-1})}
 \end{split}
 \end{equation}
-Because the process are linear gaussian, the distribution $p(x_k \mid z_{1:k-1})$ and $p(x_k \mid z_{1:k}) $ are Gaussian for all time $k$. To Characterize Gaussian distributions, all we need is the mean and variance. For the prediction and update processes, we keep track of the mean and variances separately. 
+Because the process is linear Gaussian, the distributions $p(x_k \mid z_{1:k-1})$ and $p(x_k \mid z_{1:k}) $ are Gaussian for all time $k$. To characterize Gaussian distributions, I only need the mean and variance. For the prediction and update processes, I keep track of the mean and variances separately. 
 \begin{itemize}
   \item $m_t^-$: predicted mean (prior), \quad $P_t^-$: predicted variance (prior)
   \item $m_t$: updated mean (posterior), \quad $P_t$: updated variance (posterior)
 \end{itemize}
-For any filter, we need an initial condition, 
+Every filter needs an initial condition, 
 
 \begin{equation}
   p(x_0) = \Gauss(x_0 \mid m_0, P_0).
 \end{equation}
-A process is \textit{stationary} if its statistical properties --- mean, variance --- do not change over time. For the linear state evolution $x_k = a x_{k-1} + w_{k-1}$, this happens when $|a| < 1$: the state is repeatedly pulled back toward zero, and after many steps the variance settles to a fixed value. We can find this value by asking: if the variance at step $k$ equals the variance at step $k-1$ (call it $\sigma^2$), what must $\sigma^2$ be?
+A process is \textit{stationary} if its statistical properties --- mean, variance --- do not change over time. For the linear state evolution $x_k = a x_{k-1} + w_{k-1}$, this happens when $|a| < 1$: the state is repeatedly pulled back toward zero, and after many steps the variance settles to a fixed value. Find this value by asking: if the variance at step $k$ equals the variance at step $k-1$ (call it $\sigma^2$), what must $\sigma^2$ be?
 \begin{equation}
     \sigma^2 = a^2 \sigma^2 + Q \quad \Rightarrow \quad \sigma^2 = \frac{Q}{1 - a^2}.
 \end{equation}
-This is the variance of the stationary distribution. If the process has been running long before we start observing it --- the usual assumption --- then at time $k=0$ the state is already drawn from this equilibrium. The natural initial condition is therefore $m_0 = 0$ and $P_0 = Q/(1-a^2)$. Starting here avoids a transient period where the filter is far from the true distribution.
+This is the variance of the stationary distribution. If the process has been running long before observations start --- the usual assumption --- then at time $k=0$ the state is already drawn from this equilibrium. The natural initial condition is therefore $m_0 = 0$ and $P_0 = Q/(1-a^2)$. Starting here avoids a transient period where the filter is far from the true distribution.
 
-When $|a| \geq 1$, there is no equilibrium. The state can drift arbitrarily far from zero and the variance grows without bound over time --- the process is \textit{non-stationary}. There is no principled variance to start from, so we express complete uncertainty: $m_0 = 0$ and $P_0 = \kappa$ with $\kappa$ very large. This is a \textit{diffuse prior} --- it says we have no idea where the state is at time zero. As observations arrive, the filter rapidly pulls $P_k$ down toward something sensible, so the exact value of $\kappa$ does not matter as long as it is large enough to be non-informative.
+When $|a| \geq 1$, there is no equilibrium. The state can drift arbitrarily far from zero and the variance grows without bound over time --- the process is \textit{non-stationary}. There is no principled variance to start from, so I express complete uncertainty: $m_0 = 0$ and $P_0 = \kappa$ with $\kappa$ very large. This is a \textit{diffuse prior} --- it says I have no idea where the state is at time zero. As observations arrive, the filter rapidly pulls $P_k$ down toward something sensible, so the exact value of $\kappa$ does not matter as long as it is large enough to be non-informative.
 
 \paragraph{Initial conditions as a cross-cutting principle.}
 \label{par:init-conditions}
-The 1D stationary vs.\ diffuse distinction above generalises to every model in this report and is worth stating once so later sections can refer back to it. For a multi-dimensional linear state $\mathbf{x}_k = \mathbf{F}\mathbf{x}_{k-1} + \boldsymbol{\omega}_{k-1}$ with stable $\mathbf{F}$ (spectral radius $<1$), the stationary covariance is the unique solution of the discrete Lyapunov equation $\boldsymbol{\Sigma}_0 = \mathbf{F}\boldsymbol{\Sigma}_0\mathbf{F}^\top + \mathbf{Q}$, and the natural prior is $\mathbf{x}_0 \sim \mathcal{N}(\mathbf{0}, \boldsymbol{\Sigma}_0)$. We use this for the linear Gaussian benchmarks and for the 1D stochastic volatility model, where $|\alpha| < 1$ gives $\Sigma_0 = \sigma^2/(1-\alpha^2)$ directly. For tracking models whose dynamics are not contractive --- the range-bearing and acoustic-tracking problems --- there is no Lyapunov solution and we fall back on a physically motivated prior: a mean $\boldsymbol{\mu}_0$ inside the typical observation footprint and an isotropic covariance $\boldsymbol{\Sigma}_0 = I$ large enough to cover plausible starting positions. On range-bearing, the canonical choice in this report is $\boldsymbol{\mu}_0 = (5, 5)^\top$ with $\boldsymbol{\Sigma}_0 = I_2$, as stated in \S\ref{par:range-bearing-model}; this keeps the initial bearing Jacobian away from the sensor singularity. Individual model sections below give specific numerical values but refer back to this paragraph rather than re-deriving the principle.
+The 1D stationary vs.\ diffuse distinction above generalises to every model in this report. I state it once so later sections can refer back to it. For a multi-dimensional linear state $\mathbf{x}_k = \mathbf{F}\mathbf{x}_{k-1} + \boldsymbol{\omega}_{k-1}$ with stable $\mathbf{F}$ (spectral radius $<1$), the stationary covariance is the unique solution of the discrete Lyapunov equation $\boldsymbol{\Sigma}_0 = \mathbf{F}\boldsymbol{\Sigma}_0\mathbf{F}^\top + \mathbf{Q}$, and the natural prior is $\mathbf{x}_0 \sim \mathcal{N}(\mathbf{0}, \boldsymbol{\Sigma}_0)$. I use this for the linear Gaussian benchmarks and for the 1D stochastic volatility model, where $|\alpha| < 1$ gives $\Sigma_0 = \sigma^2/(1-\alpha^2)$ directly. For tracking models whose dynamics are not contractive --- the range-bearing and acoustic-tracking problems --- there is no Lyapunov solution and I fall back on a physically motivated prior: a mean $\boldsymbol{\mu}_0$ inside the typical observation footprint and an isotropic covariance $\boldsymbol{\Sigma}_0 = I$ large enough to cover plausible starting positions. On range-bearing, the canonical choice in this report is $\boldsymbol{\mu}_0 = (5, 5)^\top$ with $\boldsymbol{\Sigma}_0 = I_2$, as stated in \S\ref{par:range-bearing-model}; this keeps the initial bearing Jacobian away from the sensor singularity. Individual model sections below give specific numerical values but refer back to this paragraph rather than re-deriving the principle.
 
-Now we compute the update rules for the prediction process, given the mean and variance from the previous update step $(m_{k-1}, P_{k-1})$, which characterize $p(x_{k-1} \mid z_{1:k-1})$. We have, for one realization of the prediction
+Compute the update rules for the prediction process, given the mean and variance from the previous update step $(m_{k-1}, P_{k-1})$, which characterize $p(x_{k-1} \mid z_{1:k-1})$. For one realization of the prediction,
 \begin{equation}
 \begin{split}
 x^-_{k}=f x_{k-1}+ \omega_k 
 \end{split}
 \end{equation}
-It is obvious that,
+For the mean,
 \begin{equation}
 \begin{split}
  \mathbb{E}[x^-_{k}|1:z_{k-1}]=& \mathbb{E}[f x_{k-1}+ \omega_k |1:z_{k-1}] ]\\
@@ -195,7 +195,7 @@ It is obvious that,
  =& f m_{k-1}
  \end{split}
 \end{equation}
-and for the variation, we just stick to the defintion,
+and for the variance, use the definition,
 \begin{equation}
 \begin{split}
 P_k^- =\text{Var}[x_k | z_{1:k-1}] =& \mathbb{E}[x_k^2| z_{1:k-1}] -  (\mathbb{E}[x_k| z_{1:k-1}])^2 \\
@@ -203,13 +203,13 @@ P_k^- =\text{Var}[x_k | z_{1:k-1}] =& \mathbb{E}[x_k^2| z_{1:k-1}] -  (\mathbb{E
 =& f^2 P_{k-1} +Q
 \end{split}
 \end{equation}
-where the first contribution is just the prediction noise and the second term is the input noise scale by the determinist part of the evolution. After prediction, we need to do correction based on the new observation $z_k$. By Bayes' rule:
+where the first contribution is just the prediction noise and the second term is the input noise scale by the determinist part of the evolution. After prediction, correct with the new observation $z_k$. By Bayes' rule:
 \begin{equation}
   p(x_k \mid z_{1:k})
   = \frac{p(z_k \mid x_k)\, p(x_k \mid z_{1:k-1})}{p(z_k \mid z_{1:k-1})}
   \propto p(z_k \mid x_k)\, p(x_k \mid z_{1:k-1}).
 \end{equation}
-For the mean and variance, we don't have to need the normalization constant. Let's take log on both side.
+For the mean and variance, the normalization constant is not needed. Take log on both sides.
 \begin{equation}
 \begin{split}
 -\frac{(x_k-m_k)^2}{2P_{k}}= -\frac{(z_k - h\,x_k)^2}{2R} - \frac{(x_k-m^-_k)^2}{2P_k^-} 
@@ -223,7 +223,7 @@ equivalently,
 \begin{align}
 P_k = \frac{R P_k^-}{h^2 P_k^- + R}=(1-k_kh)P^-_k 
 \end{align}
-For simplicity, we define the \textbf{Kalman gain:}
+Define the \textbf{Kalman gain:}
 \begin{equation}
 K_k = \frac{P_k^- h}{h^2 P_k^- + R} =P_k^- h / S_k
 \end{equation}
@@ -231,7 +231,7 @@ where we also introduce  \textbf{innovation covariance} $S_k=\frac{1}{h^2 P_k^- 
 \begin{equation}
 m_k = m_k^- + K_k v_k
 \end{equation}
-where we denote the  \textbf{innovation} $v_k=z_k-hm^-$, which is the difference between observed data and observation of the predicted mean. Let us summarize the algorithm,
+where I denote the  \textbf{innovation} $v_k=z_k-hm^-$, which is the difference between observed data and observation of the predicted mean. The algorithm is
 \begin{algorithm}[H]
 \caption{Kalman Filter (1-d, additive noise)}
 \begin{algorithmic}[1]
@@ -276,15 +276,15 @@ where we denote the  \textbf{innovation} $v_k=z_k-hm^-$, which is the difference
 
 \subsection{Numerical stability analysis for Kalman filter}
 
-If we implement it as it's derived, kalman filter might be numerically unstable. Higher dimension has more failure mode so let us start with 1-d. When the observation noise becomes very small $R \sim 0$, we have $S_k \sim \frac{1}{h^2 P^-_k}$, which leads to,
+If I implement it as derived, the Kalman filter can be numerically unstable. Higher dimension has more failure modes, so start with 1-d. When the observation noise becomes very small $R \sim 0$, there is $S_k \sim \frac{1}{h^2 P^-_k}$, which leads to,
 \begin{equation}
    \lim_{R\rightarrow 0} K =  \lim_{R\rightarrow 0} \frac{P^- h}{h^2 P^- + R} =  \frac{1}{h}
 \end{equation}
-With the standard update: $P^+ = (1 - K h) P^- \approx 0$. But this is very dangerous, because we should always have positive $P^+$. With the accumulation of small roundoff errors, $(1 - K h)$ can become negative. But with Joseph form, 
+With the standard update: $P^+ = (1 - K h) P^- \approx 0$. This is numerically dangerous, because $P^+$ should stay positive. With the accumulation of small roundoff errors, $(1 - K h)$ can become negative. With Joseph form, 
 \begin{equation}
     P^+ = (I - K h) P^- (I - K h) + K^2 R \sim \frac{R}{h^2}
 \end{equation}
-Clearly, Joseph form will resolve the issue in 1-d. Joseph form doesn't cure all problems, but it will remove one potential failure in the numerical implementation. We can prove these update formula are mathematically equivalent. 
+Joseph form resolves this issue in 1-d. Joseph form does not cure all problems, but it removes one potential failure in the numerical implementation. I can prove these update formulas are mathematically equivalent. 
 \begin{align}
   \mathbf{P}_k
   &= (\mathbf{I} - \mathbf{K}\mathbf{H})\,\mathbf{P}^-\,
@@ -316,7 +316,7 @@ Using $\mathbf{K} = \mathbf{P}^-\mathbf{H}^\top\mathbf{S}^{-1}
   &= \mathbf{P}^- - \mathbf{K}\mathbf{H}\mathbf{P}^-
    = (\mathbf{I} - \mathbf{K}\mathbf{H})\,\mathbf{P}^-. \notag
 \end{align}
-Additionally, we will have potential instability when we try to take the inverse of $\mathbf{S}^{-1}_k$. Let's not get into the details of what would cause the failure of $\mathbf{S}^{-1}_k$. But when it fails, it is usually due to that $\mathbf{S}_k$ having large condition number. Let us denote the eigenvalues of $\mathbf{S}_k$ are $\{\lambda_1,....\lambda_d\}$, where d is the dimension of the state space. When $\kappa (\mathbf{S}_k) \gg 1$, small round off error in $\mathbf{S}_k$, which was not exactly and obtained through numerical calculation will leads to huge difference in the inverse, this means that $\mathbf{S}^{-1}_k$ is unreliable. 
+There is another potential instability when I try to take the inverse of $\mathbf{S}^{-1}_k$. The usual cause is that $\mathbf{S}_k$ has a large condition number. Let $\{\lambda_1,\ldots,\lambda_d\}$ be the eigenvalues of $\mathbf{S}_k$, where $d$ is the state dimension. When $\kappa (\mathbf{S}_k) \gg 1$, small roundoff error in the numerically computed $\mathbf{S}_k$ leads to a large error in the inverse. Then $\mathbf{S}^{-1}_k$ is unreliable. 
 
 %The first topic we investigate is Joseph update and condition number. The following table is the calculation based on the 2-d linear Gaussian state space model with parameters:
 %\begin{align*}
@@ -353,14 +353,14 @@ Additionally, we will have potential instability when we try to take the inverse
 %\end{table}
 
 \subsection{The limitation and usefulness of Kalman filter}
-The derivation above relies entirely on $z_k = h\,x_k + v_k$ with $h$ constant (or a matrix $\mathbf{H}$ in the vector case). That is what lets us stay Gaussian through the update step and write a closed-form recursion for the mean and variance. The moment the observation function becomes genuinely non-linear, we lose that, and it is not really a fixable problem at the Kalman filter level --- there is no principled way to plug a non-linear $h(x)$ into the update equations. People do it anyway by replacing $h(x)$ with some linear surrogate, but at that point we are not running the Kalman filter on a non-linear model, we are running it on a linearized model we picked ourselves, and the answer is only as good as that choice. Since in practice almost every model we care about is non-linear, we really do need a generalization, and in the next section we will discuss two of them: the Extended Kalman Filter (EKF) and the Unscented Kalman Filter (UKF).
+The derivation above relies entirely on $z_k = h\,x_k + v_k$ with $h$ constant (or a matrix $\mathbf{H}$ in the vector case). That is what lets the update stay Gaussian and gives a closed-form recursion for the mean and variance. The moment the observation function becomes genuinely non-linear, that structure is gone. There is no principled way to plug a non-linear $h(x)$ into the Kalman update equations. People do it anyway by replacing $h(x)$ with a linear surrogate, but then the answer is only as good as that surrogate. Since almost every model I care about is non-linear, I need a generalization. The next section gives two: the Extended Kalman Filter (EKF) and the Unscented Kalman Filter (UKF).
 
-None of this makes the Kalman filter useless. On the contrary, being exact on linear Gaussian models is exactly what we want for one important use later on. When we build the differentiable particle filter and run HMC on top of it in Section~\ref{sec:param-estimation}, we need a way to check that the HMC pipeline itself is correct before we trust it on anything harder. The 1-D linear Gaussian model is the obvious test: the Kalman filter gives us the exact marginal log-likelihood, so it gives us the exact posterior over whatever parameter we are estimating. If HMC on the same model with the same data recovers that posterior, we know the pipeline is sound; if it does not, the problem is in HMC, not in the filter. We will come back to this cross-check in Section~\ref{sec:linear-gaussian-benchmark} when we benchmark the differentiable pipeline.
+None of this makes the Kalman filter useless. Being exact on linear Gaussian models is exactly what I need later. When I build the differentiable particle filter and run HMC on top of it in Section~\ref{sec:param-estimation}, I need a way to check that the HMC pipeline itself is correct before trusting it on anything harder. The 1-D linear Gaussian model family is the obvious test: the Kalman filter gives the exact marginal log-likelihood, so it gives the exact posterior over whatever parameter is being estimated. If HMC on a 1D linear Gaussian benchmark recovers that posterior, the pipeline is sound; if it does not, the problem is in HMC, not in the filter. I come back to this cross-check in \S\ref{sec:lg-hmc-1d} when I benchmark the differentiable pipeline.
 
 \paragraph{Demonstration on a 1D linear Gaussian.}
-To make the ``Kalman is exact for linear Gaussian'' claim concrete, we run the filter on the exact 1D model that will reappear in the HMC validation in \S\ref{sec:linear-gaussian-benchmark}. The dynamics are $x_k = 0.95\,x_{k-1} + w_k$ with $w_k \sim \mathcal{N}(0, 0.25)$ ($B = 0.5$), observation $z_k = x_k + v_k$ with $v_k \sim \mathcal{N}(0, 0.09)$ ($D = 0.3$), prior $\mathcal{N}(0, \Sigma_0)$ with $\Sigma_0$ solved from the discrete Lyapunov equation following \S\ref{par:init-conditions}, seed $42$, $T = 100$ time steps, and 64-bit precision. The Kalman gain converges to its steady-state value $K \approx 0.777$ within the first five time steps, confirming the Riccati recursion has reached its fixed point. Figure~\ref{fig:kalman-1d-linear} shows the resulting trajectory.
+To make the ``Kalman is exact for linear Gaussian'' claim concrete, I run the filter on a 1D linear Gaussian model from the same model family that reappears in the HMC validation in \S\ref{sec:lg-hmc-1d}. The HMC benchmark uses a different observation-noise scale to create a wider posterior test case; the exact Kalman reference logic is the same. The dynamics here are $x_k = 0.95\,x_{k-1} + w_k$ with $w_k \sim \mathcal{N}(0, 0.25)$ ($B = 0.5$), observation $z_k = x_k + v_k$ with $v_k \sim \mathcal{N}(0, 0.09)$ ($D = 0.3$), prior $\mathcal{N}(0, \Sigma_0)$ with $\Sigma_0$ solved from the discrete Lyapunov equation following \S\ref{par:init-conditions}, seed $42$, $T = 100$ time steps, and 64-bit precision. The Kalman gain converges to its steady-state value $K \approx 0.777$ within the first five time steps, confirming the Riccati recursion has reached its fixed point. Figure~\ref{fig:kalman-1d-linear} shows the resulting trajectory.
 
-We report two metrics throughout. The \emph{root-mean-square error} (RMSE) of the filter's posterior mean against the true state trajectory,
+I report two metrics throughout. The \emph{root-mean-square error} (RMSE) of the filter's posterior mean against the true state trajectory,
 \begin{equation}
     \mathrm{RMSE} \;=\; \sqrt{\frac{1}{T}\sum_{k=1}^{T} \bigl\lVert \mathbf{m}_k - \mathbf{x}_k \bigr\rVert^{2}},
     \label{eq:rmse-def}
@@ -377,35 +377,35 @@ measures how close the filter's point estimate is to the true latent state. It i
 The run takes $1.03$ seconds on CPU ($10.3$ ms per time step, incremental peak memory $2.1$ MB, GPU unused); for a 1D state the entire filter reduces to two scalar updates per step, so the cost is essentially measurement noise in the timing --- a useful reference point against which the particle-filter wall times in Tables~\ref{tab:edh-rb}--\ref{tab:edh-sv-log} become meaningful.
 
 \paragraph{What this plot is for.}
-This is not a benchmark of Kalman's accuracy. The derivation in \S\ref{sec:kalman-algorithm} already shows the Kalman filter is analytically exact for linear Gaussian, so there is no approximation error to measure. The RMSE of $0.269$ is the sampling-level discrepancy between the filter's posterior mean and the true state realisation for this particular seed, and is bounded below by the posterior standard deviation the filter itself reports. What the plot is for is \emph{pipeline sanity}: data generation, filter invocation, state sampling from the prior, covariance tracking, Riccati convergence, metric collection, and I/O all run end-to-end without error and produce numbers consistent with the analytic reference. This is the minimum bar every downstream benchmark in \S\ref{sec:particle-methods-section} and \S\ref{sec:param-estimation} must clear --- and the analytic reference itself is the object \S\ref{sec:linear-gaussian-benchmark} will use to validate HMC: if HMC on this same model recovers the Kalman posterior over the parameters, the differentiable pipeline is sound; if it does not, the fault lies in HMC, not in the filter or the test harness.
+This is not a benchmark of Kalman's accuracy. The derivation in \S\ref{sec:kalman-algorithm} already shows the Kalman filter is analytically exact for linear Gaussian, so there is no approximation error to measure. The RMSE of $0.269$ is the sampling-level discrepancy between the filter's posterior mean and the true state realisation for this particular seed, and is bounded below by the posterior standard deviation the filter itself reports. The plot is for \emph{pipeline sanity}: data generation, filter invocation, state sampling from the prior, covariance tracking, Riccati convergence, metric collection, and I/O all run end-to-end without error and produce numbers consistent with the analytic reference. This is the minimum bar every downstream benchmark in \S\ref{sec:particle-methods-section} and \S\ref{sec:param-estimation} must clear --- and the same Kalman-exact model family is what \S\ref{sec:lg-hmc-1d} uses to validate HMC. If HMC on that family recovers the Kalman posterior over the parameters, the differentiable pipeline is sound; if it does not, the fault lies in HMC, not in the filter or the test harness.
 
 \newpage
 \section{EKF and UKF}
 
-Previously, we discussed why the Kalman filter is not applicable to non-linear models. Here we introduce two principled generalizations, the Extended Kalman Filter (EKF) and the Unscented Kalman Filter (UKF) \cite{Särkkä2013BayesianFilteringAndSmoothing}, that can handle non-linearity to some extent. They are both designed to incorporate nonlinear corrections in the observation model, namely, $\mathbf{h}(x)$, with additive noises. In the literature, there are improved versions known as augmented EKF/UKF \cite{Särkkä2013BayesianFilteringAndSmoothing} that can handle non-additive noise but these are beyond the scope of the current document. The only non-additive noise model we will run into is the 1-d Stochastic volatility model, and we will use an approximation to turn it into additive noise model and additional improvement on EKF/UKF is overkill for this model. 
+Kalman fails once the update is no longer linear Gaussian. EKF and UKF are the two Gaussian approximations I use next \cite{Särkkä2013BayesianFilteringAndSmoothing}. They both incorporate nonlinear corrections in the observation model $\mathbf{h}(x)$ while keeping additive noise. Augmented EKF/UKF variants can handle non-additive noise \cite{Särkkä2013BayesianFilteringAndSmoothing}, but I do not need them here. The only non-additive noise model in this report is the 1-d stochastic volatility model, and I use a log-squared transform to put it into an additive-noise form.
 
 \subsection{EKF}
-EKF is a nonlinear improvement on KF, in the sense that we still want to somehow preserve most of the KF algorithm. What non-linearity breaks is the linear structure of the model. 
+EKF is a nonlinear improvement on KF. The goal is to preserve most of the KF algorithm. Nonlinearity breaks the linear structure of the model.
 \begin{equation}
 \begin{split}
 \mathbf{\hat F} \mathbf{x}_{k-1}  &\rightarrow \mathbf{f}(\mathbf{x}_{k-1})  \\
 \mathbf{\hat H} \mathbf{x}_{k}  &\rightarrow \mathbf{h}(\mathbf{x}_{k-1})
 \end{split}
 \end{equation}
-but what if we expand the prediction and observation model,
+Expand the prediction and observation model:
 \begin{equation}
 \begin{split}
 \mathbf{f}(\mathbf{ x} -\mathbf{ m}_{k-1}) &\approx \mathbf{f}(\mathbf{ m}_{k-1}) + \frac{\partial \mathbf{f}}{\partial \mathbf{x}}\Big|_{\mathbf{m}_{k-1}} (\mathbf{x}-\mathbf{ m }_{k-1}) +\mathcal{O} ((\mathbf{x}-\mathbf{ m }_{k-1})^2 ) \\
 \mathbf{h}(\mathbf{ x} -\mathbf{ m}^-_{k}) &\approx \mathbf{h}(\mathbf{ m}^-_{k}) + \frac{\partial \mathbf{h}}{\partial \mathbf{x}}\Big|_{\mathbf{m}^-_{k}} (\mathbf{x}-\mathbf{ m }^-_{k}) +\mathcal{O} ((\mathbf{x}-\mathbf{ m }_{k-1})^2 ) 
 \end{split}
 \end{equation}
-by weak nonlinearality, I meant when the second derivative term can be ignored. We would expect such linear approximation to fail when the following two terms are comparable.
+By weak nonlinearity, I mean the regime where the second derivative term can be ignored. I expect this linear approximation to fail when the following two terms are comparable.
 \begin{equation}
 \begin{split}
 \frac{\partial \mathbf{h}}{\partial \mathbf{x}}\Big|_{\mathbf{m}^-_{k}} (\mathbf{x}-\mathbf{ m }^-_{k}) \sim \frac{\partial^2 \mathbf{h}}{\partial \mathbf{x}^2}|_{\mathbf{m}^-_{k}} (\mathbf{x}-\mathbf{ m }_{k-1})^2 
 \end{split}
 \end{equation}
-When linear approximation holds, we can use the Kalman filter algorithm by adding time dependence to the evolution and observation matrices.
+When linear approximation holds, I can use the Kalman filter algorithm by adding time dependence to the evolution and observation matrices.
 \begin{equation}
 \begin{split}
 &\mathbf{F}_k \leftarrow \mathbf{f}(\mathbf{m}_{k-1}) \\
@@ -465,7 +465,7 @@ where the cross terms again vanish by independence. So $\Cov(\mathbf{z}_k^-, \ma
   \mathbf{K} = \mathbf{P}_{xz}\,\mathbf{S}^{-1},
   \label{eq:kalman-gain-cov}
 \end{equation}
-and this expression makes no assumption about linearity and is "blind" to the functional form of the models. If we can estimate $\mathbf{P}_{xz}$ and $\mathbf{S}$ for a nonlinear $\mathbf{h}$, we can run the Kalman update as-is.
+and this expression makes no assumption about linearity and is "blind" to the functional form of the models. If I can estimate $\mathbf{P}_{xz}$ and $\mathbf{S}$ for a nonlinear $\mathbf{h}$, I can run the Kalman update as-is.
 
 The question is how to compute these covariances when $\mathbf{h}$ is nonlinear. EKF evaluates them analytically via the Jacobian and discards higher-order terms. UKF instead draws $2d+1$ \emph{sigma points} deterministically from the predicted Gaussian $\mathcal{N}(\mathbf{m}_k^-, \mathbf{P}_k^-)$, propagates each through $\mathbf{h}$, and computes the covariances as weighted sums:
 \begin{align}
@@ -517,7 +517,7 @@ The $\alpha^2$ terms cancel exactly, so $\beta = 2$ holds for any $\alpha$ when 
 
 \subsection{EKF/UKF on non-linear models}
 \label{sec:ekf-ukf-nonlinear}
-We define the Range bearing model and 1-d Stochastic volatility model here. This is the first time they appear and they will also be used in later sections.
+I use two nonlinear test models here: range-bearing and 1-d stochastic volatility. They first appear here and then carry through the later particle-filter and HMC sections.
 
 \paragraph{Range bearing model.}
 \label{par:range-bearing-model}
@@ -548,11 +548,11 @@ The latent state $x_t \in \mathbb{R}$ represents the log-volatility. The state t
 \begin{equation}
     x_t = \alpha\, x_{t-1} + \sigma\, w_t, \qquad w_t \sim \mathcal{N}(0, 1),
 \end{equation}
-with persistence parameter $\alpha = 0.91$ and volatility-of-volatility $\sigma = 1.0$. Since $|\alpha| < 1$, the process is stationary, and we initialize $x_0 \sim \mathcal{N}\!\left(0,\, \sigma^2/(1-\alpha^2)\right)$ from its stationary distribution, following the same principle discussed for the 1-D Kalman filter in Section~\ref{sec:kalman-algorithm}. The observation model is
+with persistence parameter $\alpha = 0.91$ and volatility-of-volatility $\sigma = 1.0$. Since $|\alpha| < 1$, the process is stationary, and I initialize $x_0 \sim \mathcal{N}\!\left(0,\, \sigma^2/(1-\alpha^2)\right)$ from its stationary distribution, following the same principle discussed for the 1-D Kalman filter in Section~\ref{sec:kalman-algorithm}. The observation model is
 \begin{equation}
     y_t = \beta\,\exp\!\left(\tfrac{x_t}{2}\right) v_t, \qquad v_t \sim \mathcal{N}(0, 1),
 \end{equation}
-with scale parameter $\beta = 0.5$. Note that $p(y_t \mid x_t) = \mathcal{N}(0,\, \beta^2 e^{x_t})$, so the observation noise is multiplicative and the likelihood is non-Gaussian in $x_t$. It is straightforward to run EKF and UKF on the range bearing model. Stochastic volatility is harder because the multiplicative noise means the observation is not a function of $x_t$ alone in the additive sense EKF/UKF assume. To make EKF/UKF applicable, we apply a log-squared transform $z_t = \log y_t^2$ to the observation, which yields
+with scale parameter $\beta = 0.5$. The density $p(y_t \mid x_t) = \mathcal{N}(0,\, \beta^2 e^{x_t})$, so the observation noise is multiplicative and the likelihood is non-Gaussian in $x_t$. It is straightforward to run EKF and UKF on the range bearing model. Stochastic volatility is harder because the multiplicative noise means the observation is not a function of $x_t$ alone in the additive sense EKF/UKF assume. To make EKF/UKF applicable, I apply a log-squared transform $z_t = \log y_t^2$ to the observation, which yields
 \begin{equation}
     z_t = \log\beta^2 + x_t + \varepsilon_t,
 \end{equation}
@@ -566,7 +566,7 @@ On the range-bearing model, both EKF (RMSE $= 0.133$, log-likelihood $= +109.90$
 On the raw stochastic volatility model, applying EKF/UKF directly with the nonlinear measurement $y_t = \beta e^{x_t/2} v_t$ gives RMSE $= 2.04$ for both filters (Figure~\ref{fig:ekf-ukf-sv-raw}). The Jacobian $\partial h / \partial x_t = (\beta/2)\, e^{x_t/2} v_t$ depends on the noise realisation $v_t$, so the EKF linearisation is not even well-defined in the usual additive-noise sense, and both filters mostly track the prior mean rather than responding to observations. Applying the log-squared transform (Figure~\ref{fig:ekf-ukf-sv-log}) drops the RMSE to $1.14$, nearly halving the latent-state error and recovering meaningful volatility tracking. Log-likelihoods for raw and log-transformed runs are not directly comparable because they are computed in different observation spaces ($y_t$ versus $\log y_t^2$); only the RMSE in latent-$x_t$ space is a fair comparison. EKF and UKF are numerically indistinguishable on the 1D SV model in both forms.
 \end{itemize}
 
-\paragraph{Computational footprint.} All six runs execute on CPU; the EKF/UKF machinery has no meaningful GPU workload at $d_x \le 2$ and $T = 100$. The numbers below are measured on the same host as the Kalman demo in \S\ref{sec:kalman-algorithm} and should be read as a reference point for the particle-filter wall times in Tables~\ref{tab:edh-rb}--\ref{tab:edh-sv-log}, not as an optimisation target.
+\paragraph{Computational footprint.} All six runs execute on CPU; the EKF/UKF machinery has no meaningful GPU workload at $d_x \le 2$ and $T = 100$. Table~\ref{tab:ekf-ukf-footprint} reports wall time and memory for all six runs. The numbers below are measured on the same host as the Kalman demo in \S\ref{sec:kalman-algorithm} and should be read as a reference point for the particle-filter wall times in Tables~\ref{tab:edh-rb}--\ref{tab:edh-sv-log}, not as an optimisation target.
 
 \begin{table}[H]
 \centering
@@ -642,7 +642,7 @@ The challenge is that we generally cannot sample directly from the target $p(x_k
 \begin{equation}
     \mathbb{E}_{p}[g(x_k)] = \int g(x_k)\, \frac{p(x_k \mid z_{1:k})}{q(x_k)}\, q(x_k)\, dx_k \approx \sum_{i=1}^N w^{(i)}\, g\!\left(x_k^{(i)}\right), \quad x_k^{(i)} \sim q(x_k),
 \end{equation}
-where the \textit{importance weight} is proportional to the ratio $w^{(i)} \propto p(x_k^{(i)} \mid z_{1:k}) / q(x_k^{(i)})$. Since $p(x_k \mid z_{1:k})$ is known only up to a normalizing constant, we use the \textit{self-normalized} estimator with unnormalized weights $\tilde{w}^{(i)} \propto p(x_k^{(i)} \mid z_{1:k}) / q(x_k^{(i)})$,
+where the \textit{importance weight} is proportional to the ratio $w^{(i)} \propto p(x_k^{(i)} \mid z_{1:k}) / q(x_k^{(i)})$. Since $p(x_k \mid z_{1:k})$ is known only up to a normalizing constant, I use the \textit{self-normalized} estimator with unnormalized weights $\tilde{w}^{(i)} \propto p(x_k^{(i)} \mid z_{1:k}) / q(x_k^{(i)})$,
 \begin{equation}
     w_k^{(i)} = \frac{\tilde{w}_k^{(i)}}{\displaystyle\sum_{j=1}^N \tilde{w}_k^{(j)}}.
 \end{equation}
@@ -650,7 +650,7 @@ This is consistent as $N \to \infty$ for any proposal $q$ with support containin
 
 \subsubsection*{Sequential Monte Carlo}
 
-Sequential use is where importance sampling becomes a filter. Suppose at time $k-1$ we hold a particle approximation $\{x_{k-1}^{(i)}, w_{k-1}^{(i)}\}$ of $p(x_{k-1} \mid z_{1:k-1})$. Our \textit{only} goal at time $k$ is the posterior $p(x_k \mid z_{1:k})$, whose mean $m_k$ and covariance $P_k$ are the quantities of interest. The intermediate predicted distribution $p(x_k \mid z_{1:k-1})$ and its moments $m_k^-$, $P_k^-$ are not ends in themselves—they are merely one route to the posterior. This gives us great freedom: we may draw new particles from \textit{any} proposal
+Sequential use is where importance sampling becomes a filter. Suppose at time $k-1$ I hold a particle approximation $\{x_{k-1}^{(i)}, w_{k-1}^{(i)}\}$ of $p(x_{k-1} \mid z_{1:k-1})$. The \textit{only} goal at time $k$ is the posterior $p(x_k \mid z_{1:k})$, whose mean $m_k$ and covariance $P_k$ are the quantities of interest. The intermediate predicted distribution $p(x_k \mid z_{1:k-1})$ and its moments $m_k^-$, $P_k^-$ are not ends in themselves—they are merely one route to the posterior. This gives me great freedom: I may draw new particles from \textit{any} proposal
 \begin{equation}
     x_k^{(i)} \sim q(x_k \mid x_{k-1}^{(i)}, z_k), \qquad i = 1, \ldots, N,
 \end{equation}
@@ -663,7 +663,7 @@ which after normalization gives $p(x_k \mid z_{1:k}) \approx \sum_i w_k^{(i)}\, 
 
 The proposal is the design choice. The simplest option $q(x_k \mid x_{k-1}^{(i)}, z_k) = p(x_k \mid x_{k-1}^{(i)})$ ignores the current observation entirely, simplifying~\eqref{eq:smc_weight} to $\tilde{w}_k^{(i)} \propto w_{k-1}^{(i)} \cdot p(z_k \mid x_k^{(i)})$—this is the Bootstrap Particle Filter. More sophisticated methods either use a smarter proposal that already incorporates $z_k$ (while still relying on weights to correct for the approximation), or abandon importance weights altogether and instead move particles deterministically toward the posterior using a flow constructed from a Gaussian approximation to $p(x_k \mid z_{1:k})$—as in the EDH and LEDH flow filters described later.
 
-A well-known practical issue with weighted SMC is \textit{weight degeneracy}: after many steps, the multiplicative weight update concentrates nearly all weight on very few particles. The standard remedy is \textit{resampling}, and we will study its effect by applying Bootstrap Particle Filter on non-linear models.
+A well-known practical issue with weighted SMC is \textit{weight degeneracy}: after many steps, the multiplicative weight update concentrates nearly all weight on very few particles. The standard remedy is \textit{resampling}, and I study its effect by applying Bootstrap Particle Filter on non-linear models.
 
 \subsection{Bootstrap Particle Filter}
 
@@ -695,7 +695,7 @@ The weight update multiplies by a per-particle likelihood, and repeated multipli
 \begin{equation}
     N_{\mathrm{eff}} = \frac{1}{\displaystyle\sum_{i=1}^N \bigl(w_k^{(i)}\bigr)^2}
 \end{equation}
-quantifies this: it equals $N$ when all weights are uniform and drops toward $1$ at full collapse. We trigger resampling when $N_{\mathrm{eff}} < N/2$.
+quantifies this: it equals $N$ when all weights are uniform and drops toward $1$ at full collapse. I trigger resampling when $N_{\mathrm{eff}} < N/2$.
 
 \paragraph{Multinomial resampling.}
 The conceptually simplest fix draws $N$ independent samples from the categorical distribution defined by the current weights,
@@ -705,7 +705,7 @@ The conceptually simplest fix draws $N$ independent samples from the categorical
 then resets all weights to $1/N$. High-weight particles are duplicated; low-weight ones are discarded. While unbiased, this introduces additional Monte Carlo variance: because each draw is independent, particles with moderate weight may be selected zero times by chance. The cost is $O(N \log N)$ via the inverse-CDF method.
 
 \paragraph{Systematic resampling (the actual implementation).}
-We use systematic resampling, which addresses both drawbacks. A single draw $u \sim \mathcal{U}(0,\,1/N)$ places $N$ evenly-spaced points across $[0, 1]$:
+I use systematic resampling, which addresses both drawbacks. A single draw $u \sim \mathcal{U}(0,\,1/N)$ places $N$ evenly-spaced points across $[0, 1]$:
 \begin{equation}
     u^{(i)} = u + \frac{i-1}{N}, \quad i = 1, \ldots, N.
 \end{equation}
@@ -766,13 +766,13 @@ Start from the filtering update.
 \begin{equation}
     p(x_k \mid z_{1:k}) \propto \underbrace{p(x_k \mid z_{1:k-1})}_{g(x)} \cdot \underbrace{p(z_k \mid x_k)}_{h(x)}.
 \end{equation}
-The Bootstrap Particle Filter handles this by reweighting: sample from $g(x)$, then multiply each particle's weight by $h(x^{(i)})$. That multiplication is precisely what causes weight degeneracy. Flow filters \cite{daum2010exact,daum2011particle} take a different route: instead of adjusting weights, we move the particles. If we can find a deterministic map that transports samples from $g(x)$ into samples from $g(x)h(x)$, we have solved the update step exactly---with no weights and therefore no weight degeneracy.
+The Bootstrap Particle Filter handles this by reweighting: sample from $g(x)$, then multiply each particle's weight by $h(x^{(i)})$. That multiplication is precisely what causes weight degeneracy. Flow filters \cite{daum2010exact,daum2011particle} take a different route: instead of adjusting weights, move the particles. If I can find a deterministic map that transports samples from $g(x)$ into samples from $g(x)h(x)$, the update step is solved exactly---with no weights and therefore no weight degeneracy.
 
 To do this continuously, introduce a pseudo-time $\lambda \in [0,1]$ and the \textit{log-homotopy}:
 \begin{equation}
     \log p(x,\lambda) = \log g(x) + \lambda \log h(x).
 \end{equation}
-At $\lambda=0$, $p(x,0) = g(x)$ is the predicted distribution; at $\lambda=1$, $p(x,1) \propto g(x)h(x)$ is the posterior. We want a flow $f(x,\lambda)$ such that particles obeying
+At $\lambda=0$, $p(x,0) = g(x)$ is the predicted distribution; at $\lambda=1$, $p(x,1) \propto g(x)h(x)$ is the posterior. I want a flow $f(x,\lambda)$ such that particles obeying
 \begin{equation}
     \frac{d\v{x}}{d\lambda} = f(\v{x},\lambda)
 \end{equation}
@@ -786,7 +786,7 @@ The homotopy requires $\frac{\partial \log p}{\partial \lambda} = \log h(x)$, wh
 \begin{equation}
 \boxed{\log h(x) = -\nabla \cdot f - (\nabla \log p) \cdot f}
 \end{equation}
-This is a PDE in the unknown vector field $f$, and it has infinitely many solutions. Any flow satisfying this equation will correctly transport particles from $g(x)$ to $g(x)h(x)$. The choice of $f$ is a design decision, completely analogous to the choice of proposal in weighted SMC. We just need to pick one that is tractable to compute.
+This is a PDE in the unknown vector field $f$, and it has infinitely many solutions. Any flow satisfying this equation will correctly transport particles from $g(x)$ to $g(x)h(x)$. The choice of $f$ is a design decision, completely analogous to the choice of proposal in weighted SMC. I just need one that is tractable to compute.
 
 \subsubsection{Determine the evolution kernel}
 \label{sec:edh_derivation}
@@ -794,9 +794,9 @@ The simplest structured choice is an \textit{affine flow}:
 \begin{equation}
     f(x,\lambda) = A(\lambda)\,x + b(\lambda),
 \end{equation}
-where $A(\lambda)$ and $b(\lambda)$ are a matrix and vector to be determined. $A$ stretches and rotates particles while $b$ translates them. Crucially, they are not free parameters --- they must be chosen so that the flow satisfies the Fokker-Planck constraint. For an affine flow $\nabla \cdot f = \text{Tr}(A)$, and the constraint becomes algebraic once we know $\nabla \log p(x,\lambda)$.
+where $A(\lambda)$ and $b(\lambda)$ are a matrix and vector to be determined. $A$ stretches and rotates particles while $b$ translates them. Crucially, they are not free parameters --- they must be chosen so that the flow satisfies the Fokker-Planck constraint. For an affine flow $\nabla \cdot f = \text{Tr}(A)$, and the constraint becomes algebraic once $\nabla \log p(x,\lambda)$ is known.
 
-This is where we need an assumption. To evaluate $\nabla \log p(x,\lambda)$ in the constraint, we need to know what $p(x,\lambda)$ looks like for intermediate $\lambda$. Different assumptions lead to different flows --- different schedules for $A(\lambda)$ and $b(\lambda)$ --- but they all share the same endpoints: $\lambda = 0$ is the prior $g(x)$ and $\lambda = 1$ is the posterior $g(x)h(x)$, fixed by the homotopy construction. The assumption only determines the path taken between those two endpoints; it does not change the destination. We assume $p(x,\lambda)$ is Gaussian:
+This is where I need an assumption. To evaluate $\nabla \log p(x,\lambda)$ in the constraint, I need to know what $p(x,\lambda)$ looks like for intermediate $\lambda$. Different assumptions lead to different flows --- different schedules for $A(\lambda)$ and $b(\lambda)$ --- but they all share the same endpoints: $\lambda = 0$ is the prior $g(x)$ and $\lambda = 1$ is the posterior $g(x)h(x)$, fixed by the homotopy construction. The assumption only determines the path taken between those two endpoints; it does not change the destination. I assume $p(x,\lambda)$ is Gaussian:
 \begin{equation}
     p(x,\lambda) \sim \mathcal{N}(\bar{\eta}_\lambda, P_\lambda),
 \end{equation}
@@ -805,7 +805,7 @@ with precision and mean evolving as
     P_\lambda^{-1} &= P^{-1} + \lambda H^T R^{-1} H, \\
     \bar{\eta}_\lambda &= P_\lambda\bigl[P^{-1}\bar{\eta}_0 + \lambda H^T R^{-1} z\bigr].
 \end{align}
-This is the only role of the Gaussian assumption: it gives a tractable expression for $\nabla \log p(x,\lambda) = -P_\lambda^{-1}(x - \bar{\eta}_\lambda)$, which we substitute into the constraint to solve for $A$ and $b$. A different assumption about the intermediate distribution would yield a different flow schedule, but the particles would still travel between the same prior and posterior.
+This is the only role of the Gaussian assumption: it gives a tractable expression for $\nabla \log p(x,\lambda) = -P_\lambda^{-1}(x - \bar{\eta}_\lambda)$, which is substituted into the constraint to solve for $A$ and $b$. A different assumption about the intermediate distribution would yield a different flow schedule, but the particles would still travel between the same prior and posterior.
 
 With the Gaussian form, $\nabla \log p(x,\lambda) = -P_\lambda^{-1}(x - \bar{\eta}_\lambda)$. Differentiating the precision with respect to $\lambda$ and using the matrix identity $dP_\lambda/d\lambda = -P_\lambda(dP_\lambda^{-1}/d\lambda)P_\lambda$ gives
 \begin{equation}
@@ -1054,7 +1054,7 @@ To keep the global filter from drifting away from the particle cloud, a \textit{
 
 \subsubsection{Experiments}
 \label{sec:edh-experiments}
-We run every variant on all three headline models at $N = 200$ particles, $T = 100$ time steps, and $n_\lambda = 29$ flow steps with the geometric ratio $q = 1.2$ unless noted.
+I run every variant on all three headline models at $N = 200$ particles, $T = 100$ time steps, and $n_\lambda = 29$ flow steps with the geometric ratio $q = 1.2$ unless noted.
 
 \begin{table}[H]
 \centering
@@ -1078,7 +1078,7 @@ LEDH invertible             & $0.127$ & $\phantom{+}88.78$ & $142.78$ & $1427.8$
 \end{tabular}
 \end{table}
 
-The range-bearing take: once intermediate re-linearisation is turned on, every flow variant sits within ${\sim}5\%$ of EKF/UKF on RMSE, at roughly $70$--$80\times$ the wall-time. Global-EDH (one linearisation at $\lambda=0$, no refresh as the cloud moves) blows up entirely --- this is the control that justifies the per-step re-linearisation used by every other variant. LEDH-invertible is best on RMSE but its log-likelihood is noticeably lower than LEDH-flow's, suggesting the Jacobian correction is trading calibration for mean accuracy on this well-conditioned problem.
+The range-bearing take: once intermediate re-linearisation is turned on, every flow variant sits within ${\sim}5\%$ of EKF/UKF on RMSE, at roughly $70$--$80\times$ the wall-time. Global-EDH (one linearisation at $\lambda=0$, no refresh as the cloud moves) blows up entirely --- this is the control that justifies the per-step re-linearisation used by every other variant. LEDH-invertible is best on RMSE but its log-likelihood is noticeably lower than LEDH-flow's, suggesting the Jacobian correction is trading calibration for mean accuracy on this well-conditioned problem. Figure~\ref{fig:pf_edh_ledh_rb} shows why the RMSE differences are visually negligible.
 
 \begin{figure}[H]
     \centering
@@ -1109,7 +1109,7 @@ Stochastic EDH               & $45.11$  & $-65192.23$ & $24.79$  &  \\
 \end{tabular}
 \end{table}
 
-The acoustic result is not the clean story I expected. LEDH-flow, not LEDH-invertible, is the best deterministic-flow variant on this model: $41.4$ RMSE against $106.9$ for the invertible sibling and ${\sim}255$--$297$ for the globally-linearised EDH variants. Stochastic EDH at $45.1$ is effectively tied with LEDH-flow. Bootstrap PF at a manageable $N = 200$ is cheaper but less accurate ($55.7$ RMSE in $8.15$ s); pushing to $N = 10^6$ (and shortening the trajectory to $T=50$) reaches $22.1$, which I treat as a brute-force reference rather than an operational point. The flow filters do not win wall-time here. They win RMSE at moderate compute.
+The acoustic result in Table~\ref{tab:edh-acoustic} is not the clean story I expected. LEDH-flow, not LEDH-invertible, is the best deterministic-flow variant on this model: $41.4$ RMSE against $106.9$ for the invertible sibling and ${\sim}255$--$297$ for the globally-linearised EDH variants. Stochastic EDH at $45.1$ is effectively tied with LEDH-flow. Bootstrap PF at a manageable $N = 200$ is cheaper but less accurate ($55.7$ RMSE in $8.15$ s); pushing to $N = 10^6$ (and shortening the trajectory to $T=50$) reaches $22.1$, which I treat as a brute-force reference rather than an operational point. The flow filters do not win wall-time here. They win RMSE at moderate compute.
 
 \begin{table}[H]
 \centering
@@ -1132,7 +1132,7 @@ Kernel (matrix)         & $2.091$ & --- & $101.02$ \\
 \begin{table}[H]
 \centering
 \footnotesize
-\caption{Stochastic volatility, \emph{log-squared-transformed} model ($z = \log y^2$; $T=100$, $N=200$). The linear transform restores competitiveness to EKF/UKF and the flow family; kernel is slower but still tracks. LEDH-invertible narrowly beats the bootstrap PF on RMSE here, at $6\times$ the wall-time.}
+\caption{Stochastic volatility, \emph{log-squared-transformed} model ($z = \log y^2$; $T=100$, $N=200$). The linear transform restores competitiveness to EKF/UKF and the flow family; kernel is slower but still tracks. LEDH-invertible is in the same narrow RMSE band as bootstrap PF, but does not beat it.}
 \label{tab:edh-sv-log}
 \begin{tabular}{lccc}
 \toprule
@@ -1148,12 +1148,12 @@ Kernel (matrix, $T=500$) & $1.372$ & --- & $287.39$ \\
 \end{tabular}
 \end{table}
 
-The SV takeaway: on the raw model, every filter that relies on a local linearisation of $h$ (EKF, UKF, EDH, LEDH, kernel) fails at the same ${\sim}2.0$ RMSE, and only the bootstrap PF --- which evaluates the likelihood directly without touching $h$'s Jacobian --- tracks the latent volatility. The log-squared transform flattens the ranking: RMSE compresses into a ${\sim}1.14$--$1.16$ band and the wall-time differences become the discriminator. EKF and UKF are again the cheap-and-good option; the flow filters are not wrong on this model, just unnecessary.
+The SV takeaway: on the raw model, every filter that relies on a local linearisation of $h$ (EKF, UKF, EDH, LEDH, kernel) fails at the same ${\sim}2.0$ RMSE, and only the bootstrap PF --- which evaluates the likelihood directly without touching $h$'s Jacobian --- tracks the latent volatility. The log-squared transform flattens the ranking: RMSE compresses into a ${\sim}1.14$--$1.16$ band and the wall-time differences become the discriminator. EKF and UKF are again the cheap-and-good option; the flow filters are not wrong on this model, just unnecessary. Figure~\ref{fig:pf_edh_ledh_sv_log} shows the three-way comparison, and Figure~\ref{fig:edh_vs_ledh_flow_sv_log} isolates the EDH-vs-LEDH difference.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.85\linewidth]{pf_edh_ledh_sv_log.png}
-    \caption{Log-squared stochastic volatility: bootstrap PF (blue), EDH flow (green), and LEDH flow (orange) compared against the true log-volatility (black) with back-projected observations as red crosses. After the log-squared transform, the three filters compress into a narrow band and the differences between them become invisible at this scale; the three flow variants all land in the same narrow RMSE band as the LEDH-invertible entry in Table~\ref{tab:edh-sv-log}.}
+    \caption{Log-squared stochastic volatility: bootstrap PF (blue), EDH flow (green), and LEDH flow (orange) compared against the true log-volatility (black) with back-projected observations as red crosses. After the log-squared transform, the three filters compress into a narrow band and the differences between them become invisible at this scale; the three filters all land in the same narrow RMSE band as the LEDH-invertible entry in Table~\ref{tab:edh-sv-log}.}
     \label{fig:pf_edh_ledh_sv_log}
 \end{figure}
 
@@ -1165,7 +1165,7 @@ The SV takeaway: on the raw model, every filter that relies on a local linearisa
 \end{figure}
 
 \paragraph{Stochastic volatility 2D (filter accuracy).}
-Before the SV2D model reappears in \S\ref{sec:sv2d} as an HMC gradient-failure case, I record the filter-level result first. The three figures below compare bootstrap PF, EDH flow, LEDH flow, and the invertible counterparts of the flow variants on an SV2D trajectory with $N = 200$ particles and $T = 100$ time steps. A clean filter result on this model does not imply HMC will succeed on it --- that is the point of \S\ref{sec:sv2d} --- but a broken filter result would imply HMC cannot possibly succeed.
+Before the SV2D model reappears in \S\ref{sec:sv2d} as an HMC gradient-failure case, I record the filter-level result first. Figures~\ref{fig:pf_edh_ledh_sv2d}, \ref{fig:edh_flow_vs_invertible_sv2d}, and~\ref{fig:edh_vs_ledh_invertible_sv2d} compare bootstrap PF, EDH flow, LEDH flow, and the invertible counterparts of the flow variants on an SV2D trajectory with $N = 200$ particles and $T = 100$ time steps. A clean filter result on this model does not imply HMC will succeed on it --- that is the point of \S\ref{sec:sv2d} --- but a broken filter result would imply HMC cannot possibly succeed.
 
 \begin{figure}[H]
     \centering
@@ -1190,12 +1190,12 @@ Before the SV2D model reappears in \S\ref{sec:sv2d} as an HMC gradient-failure c
 
 \subsection{Invertible Flow Filter}
 
-\subsubsection{Why do we need Jacobian computation?}
-The invertible flow filter \cite{Li-Particle-Filtering-2017} corrects for the volume distortion introduced by discretization. The continuous flow $d\v{x}/d\lambda = f(\v{x},\lambda)$ is exact by construction: the Fokker-Planck equation guarantees that following the flow moves probability mass correctly from $g(x)$ to $g(x)h(x)$. In practice we integrate with finite steps $\varepsilon_j$, so each $\lambda$ step applies the discrete affine map
+\subsubsection{Why the Jacobian correction is needed}
+The invertible flow filter \cite{Li-Particle-Filtering-2017} corrects for the volume distortion introduced by discretization. The continuous flow $d\v{x}/d\lambda = f(\v{x},\lambda)$ is exact by construction: the Fokker-Planck equation guarantees that following the flow moves probability mass correctly from $g(x)$ to $g(x)h(x)$. In practice I integrate with finite steps $\varepsilon_j$, so each $\lambda$ step applies the discrete affine map
 \begin{equation}
     \boldsymbol{\eta}^{(i)} \;\leftarrow\; (I + \varepsilon_j A^{(i)}_j)\,\boldsymbol{\eta}^{(i)} + \varepsilon_j \mathbf{b}^{(i)}_j.
 \end{equation}
-This is an invertible linear map with Jacobian $\det(I + \varepsilon_j A^{(i)}_j)$. Unless $\det(I + \varepsilon_j A) = 1$ for every step (i.e., the map is volume-preserving), the discrete flow changes the volume element and therefore distorts the density. The continuous flow does not have this problem—the exact Fokker-Planck solution implicitly accounts for volume changes—but any finite discretization introduces this error. To correct for it, we re-introduce importance weights. The weight accumulated over all $n_\lambda$ steps of the flow at time $k$ is
+This is an invertible linear map with Jacobian $\det(I + \varepsilon_j A^{(i)}_j)$. Unless $\det(I + \varepsilon_j A) = 1$ for every step (i.e., the map is volume-preserving), the discrete flow changes the volume element and therefore distorts the density. The continuous flow does not have this problem—the exact Fokker-Planck solution implicitly accounts for volume changes—but any finite discretization introduces this error. To correct for it, I re-introduce importance weights. The weight accumulated over all $n_\lambda$ steps of the flow at time $k$ is
 \begin{equation}
     \log w_k^{(i)} = \log w_{k-1}^{(i)} + \sum_{j=1}^{n_\lambda} \log \bigl|\det\bigl(I + \varepsilon_j A^{(i)}_j\bigr)\bigr|,
     \label{eq:invertible_weight}
@@ -1285,7 +1285,7 @@ When $d_z \ll d_x$ this is a substantial saving. In the common case $d_z = d_x =
 
 \paragraph{When does the Jacobian correction help?} 
 
-The Jacobian correction is harmless on range-bearing and should help on high-dimensional targets, but on acoustic tracking it is strictly worse than uncorrected LEDH in my runs. I defer the root-cause investigation to future work --- the most likely culprits are float32 precision on the per-particle Cholesky and the log-determinant clipping I use for stability.
+The Jacobian correction is harmless on range-bearing and should help on high-dimensional targets, but on acoustic tracking it is strictly worse than uncorrected LEDH in my runs. Figures~\ref{fig:edh_flow_vs_invertible_rb} and~\ref{fig:ledh_flow_vs_invertible_rb} show the range-bearing control case. I defer the root-cause investigation to future work --- the most likely culprits are float32 precision on the per-particle Cholesky and the log-determinant clipping I use for stability.
 
 \begin{figure}[H]
     \centering
@@ -1376,7 +1376,7 @@ No correction, optimal schedule         & $1.307$ & $-23780.79$ & $414.63$ \\
 \end{tabular}
 \end{table}
 
-\paragraph{Empirical takeaway (§4.5).} Three facts from Table~\ref{tab:sde_flow}. (i)~Without the local correction $e_0$, stochastic flow on the range-bearing model is as bad as the Kalman filter on the same task --- the uncorrected drift diverges or tracks the prior mean, because the linearisation is stale throughout the flow. (ii)~With the local correction, the default stochastic EDH run works (RMSE $=0.131$), but it does \emph{not} beat the deterministic EDH/LEDH flows, which already reach comparable or better RMSE at a fraction of the compute. The $n_\lambda=100$ variant settles near $0.25$. (iii)~The `optimal' step-size schedule of \cite{ding2012implementation} did not help in our hands: we could not reproduce the stiffness-mitigation gain, and a fine uniform schedule plus the geometric-ratio heuristic was sufficient. 
+\paragraph{Empirical takeaway (§4.5).} Three facts from Table~\ref{tab:sde_flow}. (i)~Without the local correction $e_0$, stochastic flow on the range-bearing model is as bad as the Kalman filter on the same task --- the uncorrected drift diverges or tracks the prior mean, because the linearisation is stale throughout the flow. (ii)~With the local correction, the default stochastic EDH run works (RMSE $=0.131$), but it does \emph{not} beat the deterministic EDH/LEDH flows, which already reach comparable or better RMSE at a fraction of the compute. The $n_\lambda=100$ variant settles near $0.25$. (iii)~The `optimal' step-size schedule of \cite{ding2012implementation} did not help in my runs: I could not reproduce the stiffness-mitigation gain, and a fine uniform schedule plus the geometric-ratio heuristic was sufficient. 
 
 \clearpage
 \subsection{Kernel Flow Filter}
@@ -1580,19 +1580,19 @@ Observed dimensions then keep diversity even when unobserved dimensions spread o
 
 \subsection{Two Problems with Resampling}
 
-Before we get into details, one framing up-front: OT resampling's primary value in this report is \emph{differentiability}, not lower filtering RMSE. Table~\ref{tab:soft-vs-ot-sv} in \S\ref{par:soft-vs-ot} will show OT paying a $20$--$180\times$ compute tax on stochastic volatility without beating stop-gradient systematic or soft resampling on RMSE. The motivation for paying that tax only lands in \S\ref{sec:param-estimation}, where the gradient surface determines whether HMC can recover the parameter posterior.
+OT resampling's value in this report is \emph{differentiability}, not lower filtering RMSE. Table~\ref{tab:soft-vs-ot-sv} in \S\ref{par:soft-vs-ot} shows OT paying a $20$--$180\times$ compute tax depending on baseline and $\epsilon$, typically $60$--$100\times$ in HMC-relevant settings, without beating stop-gradient systematic or soft resampling on RMSE. The reason to pay that cost appears in \S\ref{sec:param-estimation}, where the gradient surface determines whether HMC can recover the parameter posterior.
 
-Previously, we have discussed the sample impoverishment problem introduced by low quality resampling. Therefore, we need to think about how to improve it. Before and after resampling, we are preserving the distribution. In \cite{reich2013nonparametric}, the author proposed to use optimal transport to do the resampling. An easy way to see this is that, before the resampling, we have particle location and weights at $\{\omega_i, x_i\}$, and after the resampling, we have particle location and weights at $\{\tilde\omega_i, \tilde x_i\}$. If we think $x_i$ are basis vectors and $\omega_i$ are the coefficients, we are dealing with a linear transformation problem. The transformation constructs an equal-weight approximation that reduces resampling variance and better preserves the structure of the distribution. 
+Particle filters already showed the sample-impoverishment problem caused by low-quality resampling. The resampler should change the particle representation without changing the distribution it represents. Reich's OT resampler does this by treating resampling as a transport problem \cite{reich2013nonparametric}. Before resampling I have particle locations and weights $\{\omega_i, x_i\}$; after resampling I want $\{\tilde\omega_i, \tilde x_i\}$ with equal weights. Thinking of the locations as basis vectors and the weights as coefficients turns resampling into a linear transformation problem. The transformation builds an equal-weight approximation that reduces resampling variance and better preserves the structure of the distribution.
 
-To put it sharply, we want to make sure $\{\omega_i, x_i\}$ and $\{\tilde\omega_i, \tilde x_i\}$ represent the same distribution with $\tilde\omega_i \equiv \frac1N$, where $N$ is the total number of particles.There are two problems on resampling that we need to address separately:
+The target is simple: $\{\omega_i, x_i\}$ and $\{\tilde\omega_i, \tilde x_i\}$ should represent the same distribution, with $\tilde\omega_i \equiv \frac1N$ for $N$ particles. There are two resampling problems to separate.
 
-\paragraph{Problem 1: Sampling noise.} OT resampling is deterministic instead of stochastic, which means it avoids the sampling noise introduced by systematic resampling, therefore removing its contribution to the variance of the particle cloud, namely increasing the quality of covariance estimation. But the classical OT formulation relies on solving a discrete Linear Programming (LP) problem to find the optimal transport plan. LP solvers like the Simplex algorithm or Interior Point methods walk along edges of the polytope or navigate through its interior. They do not need derivatives of the optimal solution with respect to inputs---they only need the cost matrix (particle distances) and constraints (matching weights). This is where the second problem comes in.
+\paragraph{Problem 1: Sampling noise.} OT resampling is deterministic. It avoids the extra sampling noise introduced by systematic resampling and improves covariance estimation from the particle cloud. Classical OT still requires solving a discrete linear program to find the optimal transport plan. Linear-program solvers only need the cost matrix and the marginal constraints. They do not provide derivatives of the optimal plan with respect to the inputs. That creates the second problem.
 
-\paragraph{Problem 2: Non-differentiability.} The LP-based OT plan is not differentiable with respect to the inputs. For our purpose---building a differentiable particle filter whose log-likelihood can be differentiated with respect to model parameters---this is a showstopper. The key innovation of \cite{corenflos-differentiable-2021} is to introduce entropy regularization so that the optimal coupling $P^*$ becomes differentiable as a function of the cost matrix, therefore turning the whole resampling operation differentiable in principle. The regularized transport cost is
+\paragraph{Problem 2: Non-differentiability.} The LP-based OT plan is not differentiable with respect to the inputs. For my purpose---building a differentiable particle filter whose log-likelihood can be differentiated with respect to model parameters---this is a showstopper. Entropy regularization fixes the mathematical object I need \cite{corenflos-differentiable-2021}: the optimal coupling $P^*$ becomes differentiable as a function of the cost matrix. The regularized transport cost is
 \begin{equation}
     W_{2, \epsilon}^2 (\alpha_N, \beta_N) = \min_{P \in S(a, b)} \sum_{i,j=1}^N p_{i,j} \left( c_{i,j} + \epsilon \log \frac{p_{i,j}}{a_i b_j} \right)
 \end{equation}
-The practical issue is computing the gradient faithfully through the iterative Sinkhorn solver that finds $P^*$. We will see in the following subsections that the regularized OT map is differentiable in principle, but getting an accurate backward pass requires care. This is our focus for the rest of this section.
+The practical issue is computing the gradient faithfully through the iterative Sinkhorn solver that finds $P^*$. The regularized OT map is differentiable in principle, but the backward pass still needs care. That is the focus for the rest of this section.
 
 By adding the entropy term $\epsilon \log \frac{p_{i,j}}{a_i b_j}$ instead of $\epsilon \log p_{i,j}$, the authors of \cite{corenflos-differentiable-2021} made it possible to recover the transport plan from the dual variables alone. This objective is the entropic optimal transport problem, equivalent up to constants under fixed marginals to $\langle \mathbf{C}, \mathbf{P}\rangle - \epsilon \mathbf{H}(\mathbf{P})$. The dual recovery step is $\mathcal{O}(N)$ per entry, compared to $\mathcal{O}(N^2)$ for the primal LP of \cite{reich2013nonparametric}, which opens the possibility for modeling more complicated systems with large numbers of particles.
 \subsection{Soft Resampling}
@@ -1618,7 +1618,7 @@ Soft resampling \cite{karkus2018particle} is a compromise between fully stochast
 \end{algorithmic}
 \end{algorithm}
 
-The critical observation is that soft resampling is only \emph{partially} differentiable. The selection step (line 6) is still discrete---the cumulative-sum lookup picks an integer index $j_i$, and the gradient does not flow through that choice. Only the importance weight correction $w^{(j_i)} / q^{(j_i)}$ on line 9 is differentiable through $w$. The selection gradient---how $\v\theta$ affects \emph{which} particle gets picked---is still zero. We will make this precise in Section~\ref{sec:ot-derivative-chain}.
+The critical observation is that soft resampling is only \emph{partially} differentiable. The selection step (line 6) is still discrete---the cumulative-sum lookup picks an integer index $j_i$, and the gradient does not flow through that choice. Only the importance weight correction $w^{(j_i)} / q^{(j_i)}$ on line 9 is differentiable through $w$. The selection gradient---how $\v\theta$ affects \emph{which} particle gets picked---is still zero. Section~\ref{sec:ot-derivative-chain} makes this precise.
 
 \subsection{Entropy-Regularized OT (Sinkhorn) Resampling}
 \label{sec:entropic-ot}
@@ -1628,9 +1628,9 @@ The entropy-regularized OT resampling problem is a direct application of the Mon
     \min_{\mathbf{P} \in \mathcal{U}(\mathbf{a}, \mathbf{b})} \langle \mathbf{C}, \mathbf{P} \rangle, \qquad
     \mathcal{U}(\mathbf{a}, \mathbf{b}) = \left\{ \mathbf{P} \in \mathbb{R}_+^{N\times N} : \mathbf{P}\mathbf{1}_N = \mathbf{a},\; \mathbf{P}^\top \mathbf{1}_N = \mathbf{b} \right\}.
 \end{equation}
-In the resampling context, we set $\mathbf{a} = \mathbf{w}$ (particle weights as the source marginal), $\mathbf{b} = \frac{1}{N}\mathbf{1}_N$ (the uniform distribution as the target marginal), and $C_{ij} = \|\tilde{\mathbf{x}}^{(i)} - \tilde{\mathbf{x}}^{(j)}\|^2/2$ as the squared-distance cost between normalized particle positions. Solving this exactly via linear programming is computationally expensive and, more importantly, non-differentiable with respect to the inputs.
+In the resampling context, set $\mathbf{a} = \mathbf{w}$ (particle weights as the source marginal), $\mathbf{b} = \frac{1}{N}\mathbf{1}_N$ (the uniform distribution as the target marginal), and $C_{ij} = \|\tilde{\mathbf{x}}^{(i)} - \tilde{\mathbf{x}}^{(j)}\|^2/2$ as the squared-distance cost between normalized particle positions. Solving this exactly via linear programming is computationally expensive and, more importantly, non-differentiable with respect to the inputs.
 
-\paragraph{Convention used in the algorithm below.} With the marginals as above, the optimal coupling $\mathbf{P}^*$ has row sums $\mathbf{w}$ (source) and column sums $\tfrac{1}{N}\mathbf{1}_N$ (target). The resampled particles, following Reich~\cite{reich2013nonparametric}, are $\hat{\mathbf{x}}^{(i)} = (1/b_i)\sum_j P^*_{ji}\,\mathbf{x}^{(j)} = N\sum_j P^*_{ji}\,\mathbf{x}^{(j)}$, so each new particle is a convex combination of the old ones with column-wise weights of $\mathbf{P}^*$. In the implementation we build a transport matrix $T$ such that $\hat{\mathbf{x}}^{(i)} = \sum_j T_{ij}\mathbf{x}^{(j)}$, which means $T_{ij} = N\,P^*_{ji}$: the code's $T$ is $N$ times the \emph{transpose} of the coupling $\mathbf{P}^*$. The `normalise columns / apply source weights' block in the OT resampling algorithm below is the step that converts $\mathbf{P}^*$ into this $T$. We flag the convention explicitly because row-vs-column and source-vs-target are easy to swap silently when translating between the Reich formula and the Sinkhorn output.
+\paragraph{Convention used in the algorithm below.} With the marginals as above, the optimal coupling $\mathbf{P}^*$ has row sums $\mathbf{w}$ (source) and column sums $\tfrac{1}{N}\mathbf{1}_N$ (target). The resampled particles, following Reich~\cite{reich2013nonparametric}, are $\hat{\mathbf{x}}^{(i)} = (1/b_i)\sum_j P^*_{ji}\,\mathbf{x}^{(j)} = N\sum_j P^*_{ji}\,\mathbf{x}^{(j)}$, so each new particle is a convex combination of the old ones with column-wise weights of $\mathbf{P}^*$. I use a resampling matrix $T$ below such that $\hat{\mathbf{x}}^{(i)} = \sum_j T_{ij}\mathbf{x}^{(j)}$, which means $T_{ij} = N\,P^*_{ji}$. Thus $T$ is $N$ times the \emph{transpose} of the coupling $\mathbf{P}^*$. The normalization-and-weighting step in the OT resampling algorithm below converts $\mathbf{P}^*$ into this $T$. I state the convention because row-vs-column and source-vs-target are easy to swap silently when translating between the Reich formula and the Sinkhorn output.
 
 The key insight from \cite{Cuturi2013SinkhornDL} is that adding a discrete entropy regularizer to the objective,
 \begin{equation}
@@ -1641,11 +1641,11 @@ makes the problem $\epsilon$-strongly convex, yielding a unique solution that is
     P_{ij}^* = u_i\, K_{ij}\, v_j, \qquad K_{ij} = \exp\!\left(-\frac{C_{ij}}{\epsilon}\right),
     \label{eq:gibbs-kernel}
 \end{equation}
-where $\mathbf{u} \in \mathbb{R}^N$ and $\mathbf{v} \in \mathbb{R}^N$ are two unknown scaling vectors. To determine them, we substitute this form back into the two marginal constraints $\mathbf{P}^*\mathbf{1}_N = \mathbf{a}$ and $(\mathbf{P}^*)^\top \mathbf{1}_N = \mathbf{b}$, obtaining the equivalent fixed-point conditions:
+where $\mathbf{u} \in \mathbb{R}^N$ and $\mathbf{v} \in \mathbb{R}^N$ are two unknown scaling vectors. To determine them, substitute this form back into the two marginal constraints $\mathbf{P}^*\mathbf{1}_N = \mathbf{a}$ and $(\mathbf{P}^*)^\top \mathbf{1}_N = \mathbf{b}$, obtaining the equivalent fixed-point conditions:
 \begin{equation}
     \mathbf{u} \odot (\mathbf{K}\mathbf{v}) = \mathbf{a}, \qquad \mathbf{v} \odot (\mathbf{K}^\top \mathbf{u}) = \mathbf{b},
 \end{equation}
-where $\odot$ and $\oslash$ denote element-wise multiplication and division. Rearranging, we can solve for $\mathbf{u}$ and $\mathbf{v}$ alternately:
+where $\odot$ and $\oslash$ denote element-wise multiplication and division. Rearranging gives alternating updates for $\mathbf{u}$ and $\mathbf{v}$:
 \begin{equation}
     \mathbf{u}^{(\ell)} = \mathbf{a} \oslash \!\left(\mathbf{K}\mathbf{v}^{(\ell-1)}\right), \qquad \mathbf{v}^{(\ell)} = \mathbf{b} \oslash \!\left(\mathbf{K}^\top \mathbf{u}^{(\ell)}\right),
     \label{eq:vanilla-sinkhorn}
@@ -1670,15 +1670,15 @@ and the marginal-matching updates \eqref{eq:vanilla-sinkhorn} turn into log-sum-
   \STATE $\beta_{\text{new}}^{(j)} \leftarrow -\epsilon \log\sum_i \exp\!\left(\frac{\log u + \alpha_{\text{new}}^{(i)}/\epsilon - C_{ij}/\epsilon}{1}\right)$ \hfill (softmin over rows)
   \STATE $\boldsymbol{\alpha} \leftarrow \tfrac{1}{2}(\boldsymbol{\alpha} + \boldsymbol{\alpha}_{\text{new}})$, \quad $\boldsymbol{\beta} \leftarrow \tfrac{1}{2}(\boldsymbol{\beta} + \boldsymbol{\beta}_{\text{new}})$ \hfill (damping for stability)
 \UNTIL{$\max(|\Delta\boldsymbol{\alpha}|, |\Delta\boldsymbol{\beta}|) < \delta$ or max iterations reached}
-\STATE \textbf{Single-step extrapolation} (approximate autodiff window; \emph{not} the implicit function theorem route --- see \S\ref{sec:sinkhorn-backward}):
-\STATE $\boldsymbol{\alpha}_{\text{sg}} \leftarrow \text{stop\_gradient}(\boldsymbol{\alpha})$, $\boldsymbol{\beta}_{\text{sg}} \leftarrow \text{stop\_gradient}(\boldsymbol{\beta})$
-\STATE One more Gauss-Seidel step: $\boldsymbol{\alpha} \leftarrow \text{softmin}(\epsilon, \mathbf{C}^\top, \log\mathbf{w} + \boldsymbol{\beta}_{\text{sg}}/\epsilon)$
+\STATE \textbf{Single-step extrapolation} (approximate automatic-differentiation window; \emph{not} the implicit function theorem route --- see \S\ref{sec:sinkhorn-backward}):
+\STATE $\boldsymbol{\alpha}_{\text{det}} \leftarrow \operatorname{detach}(\boldsymbol{\alpha})$, $\boldsymbol{\beta}_{\text{det}} \leftarrow \operatorname{detach}(\boldsymbol{\beta})$
+\STATE One more Gauss-Seidel step: $\boldsymbol{\alpha} \leftarrow \text{softmin}(\epsilon, \mathbf{C}^\top, \log\mathbf{w} + \boldsymbol{\beta}_{\text{det}}/\epsilon)$
 \STATE $\boldsymbol{\beta} \leftarrow \text{softmin}(\epsilon, \mathbf{C}, \log\mathbf{u} + \boldsymbol{\alpha}/\epsilon)$
 \RETURN $\boldsymbol{\alpha}, \boldsymbol{\beta}$
 \end{algorithmic}
 \end{algorithm}
 
-Lines 9--11 of the algorithm above are the \emph{extrapolation trick} for approximate differentiability. The converged potentials $(\boldsymbol{\alpha}, \boldsymbol{\beta})$ are detached from the derivative graph, and one additional Gauss--Seidel step is taken on the live graph. This gives autodiff a single-step window into how the potentials depend on the inputs $(\mathbf{C}, \log\mathbf{w})$, without differentiating through all the preceding iterations. We will see in Section~\ref{sec:sinkhorn-backward} that this is only an approximation---accurate for weight gradients but biased for particle-position gradients---and how implicit differentiation provides the correct alternative.
+Lines 9--11 of the algorithm above are the \emph{extrapolation trick} for approximate differentiability. The converged potentials $(\boldsymbol{\alpha}, \boldsymbol{\beta})$ are detached from the derivative graph, and one additional Gauss--Seidel step is taken on the live graph. This gives automatic differentiation a single-step window into how the potentials depend on the inputs $(\mathbf{C}, \log\mathbf{w})$, without differentiating through all the preceding iterations. Section~\ref{sec:sinkhorn-backward} shows why this is only an approximation---accurate for weight gradients but biased for particle-position gradients---and why implicit differentiation is the correct alternative.
 
 \begin{algorithm}[H]
 \caption{Entropy-Regularized Optimal Transport Resampling}
@@ -1701,12 +1701,12 @@ Lines 9--11 of the algorithm above are the \emph{extrapolation trick} for approx
 \subsection{The Derivative Chain through Resampling}
 \label{sec:ot-derivative-chain}
 
-The core difficulty in differentiating through a particle filter is the resampling step. Everything else---the transition model $p(x_k \mid x_{k-1}, \v\theta)$, the observation likelihood $p(z_k \mid x_k, \v\theta)$, and the weight computation---is differentiable. Resampling is the step where discrete particle selection breaks the gradient flow. To understand what each method does and does not give us, we need to trace the derivative chain explicitly.
+The core difficulty in differentiating through a particle filter is the resampling step. Everything else---the transition model $p(x_k \mid x_{k-1}, \v\theta)$, the observation likelihood $p(z_k \mid x_k, \v\theta)$, and the weight computation---is differentiable. Resampling is the step where discrete particle selection breaks the gradient flow. To understand what each method does and does not give, trace the derivative chain explicitly.
 
 At time step $k$, the negative log-likelihood contribution is $-\log \sum_i \tilde{w}_k^{(i)}$ where the unnormalized weights $\tilde{w}_k^{(i)} = w_{k-1}^{(i)} \cdot p(z_k \mid x_k^{(i)}, \v\theta)$ depend on $\v\theta$ both through the observation model and through the particle positions $x_k^{(i)}$. Particle $x_k^{(i)}$ was sampled from $p(x_k \mid x_{k-1}^{(j_i)}, \v\theta)$, where $j_i$ is the index selected by resampling at step $k-1$. The derivative $\partial x_k^{(i)} / \partial \v\theta$ therefore has two contributions: the direct effect through the transition model (differentiable) and the indirect effect through which ancestor $j_i$ was selected (depends on how resampling is done).
 
 \paragraph{Systematic resampling with stop gradient.}
-We treat the selected particle indices as constants and detach the gradient at the resampling step. The derivative flows only through the weights after resampling and the transition model, but sees nothing about how $\v\theta$ affects particle selection. The gradient is:
+Treat the selected particle indices as constants and detach the gradient at the resampling step. The derivative flows only through the weights after resampling and the transition model, but sees nothing about how $\v\theta$ affects particle selection. The gradient is:
 \begin{equation}
     \frac{\partial L}{\partial \v\theta} = -\sum_k \sum_i \frac{\partial \log p(z_k \mid x_k^{(i)}, \v\theta)}{\partial \v\theta} + \frac{\partial \log p(x_k^{(i)} \mid x_{k-1}^{(j_i)}, \v\theta)}{\partial \v\theta}
 \end{equation}
@@ -1716,11 +1716,11 @@ where $x_{k-1}^{(j_i)}$ is treated as a fixed constant. This \textit{selection g
 Soft resampling \cite{karkus2018particle} blends the weights with a uniform distribution before selection: $\tilde{w}_i = \alpha\, w_i + (1-\alpha)/N$. Particles are still selected discretely from $\tilde{w}_i$, but an importance correction weight $w_i / \tilde{w}_i$ is applied after selection and is differentiable with respect to $\v\theta$ through $w_i$. The gradient now flows through this correction factor in addition to the direct observation and transition terms. It does not flow through which particle was selected. Soft resampling is therefore partially differentiable---richer gradient information than stop gradient, but the selection is still invisible.
 
 \paragraph{OT resampling.}
-Optimal transport resampling \cite{corenflos-differentiable-2021} replaces discrete index selection entirely with a continuous transport map. Now that we have defined the transport matrix $T$ from the Sinkhorn algorithm, the resampled particles are the weighted average:
+Optimal transport resampling \cite{corenflos-differentiable-2021} replaces discrete index selection entirely with a continuous transport map. With the transport matrix $T$ from the Sinkhorn algorithm, the resampled particles are the weighted average:
 \begin{equation}
     \tilde{x}_k^{(i)} = \sum_j T_{ij}\, x_k^{(j)}.
 \end{equation}
-There is no discrete selection---every input particle contributes to every output particle through $T_{ij}$. The key point is that $T$ is itself a function of both the particle positions $\mathbf{x}_k$ (through the cost matrix $C_{ij} = \|\tilde x^{(i)} - \tilde x^{(j)}\|^2/2$) and the weights $\mathbf{w}_k$ (through the Sinkhorn marginal constraints). The total derivative of the resampled particles with respect to $\v\theta$ therefore has three terms, which we write schematically as:
+There is no discrete selection---every input particle contributes to every output particle through $T_{ij}$. The key point is that $T$ is itself a function of both the particle positions $\mathbf{x}_k$ (through the cost matrix $C_{ij} = \|\tilde x^{(i)} - \tilde x^{(j)}\|^2/2$) and the weights $\mathbf{w}_k$ (through the Sinkhorn marginal constraints). The total derivative of the resampled particles with respect to $\v\theta$ therefore has three terms, written schematically as:
 \begin{equation}
     \frac{d\tilde{\mathbf{x}}_k}{d\v\theta} = \underbrace{\frac{\partial T}{\partial \mathbf{x}_k} \frac{d\mathbf{x}_k}{d\v\theta} \cdot \mathbf{x}_k}_{\text{Term 1: particle geometry}} + \underbrace{T \cdot \frac{d\mathbf{x}_k}{d\v\theta}}_{\text{Term 2: direct transport}} + \underbrace{\frac{\partial T}{\partial \mathbf{w}_k} \frac{d\mathbf{w}_k}{d\v\theta} \cdot \mathbf{x}_k}_{\text{Term 3: weight gradient}}
     \label{eq:ot-three-terms}
@@ -1731,7 +1731,7 @@ with the symbols defined as follows: $\v\theta \in \mathbb{R}^{d_\theta}$ is the
     \item \textbf{Term 2 (direct transport):} A change in $\v\theta$ changes particle positions, which are directly transported by the (fixed) transport matrix $T$.
     \item \textbf{Term 3 (weight gradient):} A change in $\v\theta$ changes the observation likelihood, which changes the weights, which changes $T$, which changes the transported particles. This is the \emph{selection gradient} that stop-gradient and soft resampling miss entirely.
 \end{itemize}
-Together, these three paths give a gradient that is correct in principle. The regularized OT map is smooth, so the loss surface is continuous. The practical issue is computing this gradient faithfully through the iterative Sinkhorn solver, which we address in Section~\ref{sec:sinkhorn-backward}.
+Together, these three paths give a gradient that is correct in principle. The regularized OT map is smooth, so the loss surface is continuous. The practical issue is computing this gradient faithfully through the iterative Sinkhorn solver. Section~\ref{sec:sinkhorn-backward} addresses that problem.
 
 A summary of the gradient properties of each method is given in Table~\ref{tab:resampling_grad}.
 
@@ -1763,7 +1763,7 @@ The theoretical picture above says OT resampling should give fuller gradients th
 \begin{table}[H]
 \centering
 \footnotesize
-\caption{Resampling comparison on stochastic volatility (1D, $T=500$, $N=200$). Headline: OT adds roughly $20$--$180\times$ wall-time vs.\ systematic / soft, with no RMSE improvement. Soft resampling ties stop-gradient on RMSE at the same cost. Systematic is the cheapest and has the best RMSE of this group; OT's value is gradient quality under HMC (\S\ref{sec:param-estimation}), not filtering accuracy.}
+\caption{Resampling comparison on stochastic volatility (1D, $T=500$, $N=200$). Headline: OT adds roughly $20$--$180\times$ wall-time vs.\ systematic / soft depending on $\epsilon$, with the HMC-relevant settings typically around $60$--$100\times$, and gives no RMSE improvement. Soft resampling ties stop-gradient on RMSE at the same cost. Systematic is the cheapest and has the best RMSE of this group; OT's value is gradient quality under HMC (\S\ref{sec:param-estimation}), not filtering accuracy.}
 \label{tab:soft-vs-ot-sv}
 \begin{tabular}{llccccc}
 \toprule
@@ -1783,32 +1783,32 @@ OT   & $\epsilon = 1.0$ & $2.110$ & $-723.65$ & $47.94$  & $95.89$  & $0.432$ \\
 \end{tabular}
 \end{table}
 
-Three observations. First, on filtering accuracy alone OT does not outperform --- it is between $20$ and $180\times$ slower than either systematic or soft, with strictly worse RMSE on this model across every $\epsilon$. Second, increasing the Sinkhorn regularisation $\epsilon$ buys speed at the cost of further RMSE degradation, as expected: larger $\epsilon$ is a softer transport plan that under-corrects the weight information. Third, soft resampling matches stop-gradient systematic on RMSE at essentially the same cost --- no accuracy penalty, partial differentiability. The case for paying OT's compute tax is therefore not `better filter,' it is `better gradient surface for HMC.' That is tested in \S\ref{sec:param-estimation}.
+Three observations. First, on filtering accuracy alone OT does not outperform --- it is $20$--$180\times$ slower depending on baseline and $\epsilon$, typically $60$--$100\times$ in HMC-relevant settings, with strictly worse RMSE on this model across every $\epsilon$. Second, increasing the Sinkhorn regularisation $\epsilon$ buys speed at the cost of further RMSE degradation, as expected: larger $\epsilon$ is a softer transport plan that under-corrects the weight information. Third, soft resampling matches stop-gradient systematic on RMSE at essentially the same cost --- no accuracy penalty, partial differentiability. The case for paying OT's compute tax is therefore not `better filter,' it is `better gradient surface for HMC.' That is tested in \S\ref{sec:param-estimation}.
 
 \subsection{Approximate vs Implicit Sinkhorn Backward}
 \label{sec:sinkhorn-backward}
 
-The entropy-regularized OT map is differentiable in principle. The practical question is: how do we compute the backward pass through the Sinkhorn iteration? There are two approaches, and understanding their difference is essential for getting correct gradients in the differentiable particle filter pipeline.
+The entropy-regularized OT map is differentiable in principle. The practical question is how to compute the backward pass through the Sinkhorn iteration. There are two approaches, and their difference matters for correct gradients in the differentiable particle filter pipeline.
 
 \subsubsection{The Extrapolation Approximation}
 
-The approach used in our initial implementation (and described in the Sinkhorn algorithm above) is to run the iteration to convergence, detach the converged potentials from the computation graph, and take one more Gauss--Seidel step on the live graph:
+The approximate approach described in the Sinkhorn algorithm above runs the iteration to convergence, detaches the converged potentials from the computation graph, and takes one more Gauss--Seidel step on the live graph:
 \begin{align}
-    \boldsymbol{\alpha}_{\mathrm{sg}} &= \mathrm{stop\_gradient}(\boldsymbol{\alpha}_{\mathrm{converged}}), \quad \boldsymbol{\beta}_{\mathrm{sg}} = \mathrm{stop\_gradient}(\boldsymbol{\beta}_{\mathrm{converged}}), \\
-    \boldsymbol{\alpha}_{\mathrm{new}} &= \mathrm{softmin}\!\left(\epsilon,\, \mathbf{C}^\top,\, \log\mathbf{w} + \boldsymbol{\beta}_{\mathrm{sg}}/\epsilon\right), \\
+    \boldsymbol{\alpha}_{\mathrm{det}} &= \operatorname{detach}(\boldsymbol{\alpha}_{\mathrm{converged}}), \quad \boldsymbol{\beta}_{\mathrm{det}} = \operatorname{detach}(\boldsymbol{\beta}_{\mathrm{converged}}), \\
+    \boldsymbol{\alpha}_{\mathrm{new}} &= \mathrm{softmin}\!\left(\epsilon,\, \mathbf{C}^\top,\, \log\mathbf{w} + \boldsymbol{\beta}_{\mathrm{det}}/\epsilon\right), \\
     \boldsymbol{\beta}_{\mathrm{new}} &= \mathrm{softmin}\!\left(\epsilon,\, \mathbf{C},\, \log\mathbf{u} + \boldsymbol{\alpha}_{\mathrm{new}}/\epsilon\right).
 \end{align}
-Autodiff sees only this final step. The true derivative of the converged potentials with respect to the inputs $(\mathbf{C}, \log\mathbf{w})$ would require differentiating through all iterations. The one-step window is an approximation.
+Automatic differentiation sees only this final step. The true derivative of the converged potentials with respect to the inputs $(\mathbf{C}, \log\mathbf{w})$ would require differentiating through all iterations. The one-step window is an approximation.
 
 Recall the three-term chain-rule decomposition of $d\tilde{\mathbf{x}}_k/d\v\theta$ from Equation~\ref{eq:ot-three-terms}: \textbf{Term 1} is the particle-geometry gradient that flows through $\partial T/\partial \mathbf{x}_k$, \textbf{Term 2} is the direct-transport gradient $T \cdot d\mathbf{x}_k/d\v\theta$, and \textbf{Term 3} is the weight gradient that flows through $\partial T/\partial \mathbf{w}_k$. The single-step extrapolation above is accurate for \textbf{Term 3}, because the weights $\mathbf{w}_k$ enter linearly into the Sinkhorn marginal constraint and the one-step update captures their effect well. But it is biased for \textbf{Term 1}, because the particle positions $\mathbf{x}_k$ affect the cost matrix $C$ which feeds into \emph{every} Sinkhorn iteration, not just the last one, and the single-step window cannot capture how the potentials depend on $C$ across the full iteration history. Term 2 is unaffected by the Sinkhorn backward because it does not pass through $T$.
 
-When does this matter? It depends on whether $d\mathbf{x}_k / d\v\theta$ is zero or not. For a Bootstrap Particle Filter (BPF) on a linear Gaussian model with $\v\theta = \sigma_{\mathrm{obs}}$, the particles come from the state transition $x_k^{(i)} = F \tilde{x}_{k-1}^{(i)} + B \epsilon_k^{(i)}$, which does not depend on $\v\theta$. So $d\mathbf{x}_k/d\v\theta = 0$, Terms 1 and 2 vanish, and only Term 3 survives. The extrapolation approximation works well: we observe an autodiff-to-numerical-derivative ratio of approximately $1.08$. For LEDH (Local Exact Daum--Huang), the flow matrices depend on $\v\theta$ through $R = \sigma_{\mathrm{obs}}^2 DD^\top$, so $d\mathbf{x}_k / d\v\theta \neq 0$ and all three terms are active. The extrapolation approximation produces a ratio of approximately $1.33$---a clear bias from Term 1. These ratios are empirical validation targets on a specific model, not universal constants, but they sharply illustrate the problem.
+When does this matter? It depends on whether $d\mathbf{x}_k / d\v\theta$ is zero or not. For a Bootstrap Particle Filter (BPF) on a linear Gaussian model with $\v\theta = \sigma_{\mathrm{obs}}$, the particles come from the state transition $x_k^{(i)} = F \tilde{x}_{k-1}^{(i)} + B \epsilon_k^{(i)}$, which does not depend on $\v\theta$. So $d\mathbf{x}_k/d\v\theta = 0$, Terms 1 and 2 vanish, and only Term 3 survives. The extrapolation approximation works well: I observe an automatic-differentiation-to-numerical-derivative ratio of approximately $1.08$. For LEDH (Local Exact Daum--Huang), the flow matrices depend on $\v\theta$ through $R = \sigma_{\mathrm{obs}}^2 DD^\top$, so $d\mathbf{x}_k / d\v\theta \neq 0$ and all three terms are active. The extrapolation approximation produces a ratio of approximately $1.33$---a clear bias from Term 1. These ratios are empirical validation targets on a specific model, not universal constants, but they sharply illustrate the problem.
 
 \subsubsection{Implicit Differentiation at the Fixed Point}
 
-The proper fix is implicit differentiation. At convergence, the Sinkhorn potentials satisfy a system of fixed-point equations (the marginal constraints). By the implicit function theorem, we can compute the exact Jacobian of the converged potentials with respect to the inputs without differentiating through the iteration \cite{cremers2022unifiedframeworkimplicit}.
+The proper fix is implicit differentiation. At convergence, the Sinkhorn potentials satisfy a system of fixed-point equations (the marginal constraints). By the implicit function theorem, I can compute the exact Jacobian of the converged potentials with respect to the inputs without differentiating through the iteration \cite{cremers2022unifiedframeworkimplicit}.
 
-The idea is as follows. Let $\mathbf{f}$ and $\mathbf{g}$ denote the converged dual potentials (absorbing the log-scaling), and let $P_{ij} = \exp((f_i + g_j - C_{ij})/\epsilon)$ be the transport plan at the fixed point. Given an upstream gradient $\partial L / \partial T$, we need the vector-Jacobian product (VJP) $\partial L / \partial \mathbf{C}$ and $\partial L / \partial \log\mathbf{w}$. The implicit VJP reduces to solving a $(2N-1) \times (2N-1)$ linear system:
+The idea is as follows. Let $\mathbf{f}$ and $\mathbf{g}$ denote the converged dual potentials (absorbing the log-scaling), and let $P_{ij} = \exp((f_i + g_j - C_{ij})/\epsilon)$ be the transport plan at the fixed point. Given an upstream gradient $\partial L / \partial T$, the vector-Jacobian product (VJP) needs $\partial L / \partial \mathbf{C}$ and $\partial L / \partial \log\mathbf{w}$. The implicit VJP reduces to solving a $(2N-1) \times (2N-1)$ linear system:
 \begin{equation}
     \mathbf{B}\boldsymbol{\mu} = \mathbf{r},
 \end{equation}
@@ -1816,7 +1816,7 @@ where $\mathbf{B}$ is formed from the transport plan $\mathbf{T}$ and the source
 \begin{equation}
     \mathbf{B} = \begin{pmatrix} \mathrm{diag}(\mathbf{a}_{1:N-1}) & T_{1:N-1,:} \\ T_{1:N-1,:}^\top & \mathrm{diag}(\mathbf{b}) \end{pmatrix} + \rho\, \mathbf{I},
 \end{equation}
-and $\mathbf{r}$ is the right-hand side constructed from the upstream gradient $\partial L / \partial T$. The system is rank-deficient by 1 because the potentials are defined up to a global constant (a gauge freedom), so we drop one equation and add a small ridge $\rho$ for numerical stability. Once $\boldsymbol{\mu}$ is solved, the gradient with respect to the cost matrix is
+and $\mathbf{r}$ is the right-hand side constructed from the upstream gradient $\partial L / \partial T$. The system is rank-deficient by 1 because the potentials are defined up to a global constant (a gauge freedom), so one equation is dropped and a small ridge $\rho$ is added for numerical stability. Once $\boldsymbol{\mu}$ is solved, the gradient with respect to the cost matrix is
 \begin{equation}
     \frac{\partial L}{\partial C_{ij}} = -\frac{T_{ij}}{\epsilon}\left(\frac{\partial L}{\partial T_{ij}} - \mu_i^{(f)} - \mu_j^{(g)}\right),
 \end{equation}
@@ -1829,7 +1829,7 @@ and the gradient with respect to the log-weights follows from the marginal const
 \REQUIRE Converged dual potentials $\boldsymbol{\alpha}, \boldsymbol{\beta}$ from the Sinkhorn forward pass
 \REQUIRE Cost matrix $\mathbf{C} \in \mathbb{R}^{N \times N}$ and regularisation $\epsilon$
 \REQUIRE Source marginal $\mathbf{a} = \mathbf{w}$ and target marginal $\mathbf{b} = (1/N)\mathbf{1}_N$
-\REQUIRE Upstream gradient $\partial L / \partial \mathbf{T}$ from autodiff
+\REQUIRE Upstream gradient $\partial L / \partial \mathbf{T}$ from automatic differentiation
 \REQUIRE Ridge parameter $\rho > 0$ for numerical stability (default $\rho = 10^{-6}$)
 \STATE Recompute the fixed-point transport plan: $T_{ij} \leftarrow \exp\!\left((\alpha_i+\beta_j-C_{ij})/\epsilon\right)$
 \STATE Build the gauge-fixed block matrix
@@ -1853,7 +1853,7 @@ and the gradient with respect to the log-weights follows from the marginal const
 
 Here $\mathbf{T}$ is the transport plan $\mathbf{P}^{*}$ from \S\ref{sec:entropic-ot}; I use the resampling-side name in Algorithm~\ref{alg:sinkhorn_implicit_backward} to match \S\ref{sec:ot-derivative-chain}. The dense Cholesky solve costs $\mathcal{O}(N^3)$.
 
-The computational cost of the dense solve is $\mathcal{O}(N^3)$, which is acceptable for $N = 200$ particles (roughly 10$\times$ the cost of the forward Sinkhorn backward). For $N = 1000$ and above, a conjugate gradient (CG) solver with Jacobi preconditioning brings the cost down to $\mathcal{O}(kN^2)$ with $k \approx 50$ iterations, which is comparable to one extra Sinkhorn forward pass. The expected outcome is that the autodiff-to-numerical ratio moves from $\sim 1.33$ toward $\sim 1.0$ for LEDH, confirming that the particle-geometry gradient (Term 1) is now computed faithfully.
+The computational cost of the dense solve is $\mathcal{O}(N^3)$, which is acceptable for $N = 200$ particles (roughly 10$\times$ the cost of the forward Sinkhorn backward). For $N = 1000$ and above, a conjugate gradient (CG) solver with Jacobi preconditioning brings the cost down to $\mathcal{O}(kN^2)$ with $k \approx 50$ iterations, which is comparable to one extra Sinkhorn forward pass. Table~\ref{tab:gradient_validation} confirms the effect I wanted: the automatic-differentiation-to-numerical ratio moves toward $1.0$ for LEDH once the particle-geometry gradient (Term 1) is handled by the implicit backward.
 
 \begin{figure}[H]
     \centering
@@ -1862,9 +1862,9 @@ The computational cost of the dense solve is $\mathcal{O}(N^3)$, which is accept
     \label{fig:sinkhorn_convergence}
 \end{figure}
 
-I ran $42$ implicit-backward gradient checks. Each case differentiates $\log p(z_{1:T}\mid\v\theta)$ with respect to one scalar parameter. The autodiff gradient is the derivative produced by automatic differentiation through the whole differentiable filter pipeline, with Sinkhorn resampling using the implicit backward pass. The finite-difference reference uses central differences with base step $10^{-4}$ and five radii; the finite-difference median is the median of those five slopes. The relative error is
+I ran $42$ implicit-backward gradient checks. Each case differentiates $\log p(z_{1:T}\mid\v\theta)$ with respect to one scalar parameter. The automatic-differentiation gradient is the derivative produced by differentiating through the whole differentiable filter pipeline, with Sinkhorn resampling using the implicit backward pass. The finite-difference reference uses central differences with base step $10^{-4}$ and five radii; the finite-difference median is the median of those five slopes. The relative error is
 \begin{equation}
-    \frac{\left|d_{\mathrm{autodiff}}-d_{\mathrm{FD}}\right|}
+    \frac{\left|d_{\mathrm{AD}}-d_{\mathrm{FD}}\right|}
     {\max\!\left(\left|d_{\mathrm{FD}}\right|,10^{-12}\right)},
 \end{equation}
 The approximate-backward comparison is not in this table. The sweep I first made kept the particles fixed, so $d\mathbf{x}_k/d\v\theta=0$ and only Term 3 in Eq.~\ref{eq:ot-three-terms} fired. Approximate and implicit backward were then identical. That did not test the failure mode I care about, so I removed it from the report.
@@ -1902,7 +1902,7 @@ Table~\ref{tab:gradient_validation} aggregates. Table~\ref{tab:gradient_validati
 \resizebox{\linewidth}{!}{%
 \begin{tabular}{lccp{6.2cm}ccc}
 \toprule
-$T$ & $\alpha$ & FD slopes (5 radii) & FD median & autodiff & rel.\ err. \\
+$T$ & $\alpha$ & FD slopes (5 radii) & FD median & automatic diff. & rel.\ err. \\
 \midrule
  $1$  & $0.91$ & $-2.6973$, $-2.6973$, $-2.6973$, $-2.6974$, $-2.6974$ & $-2.6973$ & $-2.6973$ & $0.000013$ \\
  $5$  & $0.91$ & $0.1410$, $0.1410$, $0.1410$, $0.1409$, $0.1409$ & $0.1410$ & $0.1413$ & $0.002002$ \\
@@ -1916,7 +1916,7 @@ $T$ & $\alpha$ & FD slopes (5 radii) & FD median & autodiff & rel.\ err. \\
 }
 \end{table}
 
-The finite-difference reference is stable where it should be stable. The $\alpha=0.5$, $\alpha=0.7$, and $\alpha=0.95$ rows barely move across the five radii. The repeated $T=20,\alpha=0.91$ row is noisier, but the five slopes still bracket the reported median and the autodiff value sits inside that spread. That is the check I care about. The relative-error column is only a compact summary of the same fact.
+The finite-difference reference is stable where it should be stable. The $\alpha=0.5$, $\alpha=0.7$, and $\alpha=0.95$ rows barely move across the five radii. The repeated $T=20,\alpha=0.91$ row is noisier, but the five slopes still bracket the reported median and the automatic-differentiation value sits inside that spread. That is the check I care about. The relative-error column is only a compact summary of the same fact.
 
 
 \subsection{Neural Acceleration}
@@ -1937,7 +1937,7 @@ For squared Euclidean transport cost, Brenier's theorem says the optimal map is 
 \end{equation}
 That is the PDE route. I did not solve an explicit potential equation. I used the direct-map version of the same mass-conservation condition.
 
-In our resampling problem, the inputs are particles $x_i\in\mathbb{R}^d$ with normalized importance weights $w_i$. I use the same scalar Gaussian bandwidth $h$ for the uniform and weighted clouds:
+In this resampling problem, the inputs are particles $x_i\in\mathbb{R}^d$ with normalized importance weights $w_i$. I use the same scalar Gaussian bandwidth $h$ for the uniform and weighted clouds:
 \begin{equation}
     K_h(u) = (2\pi h^2)^{-d/2}\exp\!\left(-\frac{\|u\|^2}{2h^2}\right).
 \end{equation}
@@ -2034,24 +2034,27 @@ The plan is to build a family of two-dimensional Gaussian clouds that look like 
 \section{Parameter Estimation with Differentiable Particle Filters}
 \label{sec:param-estimation}
 
-\paragraph{Filtering accuracy is not gradient quality.} Section~\ref{sec:particle-methods-section} ranked filters by estimator accuracy: how close the filtered mean and covariance are to the true latent state, measured in RMSE and log-likelihood. This section ranks filters by \emph{gradient} quality: how well $\nabla_{\boldsymbol{\theta}} \log p_{\boldsymbol{\theta}}(z_{1:T})$ behaves under HMC. A filter can win the first ranking and lose the second, and vice versa --- a bootstrap filter with stop-gradient systematic resampling may track the state accurately yet hand HMC a discontinuous loss surface, while OT resampling often pays a $60$--$100\times$ compute tax that only shows up as useful gradient behaviour here. Keep the two criteria separate: §4 validates the filter as an estimator, §6 validates the filter as a differentiable subroutine in a parameter-inference pipeline.
+\paragraph{Filtering accuracy is not gradient quality.} Section~\ref{sec:particle-methods-section} ranked filters by estimator accuracy: how close the filtered mean and covariance are to the true latent state, measured in RMSE and log-likelihood. This section ranks filters by \emph{gradient} quality: how well $\nabla_{\boldsymbol{\theta}} \log p_{\boldsymbol{\theta}}(z_{1:T})$ behaves under HMC. A filter can win the first ranking and lose the second, and vice versa --- a bootstrap filter with stop-gradient systematic resampling may track the state accurately yet hand HMC a discontinuous loss surface, while OT resampling often pays a $20$--$180\times$ compute tax depending on baseline and $\epsilon$, typically $60$--$100\times$ in HMC-relevant settings, that only shows up as useful gradient behaviour here. Keep the two criteria separate: §4 validates the filter as an estimator, §6 validates the filter as a differentiable subroutine in a parameter-inference pipeline.
 
 \subsection{Markov Chain Monte Carlo}
 
 \subsubsection{Metropolis-Hastings}
+\label{sec:metropolis-hastings}
 
-Our goal is to estimate the model parameters $\v \theta$ from observations $z_{1:T}$. We want either the MAP point or the full posterior $p(\v \theta \mid z_{1:T})$. The particle filter gives us the marginal likelihood $p(z_{1:T} \mid \v \theta)$, and combined with a prior $p(\v \theta)$, we have access to the log-posterior up to a constant. The concrete parameter-prior choices used in these runs are described in \S\ref{sec:param-prior-selection}.
+I want either the MAP point or the full posterior $p(\v \theta \mid z_{1:T})$ for the model parameters. The particle filter gives the marginal likelihood $p(z_{1:T} \mid \v \theta)$, and with a prior $p(\v \theta)$ the log-posterior is available up to a constant:
 \begin{equation}
     \log p(\v \theta \mid z_{1:T}) = \log p(z_{1:T} \mid \v \theta) + \log p(\v \theta) + \text{const}.
+    \label{eq:hmc-log-posterior}
 \end{equation}
-The question is how to explore this surface, the geometric surface spanned by $\theta$, efficiently.
+The question is how to explore this surface efficiently.
 
-The simplest approach is a random walk in parameter space. Let $L(\v\theta) = -\log p(\v\theta \mid z_{1:T})$ denote the negative log-posterior. Propose a new parameter $\v \theta' = \v \theta + w$ where $w$ is a random vector, compute the change $\Delta L = L(\v \theta') - L(\v \theta)$, and always accept moves that improve the posterior ($\Delta L < 0$). The question is what to do when $\Delta L > 0$. Simply rejecting all uphill moves would trap the chain at the nearest local minimum. The Metropolis-Hastings algorithm \cite{Metropolis1953} accepts the proposed move with probability
+The simplest approach is a random walk in parameter space. Let $L(\v\theta) = -\log p(\v\theta \mid z_{1:T})$ denote the negative log-posterior. Propose a new parameter $\v \theta' = \v \theta + w$ where $w$ is a random vector, compute the change $\Delta L = L(\v \theta') - L(\v \theta)$, and always accept moves that improve the posterior ($\Delta L < 0$). Simply rejecting all uphill moves would trap the chain at the nearest local minimum. The Metropolis-Hastings algorithm \cite{Metropolis1953} accepts the proposed move with probability
 \begin{equation}
-    \alpha = \min\!\left(1,\; e^{-\Delta L}\right) = \min\!\left(1,\; \frac{p(\v \theta' \mid z_{1:T})}{p(\v \theta \mid z_{1:T})}\right).
+    \alpha_{\mathrm{MH}} = \min\!\left(1,\; e^{-\Delta L}\right) = \min\!\left(1,\; \frac{p(\v \theta' \mid z_{1:T})}{p(\v \theta \mid z_{1:T})}\right).
+    \label{eq:mh-acceptance}
 \end{equation}
 Even uphill moves get accepted with probability $e^{-\Delta L}$, allowing the chain to escape shallow local minima. This acceptance rule satisfies detailed balance, which guarantees the chain converges to the correct target distribution $p(\v \theta \mid z_{1:T})$. \\[6pt]
-The fundamental limitation with random-walk MH runs at two levels.
+Random-walk MH has two failure modes.
 \begin{enumerate}
 
 \item The first is just finding the right region. Even with three parameters, the posterior does not fill the whole parameter space — it concentrates on a low-dimensional surface, a thin shell inside the 3D cube. This is the \textit{typical set}. Most of the volume is empty; the posterior mass lives on a much smaller manifold. In higher dimensions this only gets worse: the total volume grows exponentially while the typical set stays low-dimensional, so the fraction of space carrying any meaningful probability shrinks exponentially. A random walk has no way to seek out that manifold — it just stumbles around hoping to land on it.
@@ -2069,7 +2072,7 @@ For the acceptance rate not to collapse, the mean must not be overwhelmingly neg
 \end{enumerate}
 \subsubsection{Hamiltonian Monte Carlo}
 
-When the pipeline is fully differentiable, we can do much better. We emphasise upfront: HMC is a method for sampling from the \emph{target it is given} --- the Metropolis correction compensates for numerical integrator error under that target, it does not cleanse a biased or noisy particle-filter marginal likelihood and turn it into an exact posterior. Whatever bias is present in the log-likelihood surface from, e.g., stop-gradient systematic resampling or the single-step Sinkhorn-backward approximation survives into HMC's stationary distribution. With that caveat, Hamiltonian Monte Carlo (HMC) \cite{Duane1987,Neal-2012-MCMC-Hamiltonian-Dynamics-ARXIV-1206-1901v1} treats parameter estimation as a physical dynamics problem. We introduce an auxiliary momentum variable $\v p$ of the same dimension as $\v \theta$ and define the Hamiltonian (total energy):
+When the pipeline is fully differentiable, I can do much better. HMC is a method for sampling from the \emph{target it is given}. The Metropolis correction compensates for numerical integrator error under that target; it does not cleanse a biased or noisy particle-filter marginal likelihood and turn it into an exact posterior. Whatever bias is present in the log-likelihood surface from stop-gradient systematic resampling or the single-step Sinkhorn-backward approximation survives into HMC's stationary distribution. Hamiltonian Monte Carlo (HMC) \cite{Duane1987,Neal-2012-MCMC-Hamiltonian-Dynamics-ARXIV-1206-1901v1} treats parameter estimation as a physical dynamics problem. I introduce an auxiliary momentum variable $\v p$ of the same dimension as $\v \theta$ and define the Hamiltonian:
 \begin{equation}
     H(\v p, \v \theta) = \underbrace{\frac{1}{2}\v p^\top M^{-1} \v p}_{K(\v p) \text{ (kinetic)}} + \underbrace{U(\v \theta)}_{\text{(potential)}}
 \end{equation}
@@ -2080,7 +2083,7 @@ where $U(\v \theta) = -\log p(\v \theta \mid z_{1:T})$ is the negative log-poste
 These trajectories conserve $H$ exactly, so the ball naturally curves around the posterior contours rather than wandering randomly.
 
 \paragraph{Leapfrog integration.}
-In practice we integrate Hamilton's equations numerically with the \textit{leapfrog} (Störmer-Verlet) integrator, which alternates half-step momentum updates and full-step position updates. Concretely, with step size $\varepsilon$ and $L$ steps:
+In practice I integrate Hamilton's equations numerically with the \textit{leapfrog} (Störmer-Verlet) integrator, which alternates half-step momentum updates and full-step position updates. Concretely, with step size $\varepsilon$ and $L$ steps:
 \begin{align}
     \v p_{t+\frac{1}{2}} &\leftarrow \v p_t - \tfrac{\varepsilon}{2}\nabla_{\v \theta} U(\v \theta_t) \notag \\
     \v \theta_{t+1} &\leftarrow \v \theta_t + \varepsilon M^{-1} \v p_{t+\frac{1}{2}} \notag \\
@@ -2088,36 +2091,138 @@ In practice we integrate Hamilton's equations numerically with the \textit{leapf
 \end{align}
 The leapfrog scheme is symplectic, meaning it approximately conserves $H$ even over many steps. Each HMC iteration samples a fresh momentum $\v p \sim \mathcal{N}(0, M)$, runs $L$ leapfrog steps to produce a proposal $(\v \theta^*, \v p^*)$, then accepts with the Metropolis criterion:
 \begin{equation}
-    \alpha = \min\!\left(1,\; e^{-(H(\v p^*, \v \theta^*) - H(\v p, \v \theta))}\right).
+    \alpha_{\mathrm{HMC}} = \min\!\left(1,\; e^{-(H(\v p^*, \v \theta^*) - H(\v p, \v \theta))}\right).
+    \label{eq:hmc-acceptance}
 \end{equation}
 Because the leapfrog nearly conserves $H$, the energy difference $\Delta H \approx 0$ and the acceptance probability is close to 1, even for proposals far from the current point. This is the key advantage over random-walk MH: the momentum carries the state along energy contours, allowing large, directed moves. Two properties are therefore non-negotiable: $\nabla_{\boldsymbol{\theta}} U$ must be bounded (a single spike derails the trajectory and wastes the proposal) and $U(\boldsymbol{\theta})$ must be continuous (discontinuities cause $\Delta H$ to jump and the Metropolis correction to reject). This is exactly the demand that \S\ref{sec:ot-derivative-chain} places on the resampling derivative chain; HMC's acceptance rate is the empirical test of whether the chain delivers.
 
 \paragraph{Step size and tuning.}
 The leapfrog integrator approximates the continuous Hamiltonian trajectory with finite steps of size $\varepsilon$. If $\varepsilon$ is too large, the numerical integration accumulates error, $H$ is no longer conserved, and $\Delta H$ becomes large — the Metropolis correction then rejects most proposals and the chain stalls. If $\varepsilon$ is too small, each accepted step moves only a tiny distance and the chain explores slowly. The acceptance rate is therefore a direct readout of whether $\varepsilon$ is well-calibrated: too low means overshooting; too high means nearly standing still.
 
-I initialize $\varepsilon = 0.01$ and let it self-adapt during the first $80\%$ of burn-in iterations via dual averaging \cite{hoffman2014nuts}, which adjusts $\varepsilon$ to hit a target acceptance rate of $65\%$. After the adaptation window closes, $\varepsilon$ is fixed for the remainder of the run. I also monitor the gradient norm $\|\nabla U\|$ at each leapfrog step: a gradient that spikes or produces a non-finite value is not a tuning problem --- it signals numerical instability somewhere in the model or filter pipeline.
+I initialize $\varepsilon = 0.01$ and let it self-adapt during the first $80\%$ of burn-in iterations via dual averaging \cite{hoffman2014nuts}, which adjusts $\varepsilon$ to hit a target acceptance rate of $65\%$. Let $\delta$ be the target acceptance rate and $\alpha_m$ the actual acceptance rate at step $m$. The update equations are:
+\begin{align}
+\bar{H}_m &= \left(1 - \frac{1}{m + t_0}\right)\bar{H}_{m-1} + \frac{1}{m + t_0}(\delta - \alpha_m), \\
+\log \varepsilon_m &= \mu - \frac{\sqrt{m}}{\gamma}\,\bar{H}_m, \\
+\log \bar{\varepsilon}_m &= m^{-\kappa}\log \varepsilon_m + (1 - m^{-\kappa})\log \bar{\varepsilon}_{m-1}.
+\end{align}
+Here $\mu = \log(10\varepsilon_0)$ is the reference target, $\gamma = 0.05$ is a shrinkage factor, $t_0 = 10$ stabilises early iterations, and $\kappa = 0.75$ controls the long-run averaging weight. The running average $\bar{\varepsilon}_m$ is used as the fixed step size after adaptation ends. I also monitor the gradient norm $\|\nabla U\|$ at each leapfrog step: a gradient that spikes or produces a non-finite value is not a tuning problem --- it signals numerical instability somewhere in the model or filter pipeline.
 
 \paragraph{Mass matrix.}
-To build intuition, start from a well-chosen coordinate system. In physics, for a system that is not over-constrained, the right parameterization decouples the dynamics into independent trajectories. Think of describing a circle: polar coordinates $(r,\phi)$ decouple the radial and angular motion immediately, while Cartesian $(x,y)$ keep them entangled. The same principle applies here — if the posterior directions are strongly coupled or have very different scales, the ball's trajectory mixes up slow and fast modes and explores inefficiently.
+Start from a well-chosen coordinate system. In physics, for a system that is not over-constrained, the right parameterization decouples the dynamics into independent trajectories. Think of describing a circle: polar coordinates $(r,\phi)$ decouple the radial and angular motion immediately, while Cartesian $(x,y)$ keep them entangled. The same principle applies here — if the posterior directions are strongly coupled or have very different scales, the ball's trajectory mixes up slow and fast modes and explores inefficiently.
 
-The mass matrix $M$ is how we implement this rescaling within HMC without changing the parameterization itself. At each iteration we sample a fresh momentum $\v p \sim \mathcal{N}(0, M)$, so $M_{ii}$ controls how much kinetic energy is injected in direction $i$ before the ball starts rolling. Think of each parameter direction as an independent harmonic oscillator — some with a steep potential (narrow posterior, high curvature) and some with a flat potential (wide posterior, low curvature). A steep direction needs more initial kinetic energy to escape the narrow well and explore; a flat one needs less. Setting $M_{ii}$ proportional to the posterior variance in direction $i$ balances the energy across modes so that all directions are explored at a similar rate.
+The mass matrix $M$ is how I implement this rescaling within HMC without changing the parameterization itself. At each iteration I sample a fresh momentum $\v p \sim \mathcal{N}(0, M)$, so $M_{ii}$ controls how much kinetic energy is injected in direction $i$ before the ball starts rolling. Think of each parameter direction as an independent harmonic oscillator — some with a steep potential (narrow posterior, high curvature) and some with a flat potential (wide posterior, low curvature). A steep direction needs more initial kinetic energy to escape the narrow well and explore; a flat one needs less. Setting $M_{ii}$ proportional to the posterior variance in direction $i$ balances the energy across modes so that all directions are explored at a similar rate.
 
 I use a fixed diagonal mass matrix specified as a vector of per-parameter values. The default is the identity ($M = I$), and the values are set manually based on the expected scale of each parameter. A full production setup would run a short pilot chain, estimate the empirical per-parameter variance, and set the diagonal entries from that --- but for the benchmarks here, the parameters are well-understood enough that the scales can be set directly.
+
+\subsubsection{MCMC Diagnostics}
+
+After every HMC run I report four diagnostics.
+
+\paragraph{Acceptance rate.}
+Equation~\ref{eq:hmc-acceptance} gives the HMC acceptance rule. If the leapfrog integrator were exact, $\Delta H = 0$ and every proposal would be accepted. Numerical discretisation error causes $\Delta H \neq 0$, so some proposals are rejected. The acceptance rate is therefore a direct diagnostic for step size calibration: too low means the step size is too large and the trajectory overshoots; too high (near 100\%) means the step size is too small and the chain barely moves. I target $65\%$ acceptance, which is the theoretically optimal rate for high-dimensional Gaussian targets \cite{beskos2013optimal}.
+
+\paragraph{Effective sample size (ESS).}
+Because consecutive MCMC samples are correlated, $N$ correlated samples carry less information than $N$ independent ones. The effective sample size quantifies this:
+\begin{equation}
+\mathrm{ESS} = \frac{N}{1 + 2\sum_{k=1}^{\infty} \rho_k},
+\end{equation}
+where $\rho_k = \mathrm{Corr}(\theta_t, \theta_{t+k})$ is the lag-$k$ autocorrelation of the chain. For an AR(1) chain $\theta_t = \phi\,\theta_{t-1} + \varepsilon_t$ with $|\phi| < 1$, $\rho_k = \phi^k$ and $\mathrm{ESS} = N(1-\phi)/(1+\phi)$. With $N = 200$ samples, $\phi = 0.9$ gives ESS $\approx 11$ --- the chain is exploring very slowly. $\phi = 0$ gives ESS $= 200$ --- fully independent. In practice the infinite sum is truncated where autocorrelations become negligible; I compute ESS with an FFT-based autocorrelation estimator. With fewer than a few hundred samples the estimator is noisy and ESS can saturate at $N$ even when mixing is imperfect.
+
+\paragraph{$\hat{R}$: Potential Scale Reduction Factor.}
+$\hat{R}$ (Gelman \& Rubin, 1992) detects non-convergence by comparing \emph{within-chain} to \emph{between-chain} variance. Since I run a single chain, I split the $N$ post-burn-in samples into two halves of length $n = N/2$ and treat them as two independent chains. Let $\bar\theta_j$ and $s_j^2$ be the mean and variance of chain $j$ ($j = 1, 2$). Define:
+\begin{align}
+W &= \tfrac{1}{2}(s_1^2 + s_2^2) && \text{(within-chain variance)}, \\
+B &= n\,(\bar\theta_1 - \bar\theta_2)^2 / 2 && \text{(between-chain variance)}, \\
+\hat{V} &= \tfrac{n-1}{n}\,W + \tfrac{1}{n}\,B && \text{(pooled variance estimate)}.
+\end{align}
+Then $\hat{R} = \sqrt{\hat{V}/W}$. If the chain has converged, both halves look like draws from the same distribution, so $B \approx 0$ and $\hat{R} \approx 1$. This is a \emph{split} $\hat{R}$ from a single chain, which is a rough one-chain diagnostic --- it detects gross non-stationarity within a run but is not a substitute for a true multi-chain $\hat{R}$, which would compare independent chains initialised from over-dispersed starting points. The standard threshold is $\hat{R} > 1.1$ to flag non-convergence. Values slightly below 1 are an artifact of finite-sample estimation and are harmless. With only $n = 100$ samples per half, both $W$ and $B$ are estimated noisily, so at least $N \geq 400$ total samples are recommended before trusting $\hat{R}$.
+
+\subsection{Parameter Prior Selection}
+\label{sec:param-prior-selection}
+
+\paragraph{What the prior is doing here.}
+There are two different priors in this section, and I keep them separate. The filter has an initial-state prior over $x_0$; that is the Lyapunov or physical prior described in \S\ref{par:init-conditions}. HMC has a parameter prior $p(\v\theta)$ over the unknown constants that I am estimating. This subsection is about the second object. Recall the log-posterior decomposition in Eq.~\ref{eq:hmc-log-posterior}; the choices here specify the $p(\v\theta)$ term in that equation.
+I chose these priors because the likelihood comes from a particle filter, not from an exact analytic marginal likelihood. A very diffuse prior lets HMC spend time in parameter regions where the filter degenerates, the ESS collapses, or the gradient is dominated by numerical artifacts. A prior that is too tight can hide a real model mismatch. The compromise I used is weakly informative and physical-scale based: center the prior near the known synthetic truth for benchmark runs, but keep enough width that the data can still move the posterior.
+
+\paragraph{Families I used.}
+For positive scale parameters I use $\mathrm{LogNormal}(\mu,\sigma)$. This is not just a generic Bayesian default. Noise scales are multiplicative objects: being wrong by a factor of two is a natural error, being wrong by an additive $0.2$ is not. A $\mathrm{LogNormal}(\mu,\sigma)$ also fits HMC because the parameter is positive in the model but unconstrained in the sampler. For $\mathrm{LogNormal}(\mu,s)$, the median is $\exp(\mu)$ and the mode is $\exp(\mu-s^2)$. This matters. MAP is pulled by the mode; HMC spends mass around the median and mean. The working guide therefore recommends $s=0.5$ as the default weakly informative scale, and warns that $s=1.0$ gives a very wide order-of-magnitude prior. For bounded persistence parameters I prefer a $\mathrm{Beta}(\alpha,\beta)$ prior when I have real knowledge that the process is persistent. A $\mathrm{Uniform}(0,1)$ prior is sometimes present in the current configurations, but I treat it as a sensitivity or legacy choice because it gives HMC no help near the boundaries. Table~\ref{tab:param-priors} lists the priors actually used in the HMC configurations.
+
+\begin{table}[H]
+\centering
+\scriptsize
+\caption{Parameter priors used by the HMC configurations.}
+\label{tab:param-priors}
+\begin{tabular}{p{2.4cm}p{2.4cm}p{2.5cm}p{2.1cm}p{2.0cm}p{3.4cm}}
+\toprule
+Model & Parameter & Prior family & Parameters & Support & Why this prior \\
+\midrule
+Linear Gaussian full & process noise std & $\mathrm{LogNormal}(\mu,\sigma)$ & loc $=0.0$, scale $=1.0$ & positive & Median $1.0$ matches the unit noise scale, but the guide flags scale $1.0$ as wider than needed. \\
+Linear Gaussian full & observation noise std & $\mathrm{LogNormal}(\mu,\sigma)$ & loc $=0.0$, scale $=1.0$ & positive & Same scale logic; useful for HMC but its MAP mode is only $\exp(-1)\approx0.37$. \\
+1D SV & $\alpha$ & $\mathrm{LogNormal}(\mu,\sigma)$ & loc $=-0.094$, scale $=0.5$ & positive & Median near $0.91$ matches the synthetic persistence; this configuration does not enforce $\alpha<1$. \\
+1D SV & $\sigma$ & $\mathrm{LogNormal}(\mu,\sigma)$ & loc $=0.0$, scale $=0.5$ & positive & Median $1.0$ matches the latent innovation scale with factor-of-$2$ uncertainty. \\
+1D SV & $\beta$ & $\mathrm{LogNormal}(\mu,\sigma)$ & loc $=-0.693$, scale $=0.5$ & positive & Median $0.5$ matches the observation scale used to generate the data. \\
+SV2D all-parameter HMC & $a_1$ & $\mathrm{Uniform}(a,b)$ & low $=0.0$, high $=1.0$ & $(0.001,0.999)$ in the transform & Legacy weak prior for a stable persistence coefficient; the guide would prefer an informative $\mathrm{Beta}(\alpha,\beta)$ when persistence is known. \\
+SV2D all-parameter HMC & $a_2$ & $\mathrm{Uniform}(a,b)$ & low $=0.0$, high $=1.0$ & $(0.001,0.999)$ in the transform & Same persistence rationale; this prior deliberately does not rule out low-persistence regimes. \\
+SV2D all-parameter HMC & $\sigma_1$ & $\mathrm{LogNormal}(\mu,\sigma)$ & loc $=-0.7$, scale $=0.5$ & positive & Median $\approx0.50$ matches the first process-noise scale. \\
+SV2D all-parameter HMC & $\sigma_2$ & $\mathrm{LogNormal}(\mu,\sigma)$ & loc $=0.0$, scale $=0.5$ & positive & Median $1.0$ matches the second process-noise scale; the guide calls this well aligned. \\
+Range-bearing & $\sigma_{\mathrm{range}}$ & $\mathrm{LogNormal}(\mu,\sigma)$ & loc $=-2.3$, scale $=0.5$ & positive & Median $\approx0.1$ because range noise is known to be order $10^{-1}$. \\
+Range-bearing & $\sigma_{\mathrm{bearing}}$ & $\mathrm{LogNormal}(\mu,\sigma)$ & loc $=-2.3$, scale $=0.5$ & positive & Same physical noise scale for bearing in the benchmark configuration. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Bijectors and the Jacobian term.}
+The model parameters live on constrained spaces: noise standard deviations must be positive, persistence parameters must stay inside an interval, and HMC itself wants to move in an unconstrained Euclidean space. I handle this with smooth bijections: a positive transform maps unconstrained coordinates to scale parameters, and a scaled logistic transform maps to bounded intervals. The log prior is evaluated in the constrained parameter value and then the forward log-Jacobian of the bijector is added. This is the change-of-variables correction. Without it, HMC would sample the wrong density in the unconstrained coordinate, even if the constrained prior looked correct on paper.
+
+\paragraph{Effect on HMC.}
+The prior changes the geometry that HMC sees. A tighter, correctly centered prior reduces wasted exploration in regions where the particle filter is numerically bad, so ESS and acceptance can improve. The cost is bias if I centered the prior on the wrong physical scale. A weakly informative prior is the safer default when I know the order of magnitude but do not want to overfit the benchmark truth. This is why I do not use textbook ``noninformative'' inverse-gamma or very wide log-normal priors here. Those are designed for cleaner likelihoods than the one produced by a differentiable particle filter.
+
+\paragraph{Worked example: range-bearing noise.}
+For range-bearing, the observation noise scale is physically around $0.1$ in both coordinates in the benchmark. I therefore set the prior median near $0.1$, not near $1.0$. The numeric prior location is $-2.3$, because $\log(0.1)=-2.3026$. With scale $0.5$, the prior is wide enough to cover roughly a factor of $2$--$3$ around that value, but it does not send HMC into absurd noise scales where the likelihood surface is dominated by particle collapse. The constrained parameter is positive, so the sampler moves in an unconstrained coordinate $u$, the positive transform produces $\sigma=s(u)$, and the HMC potential receives
+\begin{equation}
+    U(u) = -\log p(z_{1:T}\mid \sigma) - \log p(\sigma) - \log\left|\frac{d\sigma}{du}\right|.
+\end{equation}
+That last term is easy to forget. It is why the prior is not just the $\mathrm{LogNormal}(\mu,\sigma)$ density in constrained space; it is that density plus the transform correction needed to sample the same target in unconstrained HMC coordinates.
+
+%\paragraph{Config discrepancies.}
+%The working guide and the run configurations are not perfectly aligned. The guide recommends $\mathrm{LogNormal}(0.25, 0.5)$ for the linear-Gaussian noise scales if MAP mode alignment is the priority, but the reported HMC runs still use $\mathrm{LogNormal}(0.0, 1.0)$. The guide also prefers $\mathrm{Beta}(\alpha,\beta)$-style priors for bounded persistence parameters; the SV2D all-parameter HMC configuration uses $\mathrm{Uniform}(0,1)$ for $a_1$ and $a_2$, while the 1D SV configuration uses a $\mathrm{Beta}(\alpha,\beta)$ prior for $\alpha$. Finally, the SV2D $\sigma_2$-only HMC configuration sets $\sigma_2\sim\mathrm{LogNormal}(0.25,0.5)$ to put the mode at $1.0$, while the all-parameter configuration uses loc $=0.0$ to put the median at $1.0$.
+% I record these differences rather than smoothing them over, because they affect whether MAP or HMC is the intended diagnostic.
+
+%\paragraph{What I used vs.\ what the guide recommends (known limitations).}
+%The table above records the priors that actually entered the HMC runs. The working guide goes one step further and says which of those choices I should update. I did not make those config changes before producing the reported runs, so this is a known limitation of the parameter-inference section, not a correction to the experiments.
+
+%\begin{table}[H]
+%\centering
+%\scriptsize
+%\caption{Known prior-selection discrepancies between the HMC configs and the working guide.}
+%\label{tab:param-prior-discrepancies}
+%\begin{tabular}{p{3.0cm}p{3.5cm}p{3.5cm}p{3.0cm}}
+%\toprule
+%Model / parameter & Used & Recommended & Status \\
+%\midrule
+%Linear Gaussian observation noise & $\mathrm{LogNormal}(0.0,1.0)$ & $\mathrm{LogNormal}(0.25,0.5)$, so the prior peak better matches MAP estimates and the prior is tighter & Not updated; report runs use $\mathrm{LogNormal}(0.0,1.0)$ \\
+%SV2D persistence in all-parameter HMC & $\mathrm{Uniform}(0,1)$ for $a_1$ and $a_2$ & $\mathrm{Beta}(10,2)$ mapped through a scaled logistic transform onto $(0.001,0.999)$ & Not updated; this likely contributes to weak localisation in the SV2D HMC failure \\
+%SV2D $\sigma_2$ across sibling configurations & One $\sigma_2$-only configuration uses loc $=0.25$; the smoke and all-parameter configurations use loc $=0.0$ & Use loc $=0.25$ consistently when the goal is mode $=1.0$ for scale $=0.5$ & Partial; standalone configuration is mode-corrected, siblings and guide table are stale \\
+%\bottomrule
+%\%end{tabular}
+%\end{table}
+
+%I did not apply these updates to the runs in this report due to time constraints. The $\sigma_2$-only configuration has been partially mode-corrected but the sibling configurations and the guide table itself have not been synced. A future iteration should (i) switch linear-Gaussian observation-noise priors to $\mathrm{LogNormal}(0.25, 0.5)$, (ii) replace the SV2D $\mathrm{Uniform}(0,1)$ persistence prior with $\mathrm{Beta}(10, 2)$ via a scaled logistic transform, (iii) propagate the $\sigma_2$ mode-accurate loc $=0.25$ to all SV2D HMC configurations, and (iv) re-run the linear-Gaussian and SV2D benchmarks under the updated priors. The SV2D failure mode in \S\ref{sec:sv2d} may partially lift under the informative $\mathrm{Beta}(\alpha,\beta)$ prior, but I cannot claim so without rerunning.
 
 \subsection{MAP as a Pipeline Smoke Test}
 \label{sec:map-smoke-test}
 
-Before running HMC, it is always a good idea to run MAP estimation first. MAP finds the mode of the posterior by gradient descent on $U(\v \theta) = -\log p(\v \theta \mid z_{1:T})$,
+Run MAP before HMC. MAP finds the mode of the posterior by gradient descent on $U(\v \theta) = -\log p(\v \theta \mid z_{1:T})$,
 \begin{equation}
     \v \theta \leftarrow \v \theta - \eta \nabla_{\v \theta} U(\v \theta),
 \end{equation}
-using Adam or SGD. We run MAP in two modes. The \emph{fresh-seed} mode draws a new particle-filter seed at every gradient step, so resampling discontinuities average out over the trajectory; this is the default diagnostic and is useful for checking that the pipeline converges at all. The \emph{fixed-seed} mode holds the particle seed constant across optimizer steps, which exposes the same discontinuities HMC will see during a single leapfrog trajectory --- if fixed-seed MAP converges cleanly, fixed-seed HMC is much more likely to follow suit. MAP is more tolerant than HMC of imperfect resampling gradients in two ways. First, it does not require a globally smooth loss surface: fresh-seed stochastic gradients average out occasional discontinuities, and even fixed-seed MAP only needs the gradient to point roughly downhill on average. Second, it does not require unbiased gradients carrying full information. MAP will therefore often succeed with simple stop-gradient systematic resampling where HMC cannot --- but this is tolerance, not immunity: on sharply discontinuous surfaces (e.g., the SV2D pipeline in \S\ref{sec:sv2d}) even MAP can fail, so a clean MAP run is a necessary but not sufficient condition for HMC to work.
+using Adam or SGD. I run MAP in two modes. The \emph{fresh-seed} mode draws a new particle-filter seed at every gradient step, so resampling discontinuities average out over the trajectory; this is the default diagnostic and is useful for checking that the pipeline converges at all. The \emph{fixed-seed} mode holds the particle seed constant across optimizer steps, which exposes the same discontinuities HMC will see during a single leapfrog trajectory --- if fixed-seed MAP converges cleanly, fixed-seed HMC is much more likely to follow suit. MAP is more tolerant than HMC of imperfect resampling gradients in two ways. First, it does not require a globally smooth loss surface: fresh-seed stochastic gradients average out occasional discontinuities, and even fixed-seed MAP only needs the gradient to point roughly downhill on average. Second, it does not require unbiased gradients carrying full information. MAP will therefore often succeed with simple stop-gradient systematic resampling where HMC cannot --- but this is tolerance, not immunity: on sharply discontinuous surfaces (e.g., the SV2D pipeline in \S\ref{sec:sv2d}) even MAP can fail, so a clean MAP run is a necessary but not sufficient condition for HMC to work.
 
-The reason this matters is diagnostic: if MAP fails—loss diverges, gradients blow up, or the parameters drift away from the truth—there is a numerical problem somewhere in the model or the filter pipeline. MAP is therefore our first benchmark before we ever run HMC. We treat MAP convergence on a known model (e.g., 1-D linear Gaussian) as the minimum bar that any new filter configuration must clear. Only once MAP works cleanly do we move to HMC, which has the additional requirements of a deterministic loss surface (fixed particle seed) and smooth gradients.
+The reason this matters is diagnostic: if MAP fails—loss diverges, gradients blow up, or the parameters drift away from the truth—there is a numerical problem somewhere in the model or filter pipeline. MAP is therefore the first benchmark before HMC. I treat MAP convergence on a known model (e.g., 1-D linear Gaussian) as the minimum bar that any new filter configuration must clear. Only once MAP works cleanly do I move to HMC, which has the additional requirements of a deterministic loss surface (fixed particle seed) and smooth gradients.
 The prior in the MAP objective is not a resampling choice; I use the same parameter prior for MAP and HMC and explain the selection in \S\ref{sec:param-prior-selection}.
 
 \paragraph{MAP convergence across four benchmarks.}
-I ran MAP on four models as the pipeline smoke test: 1D linear Gaussian (where both BPF+OT and LEDH+OT were exercised so that I could verify the differentiable filter does not introduce a filter-family bias), range-bearing with LEDH+OT (two parameters, $\sigma_{\text{range}}$ and $\sigma_{\text{bearing}}$, estimated jointly), 1D stochastic volatility with LEDH+OT (estimating the persistence $\alpha$), and 2D stochastic volatility with LEDH+OT (estimating $\sigma_2$). Every run uses a single cosine warm-down learning-rate schedule shared across benchmarks; Figure~\ref{fig:map_learning_rate} confirms the schedules overlap exactly on the four runs, so the convergence differences that follow are not an artifact of tuning.
+I ran MAP on four models as the pipeline smoke test: 1D linear Gaussian (where both BPF+OT and LEDH+OT were exercised so that I could verify the differentiable filter does not introduce a filter-family bias), range-bearing with LEDH+OT (two parameters, $\sigma_{\text{range}}$ and $\sigma_{\text{bearing}}$, estimated jointly), 1D stochastic volatility with LEDH+OT (estimating the persistence $\alpha$), and 2D stochastic volatility with LEDH+OT (estimating $\sigma_2$). Every run uses a single cosine warm-down learning-rate schedule shared across benchmarks; Figure~\ref{fig:map_learning_rate} confirms the schedules overlap exactly on the four runs, so the convergence differences that follow are not an artifact of tuning. Figures~\ref{fig:map_lg}, \ref{fig:map_rb}, \ref{fig:map_sv1d}, and~\ref{fig:map_sv2d} show the four convergence traces.
 
 \begin{figure}[H]
     \centering
@@ -2152,143 +2257,26 @@ Each of the four MAP convergence figures is a three-panel composite: top panel s
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.82\linewidth]{map_sv2d.png}
-    \caption{MAP convergence on 2D stochastic volatility with LEDH+OT, estimating $\sigma_2$ with true value $1.0$. The MAP optimizer converges on the filter-level objective, which is the minimum bar for the SV2D pipeline. As the HMC diagnostics in \S\ref{sec:sv2d} document, a clean MAP run on SV2D is \emph{necessary but not sufficient} for HMC to work --- the gradient surface is smooth enough on average for stochastic-gradient MAP to navigate, but has per-leapfrog-step discontinuities that derail fixed-seed HMC.}
+    \caption{MAP convergence on 2D stochastic volatility with LEDH+OT, estimating $\sigma_2$ with true value $1.0$. The MAP optimizer clears the filter-level objective; \S\ref{sec:sv2d} shows why this is not enough for HMC.}
     \label{fig:map_sv2d}
 \end{figure}
 
-\paragraph{What these four figures are for.}
-These are the minimum bar every downstream benchmark must clear before HMC is run. On LG and range-bearing the MAP result is also a correctness check: the filter converges, the gradient path is not broken, and the true parameters are recovered. On SV1D the result is similar but noisier, as expected for a model where the observation does not directly reveal the latent. On SV2D the MAP convergence is the \emph{floor} of what the pipeline can do --- the HMC-specific failure mode described in \S\ref{sec:sv2d} is a strictly harder problem than MAP, and the contrast between the clean MAP trajectory here and the gradient-spike behaviour in \S\ref{sec:sv2d} is exactly the ``MAP tolerance does not imply HMC tolerance'' point made at the start of this subsection.
-
-\subsection{Differentiable Resampling and the Gradient Chain}
-
-The resampling derivative chain has already been analysed in \S\ref{sec:ot-derivative-chain}. We now test whether the differentiable filter delivers gradients usable for parameter inference: the theoretical properties in \S\ref{sec:ot-derivative-chain} are the predictions, the benchmarks below are the test.
-
-\subsection{Parameter Prior Selection}
-\label{sec:param-prior-selection}
-
-\paragraph{What the prior is doing here.}
-There are two different priors in this section, and I keep them separate. The filter has an initial-state prior over $x_0$; that is the Lyapunov or physical prior described in \S\ref{par:init-conditions}. HMC has a parameter prior $p(\v\theta)$ over the unknown constants that I am estimating. This subsection is about the second object. The posterior target in the code is not just the particle-filter likelihood. It is
-\begin{equation}
-    \log p(\v\theta \mid z_{1:T}) =
-    \log p(z_{1:T} \mid \v\theta) + \log p(\v\theta) + \mathrm{const}.
-\end{equation}
-I chose these priors because the likelihood comes from a particle filter, not from an exact analytic marginal likelihood. A very diffuse prior lets HMC spend time in parameter regions where the filter degenerates, the ESS collapses, or the gradient is dominated by numerical artifacts. A prior that is too tight can hide a real model mismatch. The compromise I used is weakly informative and physical-scale based: center the prior near the known synthetic truth for benchmark runs, but keep enough width that the data can still move the posterior.
-
-\paragraph{Families I used.}
-For positive scale parameters I use $\mathrm{LogNormal}(\mu,\sigma)$. This is not just a generic Bayesian default. Noise scales are multiplicative objects: being wrong by a factor of two is a natural error, being wrong by an additive $0.2$ is not. A $\mathrm{LogNormal}(\mu,\sigma)$ also fits HMC because the parameter is positive in the model but unconstrained in the sampler. For $\mathrm{LogNormal}(\mu,s)$, the median is $\exp(\mu)$ and the mode is $\exp(\mu-s^2)$. This matters. MAP is pulled by the mode; HMC spends mass around the median and mean. The working guide therefore recommends $s=0.5$ as the default weakly informative scale, and warns that $s=1.0$ gives a very wide order-of-magnitude prior. For bounded persistence parameters I prefer a $\mathrm{Beta}(\alpha,\beta)$ prior when I have real knowledge that the process is persistent. A $\mathrm{Uniform}(0,1)$ prior is sometimes present in the current configurations, but I treat it as a sensitivity or legacy choice because it gives HMC no help near the boundaries.
-
-\begin{table}[H]
-\centering
-\scriptsize
-\caption{Parameter priors used by the HMC configurations. Values are taken from the run configurations, not inferred from the text.}
-\label{tab:param-priors}
-\begin{tabular}{p{2.4cm}p{2.4cm}p{2.5cm}p{2.1cm}p{2.0cm}p{3.4cm}}
-\toprule
-Model & Parameter & Prior family & Parameters & Support & Why this prior \\
-\midrule
-Linear Gaussian full & process noise std & $\mathrm{LogNormal}(\mu,\sigma)$ & loc $=0.0$, scale $=1.0$ & positive & Median $1.0$ matches the unit noise scale, but the guide flags scale $1.0$ as wider than needed. \\
-Linear Gaussian full & observation noise std & $\mathrm{LogNormal}(\mu,\sigma)$ & loc $=0.0$, scale $=1.0$ & positive & Same scale logic; useful for HMC but its MAP mode is only $\exp(-1)\approx0.37$. \\
-1D SV & $\alpha$ & $\mathrm{LogNormal}(\mu,\sigma)$ & loc $=-0.094$, scale $=0.5$ & positive & Median near $0.91$ matches the synthetic persistence; this configuration does not enforce $\alpha<1$. \\
-1D SV & $\sigma$ & $\mathrm{LogNormal}(\mu,\sigma)$ & loc $=0.0$, scale $=0.5$ & positive & Median $1.0$ matches the latent innovation scale with factor-of-$2$ uncertainty. \\
-1D SV & $\beta$ & $\mathrm{LogNormal}(\mu,\sigma)$ & loc $=-0.693$, scale $=0.5$ & positive & Median $0.5$ matches the observation scale used to generate the data. \\
-SV2D all-parameter HMC & $a_1$ & $\mathrm{Uniform}(a,b)$ & low $=0.0$, high $=1.0$ & $(0.001,0.999)$ in the transform & Legacy weak prior for a stable persistence coefficient; the guide would prefer an informative $\mathrm{Beta}(\alpha,\beta)$ when persistence is known. \\
-SV2D all-parameter HMC & $a_2$ & $\mathrm{Uniform}(a,b)$ & low $=0.0$, high $=1.0$ & $(0.001,0.999)$ in the transform & Same persistence rationale; this prior deliberately does not rule out low-persistence regimes. \\
-SV2D all-parameter HMC & $\sigma_1$ & $\mathrm{LogNormal}(\mu,\sigma)$ & loc $=-0.7$, scale $=0.5$ & positive & Median $\approx0.50$ matches the first process-noise scale. \\
-SV2D all-parameter HMC & $\sigma_2$ & $\mathrm{LogNormal}(\mu,\sigma)$ & loc $=0.0$, scale $=0.5$ & positive & Median $1.0$ matches the second process-noise scale; the guide calls this well aligned. \\
-Range-bearing & $\sigma_{\mathrm{range}}$ & $\mathrm{LogNormal}(\mu,\sigma)$ & loc $=-2.3$, scale $=0.5$ & positive & Median $\approx0.1$ because range noise is known to be order $10^{-1}$. \\
-Range-bearing & $\sigma_{\mathrm{bearing}}$ & $\mathrm{LogNormal}(\mu,\sigma)$ & loc $=-2.3$, scale $=0.5$ & positive & Same physical noise scale for bearing in the benchmark configuration. \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\paragraph{Bijectors and the Jacobian term.}
-The model parameters live on constrained spaces: noise standard deviations must be positive, persistence parameters must stay inside an interval, and HMC itself wants to move in an unconstrained Euclidean space. I handle this with smooth bijections: a positive transform maps unconstrained coordinates to scale parameters, and a scaled logistic transform maps to bounded intervals. The log prior is evaluated in the constrained parameter value and then the forward log-Jacobian of the bijector is added. This is the change-of-variables correction. Without it, HMC would sample the wrong density in the unconstrained coordinate, even if the constrained prior looked correct on paper.
-
-\paragraph{Effect on HMC.}
-The prior changes the geometry that HMC sees. A tighter, correctly centered prior reduces wasted exploration in regions where the particle filter is numerically bad, so ESS and acceptance can improve. The cost is bias if I centered the prior on the wrong physical scale. A weakly informative prior is the safer default when I know the order of magnitude but do not want to overfit the benchmark truth. This is why I do not use textbook ``noninformative'' inverse-gamma or very wide log-normal priors here. Those are designed for cleaner likelihoods than the one produced by a differentiable particle filter.
-
-\paragraph{Worked example: range-bearing noise.}
-For range-bearing, the observation noise scale is physically around $0.1$ in both coordinates in the benchmark. I therefore set the prior median near $0.1$, not near $1.0$. The numeric prior location is $-2.3$, because $\log(0.1)=-2.3026$. With scale $0.5$, the prior is wide enough to cover roughly a factor of $2$--$3$ around that value, but it does not send HMC into absurd noise scales where the likelihood surface is dominated by particle collapse. The constrained parameter is positive, so the sampler moves in an unconstrained coordinate $u$, the positive transform produces $\sigma=s(u)$, and the HMC potential receives
-\begin{equation}
-    U(u) = -\log p(z_{1:T}\mid \sigma) - \log p(\sigma) - \log\left|\frac{d\sigma}{du}\right|.
-\end{equation}
-That last term is easy to forget. It is why the prior is not just the $\mathrm{LogNormal}(\mu,\sigma)$ density in constrained space; it is that density plus the transform correction needed to sample the same target in unconstrained HMC coordinates.
-
-\paragraph{Config discrepancies.}
-The working guide and the run configurations are not perfectly aligned. The guide recommends $\mathrm{LogNormal}(0.25, 0.5)$ for the linear-Gaussian noise scales if MAP mode alignment is the priority, but the reported HMC runs still use $\mathrm{LogNormal}(0.0, 1.0)$. The guide also prefers $\mathrm{Beta}(\alpha,\beta)$-style priors for bounded persistence parameters; the SV2D all-parameter HMC configuration uses $\mathrm{Uniform}(0,1)$ for $a_1$ and $a_2$, while the 1D SV configuration uses a $\mathrm{Beta}(\alpha,\beta)$ prior for $\alpha$. Finally, the SV2D $\sigma_2$-only HMC configuration sets $\sigma_2\sim\mathrm{LogNormal}(0.25,0.5)$ to put the mode at $1.0$, while the all-parameter configuration uses loc $=0.0$ to put the median at $1.0$. I record these differences rather than smoothing them over, because they affect whether MAP or HMC is the intended diagnostic.
-
-\paragraph{What we used vs.\ what the guide recommends (known limitations).}
-The table above records the priors that actually entered the HMC runs. The working guide goes one step further and says which of those choices I should update. I did not make those config changes before producing the reported runs, so this is a known limitation of the parameter-inference section, not a correction to the experiments.
-
-\begin{table}[H]
-\centering
-\scriptsize
-\caption{Known prior-selection discrepancies between the HMC configs and the working guide.}
-\label{tab:param-prior-discrepancies}
-\begin{tabular}{p{3.0cm}p{3.5cm}p{3.5cm}p{3.0cm}}
-\toprule
-Model / parameter & Used & Recommended & Status \\
-\midrule
-Linear Gaussian observation noise & $\mathrm{LogNormal}(0.0,1.0)$ & $\mathrm{LogNormal}(0.25,0.5)$, so the prior peak better matches MAP estimates and the prior is tighter & Not updated; report runs use $\mathrm{LogNormal}(0.0,1.0)$ \\
-SV2D persistence in all-parameter HMC & $\mathrm{Uniform}(0,1)$ for $a_1$ and $a_2$ & $\mathrm{Beta}(10,2)$ mapped through a scaled logistic transform onto $(0.001,0.999)$ & Not updated; this likely contributes to weak localisation in the SV2D HMC failure \\
-SV2D $\sigma_2$ across sibling configurations & One $\sigma_2$-only configuration uses loc $=0.25$; the smoke and all-parameter configurations use loc $=0.0$ & Use loc $=0.25$ consistently when the goal is mode $=1.0$ for scale $=0.5$ & Partial; standalone configuration is mode-corrected, siblings and guide table are stale \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-We did not apply these updates to the runs in this report due to time constraints. The $\sigma_2$-only configuration has been partially mode-corrected but the sibling configurations and the guide table itself have not been synced. A future iteration should (i) switch linear-Gaussian observation-noise priors to $\mathrm{LogNormal}(0.25, 0.5)$, (ii) replace the SV2D $\mathrm{Uniform}(0,1)$ persistence prior with $\mathrm{Beta}(10, 2)$ via a scaled logistic transform, (iii) propagate the $\sigma_2$ mode-accurate loc $=0.25$ to all SV2D HMC configurations, and (iv) re-run the linear-Gaussian and SV2D benchmarks under the updated priors. The SV2D failure mode in \S\ref{sec:sv2d} may partially lift under the informative $\mathrm{Beta}(\alpha,\beta)$ prior, but we cannot claim so without rerunning.
-
-\subsection{Benchmark: Linear Gaussian Model}
+\subsection{HMC Benchmarks}
 \label{sec:linear-gaussian-benchmark}
 
-We use the linear Gaussian model as the primary validation target. The filters that HMC calls as subroutines use the Lyapunov-stationary initial prior $\mathcal{N}(\mathbf{0}, \boldsymbol{\Sigma}_0)$ with $\boldsymbol{\Sigma}_0$ solving $\boldsymbol{\Sigma}_0 = \mathbf{F}\boldsymbol{\Sigma}_0\mathbf{F}^\top + \mathbf{Q}$, following the cross-cutting principle in \S\ref{par:init-conditions}. The Kalman filter gives the exact posterior, so we have ground truth for both the filter estimates and the parameter posterior.
-
-\subsubsection{MCMC Diagnostics}
-
-After every HMC run we report four diagnostics.
-
-\paragraph{Acceptance rate.}
-At each HMC step, a proposal $\v\theta^*$ is drawn by integrating Hamilton's equations for $L$ leapfrog steps from the current state. The Metropolis acceptance probability is
-\begin{equation}
-\alpha = \min\!\left(1,\; e^{-\Delta H}\right), \qquad \Delta H = H(\v p^*, \v\theta^*) - H(\v p, \v\theta).
-\end{equation}
-If the leapfrog integrator were exact, $\Delta H = 0$ and every proposal would be accepted. Numerical discretisation error causes $\Delta H \neq 0$, so some proposals are rejected. The acceptance rate is therefore a direct diagnostic for step size calibration: too low means the step size is too large and the trajectory overshoots; too high (near 100\%) means the step size is too small and the chain barely moves. We target $65\%$ acceptance, which is the theoretically optimal rate for high-dimensional Gaussian targets \cite{beskos2013optimal}.
-
-\paragraph{Step size and dual averaging.}
-The leapfrog step size $\varepsilon$ is adapted during the first 80\% of burn-in using dual averaging \cite{hoffman2014nuts}. Let $\delta$ be the target acceptance rate and $\alpha_m$ the actual acceptance rate at step $m$. The update equations are:
-\begin{align}
-\bar{H}_m &= \left(1 - \frac{1}{m + t_0}\right)\bar{H}_{m-1} + \frac{1}{m + t_0}(\delta - \alpha_m), \\
-\log \varepsilon_m &= \mu - \frac{\sqrt{m}}{\gamma}\,\bar{H}_m, \\
-\log \bar{\varepsilon}_m &= m^{-\kappa}\log \varepsilon_m + (1 - m^{-\kappa})\log \bar{\varepsilon}_{m-1}.
-\end{align}
-Here $\mu = \log(10\varepsilon_0)$ is the reference target (set to $10\times$ the initial step size), $\gamma = 0.05$ is a shrinkage factor, $t_0 = 10$ stabilises early iterations, and $\kappa = 0.75$ controls the long-run averaging weight. The running average $\bar{\varepsilon}_m$ is used as the fixed step size after adaptation ends — it is more stable than the instantaneous $\varepsilon_m$. The feedback is straightforward: when $\alpha_m < \delta$ the chain is rejecting too often, so $\bar H_m$ increases and $\varepsilon$ decreases; when $\alpha_m > \delta$ the opposite happens.
-
-\paragraph{Effective sample size (ESS).}
-Because consecutive MCMC samples are correlated, $N$ correlated samples carry less information than $N$ independent ones. The effective sample size quantifies this:
-\begin{equation}
-\mathrm{ESS} = \frac{N}{1 + 2\sum_{k=1}^{\infty} \rho_k},
-\end{equation}
-where $\rho_k = \mathrm{Corr}(\theta_t, \theta_{t+k})$ is the lag-$k$ autocorrelation of the chain. To build intuition: for an AR(1) chain $\theta_t = \phi\,\theta_{t-1} + \varepsilon_t$ with $|\phi| < 1$, we have $\rho_k = \phi^k$ and $\mathrm{ESS} = N(1-\phi)/(1+\phi)$. With $N = 200$ samples, $\phi = 0.9$ gives ESS $\approx 11$ --- the chain is exploring very slowly. $\phi = 0$ gives ESS $= 200$ --- fully independent. In practice the infinite sum is truncated where autocorrelations become negligible; I compute ESS with an FFT-based autocorrelation estimator. With fewer than a few hundred samples the estimator is noisy and ESS can saturate at $N$ even when mixing is imperfect.
-
-\paragraph{$\hat{R}$: Potential Scale Reduction Factor.}
-$\hat{R}$ (Gelman \& Rubin, 1992) detects non-convergence by comparing \emph{within-chain} to \emph{between-chain} variance. Since we run a single chain, we split the $N$ post-burn-in samples into two halves of length $n = N/2$ and treat them as two independent chains. Let $\bar\theta_j$ and $s_j^2$ be the mean and variance of chain $j$ ($j = 1, 2$). Define:
-\begin{align}
-W &= \tfrac{1}{2}(s_1^2 + s_2^2) && \text{(within-chain variance)}, \\
-B &= n\,(\bar\theta_1 - \bar\theta_2)^2 / 2 && \text{(between-chain variance)}, \\
-\hat{V} &= \tfrac{n-1}{n}\,W + \tfrac{1}{n}\,B && \text{(pooled variance estimate)}.
-\end{align}
-Then $\hat{R} = \sqrt{\hat{V}/W}$. If the chain has converged, both halves look like draws from the same distribution, so $B \approx 0$ and $\hat{R} \approx 1$. We emphasise that this is a \emph{split} $\hat{R}$ from a single chain, which is a rough one-chain diagnostic --- it detects gross non-stationarity within a run but is not a substitute for a true multi-chain $\hat{R}$, which would compare independent chains initialised from over-dispersed starting points. The standard threshold is $\hat{R} > 1.1$ to flag non-convergence. Values slightly below 1 are an artifact of finite-sample estimation and are harmless. With only $n = 100$ samples per half, both $W$ and $B$ are estimated noisily, so at least $N \geq 400$ total samples are recommended before trusting $\hat{R}$.
+I report HMC runs on three model families in this section: 1D linear Gaussian, range-bearing, and 1D stochastic volatility. I keep the multi-dimensional linear Gaussian benchmark as a not-run scaling check. The SV2D nonlinear failure case is deferred to \S\ref{sec:sv2d}. The resampling derivative chain has already been analysed in \S\ref{sec:ot-derivative-chain}; the benchmarks below test whether the differentiable filter delivers gradients usable for parameter inference. The filters that HMC calls as subroutines use the initial-state prior choices from \S\ref{par:init-conditions}.
 
 \subsubsection{1-D Model, 1 Parameter}
+\label{sec:lg-hmc-1d}
 
-We use a 1-D linear Gaussian model as the minimal end-to-end test of the differentiable pipeline. The model is:
+I use a 1-D linear Gaussian model as the minimal end-to-end test of the differentiable pipeline. The model is:
 \begin{equation}
 \begin{split}
 x_k &= F x_{k-1} + B w_k, \quad w_k \sim \mathcal{N}(0, 1), \\
 z_k &= H x_k + D v_k, \quad v_k \sim \mathcal{N}(0, 1),
 \end{split}
 \end{equation}
-where $F, B, H, D$ are scalar constants. The process noise covariance is $Q = B^2$ and the observation noise covariance is $R = D^2$. In the HMC runs reported here, I fix $F$, $B$, and $H$ at their known values and estimate the observation-noise scale $D$, written in the plots as $\sigma_{\text{obs}}$. The true value is $\sigma_{\text{obs}} = D = 1.0$. The Kalman filter is exact for this model, so we have ground-truth posteriors for both the state estimates and the parameter posterior.
+where $F, B, H, D$ are scalar constants. The process noise covariance is $Q = B^2$ and the observation noise covariance is $R = D^2$. In the HMC runs reported here, I fix $F$, $B$, and $H$ at their known values and estimate the observation-noise scale $D$, written in the plots as $\sigma_{\text{obs}}$. The true value is $\sigma_{\text{obs}} = D = 1.0$. The Kalman filter is exact for this model, so I have ground-truth posteriors for both the state estimates and the parameter posterior.
 
 I used two checks. First, I run MAP to confirm that gradients flow correctly through the entire pipeline: filter, log-likelihood, and prior. MAP minimizes $L_{\mathrm{MAP}}(D) = -\sum_k \log p_D(z_k \mid z_{1:k-1}) - \log p(D)$ using Adam with a fresh particle seed at each step. Convergence to $\sigma_{\text{obs}} = 1.0$ indicates the pipeline is numerically sound. The MAP results are already shown in \S\ref{sec:map-smoke-test} (the MAP convergence figure for 1D LG shows both BPF+OT and LEDH+OT converging to the same neighbourhood of the true $\sigma_{\text{obs}} = 1.0$). Second, I run HMC to recover the full posterior $p(D \mid z_{1:T})$. The posterior should be unimodal and tightly concentrated around the true observation-noise scale, matching the Kalman-based reference. Any discrepancy flags a problem in the gradient computation or the filter itself.
 
@@ -2298,12 +2286,12 @@ Figure~\ref{fig:hmc_lg_trace} overlays the post-burn-in chains from all five fil
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.95\linewidth]{hmc_lg_trace.png}
-    \caption{HMC post-burn-in traces for $\sigma_{\text{obs}}$ on 1D linear Gaussian, overlaying all five filters. Kalman (black) is the analytic reference; EKF (blue), UKF (green), LEDH+OT (orange), and BPF+OT (purple) are the differentiable-filter variants. Horizontal dashed line at the true value $\sigma_{\text{obs}} = 1.0$.}
+    \caption{Post-burn-in chains for $\sigma_{\text{obs}}$ on 1D LG. Kalman is the reference; the particle-filter chains should sit on the same posterior region.}
     \label{fig:hmc_lg_trace}
 \end{figure}
 
 \paragraph{HMC posteriors.}
-Figures~\ref{fig:hmc_lg_histogram_kalman}--\ref{fig:hmc_lg_histogram_bpf_ot} show the per-filter marginal posterior histograms. Each panel plots the filter's own samples (coloured bars) against the reference outline from the Kalman filter's own HMC chain and the true value (dashed vertical line). The question each panel answers is: does this filter's HMC posterior match the Kalman-filter HMC reference?
+Figures~\ref{fig:hmc_lg_histogram_kalman}, \ref{fig:hmc_lg_histogram_ekf}, \ref{fig:hmc_lg_histogram_ukf}, \ref{fig:hmc_lg_histogram_ledh_ot}, and~\ref{fig:hmc_lg_histogram_bpf_ot} show the per-filter marginal posterior histograms. Each panel plots the filter's own samples (coloured bars) against the reference outline from the Kalman filter's own HMC chain and the true value (dashed vertical line). The question each panel answers is: does this filter's HMC posterior match the Kalman-filter HMC reference?
 
 \begin{figure}[H]
     \centering
@@ -2329,7 +2317,7 @@ Figures~\ref{fig:hmc_lg_histogram_kalman}--\ref{fig:hmc_lg_histogram_bpf_ot} sho
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\linewidth]{hmc_lg_histogram_ledh_ot.png}
-    \caption{1D LG HMC posterior: LEDH+OT. This is the flow filter with the full three-term derivative chain active.}
+    \caption{1D LG HMC posterior: LEDH+OT. This is the main flow-filter HMC check.}
     \label{fig:hmc_lg_histogram_ledh_ot}
 \end{figure}
 
@@ -2341,17 +2329,16 @@ Figures~\ref{fig:hmc_lg_histogram_kalman}--\ref{fig:hmc_lg_histogram_bpf_ot} sho
 \end{figure}
 
 \paragraph{Diagnostic readout.}
-Table~\ref{tab:hmc_diagnostics} collects the diagnostics for the 1D LG runs (and the other three nonlinear runs below). Kalman, EKF, and UKF all hit acceptance $\ge 0.97$ with ESS saturating at the sample count $200$ --- the low apparent split-$\hat R$ of $0.83$ is a finite-sample artefact of running a single $N=200$ chain and is not a convergence problem. LEDH+OT achieves acceptance $0.91$ with ESS $33.7$ over $400$ samples and split-$\hat R = 0.999$, which is the cleanest "non-trivial" result: the flow filter with the full three-term derivative chain matches the Kalman posterior shape. BPF+OT lands at split-$\hat R = 1.15$, above the standard non-convergence threshold of $1.1$ --- its chain did not mix well enough at this sample count, which is visible in Figure~\ref{fig:hmc_lg_histogram_bpf_ot} as an asymmetric histogram relative to the Kalman outline. The BPF+OT result is therefore a known gap: the gradient chain is correct (§\ref{sec:sinkhorn-backward}), the MAP converges cleanly (§\ref{sec:map-smoke-test}), but the HMC chain needs either more samples, a longer burn-in, or step-size re-tuning before the posterior can be trusted. I record the run here rather than omit it --- the diagnostic is what tells us the chain is not ready.
+Table~\ref{tab:hmc_diagnostics} collects the diagnostics for the 1D LG runs (and the other three nonlinear runs below). Range-bearing and SV1D are discussed in \S\ref{sec:hmc-rb} and \S\ref{sec:hmc-sv1d}. Kalman, EKF, and UKF all hit acceptance $\ge 0.97$ with ESS saturating at the sample count $200$ --- the low apparent split-$\hat R$ of $0.83$ is a finite-sample artefact of running a single $N=200$ chain and is not a convergence problem. LEDH+OT achieves acceptance $0.91$ with ESS $33.7$ over $400$ samples and split-$\hat R = 0.999$, which is the cleanest "non-trivial" result: the flow filter with the full three-term derivative chain matches the Kalman posterior shape. BPF+OT lands at split-$\hat R = 1.15$, above the standard non-convergence threshold of $1.1$ --- its chain did not mix well enough at this sample count, which is visible in Figure~\ref{fig:hmc_lg_histogram_bpf_ot} as an asymmetric histogram relative to the Kalman outline. The BPF+OT result is therefore a known gap: the gradient chain is correct (§\ref{sec:sinkhorn-backward}), the MAP converges cleanly (§\ref{sec:map-smoke-test}), but the HMC chain needs either more samples, a longer burn-in, or step-size re-tuning before the posterior can be trusted. I record the run here rather than omit it --- the diagnostic is what tells us the chain is not ready.
 
 \subsubsection{Multi-Dimensional Model, 1 Parameter}
 \label{sec:multi-d-lg}
-We increase the state dimension to $d \in \{3, 5\}$ while still estimating a single scalar parameter $\theta$. Filter initial conditions remain Lyapunov-stationary per \S\ref{par:init-conditions}, which generalises cleanly to the multi-dimensional case via the discrete Lyapunov equation. The purpose of this subsection is narrow: rule out state-dimension scaling as a confounder for the SV2D gradient failure in \S\ref{sec:sv2d}. If the linear pipeline still converges at $d = 5$ --- MAP hits the truth, HMC matches the Kalman analytic posterior, gradient norms stay bounded across leapfrog steps --- then whatever breaks on SV2D is a nonlinearity effect, not a dimension effect.
-
-The true posterior over $\theta$ remains one-dimensional and analytically tractable via the Kalman filter at any state dimension, so the multi-D benchmark has the same ground-truth reference as \S\ref{sec:linear-gaussian-benchmark}. We report the same diagnostics table (acceptance rate, ESS, split-$\hat R$, step size, wall-time) as the 1D run, for $d = 3$ and $d = 5$. Two short paragraphs cover the scaling observations: (i)~how ESS and wall-time change with state dimension at fixed particle count, and (ii)~whether the adaptive step size stabilises at a comparable value or has to shrink with $d$. We do not repeat the MAP validation plots or the trace diagnostics here --- those are in \S\ref{sec:linear-gaussian-benchmark}, and their point on the multi-D runs is only that nothing qualitatively new appears.
+I did not run the multi-dimensional linear Gaussian HMC benchmark in this report. The intended role was to vary $d \in \{3,5\}$ while estimating one scalar parameter, with Lyapunov-stationary filter initial conditions per \S\ref{par:init-conditions}, to check whether state dimension alone could explain the SV2D failure in \S\ref{sec:sv2d}. That check remains useful, but the 1D LG result above is the Kalman-exact reference I actually use to validate the HMC machinery here.
 
 \subsubsection{HMC on Range-Bearing}
 \label{sec:hmc-rb}
 Range-bearing is the first genuinely nonlinear HMC benchmark. The observation model is the two-component range/bearing map described in \S\ref{par:range-bearing-model}, and I estimate two parameters simultaneously: $\sigma_{\text{range}}$ and $\sigma_{\text{bearing}}$ (both at true value $0.1$). The filter is LEDH+OT.
+Figures~\ref{fig:hmc_rb_trace} and~\ref{fig:hmc_rb_histogram} show the range-bearing chains and marginal posteriors.
 
 \begin{figure}[H]
     \centering
@@ -2372,6 +2359,7 @@ Acceptance rate is $0.82$ and ESS is $30.0$ across $400$ samples (Table~\ref{tab
 \subsubsection{HMC on 1D Stochastic Volatility}
 \label{sec:hmc-sv1d}
 The 1D stochastic volatility model estimates the persistence parameter $\alpha$ at true value $0.91$. The filter is LEDH+OT on the log-squared-transformed model (the raw-observation model is not used for HMC because the multiplicative-noise likelihood breaks linearisation-based filters, as shown in \S\ref{sec:ekf-ukf-nonlinear}).
+Figures~\ref{fig:hmc_sv1d_trace} and~\ref{fig:hmc_sv1d_histogram} show the SV1D chain and marginal posterior.
 
 \begin{figure}[H]
     \centering
@@ -2387,7 +2375,7 @@ The 1D stochastic volatility model estimates the persistence parameter $\alpha$ 
     \label{fig:hmc_sv1d_histogram}
 \end{figure}
 
-The diagnostic readout is the red flag in this section. Acceptance rate $0.77$ is fine, but ESS is $\mathbf{4.0}$ over $500$ samples --- effectively no independent information is extracted from the chain, it is moving in a tight oscillation that happens to pass the acceptance test without exploring the posterior. Split-$\hat R = 0.66$ is below $1$ by enough to suggest the chain is trapped rather than mixing. The posterior in Figure~\ref{fig:hmc_sv1d_histogram} therefore represents a very tight local region, not a faithful marginal over $\alpha$. I include this run as an honest diagnostic: the filter is fine (\S\ref{sec:particle-methods-section} shows LEDH+OT tracks SV1D at $\mathrm{RMSE} \approx 1.16$) and the gradient path is validated (Table~\ref{tab:gradient_validation}), but the HMC chain did not mix at the sample budget and step-size tuning I used here. This run is a known gap.
+The diagnostic readout is the red flag in this section. Acceptance rate $0.77$ is fine, but ESS is $\mathbf{4.0}$ over $500$ samples --- effectively no independent information is extracted from the chain, it is moving in a tight oscillation that happens to pass the acceptance test without exploring the posterior. Split-$\hat R = 0.66$ is below $1$ by enough to suggest the chain is trapped rather than mixing. The posterior in Figure~\ref{fig:hmc_sv1d_histogram} therefore represents a very tight local region, not a faithful marginal over $\alpha$. I include this run as an honest diagnostic: the corresponding flow-family filters track SV1D at $\mathrm{RMSE} \approx 1.16$ in \S\ref{sec:particle-methods-section} and the gradient path is validated (Table~\ref{tab:gradient_validation}), but the HMC chain did not mix at the sample budget and step-size tuning I used here. This run is a known gap.
 
 \paragraph{Diagnostic summary table.}
 Table~\ref{tab:hmc_diagnostics} collects the diagnostics for all eight HMC runs in this report --- the five 1D LG runs above, plus the two nonlinear runs just described, plus the SV2D run discussed in \S\ref{sec:sv2d}.
@@ -2423,7 +2411,7 @@ Four of the eight runs are cleanly converged (all three LG Kalman-family runs pl
 The linear Gaussian benchmark validates the HMC machinery. This subsection documents where it breaks: HMC on the 2D stochastic volatility model (SV2D) with either a bootstrap particle filter or the LEDH flow filter, both combined with OT resampling. The failure is not in the filter itself --- §4 shows LEDH tracks SV2D with reasonable RMSE --- it is in the gradient path that feeds HMC.
 The SV2D runs use the same Lyapunov-stationary construction for the stable diagonal transition matrix as the 1D SV case in \S\ref{par:init-conditions}; the initial-state prior is therefore not a candidate root cause for the failure mode described below.
 
-Before discussing the symptom and hypotheses, the post-burn-in HMC chain is shown in Figures~\ref{fig:hmc_sv2d_trace} and~\ref{fig:hmc_sv2d_histogram} with its diagnostic entry in Table~\ref{tab:hmc_diagnostics}. Acceptance is $0.75$ and split-$\hat R$ is $1.02$ --- the aggregate diagnostics look benign. The failure mode described below is step-level, not chain-aggregate: the gradient norm spikes at specific leapfrog substeps while the overall acceptance rate stays above target, so an aggregate-only look at this run would miss it.
+Figures~\ref{fig:hmc_sv2d_trace} and~\ref{fig:hmc_sv2d_histogram} show the post-burn-in chain; Table~\ref{tab:hmc_diagnostics} gives the aggregate diagnostics.
 
 \begin{figure}[H]
     \centering
@@ -2441,9 +2429,9 @@ Before discussing the symptom and hypotheses, the post-burn-in HMC chain is show
 
 \paragraph{Symptom.} During leapfrog integration, the gradient $\nabla_{\boldsymbol{\theta}} U$ occasionally spikes by several orders of magnitude, $\Delta H$ blows up, and individual proposals can be rejected. In the run shown above, the aggregate acceptance rate is $0.75$ and split-$\hat R$ is $1.02$, so the usual chain-level diagnostics look acceptable. The problem is more local: ESS is only $27.9$ over $500$ samples, and the spikes appear at specific leapfrog substeps rather than uniformly across the trajectory. An aggregate-only diagnostic would miss this failure.
 
-\paragraph{What we have ruled out.} A fixed-seed vs.\ fresh-seed MAP comparison shows that the instability persists even when the particle seed is held constant, so the spikes are not just estimator variance from the stochastic particle filter averaging out over many steps. A loss-surface scan across a 2D slice of parameter space exhibits sharp discontinuities that are absent on the 1D linear Gaussian surface; this indicates the problem is in the loss surface itself, not in integrator tuning.
+\paragraph{What I have ruled out.} A fixed-seed vs.\ fresh-seed MAP comparison shows that the instability persists even when the particle seed is held constant, so the spikes are not just estimator variance from the stochastic particle filter averaging out over many steps. A loss-surface scan across a 2D slice of parameter space exhibits sharp discontinuities that are absent on the 1D linear Gaussian surface; this indicates the problem is in the loss surface itself, not in integrator tuning.
 
-\paragraph{Working hypotheses.} We list the current candidates for the root cause, the evidence we have for and against each, and the test that would rule them in or out.
+\paragraph{Working hypotheses.} Table~\ref{tab:sv2d-hypotheses} lists the current candidates for the root cause, the evidence for and against each, and the test that would rule them in or out.
 
 \begin{table}[H]
 \centering
@@ -2455,7 +2443,7 @@ Before discussing the symptom and hypotheses, the post-burn-in HMC chain is show
 Hypothesis & Evidence for & Evidence against & Status \\
 \midrule
 ESS-threshold branch discontinuity in conditional resampling & Spikes coincide with timesteps where ESS crosses the resample threshold; 1D Gaussian (no such crossings in typical runs) is clean. & Same spike pattern reported on runs with unconditional resampling in small tests. & Open \\
-SV2D integration of the implicit Sinkhorn backward & Theoretical: §\ref{sec:sinkhorn-backward} shows the extrapolation is known to be biased for Term 1, and SV2D activates that term strongly. & The implicit backward passes the filter-level gradient checks in §\ref{sec:ot-derivative-chain}; what remains untested is the full SV2D HMC inner loop. & Open \\
+SV2D integration of the implicit Sinkhorn backward & Theoretical: §\ref{sec:sinkhorn-backward} shows the extrapolation is known to be biased for Term 1, and SV2D activates that term strongly. & The remaining gap is the full SV2D HMC inner loop; see the closing framing below. & Open \\
 LEDH flow-gradient (particle geometry term) bias & Appears on LEDH+OT; same spike geometry on BPF+OT suggests the flow is not the sole cause. & Cross-filter persistence argues against LEDH being the single culprit. & Partially ruled out \\
 Stochastic PF estimator variance & Would average out with fresh seeds. & Fixed-seed runs still spike; fresh-seed runs still spike. & Ruled out \\
 Initial-state prior choice & none & Lyapunov-stationary, matches §2 principle and the 1D SV case which converges cleanly & Ruled out \\
@@ -2464,11 +2452,11 @@ Initial-state prior choice & none & Lyapunov-stationary, matches §2 principle a
 \end{table}
 
 \paragraph{Closing framing.}
-\emph{The linear Gaussian benchmark in \S\ref{sec:linear-gaussian-benchmark} validates the HMC machinery: MAP converges, gradients match finite differences, HMC posteriors match the Kalman reference. On SV2D, gradient spikes during leapfrog integration cause acceptance-rate collapse. I have localised the failure to the nonlinear filter gradient path but have not isolated the root cause. The implicit Sinkhorn backward is derived and validated at the filter-gradient level in \S\ref{sec:ot-derivative-chain}; what I have not done is run the SV2D HMC inner loop with that backward and a branch-free conditional-resampling path. This limits the nonlinear DPF-HMC claims but does not affect the filtering results in \S\ref{sec:particle-methods-section} or the validation of the linear pipeline.}
+\emph{The linear Gaussian benchmark in \S\ref{sec:linear-gaussian-benchmark} validates the HMC machinery: MAP converges, gradients match finite differences, HMC posteriors match the Kalman reference. On SV2D, gradient spikes during leapfrog integration make the chain explore poorly even when aggregate acceptance looks acceptable. I have localised the failure to the nonlinear filter gradient path but have not isolated the root cause. The implicit Sinkhorn backward is derived and validated at the filter-gradient level in \S\ref{sec:ot-derivative-chain}; what I have not done is run the SV2D HMC inner loop with that backward and a branch-free conditional-resampling path. This limits the nonlinear DPF-HMC claims but does not affect the filtering results in \S\ref{sec:particle-methods-section} or the validation of the linear pipeline.}
 
 \subsection{Limitations}
 
-To collect the caveats that have been raised section-by-section: (i)~the differentiable-filter HMC pipeline is validated on linear Gaussian targets only; on SV2D the pipeline hits an unresolved gradient-spike failure documented in \S\ref{sec:sv2d}, so we make no parameter-inference claims on the nonlinear benchmark; (ii)~$\hat{R}$ in this report is a single-chain split $\hat R$, not a true multi-chain diagnostic; (iii)~the implicit Sinkhorn backward is validated as a filter-gradient check, but the SV2D HMC runs reported here were not rerun with that backward inside the full leapfrog loop.
+To collect the caveats that have been raised section-by-section: (i)~the differentiable-filter HMC pipeline is validated cleanly on linear Gaussian targets and demonstrated on range-bearing, but it is not yet reliable on SV1D or SV2D --- the SV1D chain is trapped (ESS $=4.0$) and the SV2D chain has the step-level gradient spikes described in \S\ref{sec:sv2d}; (ii)~$\hat{R}$ in this report is a single-chain split $\hat R$, not a true multi-chain diagnostic.
 % 
 % % \newpage
 % 
