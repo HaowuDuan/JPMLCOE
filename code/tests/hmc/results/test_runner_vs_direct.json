@@ -1,0 +1,177 @@
+{
+  "file": "test_runner_vs_direct.py",
+  "created": "2026-04-10T10:09:06.915892Z",
+  "cases": [
+    {
+      "diagnostic": "runner_vs_direct_A_direct",
+      "summary": {
+        "label": "A_direct_kernel",
+        "n_steps": 10,
+        "n_accepts": 10,
+        "accept_rate": 1.0,
+        "longest_rejection_streak": 0,
+        "final_sigma2": 1.4093235731124878,
+        "freeze_after_first_accept": false
+      },
+      "records": [
+        {
+          "step": 1,
+          "accepted": true,
+          "sigma2": 1.7475998401641846,
+          "log_prob": -211.99241638183594,
+          "wall_time_s": 14.457786165177822
+        },
+        {
+          "step": 2,
+          "accepted": true,
+          "sigma2": 1.8134534358978271,
+          "log_prob": -212.06301879882812,
+          "wall_time_s": 15.078380707651377
+        },
+        {
+          "step": 3,
+          "accepted": true,
+          "sigma2": 1.6774598360061646,
+          "log_prob": -211.877685546875,
+          "wall_time_s": 14.720487400889397
+        },
+        {
+          "step": 4,
+          "accepted": true,
+          "sigma2": 1.5658807754516602,
+          "log_prob": -211.56591796875,
+          "wall_time_s": 15.308340342715383
+        },
+        {
+          "step": 5,
+          "accepted": true,
+          "sigma2": 1.4791843891143799,
+          "log_prob": -211.31008911132812,
+          "wall_time_s": 14.903694249689579
+        },
+        {
+          "step": 6,
+          "accepted": true,
+          "sigma2": 1.482926607131958,
+          "log_prob": -211.3214874267578,
+          "wall_time_s": 14.817373614758253
+        },
+        {
+          "step": 7,
+          "accepted": true,
+          "sigma2": 1.3071762323379517,
+          "log_prob": -210.7646026611328,
+          "wall_time_s": 14.983427306637168
+        },
+        {
+          "step": 8,
+          "accepted": true,
+          "sigma2": 1.2780225276947021,
+          "log_prob": -210.66761779785156,
+          "wall_time_s": 15.060926055535674
+        },
+        {
+          "step": 9,
+          "accepted": true,
+          "sigma2": 1.3059040307998657,
+          "log_prob": -210.7598419189453,
+          "wall_time_s": 14.760431002825499
+        },
+        {
+          "step": 10,
+          "accepted": true,
+          "sigma2": 1.4093235731124878,
+          "log_prob": -211.09793090820312,
+          "wall_time_s": 14.490636680275202
+        }
+      ],
+      "timestamp": "2026-04-10T10:09:06.915904Z"
+    },
+    {
+      "diagnostic": "runner_vs_direct_B_wrapped",
+      "summary": {
+        "label": "B_wrapped_kernel",
+        "n_steps": 10,
+        "n_accepts": 10,
+        "accept_rate": 1.0,
+        "longest_rejection_streak": 0,
+        "final_sigma2": 1.4093235731124878,
+        "freeze_after_first_accept": false
+      },
+      "records": [
+        {
+          "step": 1,
+          "accepted": true,
+          "sigma2": 1.7475998401641846,
+          "log_prob": -211.99241638183594,
+          "wall_time_s": 14.750936584547162
+        },
+        {
+          "step": 2,
+          "accepted": true,
+          "sigma2": 1.8134534358978271,
+          "log_prob": -212.06301879882812,
+          "wall_time_s": 14.953006312251091
+        },
+        {
+          "step": 3,
+          "accepted": true,
+          "sigma2": 1.6774598360061646,
+          "log_prob": -211.877685546875,
+          "wall_time_s": 14.363488148897886
+        },
+        {
+          "step": 4,
+          "accepted": true,
+          "sigma2": 1.5658807754516602,
+          "log_prob": -211.56591796875,
+          "wall_time_s": 15.793809663504362
+        },
+        {
+          "step": 5,
+          "accepted": true,
+          "sigma2": 1.4791843891143799,
+          "log_prob": -211.31008911132812,
+          "wall_time_s": 15.106437707319856
+        },
+        {
+          "step": 6,
+          "accepted": true,
+          "sigma2": 1.482926607131958,
+          "log_prob": -211.3214874267578,
+          "wall_time_s": 14.537298861891031
+        },
+        {
+          "step": 7,
+          "accepted": true,
+          "sigma2": 1.3071762323379517,
+          "log_prob": -210.7646026611328,
+          "wall_time_s": 14.569724660366774
+        },
+        {
+          "step": 8,
+          "accepted": true,
+          "sigma2": 1.2780225276947021,
+          "log_prob": -210.66761779785156,
+          "wall_time_s": 15.2068325355649
+        },
+        {
+          "step": 9,
+          "accepted": true,
+          "sigma2": 1.3059040307998657,
+          "log_prob": -210.7598419189453,
+          "wall_time_s": 14.687977908179164
+        },
+        {
+          "step": 10,
+          "accepted": true,
+          "sigma2": 1.4093235731124878,
+          "log_prob": -211.09793090820312,
+          "wall_time_s": 15.478068748489022
+        }
+      ],
+      "timestamp": "2026-04-10T10:11:49.254580Z"
+    }
+  ],
+  "updated": "2026-04-10T10:11:49.254590Z"
+}

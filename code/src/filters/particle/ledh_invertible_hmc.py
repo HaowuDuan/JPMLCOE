@@ -181,8 +181,9 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
         # variant fails to compile under jit_compile=True; QR works.
         _log_abs_det = graph_safe_log_abs_det_xla.python_function
 
-        # Capture param names at build time (works for any model)
+        # Capture param names and per-particle R flag at build time
         param_names = list(self.model.trainable_param_names)
+        has_per_particle_R = hasattr(self.model, 'observation_cov_batch')
 
         @tf.function(reduce_retracing=True)
         def compiled_filter(observations, particles, weights, covs,
@@ -226,9 +227,18 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
                     d_lambda = lambda_steps[j]
                     lambda_val = lambda_val + d_lambda
 
+                    # Per-particle R for state-dependent obs noise (e.g. SV2D)
+                    if has_per_particle_R:
+                        R_flow = model.observation_cov_batch(eta_bar)  # (N, od, od)
+                        R_flow = tf.maximum(R_flow, tf.constant(1e-30, dtype=R_flow.dtype))
+                        R_inv_flow = 1.0 / R_flow  # safe for od=1
+                    else:
+                        R_flow = R
+                        R_inv_flow = R_inv
+
                     A_batch, b_batch = _flow_params(
                         model, eta_bar, lambda_val, y, covs,
-                        R, R_inv, eta_bar_0, sd, regularization
+                        R_flow, R_inv_flow, eta_bar_0, sd, regularization
                     )
 
                     drift_bar = tf.einsum('nij,nj->ni', A_batch, eta_bar) + b_batch
@@ -531,14 +541,25 @@ class LEDHParticleFlowFilterHMC(LEDHParticleFlowFilter):
             lambda_val = tf.constant(0.0, dtype=self.dtype)
             I_sd = tf.eye(self.state_dim, dtype=self.dtype)
 
+            has_pp_R = hasattr(self.model, 'observation_cov_batch')
+
             for j in range(self.n_lambda_steps):
                 d_lambda = self.lambda_steps[j]
                 lambda_val = lambda_val + d_lambda
 
+                # Per-particle R for state-dependent obs noise (e.g. SV2D)
+                if has_pp_R:
+                    R_flow = self.model.observation_cov_batch(eta_bar)
+                    R_flow = tf.maximum(R_flow, tf.constant(1e-30, dtype=R_flow.dtype))
+                    R_inv_flow = 1.0 / R_flow
+                else:
+                    R_flow = R
+                    R_inv_flow = R_inv
+
                 A_batch, b_batch = _flow_params(
                     self.model, eta_bar, lambda_val, y,
                     particle_covs,
-                    R, R_inv, eta_bar_0,
+                    R_flow, R_inv_flow, eta_bar_0,
                     self.state_dim, regularization_tf
                 )
 

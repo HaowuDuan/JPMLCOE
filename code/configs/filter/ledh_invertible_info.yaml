@@ -1,0 +1,7 @@
+_target_: src.filters.particle.ledh_invertible_info.LEDHInvertibleInfoFilter
+
+n_particles: 500  # Paper uses 500
+n_lambda_steps: 29  # Paper uses 29 exponential steps
+resample_threshold: 0.5
+cov_regularization_eps: 0.0
+prior_info_jitter: 0.0

@@ -1,0 +1,319 @@
+{
+  "file": "test_ledh_ablation.py",
+  "created": "2026-04-12T12:02:02.212323Z",
+  "cases": [
+    {
+      "case_name": "BASELINE (no stop-gradient)",
+      "model": "linear_gaussian",
+      "filter": "ledh_ot_ablation",
+      "ablation_flags": {},
+      "param_name": "obs_noise_std",
+      "param_value": 1.0,
+      "n_particles": 200,
+      "T": 20,
+      "n_lambda_steps": 15,
+      "fd_h": 0.0001,
+      "fd_slopes": [
+        7.939981974054433,
+        7.939982259657086,
+        7.939982735566767,
+        7.939983401845652,
+        7.939984258534594
+      ],
+      "log_likelihood": -43.44008356664554,
+      "autodiff_grad": 7.9440320243686235,
+      "fd_grad_median": 7.939982735566767,
+      "ratio": 1.0005099871040926,
+      "relative_error": 0.0005099871040925324,
+      "timestamp": "2026-04-12T12:02:02.212332Z"
+    },
+    {
+      "case_name": "sg(covs) in flow",
+      "model": "linear_gaussian",
+      "filter": "ledh_ot_ablation",
+      "ablation_flags": {
+        "sg_covs_in_flow": true
+      },
+      "param_name": "obs_noise_std",
+      "param_value": 1.0,
+      "n_particles": 200,
+      "T": 20,
+      "n_lambda_steps": 15,
+      "fd_h": 0.0001,
+      "fd_slopes": [
+        7.939981974054433,
+        7.939982259657086,
+        7.939982735566767,
+        7.939983401845652,
+        7.939984258534594
+      ],
+      "log_likelihood": -43.44008356664554,
+      "autodiff_grad": 8.230722099364412,
+      "fd_grad_median": 7.939982735566767,
+      "ratio": 1.0366171279561216,
+      "relative_error": 0.036617127956121605,
+      "timestamp": "2026-04-12T12:02:27.716022Z"
+    },
+    {
+      "case_name": "sg(R, R_inv) in flow",
+      "model": "linear_gaussian",
+      "filter": "ledh_ot_ablation",
+      "ablation_flags": {
+        "sg_R_in_flow": true
+      },
+      "param_name": "obs_noise_std",
+      "param_value": 1.0,
+      "n_particles": 200,
+      "T": 20,
+      "n_lambda_steps": 15,
+      "fd_h": 0.0001,
+      "fd_slopes": [
+        7.939981974054433,
+        7.939982259657086,
+        7.939982735566767,
+        7.939983401845652,
+        7.939984258534594
+      ],
+      "log_likelihood": -43.44008356664554,
+      "autodiff_grad": 6.3518201080220145,
+      "fd_grad_median": 7.939982735566767,
+      "ratio": 0.7999790830236122,
+      "relative_error": 0.20002091697638777,
+      "timestamp": "2026-04-12T12:02:53.707609Z"
+    },
+    {
+      "case_name": "sg(log_theta)",
+      "model": "linear_gaussian",
+      "filter": "ledh_ot_ablation",
+      "ablation_flags": {
+        "sg_log_theta": true
+      },
+      "param_name": "obs_noise_std",
+      "param_value": 1.0,
+      "n_particles": 200,
+      "T": 20,
+      "n_lambda_steps": 15,
+      "fd_h": 0.0001,
+      "fd_slopes": [
+        7.939981974054433,
+        7.939982259657086,
+        7.939982735566767,
+        7.939983401845652,
+        7.939984258534594
+      ],
+      "log_likelihood": -43.44008356664554,
+      "autodiff_grad": -1.2885893648366924,
+      "fd_grad_median": 7.939982735566767,
+      "ratio": -0.16229120487435306,
+      "relative_error": 1.162291204874353,
+      "timestamp": "2026-04-12T12:03:20.025947Z"
+    },
+    {
+      "case_name": "sg(OT transport) in covs",
+      "model": "linear_gaussian",
+      "filter": "ledh_ot_ablation",
+      "ablation_flags": {
+        "sg_ot_transport": true
+      },
+      "param_name": "obs_noise_std",
+      "param_value": 1.0,
+      "n_particles": 200,
+      "T": 20,
+      "n_lambda_steps": 15,
+      "fd_h": 0.0001,
+      "fd_slopes": [
+        7.939981974054433,
+        7.939982259657086,
+        7.939982735566767,
+        7.939983401845652,
+        7.939984258534594
+      ],
+      "log_likelihood": -43.44008356664554,
+      "autodiff_grad": 7.944036046008417,
+      "fd_grad_median": 7.939982735566767,
+      "ratio": 1.0005104936089462,
+      "relative_error": 0.0005104936089462032,
+      "timestamp": "2026-04-12T12:03:46.196159Z"
+    },
+    {
+      "case_name": "sg(covs) after update",
+      "model": "linear_gaussian",
+      "filter": "ledh_ot_ablation",
+      "ablation_flags": {
+        "sg_covs_after_update": true
+      },
+      "param_name": "obs_noise_std",
+      "param_value": 1.0,
+      "n_particles": 200,
+      "T": 20,
+      "n_lambda_steps": 15,
+      "fd_h": 0.0001,
+      "fd_slopes": [
+        7.939981974054433,
+        7.939982259657086,
+        7.939982735566767,
+        7.939983401845652,
+        7.939984258534594
+      ],
+      "log_likelihood": -43.44008356664554,
+      "autodiff_grad": 8.230718187777942,
+      "fd_grad_median": 7.939982735566767,
+      "ratio": 1.0366166353119182,
+      "relative_error": 0.036616635311918194,
+      "timestamp": "2026-04-12T12:04:23.934631Z"
+    },
+    {
+      "case_name": "zero OT dparticles",
+      "model": "linear_gaussian",
+      "filter": "ledh_ot_ablation",
+      "ablation_flags": {
+        "zero_ot_particle_gradient": true
+      },
+      "param_name": "obs_noise_std",
+      "param_value": 1.0,
+      "n_particles": 200,
+      "T": 20,
+      "n_lambda_steps": 15,
+      "fd_h": 0.0001,
+      "fd_slopes": [
+        7.939981974054433,
+        7.939982259657086,
+        7.939982735566767,
+        7.939983401845652,
+        7.939984258534594
+      ],
+      "log_likelihood": -43.44008356664554,
+      "autodiff_grad": 7.934522752273203,
+      "fd_grad_median": 7.939982735566767,
+      "ratio": 0.9993123431781399,
+      "relative_error": 0.0006876568218601129,
+      "timestamp": "2026-04-12T12:04:50.247753Z"
+    },
+    {
+      "case_name": "BASELINE T=1",
+      "model": "linear_gaussian",
+      "filter": "ledh_ot_ablation",
+      "ablation_flags": {},
+      "param_name": "obs_noise_std",
+      "param_value": 1.0,
+      "n_particles": 200,
+      "T": 1,
+      "n_lambda_steps": 15,
+      "fd_h": 0.0001,
+      "fd_slopes": [
+        0.008924897054729541,
+        0.008924895770201502,
+        0.008924893623400246,
+        0.008924890618211556,
+        0.008924886755412587
+      ],
+      "log_likelihood": -2.0383775998314286,
+      "autodiff_grad": 0.008924060097888209,
+      "fd_grad_median": 0.008924893623400246,
+      "ratio": 0.9999066066726161,
+      "relative_error": 9.339332738394416e-05,
+      "timestamp": "2026-04-12T12:05:13.111715Z"
+    },
+    {
+      "case_name": "BASELINE T=3",
+      "model": "linear_gaussian",
+      "filter": "ledh_ot_ablation",
+      "ablation_flags": {},
+      "param_name": "obs_noise_std",
+      "param_value": 1.0,
+      "n_particles": 200,
+      "T": 3,
+      "n_lambda_steps": 15,
+      "fd_h": 0.0001,
+      "fd_slopes": [
+        -0.5704154668739747,
+        -0.570415458875928,
+        -0.5704154455488109,
+        -0.5704154268926231,
+        -0.570415402902924
+      ],
+      "log_likelihood": -5.321361788178113,
+      "autodiff_grad": -0.5707433111799782,
+      "fd_grad_median": -0.5704154455488109,
+      "ratio": 1.0005747839293726,
+      "relative_error": 0.0005747839293726193,
+      "timestamp": "2026-04-12T12:05:36.216761Z"
+    },
+    {
+      "case_name": "BASELINE T=5",
+      "model": "linear_gaussian",
+      "filter": "ledh_ot_ablation",
+      "ablation_flags": {},
+      "param_name": "obs_noise_std",
+      "param_value": 1.0,
+      "n_particles": 200,
+      "T": 5,
+      "n_lambda_steps": 15,
+      "fd_h": 0.0001,
+      "fd_slopes": [
+        -1.290228679264871,
+        -1.2902286768179394,
+        -1.2902286727634047,
+        -1.290228667083504,
+        -1.2902286597853418
+      ],
+      "log_likelihood": -9.43706412542771,
+      "autodiff_grad": -1.2890135646609044,
+      "fd_grad_median": -1.2902286727634047,
+      "ratio": 0.9990582226793195,
+      "relative_error": 0.0009417773206804798,
+      "timestamp": "2026-04-12T12:05:59.509807Z"
+    },
+    {
+      "case_name": "BASELINE T=10",
+      "model": "linear_gaussian",
+      "filter": "ledh_ot_ablation",
+      "ablation_flags": {},
+      "param_name": "obs_noise_std",
+      "param_value": 1.0,
+      "n_particles": 200,
+      "T": 10,
+      "n_lambda_steps": 15,
+      "fd_h": 0.0001,
+      "fd_slopes": [
+        4.193926685154281,
+        4.193926849449525,
+        4.193927123227562,
+        4.19392750652392,
+        4.1939279993457035
+      ],
+      "log_likelihood": -21.680869355011975,
+      "autodiff_grad": 4.1938334254176,
+      "fd_grad_median": 4.193927123227562,
+      "ratio": 0.9999776586938188,
+      "relative_error": 2.2341306181158083e-05,
+      "timestamp": "2026-04-12T12:06:23.528234Z"
+    },
+    {
+      "case_name": "BASELINE T=20",
+      "model": "linear_gaussian",
+      "filter": "ledh_ot_ablation",
+      "ablation_flags": {},
+      "param_name": "obs_noise_std",
+      "param_value": 1.0,
+      "n_particles": 200,
+      "T": 20,
+      "n_lambda_steps": 15,
+      "fd_h": 0.0001,
+      "fd_slopes": [
+        7.939981974054433,
+        7.939982259657086,
+        7.939982735566767,
+        7.939983401845652,
+        7.939984258534594
+      ],
+      "log_likelihood": -43.44008356664554,
+      "autodiff_grad": 7.9440320243686235,
+      "fd_grad_median": 7.939982735566767,
+      "ratio": 1.0005099871040926,
+      "relative_error": 0.0005099871040925324,
+      "timestamp": "2026-04-12T12:06:49.076117Z"
+    }
+  ],
+  "updated": "2026-04-12T12:06:49.076125Z"
+}

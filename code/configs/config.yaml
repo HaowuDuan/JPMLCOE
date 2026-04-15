@@ -4,7 +4,7 @@ defaults:
   - model: 1d_linear_gaussian
   - filter: kalman
   - _self_
-  - optional experiment: null
+  - experiment: null
   - override hydra/job_logging: default
   - override hydra/hydra_logging: default
 

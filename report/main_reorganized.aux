@@ -11,149 +11,294 @@
 \@writefile{toc}{\contentsline {section}{\numberline {2}Kalman Filter}{5}{section.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Overview}{5}{subsection.2.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Algorithm}{5}{subsection.2.2}\protected@file@percent }
+\newlabel{sec:kalman-algorithm}{{2.2}{5}{Algorithm}{subsection.2.2}{}}
+\newlabel{par:init-conditions}{{2.2}{6}{Initial conditions as a cross-cutting principle}{section*.2}{}}
+\@writefile{toc}{\contentsline {paragraph}{Initial conditions as a cross-cutting principle.}{6}{section*.2}\protected@file@percent }
 \@writefile{loa}{\contentsline {algorithm}{\numberline {1}{\ignorespaces Kalman Filter (1-d, additive noise)}}{7}{algorithm.1}\protected@file@percent }
 \@writefile{loa}{\contentsline {algorithm}{\numberline {2}{\ignorespaces Kalman Filter (vector, additive noise)}}{7}{algorithm.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Numerical stability analysis for Kalman filter}{7}{subsection.2.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.4}Numerical experiments and failure on nonlinear Models}{8}{subsection.2.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{State transition.}{8}{section*.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Observation model.}{8}{section*.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{State transition.}{8}{section*.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Observation model.}{8}{section*.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Initial distribution.}{8}{section*.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4}The limitation and usefulness of Kalman filter}{8}{subsection.2.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Demonstration on a 1D linear Gaussian.}{8}{section*.3}\protected@file@percent }
+\newlabel{eq:rmse-def}{{23}{8}{Demonstration on a 1D linear Gaussian}{equation.23}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Kalman filter on the 1D linear Gaussian model ($F = 0.95$, $B = 0.5$, $H = 1.0$, $D = 0.3$, $T = 100$, seed $42$). True state in black; Kalman posterior mean in blue with the $95\%$ credible band; observations shown as red crosses. RMSE $= 0.269$, log-likelihood $= -104.80$.}}{9}{figure.1}\protected@file@percent }
+\newlabel{fig:kalman-1d-linear}{{1}{9}{Kalman filter on the 1D linear Gaussian model ($F = 0.95$, $B = 0.5$, $H = 1.0$, $D = 0.3$, $T = 100$, seed $42$). True state in black; Kalman posterior mean in blue with the $95\%$ credible band; observations shown as red crosses. RMSE $= 0.269$, log-likelihood $= -104.80$}{figure.1}{}}
+\@writefile{toc}{\contentsline {paragraph}{What this plot is for.}{9}{section*.4}\protected@file@percent }
 \citation{Särkkä2013BayesianFilteringAndSmoothing}
 \citation{Särkkä2013BayesianFilteringAndSmoothing}
-\@writefile{toc}{\contentsline {section}{\numberline {3}EKF and UKF}{9}{section.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}EKF}{9}{subsection.3.1}\protected@file@percent }
-\@writefile{loa}{\contentsline {algorithm}{\numberline {3}{\ignorespaces Extended Kalman Filter (EKF)}}{9}{algorithm.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}UKF}{10}{subsection.3.2}\protected@file@percent }
-\newlabel{eq:kalman-gain-cov}{{35}{10}{UKF}{equation.35}{}}
-\@writefile{loa}{\contentsline {algorithm}{\numberline {4}{\ignorespaces Unscented Kalman Filter (UKF)}}{11}{algorithm.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Parameter choice for the SV model.}{11}{section*.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3}EKF and UKF}{10}{section.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}EKF}{10}{subsection.3.1}\protected@file@percent }
+\@writefile{loa}{\contentsline {algorithm}{\numberline {3}{\ignorespaces Extended Kalman Filter (EKF)}}{10}{algorithm.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}UKF}{11}{subsection.3.2}\protected@file@percent }
+\newlabel{eq:kalman-gain-cov}{{30}{11}{UKF}{equation.30}{}}
+\@writefile{loa}{\contentsline {algorithm}{\numberline {4}{\ignorespaces Unscented Kalman Filter (UKF)}}{12}{algorithm.4}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.3}EKF/UKF on non-linear models}{12}{subsection.3.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{State transition.}{12}{section*.8}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Observation model.}{12}{section*.9}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {4}Particle-Based Methods}{13}{section.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Importance Sampling and Sequential Monte Carlo}{13}{subsection.4.1}\protected@file@percent }
-\newlabel{eq:smc_weight}{{50}{13}{Sequential Monte Carlo}{equation.50}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Bootstrap Particle Filter}{14}{subsection.4.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.2.1}Algorithm}{14}{subsubsection.4.2.1}\protected@file@percent }
-\@writefile{loa}{\contentsline {algorithm}{\numberline {5}{\ignorespaces Bootstrap Particle Filter (BPF)}}{14}{algorithm.5}\protected@file@percent }
-\newlabel{alg:bpf}{{5}{14}{Algorithm}{algorithm.5}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.2.2}Particle Degeneracy and Resampling}{14}{subsubsection.4.2.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Multinomial resampling.}{14}{section*.12}\protected@file@percent }
+\newlabel{sec:ekf-ukf-nonlinear}{{3.3}{12}{EKF/UKF on non-linear models}{subsection.3.3}{}}
+\newlabel{par:range-bearing-model}{{3.3}{12}{Range bearing model}{section*.5}{}}
+\@writefile{toc}{\contentsline {paragraph}{Range bearing model.}{12}{section*.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Stochastic volatility model.}{13}{section*.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Numerical results.}{13}{section*.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Computational footprint.}{13}{section*.8}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces EKF/UKF runtime and memory footprint. Peak memory is the incremental peak during the filter run (measured in Python's resident set). $d_x$ is the latent state dimension; $d_z$ is the observation dimension. All six runs are CPU-only; no GPU memory consumed.}}{14}{table.1}\protected@file@percent }
+\newlabel{tab:ekf-ukf-footprint}{{1}{14}{EKF/UKF runtime and memory footprint. Peak memory is the incremental peak during the filter run (measured in Python's resident set). $d_x$ is the latent state dimension; $d_z$ is the observation dimension. All six runs are CPU-only; no GPU memory consumed}{table.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Range-bearing: EKF (blue) and UKF (green) overlaid on the truth trajectory (black), with back-projected observations shown as red crosses. Both filters reach RMSE $\approx 0.133$ and are numerically indistinguishable.}}{14}{figure.2}\protected@file@percent }
+\newlabel{fig:ekf-ukf-rb}{{2}{14}{Range-bearing: EKF (blue) and UKF (green) overlaid on the truth trajectory (black), with back-projected observations shown as red crosses. Both filters reach RMSE $\approx 0.133$ and are numerically indistinguishable}{figure.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Raw stochastic volatility: EKF (blue) and UKF (green) both mostly track the prior mean rather than the latent volatility. Both filters have RMSE $= 2.04$ and log-likelihood $= -151.20$ in the raw observation space.}}{15}{figure.3}\protected@file@percent }
+\newlabel{fig:ekf-ukf-sv-raw}{{3}{15}{Raw stochastic volatility: EKF (blue) and UKF (green) both mostly track the prior mean rather than the latent volatility. Both filters have RMSE $= 2.04$ and log-likelihood $= -151.20$ in the raw observation space}{figure.3}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Log-squared stochastic volatility: EKF (blue) and UKF (green) recover meaningful latent-volatility tracking after the transform. Both filters have RMSE $= 1.14$ and log-likelihood $= -235.27$ in the transformed observation space.}}{15}{figure.4}\protected@file@percent }
+\newlabel{fig:ekf-ukf-sv-log}{{4}{15}{Log-squared stochastic volatility: EKF (blue) and UKF (green) recover meaningful latent-volatility tracking after the transform. Both filters have RMSE $= 1.14$ and log-likelihood $= -235.27$ in the transformed observation space}{figure.4}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Particle-Based Methods}{16}{section.4}\protected@file@percent }
+\newlabel{sec:particle-methods-section}{{4}{16}{Particle-Based Methods}{section.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Importance Sampling and Sequential Monte Carlo}{16}{subsection.4.1}\protected@file@percent }
+\newlabel{eq:smc_weight}{{48}{16}{Sequential Monte Carlo}{equation.48}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Bootstrap Particle Filter}{17}{subsection.4.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.2.1}Algorithm}{17}{subsubsection.4.2.1}\protected@file@percent }
+\@writefile{loa}{\contentsline {algorithm}{\numberline {5}{\ignorespaces Bootstrap Particle Filter (BPF)}}{17}{algorithm.5}\protected@file@percent }
+\newlabel{alg:bpf}{{5}{17}{Algorithm}{algorithm.5}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.2.2}Particle Degeneracy and Resampling}{17}{subsubsection.4.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Multinomial resampling.}{17}{section*.11}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Systematic resampling (the actual implementation).}{18}{section*.12}\protected@file@percent }
+\@writefile{loa}{\contentsline {algorithm}{\numberline {6}{\ignorespaces Systematic Resampling}}{18}{algorithm.6}\protected@file@percent }
+\newlabel{alg:systematic}{{6}{18}{Systematic resampling (the actual implementation)}{algorithm.6}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Bootstrap PF tracking on range-bearing and 1D stochastic volatility. The filter mean tracks the true state on both models at $N=200$.}}{18}{figure.5}\protected@file@percent }
+\newlabel{fig:particle_tracking}{{5}{18}{Bootstrap PF tracking on range-bearing and 1D stochastic volatility. The filter mean tracks the true state on both models at $N=200$}{figure.5}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Effective sample size over time for the same two runs. Range-bearing collapses within the first few steps; stochastic volatility stays above threshold longer.}}{19}{figure.6}\protected@file@percent }
+\newlabel{fig:ess_time}{{6}{19}{Effective sample size over time for the same two runs. Range-bearing collapses within the first few steps; stochastic volatility stays above threshold longer}{figure.6}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Weight distribution histograms at $k=1,25,100$. The range-bearing cloud is dominated by a single particle within one step.}}{19}{figure.7}\protected@file@percent }
+\newlabel{fig:weight_distribution}{{7}{19}{Weight distribution histograms at $k=1,25,100$. The range-bearing cloud is dominated by a single particle within one step}{figure.7}{}}
 \citation{daum2010exact}
 \citation{daum2011particle}
 \citation{Li-Particle-Filtering-2017}
 \citation{daum2010exact}
 \citation{daum2011particle}
-\@writefile{toc}{\contentsline {paragraph}{Systematic resampling (the actual implementation).}{15}{section*.13}\protected@file@percent }
-\@writefile{loa}{\contentsline {algorithm}{\numberline {6}{\ignorespaces Systematic Resampling}}{15}{algorithm.6}\protected@file@percent }
-\newlabel{alg:systematic}{{6}{15}{Systematic resampling (the actual implementation)}{algorithm.6}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}EDH/LEDH Flow Filter}{15}{subsection.4.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.3.1}Use Fokker-Planck to reach the target distribution}{15}{subsubsection.4.3.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.3.2}Determine the evolution kernel}{16}{subsubsection.4.3.2}\protected@file@percent }
-\newlabel{sec:edh_derivation}{{4.3.2}{16}{Determine the evolution kernel}{subsubsection.4.3.2}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.3.3}EDH vs.\ LEDH: incremental improvements in linearization quality.}{16}{subsubsection.4.3.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Particle diversity on stochastic volatility. Diversity stays reasonable because the observation is diffuse enough to spread the weight mass.}}{20}{figure.8}\protected@file@percent }
+\newlabel{fig:particle_diversity}{{8}{20}{Particle diversity on stochastic volatility. Diversity stays reasonable because the observation is diffuse enough to spread the weight mass}{figure.8}{}}
+\@writefile{toc}{\contentsline {paragraph}{Empirical takeaway (§4.2).}{20}{section*.13}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}EDH/LEDH Flow Filter}{20}{subsection.4.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.3.1}Use Fokker-Planck to reach the target distribution}{20}{subsubsection.4.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.3.2}Determine the evolution kernel}{21}{subsubsection.4.3.2}\protected@file@percent }
+\newlabel{sec:edh_derivation}{{4.3.2}{21}{Determine the evolution kernel}{subsubsection.4.3.2}{}}
 \citation{Li-Particle-Filtering-2017}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.3.4}Algorithm}{17}{subsubsection.4.3.4}\protected@file@percent }
-\@writefile{loa}{\contentsline {algorithm}{\numberline {7}{\ignorespaces EDH Flow Filter (Fixed Global Linearization)}}{17}{algorithm.7}\protected@file@percent }
-\newlabel{alg:edh_fixed}{{7}{17}{Algorithm}{algorithm.7}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.3.3}EDH vs.\ LEDH: incremental improvements in linearization quality.}{22}{subsubsection.4.3.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.3.4}Algorithm}{22}{subsubsection.4.3.4}\protected@file@percent }
+\@writefile{loa}{\contentsline {algorithm}{\numberline {7}{\ignorespaces EDH Flow Filter (Fixed Global Linearization)}}{23}{algorithm.7}\protected@file@percent }
+\newlabel{alg:edh_fixed}{{7}{23}{Algorithm}{algorithm.7}{}}
+\@writefile{loa}{\contentsline {algorithm}{\numberline {8}{\ignorespaces EDH Flow Filter (Intermediate Re-linearization)}}{23}{algorithm.8}\protected@file@percent }
+\newlabel{alg:edh_relinear}{{8}{23}{Algorithm}{algorithm.8}{}}
+\@writefile{loa}{\contentsline {algorithm}{\numberline {9}{\ignorespaces LEDH Flow Filter (Local Per-Particle Linearization)}}{24}{algorithm.9}\protected@file@percent }
+\newlabel{alg:ledh}{{9}{24}{Algorithm}{algorithm.9}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.3.5}Experiments}{24}{subsubsection.4.3.5}\protected@file@percent }
+\newlabel{sec:edh-experiments}{{4.3.5}{24}{Experiments}{subsubsection.4.3.5}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Range-bearing filter comparison ($N=200$, $T=100$, $n_\lambda =29$). All RMSE values are in position units. The `EDH global' row uses a single global linearisation at $\lambda =0$ and is the essential control --- it diverges, which is what motivates intermediate re-linearisation for every other variant.}}{24}{table.2}\protected@file@percent }
+\newlabel{tab:edh-rb}{{2}{24}{Range-bearing filter comparison ($N=200$, $T=100$, $n_\lambda =29$). All RMSE values are in position units. The `EDH global' row uses a single global linearisation at $\lambda =0$ and is the essential control --- it diverges, which is what motivates intermediate re-linearisation for every other variant}{table.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces Range-bearing: bootstrap PF (blue), EDH flow (green), and LEDH flow (orange) overlaid on the true trajectory (black), with back-projected observations as red crosses. The three filters are visually indistinguishable on this well-conditioned model --- the per-model ranking in Table~\ref {tab:edh-rb} is driven primarily by wall-time; log-likelihood differs by a few nats but RMSE is tied to three decimal places.}}{25}{figure.9}\protected@file@percent }
+\newlabel{fig:pf_edh_ledh_rb}{{9}{25}{Range-bearing: bootstrap PF (blue), EDH flow (green), and LEDH flow (orange) overlaid on the true trajectory (black), with back-projected observations as red crosses. The three filters are visually indistinguishable on this well-conditioned model --- the per-model ranking in Table~\ref {tab:edh-rb} is driven primarily by wall-time; log-likelihood differs by a few nats but RMSE is tied to three decimal places}{figure.9}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Acoustic-tracking filter comparison ($T = 100$ except where noted). The high-dimensional state and weak observation geometry make this the hardest of the three headline models; none of the filters reach the same relative accuracy they do on range-bearing, and the ranking is driven as much by particle count and hyperparameter choice as by algorithm.}}{25}{table.3}\protected@file@percent }
+\newlabel{tab:edh-acoustic}{{3}{25}{Acoustic-tracking filter comparison ($T = 100$ except where noted). The high-dimensional state and weak observation geometry make this the hardest of the three headline models; none of the filters reach the same relative accuracy they do on range-bearing, and the ranking is driven as much by particle count and hyperparameter choice as by algorithm}{table.3}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Stochastic volatility, \emph  {raw} model ($h(x)=\beta e^{x/2}v$, multiplicative noise; $T=100$, $N=200$). Every linearisation-based method fails at ${\sim }2.0$ RMSE; only the bootstrap PF handles the raw multiplicative likelihood.}}{26}{table.4}\protected@file@percent }
+\newlabel{tab:edh-sv-raw}{{4}{26}{Stochastic volatility, \emph {raw} model ($h(x)=\beta e^{x/2}v$, multiplicative noise; $T=100$, $N=200$). Every linearisation-based method fails at ${\sim }2.0$ RMSE; only the bootstrap PF handles the raw multiplicative likelihood}{table.4}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Stochastic volatility, \emph  {log-squared-transformed} model ($z = \log y^2$; $T=100$, $N=200$). The linear transform restores competitiveness to EKF/UKF and the flow family; kernel is slower but still tracks. LEDH-invertible narrowly beats the bootstrap PF on RMSE here, at $6\times $ the wall-time.}}{26}{table.5}\protected@file@percent }
+\newlabel{tab:edh-sv-log}{{5}{26}{Stochastic volatility, \emph {log-squared-transformed} model ($z = \log y^2$; $T=100$, $N=200$). The linear transform restores competitiveness to EKF/UKF and the flow family; kernel is slower but still tracks. LEDH-invertible narrowly beats the bootstrap PF on RMSE here, at $6\times $ the wall-time}{table.5}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces Log-squared stochastic volatility: bootstrap PF (blue), EDH flow (green), and LEDH flow (orange) compared against the true log-volatility (black) with back-projected observations as red crosses. After the log-squared transform, the three filters compress into a narrow band and the differences between them become invisible at this scale; the three flow variants all land in the same narrow RMSE band as the LEDH-invertible entry in Table~\ref {tab:edh-sv-log}.}}{26}{figure.10}\protected@file@percent }
+\newlabel{fig:pf_edh_ledh_sv_log}{{10}{26}{Log-squared stochastic volatility: bootstrap PF (blue), EDH flow (green), and LEDH flow (orange) compared against the true log-volatility (black) with back-projected observations as red crosses. After the log-squared transform, the three filters compress into a narrow band and the differences between them become invisible at this scale; the three flow variants all land in the same narrow RMSE band as the LEDH-invertible entry in Table~\ref {tab:edh-sv-log}}{figure.10}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces Log-squared stochastic volatility, EDH flow (blue) vs.\ LEDH flow (green). The pairwise comparison isolates the effect of per-particle re-linearisation (LEDH) against a single global linearisation per time step (EDH) on the transformed model. Per-particle re-linearisation buys essentially nothing here: the two trajectories overlap within plot precision.}}{27}{figure.11}\protected@file@percent }
+\newlabel{fig:edh_vs_ledh_flow_sv_log}{{11}{27}{Log-squared stochastic volatility, EDH flow (blue) vs.\ LEDH flow (green). The pairwise comparison isolates the effect of per-particle re-linearisation (LEDH) against a single global linearisation per time step (EDH) on the transformed model. Per-particle re-linearisation buys essentially nothing here: the two trajectories overlap within plot precision}{figure.11}{}}
+\@writefile{toc}{\contentsline {paragraph}{Stochastic volatility 2D (filter accuracy).}{27}{section*.14}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {12}{\ignorespaces Stochastic volatility 2D: bootstrap PF (blue), EDH flow (green), LEDH flow (orange), overlaid on the true state (black). The first state component $x^{(1)}$ is the linear drift driver; the second $x^{(2)}$ is the log-volatility scale. Back-projected observations (red crosses) are shown only on the first panel because the SV2D observation model has a scalar output $y_t = b\,x_t^{(1)} + \exp (x_t^{(2)}/2)\,v_t$ with no per-dimension back-projection of $x^{(2)}$.}}{27}{figure.12}\protected@file@percent }
+\newlabel{fig:pf_edh_ledh_sv2d}{{12}{27}{Stochastic volatility 2D: bootstrap PF (blue), EDH flow (green), LEDH flow (orange), overlaid on the true state (black). The first state component $x^{(1)}$ is the linear drift driver; the second $x^{(2)}$ is the log-volatility scale. Back-projected observations (red crosses) are shown only on the first panel because the SV2D observation model has a scalar output $y_t = b\,x_t^{(1)} + \exp (x_t^{(2)}/2)\,v_t$ with no per-dimension back-projection of $x^{(2)}$}{figure.12}{}}
 \citation{Li-Particle-Filtering-2017}
-\@writefile{loa}{\contentsline {algorithm}{\numberline {8}{\ignorespaces EDH Flow Filter (Intermediate Re-linearization)}}{18}{algorithm.8}\protected@file@percent }
-\newlabel{alg:edh_relinear}{{8}{18}{Algorithm}{algorithm.8}{}}
-\@writefile{loa}{\contentsline {algorithm}{\numberline {9}{\ignorespaces LEDH Flow Filter (Local Per-Particle Linearization)}}{18}{algorithm.9}\protected@file@percent }
-\newlabel{alg:ledh}{{9}{18}{Algorithm}{algorithm.9}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.3.5}Experiments}{18}{subsubsection.4.3.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Invertible Flow Filter}{18}{subsection.4.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.4.1}Why do we need Jacobian computation?}{18}{subsubsection.4.4.1}\protected@file@percent }
-\newlabel{eq:invertible_weight}{{68}{19}{Why do we need Jacobian computation?}{equation.68}{}}
-\@writefile{loa}{\contentsline {algorithm}{\numberline {10}{\ignorespaces EDH Invertible Particle Flow Filter (Intermediate Re-linearization)}}{20}{algorithm.10}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {13}{\ignorespaces Stochastic volatility 2D, EDH flow (blue) vs.\ EDH invertible (green). Both share the same global linearisation per time step; only the Jacobian correction differs. On this high-dimensional nonlinear target the two variants diverge visibly in places (max mean difference ${\approx }3.2$ in the log-volatility component), more than on range-bearing where the correction is essentially free.}}{28}{figure.13}\protected@file@percent }
+\newlabel{fig:edh_flow_vs_invertible_sv2d}{{13}{28}{Stochastic volatility 2D, EDH flow (blue) vs.\ EDH invertible (green). Both share the same global linearisation per time step; only the Jacobian correction differs. On this high-dimensional nonlinear target the two variants diverge visibly in places (max mean difference ${\approx }3.2$ in the log-volatility component), more than on range-bearing where the correction is essentially free}{figure.13}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {14}{\ignorespaces Stochastic volatility 2D, EDH invertible (blue) vs.\ LEDH invertible (green). Both carry the Jacobian correction; only the linearisation scheme differs (global vs.\ per-particle). On SV2D the per-particle LEDH variant is \emph  {not} consistently better than global-EDH; the two filters cross each other in places and the ranking is not decisive.}}{28}{figure.14}\protected@file@percent }
+\newlabel{fig:edh_vs_ledh_invertible_sv2d}{{14}{28}{Stochastic volatility 2D, EDH invertible (blue) vs.\ LEDH invertible (green). Both carry the Jacobian correction; only the linearisation scheme differs (global vs.\ per-particle). On SV2D the per-particle LEDH variant is \emph {not} consistently better than global-EDH; the two filters cross each other in places and the ranking is not decisive}{figure.14}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Invertible Flow Filter}{29}{subsection.4.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.4.1}Why do we need Jacobian computation?}{29}{subsubsection.4.4.1}\protected@file@percent }
+\newlabel{eq:invertible_weight}{{66}{29}{Why do we need Jacobian computation?}{equation.66}{}}
+\@writefile{loa}{\contentsline {algorithm}{\numberline {10}{\ignorespaces EDH Invertible Particle Flow Filter (Intermediate Re-linearization)}}{30}{algorithm.10}\protected@file@percent }
+\@writefile{loa}{\contentsline {algorithm}{\numberline {11}{\ignorespaces LEDH Invertible Particle Flow Filter (Local Linearization + Jacobian Tracking)}}{31}{algorithm.11}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{When does the Jacobian correction help?}{31}{section*.15}\protected@file@percent }
 \citation{dai-new-2021}
 \citation{dai-new-2021}
-\@writefile{loa}{\contentsline {algorithm}{\numberline {11}{\ignorespaces LEDH Invertible Particle Flow Filter (Local Linearization + Jacobian Tracking)}}{21}{algorithm.11}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.5}Stochastic Flow Filter}{21}{subsection.4.5}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {15}{\ignorespaces Range-bearing, EDH flow (blue) vs.\ EDH invertible (green). The two variants are visually indistinguishable: on this well-conditioned 2D model the per-particle log-determinants are close to unity at every flow step, so the Jacobian correction adds negligible information and adds negligible error. This is the control that says the correction is numerically harmless in the easy regime.}}{32}{figure.15}\protected@file@percent }
+\newlabel{fig:edh_flow_vs_invertible_rb}{{15}{32}{Range-bearing, EDH flow (blue) vs.\ EDH invertible (green). The two variants are visually indistinguishable: on this well-conditioned 2D model the per-particle log-determinants are close to unity at every flow step, so the Jacobian correction adds negligible information and adds negligible error. This is the control that says the correction is numerically harmless in the easy regime}{figure.15}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {16}{\ignorespaces Range-bearing, LEDH flow (blue) vs.\ LEDH invertible (green). The per-particle-linearisation version of the same comparison. Conclusion is identical: on a well-conditioned low-dimensional model the invertible correction neither helps nor hurts, and the empirical tie holds whether the underlying linearisation is global or local.}}{32}{figure.16}\protected@file@percent }
+\newlabel{fig:ledh_flow_vs_invertible_rb}{{16}{32}{Range-bearing, LEDH flow (blue) vs.\ LEDH invertible (green). The per-particle-linearisation version of the same comparison. Conclusion is identical: on a well-conditioned low-dimensional model the invertible correction neither helps nor hurts, and the empirical tie holds whether the underlying linearisation is global or local}{figure.16}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.5}Stochastic Flow Filter}{32}{subsection.4.5}\protected@file@percent }
 \citation{ding2012implementation}
+\citation{ding2012implementation}
+\citation{ding2012implementation}
+\citation{ding2012implementation}
+\@writefile{lof}{\contentsline {figure}{\numberline {17}{\ignorespaces Stochastic EDH flow on the range-bearing model: no correction (blue, RMSE $\approx 5.28$) versus with local correction $e_0 = h(\bar  {\boldsymbol  {\eta }}_0) - \mathbf  {H}\bar  {\boldsymbol  {\eta }}_0$ (green, RMSE $\approx 0.13$). True trajectory in black; observations as red crosses back-projected to position coordinates. The uncorrected run diverges because the global linearisation is stale throughout the flow; adding the local correction makes the same drift equation track the truth within one position unit.}}{34}{figure.17}\protected@file@percent }
+\newlabel{fig:rb_sde_combined}{{17}{34}{Stochastic EDH flow on the range-bearing model: no correction (blue, RMSE $\approx 5.28$) versus with local correction $e_0 = h(\bar {\boldsymbol {\eta }}_0) - \mathbf {H}\bar {\boldsymbol {\eta }}_0$ (green, RMSE $\approx 0.13$). True trajectory in black; observations as red crosses back-projected to position coordinates. The uncorrected run diverges because the global linearisation is stale throughout the flow; adding the local correction makes the same drift equation track the truth within one position unit}{figure.17}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces Stochastic EDH on the range-bearing model. `No correction' means $e_0 = 0$ and the drift is derived under pure global linearisation; `+ local correction' uses $e_0 = h(\bar  \eta _0) - H\bar  \eta _0$. `100 steps' forces a uniform $n_\lambda = 100$ grid; `optimal' uses the stiffness-mitigation schedule of \cite  {ding2012implementation}.}}{34}{table.6}\protected@file@percent }
+\newlabel{tab:sde_flow}{{6}{34}{Stochastic EDH on the range-bearing model. `No correction' means $e_0 = 0$ and the drift is derived under pure global linearisation; `+ local correction' uses $e_0 = h(\bar \eta _0) - H\bar \eta _0$. `100 steps' forces a uniform $n_\lambda = 100$ grid; `optimal' uses the stiffness-mitigation schedule of \cite {ding2012implementation}}{table.6}{}}
+\@writefile{toc}{\contentsline {paragraph}{Empirical takeaway (§4.5).}{34}{section*.16}\protected@file@percent }
 \citation{Pulido2019}
 \citation{HuVanLeeuwen2021}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.6}Kernel Flow Filter}{23}{subsection.4.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.6.1}Overview}{23}{subsubsection.4.6.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.6.2}Derivation}{23}{subsubsection.4.6.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Optimal Transport via Gradient Flow}{23}{section*.14}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Deriving Optimal Velocity via Kernel Restriction}{23}{section*.15}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Scalar Kernel}{24}{section*.16}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Matrix-Valued Kernel}{24}{section*.17}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.6.3}Matrix Kernel Preventing Collapse}{25}{subsubsection.4.6.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.6.4}Algorithm}{25}{subsubsection.4.6.4}\protected@file@percent }
-\@writefile{loa}{\contentsline {algorithm}{\numberline {12}{\ignorespaces Kernel Flow Filter --- Scalar Kernel}}{25}{algorithm.12}\protected@file@percent }
-\@writefile{loa}{\contentsline {algorithm}{\numberline {13}{\ignorespaces Kernel Flow Filter --- Matrix (Tensor) Kernel}}{25}{algorithm.13}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.7}Filter Comparison Summary}{25}{subsection.4.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.6}Kernel Flow Filter}{35}{subsection.4.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.6.1}Overview}{35}{subsubsection.4.6.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.6.2}Derivation}{35}{subsubsection.4.6.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Deriving Optimal Velocity via Kernel Restriction.}{35}{section*.17}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Scalar Kernel}{36}{section*.18}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Matrix-Valued Kernel}{36}{section*.19}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.6.3}Matrix Kernel Preventing Collapse}{37}{subsubsection.4.6.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {18}{\ignorespaces Switching to the matrix kernel prevents $x_{20}$ from collapsing to one point.}}{37}{figure.18}\protected@file@percent }
+\newlabel{fig:matrix_kernel}{{18}{37}{Switching to the matrix kernel prevents $x_{20}$ from collapsing to one point}{figure.18}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.6.4}Algorithm}{37}{subsubsection.4.6.4}\protected@file@percent }
+\@writefile{loa}{\contentsline {algorithm}{\numberline {12}{\ignorespaces Kernel Flow Filter --- Scalar Kernel}}{37}{algorithm.12}\protected@file@percent }
+\@writefile{loa}{\contentsline {algorithm}{\numberline {13}{\ignorespaces Kernel Flow Filter --- Matrix (Tensor) Kernel}}{38}{algorithm.13}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Empirical takeaway (§4.6).}{38}{section*.20}\protected@file@percent }
 \citation{reich2013nonparametric}
 \citation{corenflos-differentiable-2021}
 \citation{corenflos-differentiable-2021}
 \citation{reich2013nonparametric}
 \citation{karkus2018particle}
-\@writefile{toc}{\contentsline {section}{\numberline {5}Resampling and Optimal Transport}{26}{section.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Two Problems with Resampling}{26}{subsection.5.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Problem 1: Sampling noise.}{26}{section*.18}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Problem 2: Non-differentiability.}{26}{section*.19}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Soft Resampling}{26}{subsection.5.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5}Resampling and Optimal Transport}{39}{section.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Two Problems with Resampling}{39}{subsection.5.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Problem 1: Sampling noise.}{39}{section*.21}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Problem 2: Non-differentiability.}{39}{section*.22}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Soft Resampling}{39}{subsection.5.2}\protected@file@percent }
+\citation{reich2013nonparametric}
 \citation{Cuturi2013SinkhornDL}
-\@writefile{loa}{\contentsline {algorithm}{\numberline {14}{\ignorespaces Soft Resampling}}{27}{algorithm.14}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Entropy-Regularized OT (Sinkhorn) Resampling}{27}{subsection.5.3}\protected@file@percent }
-\newlabel{eq:gibbs-kernel}{{96}{27}{Entropy-Regularized OT (Sinkhorn) Resampling}{equation.96}{}}
-\newlabel{eq:vanilla-sinkhorn}{{98}{27}{Entropy-Regularized OT (Sinkhorn) Resampling}{equation.98}{}}
-\@writefile{loa}{\contentsline {algorithm}{\numberline {15}{\ignorespaces Sinkhorn Iteration (Dual Potentials)}}{28}{algorithm.15}\protected@file@percent }
-\@writefile{loa}{\contentsline {algorithm}{\numberline {16}{\ignorespaces Entropy-Regularized Optimal Transport Resampling}}{28}{algorithm.16}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.4}The Derivative Chain through Resampling}{28}{subsection.5.4}\protected@file@percent }
-\newlabel{sec:ot-derivative-chain}{{5.4}{28}{The Derivative Chain through Resampling}{subsection.5.4}{}}
+\@writefile{loa}{\contentsline {algorithm}{\numberline {14}{\ignorespaces Soft Resampling}}{40}{algorithm.14}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Entropy-Regularized OT (Sinkhorn) Resampling}{40}{subsection.5.3}\protected@file@percent }
+\newlabel{sec:entropic-ot}{{5.3}{40}{Entropy-Regularized OT (Sinkhorn) Resampling}{subsection.5.3}{}}
+\@writefile{toc}{\contentsline {paragraph}{Convention used in the algorithm below.}{40}{section*.23}\protected@file@percent }
+\newlabel{eq:gibbs-kernel}{{92}{40}{Convention used in the algorithm below}{equation.92}{}}
+\newlabel{eq:vanilla-sinkhorn}{{94}{41}{Convention used in the algorithm below}{equation.94}{}}
+\@writefile{loa}{\contentsline {algorithm}{\numberline {15}{\ignorespaces Sinkhorn Iteration (Dual Potentials)}}{41}{algorithm.15}\protected@file@percent }
+\@writefile{loa}{\contentsline {algorithm}{\numberline {16}{\ignorespaces Entropy-Regularized Optimal Transport Resampling}}{41}{algorithm.16}\protected@file@percent }
 \citation{karkus2018particle}
 \citation{corenflos-differentiable-2021}
-\@writefile{toc}{\contentsline {paragraph}{Systematic resampling with stop gradient.}{29}{section*.20}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Soft resampling.}{29}{section*.21}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{OT resampling.}{29}{section*.22}\protected@file@percent }
-\newlabel{eq:ot-three-terms}{{102}{29}{OT resampling}{equation.102}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.4}The Derivative Chain through Resampling}{42}{subsection.5.4}\protected@file@percent }
+\newlabel{sec:ot-derivative-chain}{{5.4}{42}{The Derivative Chain through Resampling}{subsection.5.4}{}}
+\@writefile{toc}{\contentsline {paragraph}{Systematic resampling with stop gradient.}{42}{section*.24}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Soft resampling.}{42}{section*.25}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{OT resampling.}{42}{section*.26}\protected@file@percent }
+\newlabel{eq:ot-three-terms}{{98}{42}{OT resampling}{equation.98}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {7}{\ignorespaces Resampling strategies for differentiable particle filters.}}{43}{table.7}\protected@file@percent }
+\newlabel{tab:resampling_grad}{{7}{43}{Resampling strategies for differentiable particle filters}{table.7}{}}
+\@writefile{toc}{\contentsline {paragraph}{Implications for HMC.}{43}{section*.27}\protected@file@percent }
+\newlabel{par:soft-vs-ot}{{5.4}{43}{Empirical check: soft vs.\ OT resampling on stochastic volatility}{section*.28}{}}
+\@writefile{toc}{\contentsline {paragraph}{Empirical check: soft vs.\ OT resampling on stochastic volatility.}{43}{section*.28}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {8}{\ignorespaces Resampling comparison on stochastic volatility (1D, $T=500$, $N=200$). Headline: OT adds roughly $20$--$180\times $ wall-time vs.\ systematic / soft, with no RMSE improvement. Soft resampling ties stop-gradient on RMSE at the same cost. Systematic is the cheapest and has the best RMSE of this group; OT's value is gradient quality under HMC (\S  \ref {sec:param-estimation}), not filtering accuracy.}}{43}{table.8}\protected@file@percent }
+\newlabel{tab:soft-vs-ot-sv}{{8}{43}{Resampling comparison on stochastic volatility (1D, $T=500$, $N=200$). Headline: OT adds roughly $20$--$180\times $ wall-time vs.\ systematic / soft, with no RMSE improvement. Soft resampling ties stop-gradient on RMSE at the same cost. Systematic is the cheapest and has the best RMSE of this group; OT's value is gradient quality under HMC (\S \ref {sec:param-estimation}), not filtering accuracy}{table.8}{}}
 \citation{cremers2022unifiedframeworkimplicit}
-\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Resampling strategies for differentiable particle filters.}}{30}{table.1}\protected@file@percent }
-\newlabel{tab:resampling_grad}{{1}{30}{Resampling strategies for differentiable particle filters}{table.1}{}}
-\@writefile{toc}{\contentsline {paragraph}{Implications for HMC.}{30}{section*.23}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.5}Approximate vs Implicit Sinkhorn Backward}{30}{subsection.5.5}\protected@file@percent }
-\newlabel{sec:sinkhorn-backward}{{5.5}{30}{Approximate vs Implicit Sinkhorn Backward}{subsection.5.5}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.5.1}The Extrapolation Approximation}{30}{subsubsection.5.5.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.5.2}Implicit Differentiation at the Fixed Point}{30}{subsubsection.5.5.2}\protected@file@percent }
-\citation{chaudhari2025gradnetot}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.6}Neural Acceleration}{31}{subsection.5.6}\protected@file@percent }
-\citation{Zhu2020TowardsDR}
-\citation{Lee2019SetTransformer}
-\citation{chen2023overview}
-\citation{amos2022amortized}
-\citation{amos2023meta}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.5}Approximate vs Implicit Sinkhorn Backward}{44}{subsection.5.5}\protected@file@percent }
+\newlabel{sec:sinkhorn-backward}{{5.5}{44}{Approximate vs Implicit Sinkhorn Backward}{subsection.5.5}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.5.1}The Extrapolation Approximation}{44}{subsubsection.5.5.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.5.2}Implicit Differentiation at the Fixed Point}{44}{subsubsection.5.5.2}\protected@file@percent }
+\@writefile{loa}{\contentsline {algorithm}{\numberline {17}{\ignorespaces Implicit differentiation backward pass for the Sinkhorn transport plan}}{45}{algorithm.17}\protected@file@percent }
+\newlabel{alg:sinkhorn_implicit_backward}{{17}{45}{Implicit Differentiation at the Fixed Point}{algorithm.17}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {19}{\ignorespaces Sinkhorn iteration marginal violation $\|\mathbf  {P}\mathbf  {1} - \mathbf  {a}\|_\infty $ vs iteration number $\ell $, for four regularisation strengths $\epsilon \in \{0.01, 0.05, 0.1, 0.5\}$ on the same $N = 200$ weighted cloud (seed $42$, log-normal weights). Smaller $\epsilon $ gives sharper transport plans but requires more iterations to reach the same tolerance.}}{46}{figure.19}\protected@file@percent }
+\newlabel{fig:sinkhorn_convergence}{{19}{46}{Sinkhorn iteration marginal violation $\|\mathbf {P}\mathbf {1} - \mathbf {a}\|_\infty $ vs iteration number $\ell $, for four regularisation strengths $\epsilon \in \{0.01, 0.05, 0.1, 0.5\}$ on the same $N = 200$ weighted cloud (seed $42$, log-normal weights). Smaller $\epsilon $ gives sharper transport plans but requires more iterations to reach the same tolerance}{figure.19}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {9}{\ignorespaces Gradient validation summary. The columns are defined in the paragraph above the table; all rows use the implicit Sinkhorn backward.}}{46}{table.9}\protected@file@percent }
+\newlabel{tab:gradient_validation}{{9}{46}{Gradient validation summary. The columns are defined in the paragraph above the table; all rows use the implicit Sinkhorn backward}{table.9}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {10}{\ignorespaces SV1D LEDH+OT gradient validation cases. The finite-difference slopes use radii $1,\ldots  ,5$ times the base step $10^{-4}$; the finite-difference median is the median of those five slopes.}}{47}{table.10}\protected@file@percent }
+\newlabel{tab:gradient_validation_sv1d}{{10}{47}{SV1D LEDH+OT gradient validation cases. The finite-difference slopes use radii $1,\ldots ,5$ times the base step $10^{-4}$; the finite-difference median is the median of those five slopes}{table.10}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.6}Neural Acceleration}{47}{subsection.5.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{First-principles design.}{47}{section*.29}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{What the Monge--Amp\`ere equation is here.}{47}{section*.30}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Input and output of the operator.}{48}{section*.31}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Ansatz.}{48}{section*.32}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Inference path.}{48}{section*.33}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Current status.}{48}{section*.34}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Next step.}{49}{section*.35}\protected@file@percent }
 \citation{Metropolis1953}
 \citation{Duane1987}
 \citation{Neal-2012-MCMC-Hamiltonian-Dynamics-ARXIV-1206-1901v1}
-\@writefile{toc}{\contentsline {section}{\numberline {6}Parameter Estimation with Differentiable Particle Filters}{34}{section.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Markov Chain Monte Carlo}{34}{subsection.6.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.1.1}Metropolis-Hastings}{34}{subsubsection.6.1.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.1.2}Hamiltonian Monte Carlo}{34}{subsubsection.6.1.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {6}Parameter Estimation with Differentiable Particle Filters}{50}{section.6}\protected@file@percent }
+\newlabel{sec:param-estimation}{{6}{50}{Parameter Estimation with Differentiable Particle Filters}{section.6}{}}
+\@writefile{toc}{\contentsline {paragraph}{Filtering accuracy is not gradient quality.}{50}{section*.36}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Markov Chain Monte Carlo}{50}{subsection.6.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.1.1}Metropolis-Hastings}{50}{subsubsection.6.1.1}\protected@file@percent }
 \citation{hoffman2014nuts}
-\@writefile{toc}{\contentsline {paragraph}{Leapfrog integration.}{35}{section*.24}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Step size and tuning.}{35}{section*.25}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Mass matrix.}{35}{section*.26}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.1.2}Hamiltonian Monte Carlo}{51}{subsubsection.6.1.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Leapfrog integration.}{51}{section*.37}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Step size and tuning.}{51}{section*.38}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Mass matrix.}{52}{section*.39}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}MAP as a Pipeline Smoke Test}{52}{subsection.6.2}\protected@file@percent }
+\newlabel{sec:map-smoke-test}{{6.2}{52}{MAP as a Pipeline Smoke Test}{subsection.6.2}{}}
+\@writefile{toc}{\contentsline {paragraph}{MAP convergence across four benchmarks.}{52}{section*.40}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {20}{\ignorespaces Learning-rate schedules for the four MAP runs. All four use the same cosine warm-down schedule; the curves overlap exactly, so any convergence-speed differences in the figures below come from the loss surface, not from tuning.}}{53}{figure.20}\protected@file@percent }
+\newlabel{fig:map_learning_rate}{{20}{53}{Learning-rate schedules for the four MAP runs. All four use the same cosine warm-down schedule; the curves overlap exactly, so any convergence-speed differences in the figures below come from the loss surface, not from tuning}{figure.20}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {21}{\ignorespaces MAP convergence on the 1D linear Gaussian benchmark, with BPF+OT (blue) and LEDH+OT (green) running the same optimizer schedule against the same data. Both filters converge to the same neighbourhood of the true $\sigma _{\text  {obs}} = 1.0$; the fact that LEDH+OT --- which passes the full three-term derivative chain --- matches BPF+OT (where only the weight gradient is active) is the cleanest check that the flow-filter gradient path is not introducing a systematic bias on linear Gaussian targets.}}{54}{figure.21}\protected@file@percent }
+\newlabel{fig:map_lg}{{21}{54}{MAP convergence on the 1D linear Gaussian benchmark, with BPF+OT (blue) and LEDH+OT (green) running the same optimizer schedule against the same data. Both filters converge to the same neighbourhood of the true $\sigma _{\text {obs}} = 1.0$; the fact that LEDH+OT --- which passes the full three-term derivative chain --- matches BPF+OT (where only the weight gradient is active) is the cleanest check that the flow-filter gradient path is not introducing a systematic bias on linear Gaussian targets}{figure.21}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {22}{\ignorespaces MAP convergence on range-bearing with LEDH+OT, estimating two parameters simultaneously. The bottom panel plots $\sigma _{\text  {range}}$ (blue) and $\sigma _{\text  {bearing}}$ (green) with the true values $\sigma _{\text  {range}} = \sigma _{\text  {bearing}} = 0.1$ as dashed reference lines. Both converge cleanly to the true values; the joint estimation does not introduce a noticeable coupling in the gradient-norm profile.}}{55}{figure.22}\protected@file@percent }
+\newlabel{fig:map_rb}{{22}{55}{MAP convergence on range-bearing with LEDH+OT, estimating two parameters simultaneously. The bottom panel plots $\sigma _{\text {range}}$ (blue) and $\sigma _{\text {bearing}}$ (green) with the true values $\sigma _{\text {range}} = \sigma _{\text {bearing}} = 0.1$ as dashed reference lines. Both converge cleanly to the true values; the joint estimation does not introduce a noticeable coupling in the gradient-norm profile}{figure.22}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {23}{\ignorespaces MAP convergence on 1D stochastic volatility with LEDH+OT, estimating the persistence parameter $\alpha $ with true value $0.91$. The trajectory approaches the true value within the allotted optimizer steps; the MAP mode sits slightly below the median of the weakly-informative $\mathrm  {LogNormal}$ prior, which is expected given the prior and the data together should land close to truth.}}{56}{figure.23}\protected@file@percent }
+\newlabel{fig:map_sv1d}{{23}{56}{MAP convergence on 1D stochastic volatility with LEDH+OT, estimating the persistence parameter $\alpha $ with true value $0.91$. The trajectory approaches the true value within the allotted optimizer steps; the MAP mode sits slightly below the median of the weakly-informative $\mathrm {LogNormal}$ prior, which is expected given the prior and the data together should land close to truth}{figure.23}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {24}{\ignorespaces MAP convergence on 2D stochastic volatility with LEDH+OT, estimating $\sigma _2$ with true value $1.0$. The MAP optimizer converges on the filter-level objective, which is the minimum bar for the SV2D pipeline. As the HMC diagnostics in \S  \ref {sec:sv2d} document, a clean MAP run on SV2D is \emph  {necessary but not sufficient} for HMC to work --- the gradient surface is smooth enough on average for stochastic-gradient MAP to navigate, but has per-leapfrog-step discontinuities that derail fixed-seed HMC.}}{57}{figure.24}\protected@file@percent }
+\newlabel{fig:map_sv2d}{{24}{57}{MAP convergence on 2D stochastic volatility with LEDH+OT, estimating $\sigma _2$ with true value $1.0$. The MAP optimizer converges on the filter-level objective, which is the minimum bar for the SV2D pipeline. As the HMC diagnostics in \S \ref {sec:sv2d} document, a clean MAP run on SV2D is \emph {necessary but not sufficient} for HMC to work --- the gradient surface is smooth enough on average for stochastic-gradient MAP to navigate, but has per-leapfrog-step discontinuities that derail fixed-seed HMC}{figure.24}{}}
+\@writefile{toc}{\contentsline {paragraph}{What these four figures are for.}{57}{section*.41}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.3}Differentiable Resampling and the Gradient Chain}{57}{subsection.6.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.4}Parameter Prior Selection}{58}{subsection.6.4}\protected@file@percent }
+\newlabel{sec:param-prior-selection}{{6.4}{58}{Parameter Prior Selection}{subsection.6.4}{}}
+\@writefile{toc}{\contentsline {paragraph}{What the prior is doing here.}{58}{section*.42}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Families I used.}{58}{section*.43}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {11}{\ignorespaces Parameter priors used by the HMC configurations. Values are taken from the run configurations, not inferred from the text.}}{58}{table.11}\protected@file@percent }
+\newlabel{tab:param-priors}{{11}{58}{Parameter priors used by the HMC configurations. Values are taken from the run configurations, not inferred from the text}{table.11}{}}
+\@writefile{toc}{\contentsline {paragraph}{Bijectors and the Jacobian term.}{58}{section*.44}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Effect on HMC.}{59}{section*.45}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Worked example: range-bearing noise.}{59}{section*.46}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Config discrepancies.}{59}{section*.47}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{What we used vs.\ what the guide recommends (known limitations).}{59}{section*.48}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {12}{\ignorespaces Known prior-selection discrepancies between the HMC configs and the working guide.}}{59}{table.12}\protected@file@percent }
+\newlabel{tab:param-prior-discrepancies}{{12}{59}{Known prior-selection discrepancies between the HMC configs and the working guide}{table.12}{}}
 \citation{beskos2013optimal}
 \citation{hoffman2014nuts}
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}MAP as a Pipeline Smoke Test}{36}{subsection.6.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.3}Differentiable Resampling and the Gradient Chain}{36}{subsection.6.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.4}Benchmark: Linear Gaussian Model}{36}{subsection.6.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.4.1}MCMC Diagnostics}{36}{subsubsection.6.4.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Acceptance rate.}{36}{section*.27}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Step size and dual averaging.}{36}{section*.28}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.5}Benchmark: Linear Gaussian Model}{60}{subsection.6.5}\protected@file@percent }
+\newlabel{sec:linear-gaussian-benchmark}{{6.5}{60}{Benchmark: Linear Gaussian Model}{subsection.6.5}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.5.1}MCMC Diagnostics}{60}{subsubsection.6.5.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Acceptance rate.}{60}{section*.49}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Step size and dual averaging.}{60}{section*.50}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Effective sample size (ESS).}{60}{section*.51}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{$\hat  {R}$: Potential Scale Reduction Factor.}{61}{section*.52}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.5.2}1-D Model, 1 Parameter}{61}{subsubsection.6.5.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{HMC trace.}{61}{section*.53}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {25}{\ignorespaces HMC post-burn-in traces for $\sigma _{\text  {obs}}$ on 1D linear Gaussian, overlaying all five filters. Kalman (black) is the analytic reference; EKF (blue), UKF (green), LEDH+OT (orange), and BPF+OT (purple) are the differentiable-filter variants. Horizontal dashed line at the true value $\sigma _{\text  {obs}} = 1.0$.}}{62}{figure.25}\protected@file@percent }
+\newlabel{fig:hmc_lg_trace}{{25}{62}{HMC post-burn-in traces for $\sigma _{\text {obs}}$ on 1D linear Gaussian, overlaying all five filters. Kalman (black) is the analytic reference; EKF (blue), UKF (green), LEDH+OT (orange), and BPF+OT (purple) are the differentiable-filter variants. Horizontal dashed line at the true value $\sigma _{\text {obs}} = 1.0$}{figure.25}{}}
+\@writefile{toc}{\contentsline {paragraph}{HMC posteriors.}{62}{section*.54}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {26}{\ignorespaces 1D LG HMC posterior: Kalman filter. This is the HMC reference other filters are compared against.}}{62}{figure.26}\protected@file@percent }
+\newlabel{fig:hmc_lg_histogram_kalman}{{26}{62}{1D LG HMC posterior: Kalman filter. This is the HMC reference other filters are compared against}{figure.26}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {27}{\ignorespaces 1D LG HMC posterior: EKF. Kalman outline in grey, true value as dashed vertical.}}{63}{figure.27}\protected@file@percent }
+\newlabel{fig:hmc_lg_histogram_ekf}{{27}{63}{1D LG HMC posterior: EKF. Kalman outline in grey, true value as dashed vertical}{figure.27}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {28}{\ignorespaces 1D LG HMC posterior: UKF.}}{63}{figure.28}\protected@file@percent }
+\newlabel{fig:hmc_lg_histogram_ukf}{{28}{63}{1D LG HMC posterior: UKF}{figure.28}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {29}{\ignorespaces 1D LG HMC posterior: LEDH+OT. This is the flow filter with the full three-term derivative chain active.}}{63}{figure.29}\protected@file@percent }
+\newlabel{fig:hmc_lg_histogram_ledh_ot}{{29}{63}{1D LG HMC posterior: LEDH+OT. This is the flow filter with the full three-term derivative chain active}{figure.29}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {30}{\ignorespaces 1D LG HMC posterior: BPF+OT. Split-$\hat  R = 1.15$ on this run (see Table~\ref {tab:hmc_diagnostics}), meaning the chain did not converge cleanly --- the posterior shape should be read with that caveat.}}{64}{figure.30}\protected@file@percent }
+\newlabel{fig:hmc_lg_histogram_bpf_ot}{{30}{64}{1D LG HMC posterior: BPF+OT. Split-$\hat R = 1.15$ on this run (see Table~\ref {tab:hmc_diagnostics}), meaning the chain did not converge cleanly --- the posterior shape should be read with that caveat}{figure.30}{}}
+\@writefile{toc}{\contentsline {paragraph}{Diagnostic readout.}{64}{section*.55}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.5.3}Multi-Dimensional Model, 1 Parameter}{64}{subsubsection.6.5.3}\protected@file@percent }
+\newlabel{sec:multi-d-lg}{{6.5.3}{64}{Multi-Dimensional Model, 1 Parameter}{subsubsection.6.5.3}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.5.4}HMC on Range-Bearing}{64}{subsubsection.6.5.4}\protected@file@percent }
+\newlabel{sec:hmc-rb}{{6.5.4}{64}{HMC on Range-Bearing}{subsubsection.6.5.4}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {31}{\ignorespaces Range-bearing HMC post-burn-in traces, LEDH+OT filter. Two stacked panels for $\sigma _{\text  {range}}$ and $\sigma _{\text  {bearing}}$. Horizontal dashed lines at the true values ($0.1$ for both). Both chains oscillate around the truth without drift.}}{65}{figure.31}\protected@file@percent }
+\newlabel{fig:hmc_rb_trace}{{31}{65}{Range-bearing HMC post-burn-in traces, LEDH+OT filter. Two stacked panels for $\sigma _{\text {range}}$ and $\sigma _{\text {bearing}}$. Horizontal dashed lines at the true values ($0.1$ for both). Both chains oscillate around the truth without drift}{figure.31}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {32}{\ignorespaces Range-bearing HMC marginal posteriors, LEDH+OT filter. Two panels, one per parameter. True values as dashed vertical lines. Both marginals concentrate near the truth.}}{65}{figure.32}\protected@file@percent }
+\newlabel{fig:hmc_rb_histogram}{{32}{65}{Range-bearing HMC marginal posteriors, LEDH+OT filter. Two panels, one per parameter. True values as dashed vertical lines. Both marginals concentrate near the truth}{figure.32}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.5.5}HMC on 1D Stochastic Volatility}{66}{subsubsection.6.5.5}\protected@file@percent }
+\newlabel{sec:hmc-sv1d}{{6.5.5}{66}{HMC on 1D Stochastic Volatility}{subsubsection.6.5.5}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {33}{\ignorespaces 1D stochastic volatility HMC post-burn-in trace for $\alpha $, LEDH+OT filter. Dashed reference line at the true value $0.91$.}}{66}{figure.33}\protected@file@percent }
+\newlabel{fig:hmc_sv1d_trace}{{33}{66}{1D stochastic volatility HMC post-burn-in trace for $\alpha $, LEDH+OT filter. Dashed reference line at the true value $0.91$}{figure.33}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {34}{\ignorespaces 1D stochastic volatility HMC marginal posterior for $\alpha $, LEDH+OT filter.}}{66}{figure.34}\protected@file@percent }
+\newlabel{fig:hmc_sv1d_histogram}{{34}{66}{1D stochastic volatility HMC marginal posterior for $\alpha $, LEDH+OT filter}{figure.34}{}}
+\@writefile{toc}{\contentsline {paragraph}{Diagnostic summary table.}{66}{section*.56}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {13}{\ignorespaces HMC diagnostics for all eight runs. ``Acceptance'' is the fraction of leapfrog proposals accepted; ``ESS'' is effective sample size at the reported $N_{\text  {samples}}$; ``split-$\hat  R$'' is the single-chain split potential-scale-reduction factor (values near $1$ are clean, values $> 1.1$ flag non-convergence, very-low values can flag a trapped chain). ``Wall'' is total burn-in + sampling wall time; ``Time/step'' is seconds per HMC iteration ($L = 5$ leapfrog steps per iteration for every run). Memory is not reported --- the current HMC logging does not store peak memory.}}{67}{table.13}\protected@file@percent }
+\newlabel{tab:hmc_diagnostics}{{13}{67}{HMC diagnostics for all eight runs. ``Acceptance'' is the fraction of leapfrog proposals accepted; ``ESS'' is effective sample size at the reported $N_{\text {samples}}$; ``split-$\hat R$'' is the single-chain split potential-scale-reduction factor (values near $1$ are clean, values $> 1.1$ flag non-convergence, very-low values can flag a trapped chain). ``Wall'' is total burn-in + sampling wall time; ``Time/step'' is seconds per HMC iteration ($L = 5$ leapfrog steps per iteration for every run). Memory is not reported --- the current HMC logging does not store peak memory}{table.13}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.6}Gradient Diagnostics on SV2D: Unresolved Nonlinear Failure}{67}{subsection.6.6}\protected@file@percent }
+\newlabel{sec:sv2d}{{6.6}{67}{Gradient Diagnostics on SV2D: Unresolved Nonlinear Failure}{subsection.6.6}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {35}{\ignorespaces 2D stochastic volatility HMC post-burn-in trace for $\sigma _2$, LEDH+OT filter. Dashed reference line at the true value $1.0$. The trace oscillates around the truth but see the paragraphs below for why this is insufficient to call the run a success.}}{68}{figure.35}\protected@file@percent }
+\newlabel{fig:hmc_sv2d_trace}{{35}{68}{2D stochastic volatility HMC post-burn-in trace for $\sigma _2$, LEDH+OT filter. Dashed reference line at the true value $1.0$. The trace oscillates around the truth but see the paragraphs below for why this is insufficient to call the run a success}{figure.35}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {36}{\ignorespaces 2D stochastic volatility HMC marginal posterior for $\sigma _2$, LEDH+OT filter. The posterior is broader than the SV1D and LG cases, reflecting the step-level gradient instability discussed below.}}{68}{figure.36}\protected@file@percent }
+\newlabel{fig:hmc_sv2d_histogram}{{36}{68}{2D stochastic volatility HMC marginal posterior for $\sigma _2$, LEDH+OT filter. The posterior is broader than the SV1D and LG cases, reflecting the step-level gradient instability discussed below}{figure.36}{}}
+\@writefile{toc}{\contentsline {paragraph}{Symptom.}{68}{section*.57}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{What we have ruled out.}{68}{section*.58}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Working hypotheses.}{68}{section*.59}\protected@file@percent }
 \bibstyle{unsrt}
 \bibdata{main_reorganized}
 \bibcite{Särkkä2013BayesianFilteringAndSmoothing}{1}
 \bibcite{daum2010exact}{2}
-\@writefile{toc}{\contentsline {paragraph}{Effective sample size (ESS).}{37}{section*.29}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{$\hat  {R}$: Potential Scale Reduction Factor.}{37}{section*.30}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.4.2}1-D Model, 1 Parameter}{37}{subsubsection.6.4.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.4.3}Multi-Dimensional Model, 1 Parameter}{37}{subsubsection.6.4.3}\protected@file@percent }
 \bibcite{daum2011particle}{3}
 \bibcite{Li-Particle-Filtering-2017}{4}
 \bibcite{dai-new-2021}{5}
@@ -161,18 +306,17 @@
 \bibcite{Pulido2019}{7}
 \bibcite{HuVanLeeuwen2021}{8}
 \bibcite{reich2013nonparametric}{9}
+\@writefile{lot}{\contentsline {table}{\numberline {14}{\ignorespaces Candidate root causes for the SV2D HMC gradient failure.}}{69}{table.14}\protected@file@percent }
+\newlabel{tab:sv2d-hypotheses}{{14}{69}{Candidate root causes for the SV2D HMC gradient failure}{table.14}{}}
+\@writefile{toc}{\contentsline {paragraph}{Closing framing.}{69}{section*.60}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.7}Limitations}{69}{subsection.6.7}\protected@file@percent }
 \bibcite{corenflos-differentiable-2021}{10}
-\bibcite{Cuturi2013SinkhornDL}{11}
-\bibcite{chaudhari2025gradnetot}{12}
-\bibcite{Zhu2020TowardsDR}{13}
-\bibcite{Lee2019SetTransformer}{14}
-\bibcite{chen2023overview}{15}
-\bibcite{amos2022amortized}{16}
-\bibcite{amos2023meta}{17}
-\bibcite{Metropolis1953}{18}
-\bibcite{Duane1987}{19}
-\bibcite{Neal-2012-MCMC-Hamiltonian-Dynamics-ARXIV-1206-1901v1}{20}
-\bibcite{hoffman2014nuts}{21}
-\bibcite{karkus2018particle}{22}
-\bibcite{beskos2013optimal}{23}
-\gdef \@abspage@last{39}
+\bibcite{karkus2018particle}{11}
+\bibcite{Cuturi2013SinkhornDL}{12}
+\bibcite{cremers2022unifiedframeworkimplicit}{13}
+\bibcite{Metropolis1953}{14}
+\bibcite{Duane1987}{15}
+\bibcite{Neal-2012-MCMC-Hamiltonian-Dynamics-ARXIV-1206-1901v1}{16}
+\bibcite{hoffman2014nuts}{17}
+\bibcite{beskos2013optimal}{18}
+\gdef \@abspage@last{70}

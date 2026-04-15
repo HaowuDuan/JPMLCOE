@@ -1,0 +1,69 @@
+{
+  "file": "test_ot_gradient_standalone.py",
+  "created": "2026-04-12T12:14:43.318970Z",
+  "cases": [
+    {
+      "method": "approx",
+      "n_particles": 200,
+      "state_dim": 2,
+      "epsilon": 0.5,
+      "theta_0": 0.3,
+      "fd_h": 0.0001,
+      "tolerance": 1e-06,
+      "passed": false,
+      "modes": [
+        {
+          "mode": "weights_only",
+          "numerical": 0.03110573189191168,
+          "autodiff": 0.05197734847056878,
+          "rel_err": 0.6709894064278318
+        },
+        {
+          "mode": "particles_only",
+          "numerical": 1.56158347444868,
+          "autodiff": 1.638240787207568,
+          "rel_err": 0.04908947489083277
+        },
+        {
+          "mode": "full",
+          "numerical": 1.666228259398217,
+          "autodiff": 1.8054759524934882,
+          "rel_err": 0.08357059863188412
+        }
+      ],
+      "timestamp": "2026-04-12T12:14:43.318979Z"
+    },
+    {
+      "method": "implicit",
+      "n_particles": 200,
+      "state_dim": 2,
+      "epsilon": 0.5,
+      "theta_0": 0.3,
+      "fd_h": 0.0001,
+      "tolerance": 1e-06,
+      "passed": true,
+      "modes": [
+        {
+          "mode": "weights_only",
+          "numerical": 0.03110573189191168,
+          "autodiff": 0.031105731926724608,
+          "rel_err": 1.1191804445491598e-09
+        },
+        {
+          "mode": "particles_only",
+          "numerical": 1.56158347444868,
+          "autodiff": 1.5615834743846262,
+          "rel_err": 4.101853942784128e-11
+        },
+        {
+          "mode": "full",
+          "numerical": 1.666228259398217,
+          "autodiff": 1.6662282591069308,
+          "rel_err": 1.7481764860454093e-10
+        }
+      ],
+      "timestamp": "2026-04-12T12:15:02.708926Z"
+    }
+  ],
+  "updated": "2026-04-12T12:15:02.708935Z"
+}

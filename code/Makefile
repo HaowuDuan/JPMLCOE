@@ -31,6 +31,8 @@ push-jit-dry:
 
 pull-results-jit:
 	rsync -avz --progress $(REMOTE):$(REMOTE_DIR_JIT)/outputs/ $(LOCAL_DIR)/outputs/
+	mkdir -p $(LOCAL_DIR)/tests/hmc/results
+	rsync -avz --progress $(REMOTE):$(REMOTE_DIR_JIT)/tests/hmc/results/ $(LOCAL_DIR)/tests/hmc/results/
 
 remote-setup-jit:
 	ssh $(REMOTE) 'mkdir -p $(REMOTE_DIR_JIT) && cd $(REMOTE_DIR_JIT) && python3 -m venv .venv && . .venv/bin/activate && pip install --upgrade pip && pip install -r requirements.txt'

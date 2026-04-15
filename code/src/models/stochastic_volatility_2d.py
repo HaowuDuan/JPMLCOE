@@ -186,6 +186,16 @@ class StochasticVolatility2DModel(StateSpaceModel):
         """Var[y | x] = exp(x_2) (state-dependent)"""
         return tf.reshape(tf.exp(x[1]), [1, 1])
 
+    def observation_cov_batch(self, particles: tf.Tensor) -> tf.Tensor:
+        """Per-particle observation covariance: Var[y|x] = exp(x_2).
+
+        Args:
+            particles: (N, 2) particle states
+        Returns:
+            (N, 1, 1) per-particle observation covariance
+        """
+        return tf.reshape(tf.exp(particles[:, 1]), [-1, 1, 1])
+
     def observation_cov_corrected(self, mean: tf.Tensor, cov: tf.Tensor) -> tf.Tensor:
         """E[exp(x_2)] = exp(m_2 + P_22/2) by lognormal MGF."""
         m2 = mean[1]

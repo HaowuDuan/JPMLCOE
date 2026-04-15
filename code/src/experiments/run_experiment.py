@@ -72,12 +72,13 @@ def _create_filter(cfg: DictConfig, model, initial_state: np.ndarray,
     # --- EKF / UKF with non-tracking models ---
     if filter_name in ('ExtendedKalmanFilter', 'UnscentedKalmanFilter', 'AugmentedUnscentedKalmanFilter'):
         filter_obj = hydra.utils.instantiate(
-            cfg.filter, model=model, random_seed=cfg.seed,
+            cfg.filter, model=model,
+            sample_initial_mean=False, random_seed=cfg.seed,
         )
         # Retrieve what the filter actually initialized with
         initial_mean = np.asarray(filter_obj.mean_0)
         initial_cov = np.asarray(filter_obj.Sigma_0)
-        print(f"Initialized {filter_name} with sampled initial state from model distribution")
+        print(f"Initialized {filter_name} with model mu_0 as filter prior mean")
         return filter_obj, initial_mean, initial_cov
 
     # --- Plain Kalman (no model needed) ---

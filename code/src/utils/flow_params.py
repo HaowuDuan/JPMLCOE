@@ -225,8 +225,12 @@ def compute_flow_params_batch(
     H_T = tf.linalg.matrix_transpose(H_batch)  # (N, sd, od)
     HPH = tf.matmul(HP, H_T)
 
+    # R can be (od, od) shared or (N, od, od) per-particle
+    R_b = R if R.shape.rank == 3 else tf.expand_dims(R, 0)
+    R_inv_b = R_inv if R_inv.shape.rank == 3 else tf.expand_dims(R_inv, 0)
+
     # S = λ * HPH + R: (N, od, od)
-    S = lambda_val * HPH + tf.expand_dims(R, 0)
+    S = lambda_val * HPH + R_b
 
     # Cholesky solve: S @ X = H → X = S^{-1} @ H: (N, od, sd)
     L_S = safe_cholesky(S)
@@ -249,7 +253,7 @@ def compute_flow_params_batch(
     I_lA = I_batch + lambda_val * A_batch
 
     # P @ H^T @ R_inv: (N, sd, od)
-    PHT_Rinv = tf.matmul(PH_T, tf.expand_dims(R_inv, 0))
+    PHT_Rinv = tf.matmul(PH_T, R_inv_b)
 
     # (z - e): (N, od)
     z_minus_e = tf.expand_dims(observation, 0) - e_batch

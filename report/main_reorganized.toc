@@ -6,75 +6,109 @@
 \contentsline {section}{\numberline {2}Kalman Filter}{5}{section.2}%
 \contentsline {subsection}{\numberline {2.1}Overview}{5}{subsection.2.1}%
 \contentsline {subsection}{\numberline {2.2}Algorithm}{5}{subsection.2.2}%
+\contentsline {paragraph}{Initial conditions as a cross-cutting principle.}{6}{section*.2}%
 \contentsline {subsection}{\numberline {2.3}Numerical stability analysis for Kalman filter}{7}{subsection.2.3}%
-\contentsline {subsection}{\numberline {2.4}Numerical experiments and failure on nonlinear Models}{8}{subsection.2.4}%
-\contentsline {paragraph}{State transition.}{8}{section*.2}%
-\contentsline {paragraph}{Observation model.}{8}{section*.3}%
-\contentsline {paragraph}{State transition.}{8}{section*.4}%
-\contentsline {paragraph}{Observation model.}{8}{section*.5}%
-\contentsline {paragraph}{Initial distribution.}{8}{section*.6}%
-\contentsline {section}{\numberline {3}EKF and UKF}{9}{section.3}%
-\contentsline {subsection}{\numberline {3.1}EKF}{9}{subsection.3.1}%
-\contentsline {subsection}{\numberline {3.2}UKF}{10}{subsection.3.2}%
-\contentsline {paragraph}{Parameter choice for the SV model.}{11}{section*.7}%
+\contentsline {subsection}{\numberline {2.4}The limitation and usefulness of Kalman filter}{8}{subsection.2.4}%
+\contentsline {paragraph}{Demonstration on a 1D linear Gaussian.}{8}{section*.3}%
+\contentsline {paragraph}{What this plot is for.}{9}{section*.4}%
+\contentsline {section}{\numberline {3}EKF and UKF}{10}{section.3}%
+\contentsline {subsection}{\numberline {3.1}EKF}{10}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}UKF}{11}{subsection.3.2}%
 \contentsline {subsection}{\numberline {3.3}EKF/UKF on non-linear models}{12}{subsection.3.3}%
-\contentsline {paragraph}{State transition.}{12}{section*.8}%
-\contentsline {paragraph}{Observation model.}{12}{section*.9}%
-\contentsline {section}{\numberline {4}Particle-Based Methods}{13}{section.4}%
-\contentsline {subsection}{\numberline {4.1}Importance Sampling and Sequential Monte Carlo}{13}{subsection.4.1}%
-\contentsline {subsection}{\numberline {4.2}Bootstrap Particle Filter}{14}{subsection.4.2}%
-\contentsline {subsubsection}{\numberline {4.2.1}Algorithm}{14}{subsubsection.4.2.1}%
-\contentsline {subsubsection}{\numberline {4.2.2}Particle Degeneracy and Resampling}{14}{subsubsection.4.2.2}%
-\contentsline {paragraph}{Multinomial resampling.}{14}{section*.12}%
-\contentsline {paragraph}{Systematic resampling (the actual implementation).}{15}{section*.13}%
-\contentsline {subsection}{\numberline {4.3}EDH/LEDH Flow Filter}{15}{subsection.4.3}%
-\contentsline {subsubsection}{\numberline {4.3.1}Use Fokker-Planck to reach the target distribution}{15}{subsubsection.4.3.1}%
-\contentsline {subsubsection}{\numberline {4.3.2}Determine the evolution kernel}{16}{subsubsection.4.3.2}%
-\contentsline {subsubsection}{\numberline {4.3.3}EDH vs.\ LEDH: incremental improvements in linearization quality.}{16}{subsubsection.4.3.3}%
-\contentsline {subsubsection}{\numberline {4.3.4}Algorithm}{17}{subsubsection.4.3.4}%
-\contentsline {subsubsection}{\numberline {4.3.5}Experiments}{18}{subsubsection.4.3.5}%
-\contentsline {subsection}{\numberline {4.4}Invertible Flow Filter}{18}{subsection.4.4}%
-\contentsline {subsubsection}{\numberline {4.4.1}Why do we need Jacobian computation?}{18}{subsubsection.4.4.1}%
-\contentsline {subsection}{\numberline {4.5}Stochastic Flow Filter}{21}{subsection.4.5}%
-\contentsline {subsection}{\numberline {4.6}Kernel Flow Filter}{23}{subsection.4.6}%
-\contentsline {subsubsection}{\numberline {4.6.1}Overview}{23}{subsubsection.4.6.1}%
-\contentsline {subsubsection}{\numberline {4.6.2}Derivation}{23}{subsubsection.4.6.2}%
-\contentsline {paragraph}{Optimal Transport via Gradient Flow}{23}{section*.14}%
-\contentsline {paragraph}{Deriving Optimal Velocity via Kernel Restriction}{23}{section*.15}%
-\contentsline {paragraph}{Scalar Kernel}{24}{section*.16}%
-\contentsline {paragraph}{Matrix-Valued Kernel}{24}{section*.17}%
-\contentsline {subsubsection}{\numberline {4.6.3}Matrix Kernel Preventing Collapse}{25}{subsubsection.4.6.3}%
-\contentsline {subsubsection}{\numberline {4.6.4}Algorithm}{25}{subsubsection.4.6.4}%
-\contentsline {subsection}{\numberline {4.7}Filter Comparison Summary}{25}{subsection.4.7}%
-\contentsline {section}{\numberline {5}Resampling and Optimal Transport}{26}{section.5}%
-\contentsline {subsection}{\numberline {5.1}Two Problems with Resampling}{26}{subsection.5.1}%
-\contentsline {paragraph}{Problem 1: Sampling noise.}{26}{section*.18}%
-\contentsline {paragraph}{Problem 2: Non-differentiability.}{26}{section*.19}%
-\contentsline {subsection}{\numberline {5.2}Soft Resampling}{26}{subsection.5.2}%
-\contentsline {subsection}{\numberline {5.3}Entropy-Regularized OT (Sinkhorn) Resampling}{27}{subsection.5.3}%
-\contentsline {subsection}{\numberline {5.4}The Derivative Chain through Resampling}{28}{subsection.5.4}%
-\contentsline {paragraph}{Systematic resampling with stop gradient.}{29}{section*.20}%
-\contentsline {paragraph}{Soft resampling.}{29}{section*.21}%
-\contentsline {paragraph}{OT resampling.}{29}{section*.22}%
-\contentsline {paragraph}{Implications for HMC.}{30}{section*.23}%
-\contentsline {subsection}{\numberline {5.5}Approximate vs Implicit Sinkhorn Backward}{30}{subsection.5.5}%
-\contentsline {subsubsection}{\numberline {5.5.1}The Extrapolation Approximation}{30}{subsubsection.5.5.1}%
-\contentsline {subsubsection}{\numberline {5.5.2}Implicit Differentiation at the Fixed Point}{30}{subsubsection.5.5.2}%
-\contentsline {subsection}{\numberline {5.6}Neural Acceleration}{31}{subsection.5.6}%
-\contentsline {section}{\numberline {6}Parameter Estimation with Differentiable Particle Filters}{34}{section.6}%
-\contentsline {subsection}{\numberline {6.1}Markov Chain Monte Carlo}{34}{subsection.6.1}%
-\contentsline {subsubsection}{\numberline {6.1.1}Metropolis-Hastings}{34}{subsubsection.6.1.1}%
-\contentsline {subsubsection}{\numberline {6.1.2}Hamiltonian Monte Carlo}{34}{subsubsection.6.1.2}%
-\contentsline {paragraph}{Leapfrog integration.}{35}{section*.24}%
-\contentsline {paragraph}{Step size and tuning.}{35}{section*.25}%
-\contentsline {paragraph}{Mass matrix.}{35}{section*.26}%
-\contentsline {subsection}{\numberline {6.2}MAP as a Pipeline Smoke Test}{36}{subsection.6.2}%
-\contentsline {subsection}{\numberline {6.3}Differentiable Resampling and the Gradient Chain}{36}{subsection.6.3}%
-\contentsline {subsection}{\numberline {6.4}Benchmark: Linear Gaussian Model}{36}{subsection.6.4}%
-\contentsline {subsubsection}{\numberline {6.4.1}MCMC Diagnostics}{36}{subsubsection.6.4.1}%
-\contentsline {paragraph}{Acceptance rate.}{36}{section*.27}%
-\contentsline {paragraph}{Step size and dual averaging.}{36}{section*.28}%
-\contentsline {paragraph}{Effective sample size (ESS).}{37}{section*.29}%
-\contentsline {paragraph}{$\hat {R}$: Potential Scale Reduction Factor.}{37}{section*.30}%
-\contentsline {subsubsection}{\numberline {6.4.2}1-D Model, 1 Parameter}{37}{subsubsection.6.4.2}%
-\contentsline {subsubsection}{\numberline {6.4.3}Multi-Dimensional Model, 1 Parameter}{37}{subsubsection.6.4.3}%
+\contentsline {paragraph}{Range bearing model.}{12}{section*.5}%
+\contentsline {paragraph}{Stochastic volatility model.}{13}{section*.6}%
+\contentsline {paragraph}{Numerical results.}{13}{section*.7}%
+\contentsline {paragraph}{Computational footprint.}{13}{section*.8}%
+\contentsline {section}{\numberline {4}Particle-Based Methods}{16}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Importance Sampling and Sequential Monte Carlo}{16}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}Bootstrap Particle Filter}{17}{subsection.4.2}%
+\contentsline {subsubsection}{\numberline {4.2.1}Algorithm}{17}{subsubsection.4.2.1}%
+\contentsline {subsubsection}{\numberline {4.2.2}Particle Degeneracy and Resampling}{17}{subsubsection.4.2.2}%
+\contentsline {paragraph}{Multinomial resampling.}{17}{section*.11}%
+\contentsline {paragraph}{Systematic resampling (the actual implementation).}{18}{section*.12}%
+\contentsline {paragraph}{Empirical takeaway (§4.2).}{20}{section*.13}%
+\contentsline {subsection}{\numberline {4.3}EDH/LEDH Flow Filter}{20}{subsection.4.3}%
+\contentsline {subsubsection}{\numberline {4.3.1}Use Fokker-Planck to reach the target distribution}{20}{subsubsection.4.3.1}%
+\contentsline {subsubsection}{\numberline {4.3.2}Determine the evolution kernel}{21}{subsubsection.4.3.2}%
+\contentsline {subsubsection}{\numberline {4.3.3}EDH vs.\ LEDH: incremental improvements in linearization quality.}{22}{subsubsection.4.3.3}%
+\contentsline {subsubsection}{\numberline {4.3.4}Algorithm}{22}{subsubsection.4.3.4}%
+\contentsline {subsubsection}{\numberline {4.3.5}Experiments}{24}{subsubsection.4.3.5}%
+\contentsline {paragraph}{Stochastic volatility 2D (filter accuracy).}{27}{section*.14}%
+\contentsline {subsection}{\numberline {4.4}Invertible Flow Filter}{29}{subsection.4.4}%
+\contentsline {subsubsection}{\numberline {4.4.1}Why do we need Jacobian computation?}{29}{subsubsection.4.4.1}%
+\contentsline {paragraph}{When does the Jacobian correction help?}{31}{section*.15}%
+\contentsline {subsection}{\numberline {4.5}Stochastic Flow Filter}{32}{subsection.4.5}%
+\contentsline {paragraph}{Empirical takeaway (§4.5).}{34}{section*.16}%
+\contentsline {subsection}{\numberline {4.6}Kernel Flow Filter}{35}{subsection.4.6}%
+\contentsline {subsubsection}{\numberline {4.6.1}Overview}{35}{subsubsection.4.6.1}%
+\contentsline {subsubsection}{\numberline {4.6.2}Derivation}{35}{subsubsection.4.6.2}%
+\contentsline {paragraph}{Deriving Optimal Velocity via Kernel Restriction.}{35}{section*.17}%
+\contentsline {paragraph}{Scalar Kernel}{36}{section*.18}%
+\contentsline {paragraph}{Matrix-Valued Kernel}{36}{section*.19}%
+\contentsline {subsubsection}{\numberline {4.6.3}Matrix Kernel Preventing Collapse}{37}{subsubsection.4.6.3}%
+\contentsline {subsubsection}{\numberline {4.6.4}Algorithm}{37}{subsubsection.4.6.4}%
+\contentsline {paragraph}{Empirical takeaway (§4.6).}{38}{section*.20}%
+\contentsline {section}{\numberline {5}Resampling and Optimal Transport}{39}{section.5}%
+\contentsline {subsection}{\numberline {5.1}Two Problems with Resampling}{39}{subsection.5.1}%
+\contentsline {paragraph}{Problem 1: Sampling noise.}{39}{section*.21}%
+\contentsline {paragraph}{Problem 2: Non-differentiability.}{39}{section*.22}%
+\contentsline {subsection}{\numberline {5.2}Soft Resampling}{39}{subsection.5.2}%
+\contentsline {subsection}{\numberline {5.3}Entropy-Regularized OT (Sinkhorn) Resampling}{40}{subsection.5.3}%
+\contentsline {paragraph}{Convention used in the algorithm below.}{40}{section*.23}%
+\contentsline {subsection}{\numberline {5.4}The Derivative Chain through Resampling}{42}{subsection.5.4}%
+\contentsline {paragraph}{Systematic resampling with stop gradient.}{42}{section*.24}%
+\contentsline {paragraph}{Soft resampling.}{42}{section*.25}%
+\contentsline {paragraph}{OT resampling.}{42}{section*.26}%
+\contentsline {paragraph}{Implications for HMC.}{43}{section*.27}%
+\contentsline {paragraph}{Empirical check: soft vs.\ OT resampling on stochastic volatility.}{43}{section*.28}%
+\contentsline {subsection}{\numberline {5.5}Approximate vs Implicit Sinkhorn Backward}{44}{subsection.5.5}%
+\contentsline {subsubsection}{\numberline {5.5.1}The Extrapolation Approximation}{44}{subsubsection.5.5.1}%
+\contentsline {subsubsection}{\numberline {5.5.2}Implicit Differentiation at the Fixed Point}{44}{subsubsection.5.5.2}%
+\contentsline {subsection}{\numberline {5.6}Neural Acceleration}{47}{subsection.5.6}%
+\contentsline {paragraph}{First-principles design.}{47}{section*.29}%
+\contentsline {paragraph}{What the Monge--Amp\`ere equation is here.}{47}{section*.30}%
+\contentsline {paragraph}{Input and output of the operator.}{48}{section*.31}%
+\contentsline {paragraph}{Ansatz.}{48}{section*.32}%
+\contentsline {paragraph}{Inference path.}{48}{section*.33}%
+\contentsline {paragraph}{Current status.}{48}{section*.34}%
+\contentsline {paragraph}{Next step.}{49}{section*.35}%
+\contentsline {section}{\numberline {6}Parameter Estimation with Differentiable Particle Filters}{50}{section.6}%
+\contentsline {paragraph}{Filtering accuracy is not gradient quality.}{50}{section*.36}%
+\contentsline {subsection}{\numberline {6.1}Markov Chain Monte Carlo}{50}{subsection.6.1}%
+\contentsline {subsubsection}{\numberline {6.1.1}Metropolis-Hastings}{50}{subsubsection.6.1.1}%
+\contentsline {subsubsection}{\numberline {6.1.2}Hamiltonian Monte Carlo}{51}{subsubsection.6.1.2}%
+\contentsline {paragraph}{Leapfrog integration.}{51}{section*.37}%
+\contentsline {paragraph}{Step size and tuning.}{51}{section*.38}%
+\contentsline {paragraph}{Mass matrix.}{52}{section*.39}%
+\contentsline {subsection}{\numberline {6.2}MAP as a Pipeline Smoke Test}{52}{subsection.6.2}%
+\contentsline {paragraph}{MAP convergence across four benchmarks.}{52}{section*.40}%
+\contentsline {paragraph}{What these four figures are for.}{57}{section*.41}%
+\contentsline {subsection}{\numberline {6.3}Differentiable Resampling and the Gradient Chain}{57}{subsection.6.3}%
+\contentsline {subsection}{\numberline {6.4}Parameter Prior Selection}{58}{subsection.6.4}%
+\contentsline {paragraph}{What the prior is doing here.}{58}{section*.42}%
+\contentsline {paragraph}{Families I used.}{58}{section*.43}%
+\contentsline {paragraph}{Bijectors and the Jacobian term.}{58}{section*.44}%
+\contentsline {paragraph}{Effect on HMC.}{59}{section*.45}%
+\contentsline {paragraph}{Worked example: range-bearing noise.}{59}{section*.46}%
+\contentsline {paragraph}{Config discrepancies.}{59}{section*.47}%
+\contentsline {paragraph}{What we used vs.\ what the guide recommends (known limitations).}{59}{section*.48}%
+\contentsline {subsection}{\numberline {6.5}Benchmark: Linear Gaussian Model}{60}{subsection.6.5}%
+\contentsline {subsubsection}{\numberline {6.5.1}MCMC Diagnostics}{60}{subsubsection.6.5.1}%
+\contentsline {paragraph}{Acceptance rate.}{60}{section*.49}%
+\contentsline {paragraph}{Step size and dual averaging.}{60}{section*.50}%
+\contentsline {paragraph}{Effective sample size (ESS).}{60}{section*.51}%
+\contentsline {paragraph}{$\hat {R}$: Potential Scale Reduction Factor.}{61}{section*.52}%
+\contentsline {subsubsection}{\numberline {6.5.2}1-D Model, 1 Parameter}{61}{subsubsection.6.5.2}%
+\contentsline {paragraph}{HMC trace.}{61}{section*.53}%
+\contentsline {paragraph}{HMC posteriors.}{62}{section*.54}%
+\contentsline {paragraph}{Diagnostic readout.}{64}{section*.55}%
+\contentsline {subsubsection}{\numberline {6.5.3}Multi-Dimensional Model, 1 Parameter}{64}{subsubsection.6.5.3}%
+\contentsline {subsubsection}{\numberline {6.5.4}HMC on Range-Bearing}{64}{subsubsection.6.5.4}%
+\contentsline {subsubsection}{\numberline {6.5.5}HMC on 1D Stochastic Volatility}{66}{subsubsection.6.5.5}%
+\contentsline {paragraph}{Diagnostic summary table.}{66}{section*.56}%
+\contentsline {subsection}{\numberline {6.6}Gradient Diagnostics on SV2D: Unresolved Nonlinear Failure}{67}{subsection.6.6}%
+\contentsline {paragraph}{Symptom.}{68}{section*.57}%
+\contentsline {paragraph}{What we have ruled out.}{68}{section*.58}%
+\contentsline {paragraph}{Working hypotheses.}{68}{section*.59}%
+\contentsline {paragraph}{Closing framing.}{69}{section*.60}%
+\contentsline {subsection}{\numberline {6.7}Limitations}{69}{subsection.6.7}%

@@ -1,0 +1,70 @@
+{
+  "file": "test_memory_and_jit.py",
+  "created": "2026-04-12T12:14:16.921164Z",
+  "cases": [
+    {
+      "case_name": "ledh_no_variable_leak",
+      "vars_after_warmup": 0,
+      "vars_after_5_calls": 0,
+      "diff": 0,
+      "passed": true,
+      "timestamp": "2026-04-12T12:14:16.921172Z"
+    },
+    {
+      "case_name": "bpf_callable_no_numpy_barrier",
+      "log_likelihood": -19.925621032714844,
+      "is_tensor": true,
+      "is_finite": true,
+      "passed": true,
+      "timestamp": "2026-04-12T12:14:17.068626Z"
+    },
+    {
+      "case_name": "ledh_gradient_nonzero",
+      "nlp": 21.793954849243164,
+      "grad": [
+        2.8553645610809326
+      ],
+      "passed": true,
+      "timestamp": "2026-04-12T12:14:21.070934Z"
+    },
+    {
+      "case_name": "bpf_gradient_nonzero",
+      "nlp": 21.92334747314453,
+      "grad": [
+        2.917724609375
+      ],
+      "passed": true,
+      "timestamp": "2026-04-12T12:14:21.500816Z"
+    },
+    {
+      "case_name": "ledh_memory_stable",
+      "snapshots_bytes": [
+        36973,
+        59067,
+        80067,
+        100381,
+        120045,
+        139882,
+        159662,
+        178838,
+        198671,
+        218354
+      ],
+      "diffs_bytes": [
+        22094,
+        21000,
+        20314,
+        19664,
+        19837,
+        19780,
+        19176,
+        19833,
+        19683
+      ],
+      "all_increasing": true,
+      "passed": false,
+      "timestamp": "2026-04-12T12:14:22.409436Z"
+    }
+  ],
+  "updated": "2026-04-12T12:14:22.409445Z"
+}

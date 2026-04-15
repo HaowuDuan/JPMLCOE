@@ -85,8 +85,12 @@ def batched_ekf_update(
     # Batched Jacobians: (N, od, sd)
     H_batch = model.observation_jacobian_batch(means)
 
-    # Observation noise covariance — typically constant: (od, od)
-    R = tf.cast(model.observation_cov(means[0]), covs.dtype)
+    # Observation noise covariance — per-particle (N, od, od) or shared (od, od)
+    if hasattr(model, 'observation_cov_batch'):
+        R_b = tf.cast(model.observation_cov_batch(means), covs.dtype)  # (N, od, od)
+    else:
+        R = tf.cast(model.observation_cov(means[0]), covs.dtype)  # (od, od)
+        R_b = tf.expand_dims(R, 0)  # (1, od, od) — broadcasts with (N, ...)
 
     # Innovation: (N, od)
     innovation = tf.expand_dims(observation, 0) - y_pred
@@ -94,7 +98,7 @@ def batched_ekf_update(
     # S = H @ cov @ H^T + R: (N, od, od)
     H_cov = tf.matmul(H_batch, covs)  # (N, od, sd)
     H_T = tf.linalg.matrix_transpose(H_batch)  # (N, sd, od)
-    S = tf.matmul(H_cov, H_T) + tf.expand_dims(R, 0)
+    S = tf.matmul(H_cov, H_T) + R_b
 
     # Kalman gain: K = cov @ H^T @ S^{-1}: (N, sd, od)
     # Solve via Cholesky: S K^T = H cov  (S, cov symmetric)
@@ -111,7 +115,7 @@ def batched_ekf_update(
     I_KH = tf.expand_dims(I, 0) - KH                    # (N, sd, sd)
     I_KH_T = tf.linalg.matrix_transpose(I_KH)           # (N, sd, sd)
     term1 = tf.matmul(tf.matmul(I_KH, covs), I_KH_T)   # (N, sd, sd)
-    K_R = tf.matmul(K, tf.expand_dims(R, 0))            # (N, sd, od)
+    K_R = tf.matmul(K, R_b)                             # (N, sd, od)
     K_T = tf.linalg.matrix_transpose(K)                 # (N, od, sd)
     term2 = tf.matmul(K_R, K_T)                         # (N, sd, sd)
     cov_updated = symmetrize(term1 + term2)

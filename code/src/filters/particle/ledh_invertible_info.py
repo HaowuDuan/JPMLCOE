@@ -1,0 +1,499 @@
+"""Information-form LEDH invertible particle flow filter."""
+
+import tensorflow as tf
+import numpy as np
+import time
+from typing import Tuple, Optional, Callable, Dict, Any
+from ...core.model_base import StateSpaceModel
+from ...core.types import FilterResult
+from ..kalman.batched_ekf import batched_ekf_predict, batched_ekf_update
+from ..kalman.batched_ukf import batched_ukf_predict, batched_ukf_update, compute_ukf_weights
+from ...utils.distributions import compute_flow_weights
+from ...utils.linalg import safe_log_abs_det
+from ...utils.distributions import sample_particles_cholesky
+from ...utils.constants import FlowScheduleConfig
+from ...utils.resampling_config import resolve_resampling
+from ...resampling.diagnosis import effective_sample_size as ess_tf
+
+
+class LEDHInvertibleInfoFilter:
+    """
+    Local Exact Daum-Huang (LEDH) Invertible Particle Flow Filter - Algorithm 1.
+
+    Uses per-particle local linearization with batched EKF for covariance tracking.
+    """
+
+    def __init__(
+        self,
+        model: StateSpaceModel,
+        n_particles: int = 1000,
+        n_lambda_steps: int = 29,
+        regularization: float = 1e-8,
+        resample_threshold: float = 0.5,
+        resampling_method: Optional[Callable] = None,
+        resampling_config: Optional[Dict[str, Any]] = None,
+        weight_clip_range: Optional[float] = None,
+        debug_mode: bool = False,
+        flow_config: FlowScheduleConfig = FlowScheduleConfig(),
+        geometric_ratio: Optional[float] = None,
+        filter_type: str = 'ekf',
+        ukf_params: Optional[Dict[str, float]] = None,
+        cov_regularization_eps: float = 0.0,
+        prior_info_jitter: float = 0.0,
+        **filter_kwargs
+    ):
+        """
+        Args:
+            model: StateSpaceModel
+            n_particles: Number of particles
+            n_lambda_steps: Number of flow integration steps
+            regularization: Regularization strength for numerical stability (default: 1e-8)
+            resample_threshold: Resample when ESS/N < threshold
+            resampling_method: Resampling function (systematic/soft/ot_entropy)
+            resampling_config: Dict of additional parameters for resampling
+            weight_clip_range: If set, clip log-weights to (-val, val) before normalization.
+                              Prevents weight collapse while preserving gradient signal.
+                              Typical values: 30-50. None = no clipping (MATLAB behavior).
+            debug_mode: If True, store detailed diagnostics
+            flow_config: Flow schedule configuration
+            geometric_ratio: If set, overrides flow_config.geometric_ratio (convenient for YAML configs)
+            filter_type: 'ekf' or 'ukf' for per-particle covariance tracking
+            ukf_params: Dict with UKF-specific params (alpha, beta, kappa). Only used when filter_type='ukf'.
+            cov_regularization_eps: Adaptive covariance regularization strength for P before inversion.
+            prior_info_jitter: Diagonal jitter added to the prior information matrix Lambda_0.
+        """
+        self.model = model
+        self.filter_type = filter_type
+        self.ukf_params = ukf_params or {}
+        self.cov_regularization_eps = cov_regularization_eps
+        self.prior_info_jitter = prior_info_jitter
+        self.cholesky_fallback_count = 0
+        if geometric_ratio is not None:
+            flow_config = FlowScheduleConfig(geometric_ratio=geometric_ratio)
+        self.flow_config = flow_config
+        self.dtype = getattr(model, 'dtype', tf.float64)
+        self.state_dim = model.state_dim
+        self.obs_dim = model.obs_dim
+        self.n_particles = n_particles
+        self.n_lambda_steps = n_lambda_steps
+        self.regularization = regularization
+        self.resample_threshold = resample_threshold
+        self.weight_clip_range = (-weight_clip_range, weight_clip_range) if weight_clip_range is not None else None
+        self.debug_mode = debug_mode
+
+        # Resolve resampling method and config
+        self.resampling_method, self.resampling_method_name, self.resampling_config = (
+            resolve_resampling(resampling_method, resampling_config)
+        )
+
+        # Particles and weights
+        self.particles = None
+        self.weights = None
+        self.particles_prev = None
+        self.eta_0 = None
+        self.eta_bar_0 = None
+
+        # Per-particle covariances (managed via batched EKF)
+        self.particle_covs = None
+
+        # Cache R_inv (constant across timesteps)
+        self.R_inv_cache = None
+
+        # Storage
+        self.means = []
+        self.covs = []
+        self.log_likelihoods = []
+        self.ess_history = []
+        self.weights_history = []
+        self.resampled_at = []
+        self.n_unique_particles = []
+        self.cholesky_fallback_count = 0
+
+        # RNG key for stateless random sampling
+        self.rng_key = tf.constant([42, 0], dtype=tf.int32)
+
+        # Debug storage (populated on demand when debug_mode=True)
+        self.debug_info = {} if self.debug_mode else None
+
+        self._generate_lambda_steps()
+
+    def _cholesky_solve_with_fallback(self, matrix: tf.Tensor, rhs: tf.Tensor) -> tf.Tensor:
+        """Solve matrix * X = rhs, retrying once with adaptive jitter if Cholesky produces NaNs."""
+        L = tf.linalg.cholesky(matrix)
+        if bool(tf.reduce_any(tf.math.is_nan(L)).numpy()):
+            dim = tf.cast(tf.shape(matrix)[-1], self.dtype)
+            trace = tf.linalg.trace(matrix)
+            jitter = tf.constant(1.0e-8, dtype=self.dtype) * trace / dim
+            I = tf.eye(tf.shape(matrix)[-1], dtype=self.dtype)
+            matrix = matrix + jitter[..., tf.newaxis, tf.newaxis] * I
+            L = tf.linalg.cholesky(matrix)
+            self.cholesky_fallback_count += 1
+        return tf.linalg.cholesky_solve(L, rhs)
+
+    def _compute_r_inv(self, R: tf.Tensor) -> tf.Tensor:
+        """Invert R using diagonal reciprocal when possible, otherwise Cholesky solve."""
+        diag = tf.linalg.diag_part(R)
+        R_diag = tf.linalg.diag(diag)
+        if bool(tf.reduce_all(tf.abs(R - R_diag) <= tf.constant(1.0e-12, dtype=self.dtype)).numpy()):
+            return tf.linalg.diag(tf.math.reciprocal(diag))
+        I_obs = tf.eye(self.obs_dim, dtype=self.dtype)
+        return self._cholesky_solve_with_fallback(R, I_obs)
+
+    def _next_seed(self):
+        """Split RNG key, return subkey for use."""
+        keys = tf.random.experimental.stateless_split(self.rng_key, num=2)
+        self.rng_key = keys[0]
+        return keys[1]
+
+    def _generate_lambda_steps(self):
+        """Generate exponentially spaced step sizes as TF tensor."""
+        q = self.flow_config.geometric_ratio
+        epsilon_1 = (1 - q) / (1 - q**self.n_lambda_steps)
+        lambda_steps_np = epsilon_1 * q**np.arange(self.n_lambda_steps)
+        self.lambda_steps = tf.constant(lambda_steps_np, dtype=self.dtype)
+
+    def initialize(self, initial_mean: Optional[np.ndarray] = None,
+                   initial_cov: Optional[np.ndarray] = None,
+                   random_seed: Optional[int] = None):
+        """Initialize particles and per-particle filters."""
+        if random_seed is not None:
+            self.rng_key = tf.constant([random_seed, 0], dtype=tf.int32)
+        else:
+            self.rng_key = tf.constant([42, 0], dtype=tf.int32)
+
+        if initial_mean is None:
+            # Use model's initial mean directly (not a random sample)
+            initial_mean = np.asarray(self.model.mu_0, dtype=np.float64 if self.dtype == tf.float64 else np.float32)
+
+        if initial_cov is None:
+            if hasattr(self.model, 'Sigma_0'):
+                initial_cov = np.asarray(self.model.Sigma_0)
+            elif hasattr(self.model, 'stationary_var'):
+                initial_cov = np.eye(self.state_dim) * self.model.stationary_var
+            else:
+                initial_cov = np.eye(self.state_dim)
+
+        # Sample initial particles using TensorFlow
+        seed = self._next_seed()
+        initial_mean_tf = tf.constant(initial_mean, dtype=self.dtype)
+        initial_cov_tf = tf.constant(initial_cov, dtype=self.dtype)
+
+        particles_tf = sample_particles_cholesky(
+            initial_mean_tf, initial_cov_tf, self.n_particles, self.state_dim, seed, self.dtype
+        )
+
+        self.particles = tf.Variable(particles_tf, dtype=self.dtype)
+        self.weights = tf.Variable(tf.ones(self.n_particles, dtype=self.dtype) / self.n_particles)
+
+        # Per-particle covariances for batched EKF (TF Variable)
+        self.particle_covs = tf.Variable(
+            tf.tile(tf.expand_dims(initial_cov_tf, 0), [self.n_particles, 1, 1]),
+            dtype=self.dtype
+        )
+
+        # Pre-allocate Variables used in predict() to avoid per-timestep allocation
+        self.particles_prev = tf.Variable(tf.zeros_like(particles_tf), dtype=self.dtype)
+        self.eta_bar_0 = tf.Variable(tf.zeros([self.n_particles, self.state_dim], dtype=self.dtype))
+        self.eta_0 = tf.Variable(tf.zeros([self.n_particles, self.state_dim], dtype=self.dtype))
+
+        # Pre-compute UKF weights if needed
+        if self.filter_type == 'ukf':
+            alpha = self.ukf_params.get('alpha', 1e-3)
+            beta = self.ukf_params.get('beta', 2.0)
+            kappa = self.ukf_params.get('kappa', 0.0)
+            self._ukf_weights_mean, self._ukf_weights_cov, self._ukf_lambda = (
+                compute_ukf_weights(self.state_dim, alpha, beta, kappa, self.dtype)
+            )
+
+        self.means = []
+        self.covs = []
+        self.log_likelihoods = []
+        self.ess_history = []
+        self.weights_history = []
+        self.resampled_at = []
+        self.n_unique_particles = []
+
+    def predict(self, t=None):
+        """Prediction step with batched EKF (all TF ops)."""
+        if t is not None and hasattr(self.model, 't'):
+            self.model.t = t
+
+        self.particles_prev.assign(self.particles.value())
+
+        # Batched predict - single tf.function call (all TF tensors)
+        if self.filter_type == 'ukf':
+            eta_bar_0_tf, cov_pred_tf = batched_ukf_predict(
+                self.model, self.particles.value(), self.particle_covs.value(),
+                self._ukf_weights_mean, self._ukf_weights_cov,
+                self._ukf_lambda, self.state_dim
+            )
+        else:
+            eta_bar_0_tf, cov_pred_tf = batched_ekf_predict(
+                self.model, self.particles.value(), self.particle_covs.value()
+            )
+        self.particle_covs.assign(cov_pred_tf)
+
+        self.eta_bar_0.assign(eta_bar_0_tf)
+
+        # Stochastic prediction - use batch method
+        seed = self._next_seed()
+        eta_0_tf = self.model.state_transition_batch(self.particles_prev.value(), seed)
+        self.eta_0.assign(eta_0_tf)
+
+    def update(self, y: tf.Tensor):
+        """Update step with per-particle local flow using batched operations."""
+        R = self.model.observation_noise_cov
+
+        eta_1 = self.eta_0.value()
+        eta_bar = self.eta_bar_0.value()
+
+        lambda_val = tf.constant(0.0, dtype=self.dtype)
+        log_theta = tf.zeros(self.n_particles, dtype=self.dtype)
+
+        # Cache R_inv (constant across timesteps)
+        if self.R_inv_cache is None:
+            self.R_inv_cache = self._compute_r_inv(R)
+        R_inv = self.R_inv_cache
+
+        # Use TF tensors directly (particle_covs is TF Variable, eta_bar_0 is TF Variable)
+        particle_covs_tf = self.particle_covs.value()
+        eta_bar_0_tf = self.eta_bar_0.value()
+
+        I_sd = tf.eye(self.state_dim, dtype=self.dtype)
+        I_batch = tf.broadcast_to(
+            tf.expand_dims(I_sd, 0),
+            [self.n_particles, self.state_dim, self.state_dim]
+        )
+        R_inv_b = tf.expand_dims(R_inv, 0)
+
+        # Information-form preprocessing: Lambda_0 = P_reg^{-1} + prior_info_jitter I.
+        cov_reg_eps = tf.constant(self.cov_regularization_eps, dtype=self.dtype)
+        trace_P = tf.linalg.trace(particle_covs_tf)
+        state_dim_f = tf.cast(self.state_dim, self.dtype)
+        P_reg = particle_covs_tf + (
+            cov_reg_eps * trace_P[:, tf.newaxis, tf.newaxis] / state_dim_f
+        ) * tf.expand_dims(I_sd, 0)
+        Lambda_0 = self._cholesky_solve_with_fallback(P_reg, I_batch)
+        prior_jitter = tf.constant(self.prior_info_jitter, dtype=self.dtype)
+        if self.prior_info_jitter != 0.0:
+            Lambda_0 = Lambda_0 + prior_jitter * tf.expand_dims(I_sd, 0)
+
+        # Flow loop — batched over all N particles per lambda step
+        for j in range(self.n_lambda_steps):
+            d_lambda = self.lambda_steps[j]
+            lambda_val = lambda_val + d_lambda
+
+            # Information-form Gaussian flow at per-particle linearization points.
+            H_batch = self.model.observation_jacobian_batch(eta_bar)  # (N, obs_dim, state_dim)
+            h_batch = self.model.observation_function_batch(eta_bar)  # (N, obs_dim)
+            e_batch = h_batch - tf.einsum('nij,nj->ni', H_batch, eta_bar)
+            z_minus_e = tf.expand_dims(y, 0) - e_batch
+
+            H_T_R_inv = tf.matmul(H_batch, R_inv_b, transpose_a=True)  # (N, state_dim, obs_dim)
+            H_T_R_inv_H = tf.matmul(H_T_R_inv, H_batch)  # (N, state_dim, state_dim)
+            Lambda_lam = Lambda_0 + lambda_val * H_T_R_inv_H
+            P_lam = self._cholesky_solve_with_fallback(Lambda_lam, I_batch)
+
+            K_lam = tf.matmul(P_lam, H_T_R_inv)  # P_lambda H^T R^{-1}
+            A_batch = -0.5 * tf.matmul(K_lam, H_batch)
+            innovation_push = tf.einsum('nij,nj->ni', K_lam, z_minus_e)
+            I_plus_2lambda_A = tf.expand_dims(I_sd, 0) + 2.0 * lambda_val * A_batch
+            mu_lambda = (
+                tf.einsum('nij,nj->ni', I_plus_2lambda_A, eta_bar_0_tf)
+                + lambda_val * innovation_push
+            )
+            b_batch = tf.einsum('nij,nj->ni', A_batch, mu_lambda) + innovation_push
+
+            # Vectorized Euler step for eta_bar: dx/dλ = A@x + b
+            drift_bar = tf.einsum('nij,nj->ni', A_batch, eta_bar) + b_batch
+            eta_bar = eta_bar + d_lambda * drift_bar
+
+            # Vectorized Euler step for eta_1 (same A, b)
+            drift_1 = tf.einsum('nij,nj->ni', A_batch, eta_1) + b_batch
+            eta_1 = eta_1 + d_lambda * drift_1
+
+            # Vectorized log-det of Jacobian: M = I + dλ * A
+            M_batch = tf.expand_dims(I_sd, 0) + d_lambda * A_batch  # (N, sd, sd)
+            log_det_M = safe_log_abs_det(M_batch)  # (N,)
+            log_theta = log_theta + log_det_M
+
+        # Normalize Jacobians for numerical stability
+        max_log_theta = tf.reduce_max(log_theta)
+        log_theta = log_theta - max_log_theta
+        theta = tf.exp(log_theta)
+
+        self.particles.assign(eta_1)
+
+        # Compute weights using shared utility (with Jacobians for LEDH)
+        weights_new, log_lik = compute_flow_weights(
+            eta_1=eta_1,
+            eta_0=self.eta_0.value(),
+            particles_prev=self.particles_prev.value(),
+            observation=y,
+            model=self.model,
+            prev_weights=self.weights.value(),
+            jacobians=theta,
+            clip_range=self.weight_clip_range
+        )
+        self.weights.assign(weights_new)
+
+        # Store as numpy immediately to avoid retaining TF graph references
+        self.weights_history.append(self.weights.numpy())
+
+        # Log-likelihood from importance-weighted estimate
+        # Keep TF tensor for HMC gradient path; store numpy for diagnostics
+        self._last_log_lik = log_lik + max_log_theta
+        self.log_likelihoods.append(float(self._last_log_lik.numpy()))
+
+        # Update per-particle covariances via batched EKF/UKF (all TF tensors)
+        if self.filter_type == 'ukf':
+            _, cov_updated = batched_ukf_update(
+                self.model, self.eta_bar_0.value(), self.particle_covs.value(), y,
+                self._ukf_weights_mean, self._ukf_weights_cov,
+                self._ukf_lambda, self.state_dim
+            )
+        else:
+            _, cov_updated = batched_ekf_update(
+                self.model, self.eta_bar_0.value(), self.particle_covs.value(), y
+            )
+        self.particle_covs.assign(cov_updated)
+
+        # ESS and resampling
+        ess = ess_tf(self.weights.value())
+        self.ess_history.append(float(ess.numpy()))
+
+        if ess < self.resample_threshold * self.n_particles:
+            self._resample()
+            self.resampled_at.append(len(self.ess_history) - 1)
+            # Count unique particles (numpy needed for np.unique)
+            particles_np = self.particles.numpy()
+            n_unique = len(np.unique(particles_np, axis=0))
+            self.n_unique_particles.append(n_unique)
+
+    def _resample(self):
+        """Resample particles and per-particle covariances."""
+        seed = self._next_seed()
+
+        result = self.resampling_method(
+            self.particles.value(),
+            self.weights.value(),
+            seed=seed,
+            **self.resampling_config
+        )
+
+        # Get ancestor indices from ResampleResult
+        if result.ancestor_indices is not None:
+            # Index-based (systematic, soft): direct gather
+            indices = result.ancestor_indices
+        elif result.transport_matrix is not None:
+            # Transport-based (OT): use dominant ancestor per row
+            indices = tf.argmax(result.transport_matrix, axis=1)
+        else:
+            raise ValueError("ResampleResult has neither ancestor_indices nor transport_matrix")
+
+        # Resample covariances using ancestor indices
+        self.particle_covs.assign(tf.gather(self.particle_covs.value(), indices))
+
+        self.particles.assign(result.particles)
+        self.weights.assign(result.weights)
+
+    def _estimate_mean_cov(self) -> Tuple[tf.Tensor, tf.Tensor]:
+        """Estimate weighted mean and covariance (TF ops)."""
+        particles = self.particles.value()
+        weights = self.weights.value()
+
+        mean = tf.reduce_sum(weights[:, tf.newaxis] * particles, axis=0)
+        diff = particles - mean
+        cov = tf.reduce_sum(
+            weights[:, tf.newaxis, tf.newaxis] *
+            tf.einsum('ij,ik->ijk', diff, diff),
+            axis=0
+        )
+        return mean, cov
+
+    def log_marginal_likelihood_tf(
+        self,
+        observations: tf.Tensor,
+        seed: tf.Tensor = None
+    ) -> tf.Tensor:
+        """
+        Total log marginal likelihood as a differentiable TF scalar.
+
+        Runs the full LEDH filter (initialize, predict/update loop)
+        and sums per-step log-likelihoods. All ops stay in TF graph
+        for HMC gradient computation.
+
+        For differentiability, resampling must use a differentiable method
+        (ot_entropy or soft). Systematic resampling will break gradients.
+
+        Args:
+            observations: (T, obs_dim), dtype matching model
+            seed: TF random seed (2,) for initialization
+
+        Returns:
+            Scalar tf.Tensor: log p(y_{1:T})
+        """
+        random_seed = int(seed[0].numpy()) if seed is not None else 42
+        self.initialize(random_seed=random_seed)
+
+        T = observations.shape[0]
+        total_log_lik = tf.constant(0.0, dtype=self.dtype)
+
+        for t in range(T):
+            self.predict(t=t + 1)
+            self.update(observations[t])
+
+            # Accumulate the log-likelihood already computed in update()
+            # Use the TF tensor (not the numpy copy in the list) to preserve gradients
+            total_log_lik = total_log_lik + self._last_log_lik
+
+        return total_log_lik
+
+    def filter(self, observations: np.ndarray,
+               initial_mean: Optional[np.ndarray] = None,
+               initial_cov: Optional[np.ndarray] = None,
+               random_seed: Optional[int] = None,
+               progress_callback: Optional[Callable[[int, int, float], None]] = None) -> FilterResult:
+        """Run filter on sequence of observations."""
+        self.initialize(initial_mean, initial_cov, random_seed)
+        T = len(observations)
+
+        # Pre-convert observations to TF once
+        obs_tf = tf.constant(observations, dtype=self.dtype)
+
+        for t in range(T):
+            t0 = time.perf_counter()
+            self.predict(t=t + 1)
+            self.update(obs_tf[t])
+            mean, cov = self._estimate_mean_cov()
+            self.means.append(mean.numpy())
+            self.covs.append(cov.numpy())
+            if progress_callback is not None:
+                progress_callback(t, T, time.perf_counter() - t0)
+
+        resampling_rate = len(self.resampled_at) / T if T > 0 else 0.0
+
+        # All lists are already numpy — just stack
+        means_np = np.stack(self.means)
+        covs_np = np.stack(self.covs)
+        log_liks_np = np.array(self.log_likelihoods) if self.log_likelihoods else None
+        ess_np = np.array(self.ess_history)
+        weights_np = np.stack(self.weights_history)
+
+        return FilterResult(
+            means=means_np,
+            covs=covs_np,
+            log_likelihood=float(np.sum(log_liks_np)) if log_liks_np is not None else None,
+            log_likelihoods=log_liks_np,
+            ess=ess_np,
+            weights_history=weights_np,
+            resampled_at=self.resampled_at,
+            n_unique=np.array(self.n_unique_particles) if self.n_unique_particles else None,
+            metadata={
+                'filter_type': 'LEDHParticleFlowFilter',
+                'n_particles': self.n_particles,
+                'n_lambda_steps': self.n_lambda_steps,
+                'resampling_method': self.resampling_method_name,
+                'resampling_rate': resampling_rate
+            }
+        )

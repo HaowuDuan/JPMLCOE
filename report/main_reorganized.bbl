@@ -52,51 +52,21 @@ Adrien Corenflos, James Thornton, George Deligiannidis, and Arnaud Doucet.
 \newblock Differentiable particle filtering via entropy-regularized optimal
   transport, 2021.
 
+\bibitem{karkus2018particle}
+Peter Karkus, David Hsu, and Wee~Sun Lee.
+\newblock Particle filter networks with application to visual localization.
+\newblock In {\em Conference on Robot Learning (CoRL)}, pages 169--178. PMLR,
+  2018.
+
 \bibitem{Cuturi2013SinkhornDL}
 Marco Cuturi.
 \newblock Sinkhorn distances: Lightspeed computation of optimal transport.
 \newblock pages 2292--2300, 2013.
 
-\bibitem{chaudhari2025gradnetot}
-Shreyas Chaudhari, Srinivasa Pranav, and Jos{\'e} M.~F. Moura.
-\newblock Gradnetot: Learning optimal transport maps with gradnets.
-\newblock {\em arXiv preprint arXiv:2507.13191}, 2025.
-\newblock v2.
-
-\bibitem{Zhu2020TowardsDR}
-Michael Zhu, Kevin~P. Murphy, and Rico Jonschkowski.
-\newblock Towards differentiable resampling.
-\newblock {\em arXiv preprint arXiv:2004.11938}, 2020.
-
-\bibitem{Lee2019SetTransformer}
-Juho Lee, Yoonho Lee, Jungtaek Kim, Adam~R. Kosiorek, Seungjin Choi, and
-  Yee~Whye Teh.
-\newblock Set transformer: A framework for attention-based
-  permutation-invariant neural networks.
-\newblock In {\em Proceedings of the 36th International Conference on Machine
-  Learning}, volume~97 of {\em Proceedings of Machine Learning Research}, pages
-  3744--3753. PMLR, 2019.
-
-\bibitem{chen2023overview}
-Xiongjie Chen and Yunpeng Li.
-\newblock An overview of differentiable particle filters for data-adaptive
-  sequential bayesian inference.
-\newblock {\em Foundations of Data Science}, 2023.
-\newblock Also available as arXiv:2302.09639.
-
-\bibitem{amos2022amortized}
-Brandon Amos.
-\newblock Tutorial on amortized optimization: Learning to optimize over
-  continuous spaces.
-\newblock {\em arXiv preprint arXiv:2202.00665}, 2022.
-\newblock Version 5, October 2025.
-
-\bibitem{amos2023meta}
-Brandon Amos, Giulia Luise, Samuel Cohen, and Ievgen Redko.
-\newblock Meta optimal transport.
-\newblock In {\em Proceedings of the 40th International Conference on Machine
-  Learning}, PMLR 202, Honolulu, Hawaii, USA, 2023.
-\newblock arXiv:2206.05262v2.
+\bibitem{cremers2022unifiedframeworkimplicit}
+Daniel Cremers, Florian Bernard, Marvin Eisenberger, Laura Leal-Taixé, and
+  Aysim Toker.
+\newblock A unified framework for implicit sinkhorn differentiation, 2022.
 
 \bibitem{Metropolis1953}
 Nicholas Metropolis, Arianna~W. Rosenbluth, Marshall~N. Rosenbluth, Augusta~H.
@@ -118,12 +88,6 @@ Matthew~D. Hoffman and Andrew Gelman.
 \newblock The no-u-turn sampler: Adaptively setting path lengths in hamiltonian
   {Monte Carlo}.
 \newblock {\em Journal of Machine Learning Research}, 15(1):1593--1623, 2014.
-
-\bibitem{karkus2018particle}
-Peter Karkus, David Hsu, and Wee~Sun Lee.
-\newblock Particle filter networks with application to visual localization.
-\newblock In {\em Conference on Robot Learning (CoRL)}, pages 169--178. PMLR,
-  2018.
 
 \bibitem{beskos2013optimal}
 Alexandros Beskos, Natesh Pillai, Gareth~O. Roberts, Jes{\'u}s-Mari{\'a}

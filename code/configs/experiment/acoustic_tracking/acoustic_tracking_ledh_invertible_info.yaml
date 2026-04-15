@@ -1,0 +1,17 @@
+# @package _global_
+
+# Experiment: Information-form LEDH Invertible Flow on Acoustic Tracking Model
+
+defaults:
+  - override /model: acoustic_tracking_full
+  - override /filter: ledh_invertible_info
+
+# Override settings
+T: 100
+seed: 42
+dtype: float32
+plot: true
+output_dir: outputs/acoustic_tracking/acoustic_tracking_ledh_invertible_info
+
+filter:
+  cov_regularization_eps: 1.0e-4

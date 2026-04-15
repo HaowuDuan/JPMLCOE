@@ -6,45 +6,45 @@ Database file #1: main_reorganized.bib
 Warning--empty journal in Pulido2019
 Warning--empty journal in HuVanLeeuwen2021
 Warning--empty journal in Cuturi2013SinkhornDL
-You've used 23 entries,
+You've used 18 entries,
             1791 wiz_defined-function locations,
-            593 strings with 7753 characters,
-and the built_in function-call counts, 5559 in all, are:
-= -- 514
-> -- 224
-< -- 9
-+ -- 84
-- -- 61
-* -- 323
-:= -- 833
-add.period$ -- 74
-call.type$ -- 23
-change.case$ -- 22
+            557 strings with 6635 characters,
+and the built_in function-call counts, 4410 in all, are:
+= -- 405
+> -- 173
+< -- 7
++ -- 65
+- -- 47
+* -- 260
+:= -- 645
+add.period$ -- 53
+call.type$ -- 18
+change.case$ -- 17
 chr.to.int$ -- 0
-cite$ -- 26
-duplicate$ -- 261
-empty$ -- 553
-format.name$ -- 61
-if$ -- 1285
+cite$ -- 21
+duplicate$ -- 198
+empty$ -- 450
+format.name$ -- 47
+if$ -- 1022
 int.to.chr$ -- 0
-int.to.str$ -- 23
-missing$ -- 20
-newline$ -- 118
-num.names$ -- 23
-pop$ -- 93
+int.to.str$ -- 18
+missing$ -- 14
+newline$ -- 88
+num.names$ -- 18
+pop$ -- 83
 preamble$ -- 1
 purify$ -- 0
 quote$ -- 0
-skip$ -- 152
+skip$ -- 123
 stack$ -- 0
-substring$ -- 354
-swap$ -- 85
-text.length$ -- 9
+substring$ -- 314
+swap$ -- 66
+text.length$ -- 7
 text.prefix$ -- 0
 top$ -- 0
 type$ -- 0
 warning$ -- 3
-while$ -- 50
-width$ -- 25
-write$ -- 250
+while$ -- 42
+width$ -- 20
+write$ -- 185
 (There were 3 warnings)
