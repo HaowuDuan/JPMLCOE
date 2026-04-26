@@ -1,0 +1,56 @@
+# @package _global_
+# RB + LEDH+OT HMC short-chain validation (100 steps total).
+# Purpose: compare tuned settings (mass_vector=[38, 65], step_size=0.1) against
+# the original run (no mass, step_size=0.001, 400+200 steps, ESS=31,
+# posterior mean sigma_bearing=0.140).
+# Apples-to-apples: same init (0.3, 0.3), same seed 42, same data.
+# 50 burnin + 50 samples = 100 total steps.
+
+model:
+  _target_: src.models.range_bearing.RangeBearingModel
+  sigma_range: 0.3
+  sigma_bearing: 0.3
+
+filter:
+  _target_: src.filters.particle.ledh_invertible_hmc.LEDHParticleFlowFilterHMC
+  n_particles: 500
+  n_lambda_steps: 15
+  resampling_method: ot_entropy
+  resampling_config:
+    epsilon: 0.5
+  weight_clip_range: 50.0
+  stop_gradient_resampling: false
+  eager_mode: false
+
+dpf:
+  sampler: hmc
+  trainable_params:
+    sigma_range:
+      constraint: positive
+      prior:
+        _target_: tensorflow_probability.distributions.LogNormal
+        loc: -2.05
+        scale: 0.5
+    sigma_bearing:
+      constraint: positive
+      prior:
+        _target_: tensorflow_probability.distributions.LogNormal
+        loc: -2.05
+        scale: 0.5
+  hmc:
+    num_samples: 50
+    num_burnin: 50
+    step_size: 0.1
+    num_leapfrog_steps: 5
+    max_tree_depth: 10
+    adaptation_rate: 0.8
+    target_accept_prob: 0.75
+    seed: 42
+    mass_vector: [38.0, 65.0]
+
+data:
+  T: 50
+  seed: 42
+  true_params:
+    sigma_range: 0.1
+    sigma_bearing: 0.1

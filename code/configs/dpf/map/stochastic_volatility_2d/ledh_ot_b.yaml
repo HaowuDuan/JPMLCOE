@@ -1,5 +1,5 @@
 # @package _global_
-# MAP: 2D SV with LEDH + OT resampling — Level 0: infer sigma2 only
+# MAP: 2D SV with LEDH + OT resampling — Level 0: infer b only
 # True: a1=0.95, a2=0.91, sigma1=0.5, sigma2=1.0, b=1.0 (fixed)
 
 dtype: float32
@@ -9,8 +9,8 @@ model:
   a1: 0.95
   a2: 0.91
   sigma1: 0.5
-  sigma2: 2.0       # Initial guess (true: 1.0)
-  b: 1.0
+  sigma2: 1.0
+  b: 2.0               # Initial guess (true: 1.0)
 
 filter:
   _target_: src.filters.particle.ledh_invertible_hmc.LEDHParticleFlowFilterHMC
@@ -27,15 +27,15 @@ dpf:
   sampler: map
 
   trainable_params:
-    sigma2:
+    b:
       constraint: positive
       prior:
         _target_: tensorflow_probability.distributions.LogNormal
-        loc: 0.25           # log(1.0) + 0.25 = 0.25, mode=1.0
+        loc: 0.25            # mode = 1.0 (with scale=0.5)
         scale: 0.5
 
   map:
-    num_steps: 250
+    num_steps: 300
     learning_rate: 0.01
     optimizer: adam
     random_seed: false
@@ -45,4 +45,4 @@ data:
   T: 200
   seed: 42
   true_params:
-    sigma2: 1.0
+    b: 1.0

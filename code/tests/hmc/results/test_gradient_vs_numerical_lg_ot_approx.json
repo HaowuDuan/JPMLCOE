@@ -1,0 +1,61 @@
+{
+  "file": "test_gradient_vs_numerical_lg_ot_approx.py",
+  "created": "2026-04-15T11:13:09.806062Z",
+  "cases": [
+    {
+      "case_name": "LG LEDH+OT T=1",
+      "model": "linear_gaussian",
+      "filter": "ledh_ot",
+      "param_name": "obs_noise_std",
+      "param_value": 1.0,
+      "n_particles": 200,
+      "T": 1,
+      "n_lambda_steps": 15,
+      "fd_h": 0.0001,
+      "fd_n_radii": 5,
+      "fd_slopes": [
+        0.008924897056949987,
+        0.008924895769091279,
+        0.008924893624140395,
+        0.008924890618211556,
+        0.008924886755856676
+      ],
+      "log_likelihood": -2.0383775998314286,
+      "autodiff_grad": 0.00892406009788832,
+      "fd_grad_median": 0.008924893624140395,
+      "relative_error": 9.339341029463703e-05,
+      "tolerance": 0.03,
+      "passed": true,
+      "backward_method": "approx",
+      "timestamp": "2026-04-15T11:13:09.806075Z"
+    },
+    {
+      "case_name": "LG LEDH+OT T=5",
+      "model": "linear_gaussian",
+      "filter": "ledh_ot",
+      "param_name": "obs_noise_std",
+      "param_value": 1.0,
+      "n_particles": 200,
+      "T": 5,
+      "n_lambda_steps": 15,
+      "fd_h": 0.0001,
+      "fd_n_radii": 5,
+      "fd_slopes": [
+        -1.290228679264871,
+        -1.2902286768134985,
+        -1.2902286727634047,
+        -1.2902286670857244,
+        -1.2902286597853418
+      ],
+      "log_likelihood": -9.43706412542771,
+      "autodiff_grad": 0.3690228922911709,
+      "fd_grad_median": -1.2902286727634047,
+      "relative_error": 1.2860135571943225,
+      "tolerance": 0.03,
+      "passed": false,
+      "backward_method": "approx",
+      "timestamp": "2026-04-15T11:13:32.189118Z"
+    }
+  ],
+  "updated": "2026-04-15T11:13:32.189127Z"
+}

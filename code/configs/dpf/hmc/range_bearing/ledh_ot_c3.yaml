@@ -1,0 +1,51 @@
+# @package _global_
+# RB + LEDH+OT HMC, chain 3 of 4 (for R-hat)
+# Varies: seed=44, sigma_range init=0.2, sigma_bearing init=0.2
+
+model:
+  _target_: src.models.range_bearing.RangeBearingModel
+  sigma_range: 0.2
+  sigma_bearing: 0.2
+
+filter:
+  _target_: src.filters.particle.ledh_invertible_hmc.LEDHParticleFlowFilterHMC
+  n_particles: 500
+  n_lambda_steps: 15
+  resampling_method: ot_entropy
+  resampling_config:
+    epsilon: 0.5
+  weight_clip_range: 50.0
+  stop_gradient_resampling: false
+  eager_mode: false
+
+dpf:
+  sampler: hmc
+  trainable_params:
+    sigma_range:
+      constraint: positive
+      prior:
+        _target_: tensorflow_probability.distributions.LogNormal
+        loc: -2.05
+        scale: 0.5
+    sigma_bearing:
+      constraint: positive
+      prior:
+        _target_: tensorflow_probability.distributions.LogNormal
+        loc: -2.05
+        scale: 0.5
+  hmc:
+    num_samples: 400
+    num_burnin: 200
+    step_size: 0.001
+    num_leapfrog_steps: 5
+    max_tree_depth: 10
+    adaptation_rate: 0.8
+    target_accept_prob: 0.75
+    seed: 44
+
+data:
+  T: 50
+  seed: 42
+  true_params:
+    sigma_range: 0.1
+    sigma_bearing: 0.1

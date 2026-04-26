@@ -1,0 +1,103 @@
+{
+  "case_name": "RB leapfrog energy replay at tuned settings",
+  "model": "range_bearing",
+  "filter": "ledh_invertible_hmc",
+  "T": 50,
+  "data_seed": 42,
+  "n_particles": 500,
+  "n_lambda_steps": 15,
+  "ot_epsilon": 0.5,
+  "step_size": 0.1,
+  "num_leapfrog_steps": 5,
+  "mass_vector": [
+    50.0,
+    50.0
+  ],
+  "peak_sigma_range": 0.1,
+  "peak_sigma_bearing": 0.113,
+  "pf_seed": [
+    42,
+    0
+  ],
+  "num_trajectories": 5,
+  "per_trajectory": [
+    {
+      "traj_idx": 0,
+      "momentum_seed": [
+        42,
+        1000
+      ],
+      "delta_H": 0.00016117095947265625,
+      "log_accept_ratio": -0.00016117095947265625,
+      "accept_prob": 0.9998388420278687,
+      "is_accepted": true,
+      "displacement_q": 0.06779798865318298,
+      "sq_displacement_q": 0.004596567265417129
+    },
+    {
+      "traj_idx": 1,
+      "momentum_seed": [
+        42,
+        1001
+      ],
+      "delta_H": 0.0034046173095703125,
+      "log_accept_ratio": -0.0034046173095703125,
+      "accept_prob": 0.9966011718281456,
+      "is_accepted": true,
+      "displacement_q": 0.25249752402305603,
+      "sq_displacement_q": 0.06375499963777376
+    },
+    {
+      "traj_idx": 2,
+      "momentum_seed": [
+        42,
+        1002
+      ],
+      "delta_H": 0.0003757476806640625,
+      "log_accept_ratio": -0.0003757476806640625,
+      "accept_prob": 0.9996243229036548,
+      "is_accepted": true,
+      "displacement_q": 0.06577734649181366,
+      "sq_displacement_q": 0.004326659311504111
+    },
+    {
+      "traj_idx": 3,
+      "momentum_seed": [
+        42,
+        1003
+      ],
+      "delta_H": 0.0003428459167480469,
+      "log_accept_ratio": -0.0003428459167480469,
+      "accept_prob": 0.9996572128481973,
+      "is_accepted": true,
+      "displacement_q": 0.0807139202952385,
+      "sq_displacement_q": 0.006514736929426113
+    },
+    {
+      "traj_idx": 4,
+      "momentum_seed": [
+        42,
+        1004
+      ],
+      "delta_H": 0.00316619873046875,
+      "log_accept_ratio": -0.00316619873046875,
+      "accept_prob": 0.996838808390824,
+      "is_accepted": true,
+      "displacement_q": 0.17118853330612183,
+      "sq_displacement_q": 0.029305513935501182
+    }
+  ],
+  "summary": {
+    "delta_H_mean": 0.0014901161193847656,
+    "delta_H_std": 0.0014696059947842293,
+    "delta_H_abs_mean": 0.0014901161193847656,
+    "delta_H_abs_median": 0.0003757476806640625,
+    "accept_prob_mean": 0.9985120715997381,
+    "accept_prob_median": 0.9996243229036548,
+    "esjd_q_space": 0.02169969541592446,
+    "rms_move_q_space": 0.14730816479721842,
+    "posterior_std_q_assumed": 0.14,
+    "mixing_rate_per_step": 1.0522011771229887,
+    "verdict": "SCREENING PASSED: accept=1.00, rms_move/std_q=1.05. Settings are not obviously broken. Full chain needed to certify convergence."
+  }
+}

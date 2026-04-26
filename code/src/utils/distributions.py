@@ -93,7 +93,7 @@ def multivariate_normal_sample(mean: tf.Tensor, cov: tf.Tensor,
         Samples of shape (n_samples, d)
     """
     d = tf.shape(mean)[0]
-    L = tf.linalg.cholesky(cov)
+    L = safe_cholesky(cov)
     z = tf.random.stateless_normal([n_samples, d], seed=seed, dtype=mean.dtype)
 
     # Correct batch multiplication: z @ L^T

@@ -1,0 +1,49 @@
+# @package _global_
+# HMC: 1D SV with LEDH + OT resampling, chain 4 of 4 (for R-hat)
+# Varies: seed=45, alpha init=0.97
+
+dtype: float32
+
+model:
+  _target_: src.models.stochastic_volatility.StochasticVolatilityModel
+  alpha: 0.97
+  sigma: 1.0
+  beta: 0.5
+  log_space: true
+
+filter:
+  _target_: src.filters.particle.ledh_invertible_hmc.LEDHParticleFlowFilterHMC
+  n_particles: 500
+  n_lambda_steps: 29
+  resampling_method: ot_entropy
+  resampling_config:
+    epsilon: 0.5
+  weight_clip_range: 50.0
+  stop_gradient_resampling: false
+  eager_mode: false
+
+dpf:
+  sampler: hmc
+  trainable_params:
+    alpha:
+      constraint: [0.001, 0.999]
+      prior:
+        _target_: tensorflow_probability.distributions.Beta
+        concentration1: 17.38
+        concentration0: 2.62
+  hmc:
+    num_samples: 400
+    num_burnin: 200
+    step_size: 0.001
+    num_leapfrog_steps: 5
+    max_tree_depth: 10
+    adaptation_rate: 0.8
+    target_accept_prob: 0.75
+    seed: 45
+    grad_clip_norm: 100.0
+
+data:
+  T: 100
+  seed: 42
+  true_params:
+    alpha: 0.91

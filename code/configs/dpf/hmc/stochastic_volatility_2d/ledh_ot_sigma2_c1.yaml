@@ -1,6 +1,6 @@
 # @package _global_
-# MAP: 2D SV with LEDH + OT resampling — Level 0: infer sigma2 only
-# True: a1=0.95, a2=0.91, sigma1=0.5, sigma2=1.0, b=1.0 (fixed)
+# HMC: 2D SV with LEDH+OT, chain 1 of 4 (for R-hat)
+# Varies: seed=42, sigma2 init=0.6
 
 dtype: float32
 
@@ -9,7 +9,7 @@ model:
   a1: 0.95
   a2: 0.91
   sigma1: 0.5
-  sigma2: 2.0       # Initial guess (true: 1.0)
+  sigma2: 0.6
   b: 1.0
 
 filter:
@@ -24,22 +24,24 @@ filter:
   eager_mode: false
 
 dpf:
-  sampler: map
-
+  sampler: hmc
   trainable_params:
     sigma2:
       constraint: positive
       prior:
         _target_: tensorflow_probability.distributions.LogNormal
-        loc: 0.25           # log(1.0) + 0.25 = 0.25, mode=1.0
+        loc: 0.25
         scale: 0.5
-
-  map:
-    num_steps: 250
-    learning_rate: 0.01
-    optimizer: adam
-    random_seed: false
+  hmc:
+    num_samples: 400
+    num_burnin: 200
+    step_size: 0.005
+    num_leapfrog_steps: 5
+    max_tree_depth: 10
+    adaptation_rate: 0.8
+    target_accept_prob: 0.65
     seed: 42
+    grad_clip_norm: 100.0
 
 data:
   T: 200

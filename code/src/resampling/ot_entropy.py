@@ -445,8 +445,20 @@ def _sinkhorn_implicit_vjp(dT, T, epsilon):
     bottom = tf.concat([tf.transpose(T_free), tf.linalg.diag(b[:-1])], axis=1)  # (N-1, 2N-1)
     K = tf.concat([top, bottom], axis=0)     # (2N-1, 2N-1)
 
-    # Solve K @ [u; v] = rhs
-    sol = tf.linalg.solve(K, rhs[:, tf.newaxis])[:, 0]  # (2N-1,)
+    # Ridge regularization to prevent MatrixSolve failures at near-singular K.
+    # K becomes ill-conditioned when transport plan is sharp (one particle dominates).
+    # Earlier attempt scaled by mean(|diag(K)|), but for large N the marginals are
+    # ~1/N which makes diag-scaled ridge effectively zero. Use max(|K|) as the
+    # scale anchor (always ~O(1)) plus an absolute floor.
+    max_abs = tf.reduce_max(tf.abs(K))
+    ridge = tf.maximum(
+        tf.constant(1e-4, dtype=dtype) * max_abs,
+        tf.constant(1e-6, dtype=dtype),
+    )
+    K_reg = K + ridge * tf.eye(tf.shape(K)[0], dtype=dtype)
+
+    # Solve K_reg @ [u; v] = rhs
+    sol = tf.linalg.solve(K_reg, rhs[:, tf.newaxis])[:, 0]  # (2N-1,)
 
     u = sol[:N]                              # (N,) — row potential adjoint
     v_free = sol[N:]                         # (N-1,) — column potential adjoint

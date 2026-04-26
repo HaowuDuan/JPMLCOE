@@ -1,0 +1,158 @@
+[
+  {
+    "model": "linear_gaussian",
+    "filter": "ledh_ot",
+    "num_chains": 4,
+    "params": {
+      "obs_noise_std": {
+        "rhat": 1.0006668457472538,
+        "ess": 628.6446754161354,
+        "num_samples_per_chain": 400,
+        "posterior_mean": 1.2024461602941825,
+        "posterior_std": 0.1787087318688713,
+        "chain_means": [
+          1.199743204186501,
+          1.2092938242271976,
+          1.209863100758354,
+          1.1908845120046765
+        ],
+        "chain_stds": [
+          0.18062706535878698,
+          0.17838863625442028,
+          0.1859462508256891,
+          0.1687593366711075
+        ]
+      }
+    }
+  },
+  {
+    "model": "linear_gaussian",
+    "filter": "bpf_ot",
+    "num_chains": 4,
+    "params": {
+      "obs_noise_std": {
+        "rhat": 1.087024037102419,
+        "ess": 45.380770518667646,
+        "num_samples_per_chain": 400,
+        "posterior_mean": 1.2236130963385998,
+        "posterior_std": 0.18276185125076494,
+        "chain_means": [
+          1.1955623529248345,
+          1.21611379605357,
+          1.293118311533043,
+          1.1896579248429522
+        ],
+        "chain_stds": [
+          0.17485970238986812,
+          0.16346282943971308,
+          0.2005666005429812,
+          0.17104850594902754
+        ]
+      }
+    }
+  },
+  {
+    "model": "linear_gaussian",
+    "filter": "bpf_ot_long",
+    "num_chains": 4,
+    "params": {
+      "obs_noise_std": {
+        "rhat": 1.0012021488241212,
+        "ess": 7599.929592752789,
+        "num_samples_per_chain": 2000,
+        "posterior_mean": 1.1935523336578338,
+        "posterior_std": 0.16837813517261152,
+        "chain_means": [
+          1.1969897323037288,
+          1.185318378898965,
+          1.1994607081518227,
+          1.1924405152768185
+        ],
+        "chain_stds": [
+          0.17126422988461756,
+          0.16504486092317178,
+          0.17354036720437252,
+          0.16309974022842819
+        ]
+      }
+    }
+  },
+  {
+    "model": "range_bearing",
+    "filter": "ledh_ot",
+    "num_chains": 4,
+    "params": {
+      "sigma_range": {
+        "rhat": 1.003167841228819,
+        "ess": 823.3831349281547,
+        "num_samples_per_chain": 400,
+        "posterior_mean": 0.10628009378156332,
+        "posterior_std": 0.014686526760689931,
+        "chain_means": [
+          0.10702105263656066,
+          0.10630664721040263,
+          0.1048747838317394,
+          0.10691789144755064
+        ],
+        "chain_stds": [
+          0.014697918947171696,
+          0.014062671630129316,
+          0.015334629791316804,
+          0.014522618240229185
+        ]
+      },
+      "sigma_bearing": {
+        "rhat": 1.0936972662579483,
+        "ess": 87.66349042937246,
+        "num_samples_per_chain": 400,
+        "posterior_mean": 0.12689804768031518,
+        "posterior_std": 0.01328920899535179,
+        "chain_means": [
+          0.12627463948320922,
+          0.1220647284909187,
+          0.129596341134195,
+          0.12965648161293786
+        ],
+        "chain_stds": [
+          0.013820961268765348,
+          0.008862315477353512,
+          0.01153312854973405,
+          0.016284971146437805
+        ]
+      }
+    }
+  },
+  {
+    "model": "stochastic_volatility",
+    "filter": "ledh_ot",
+    "num_chains": 4,
+    "params": {
+      "alpha": {
+        "rhat": 1.0055604407293242,
+        "ess": 616.3796702126739,
+        "num_samples_per_chain": 400,
+        "posterior_mean": 0.9204944202676415,
+        "posterior_std": 0.02787203863413927,
+        "chain_means": [
+          0.9172340478003025,
+          0.9208428360521793,
+          0.9219185991585255,
+          0.9219821980595588
+        ],
+        "chain_stds": [
+          0.028352385979937993,
+          0.02746379808933132,
+          0.027103419931399624,
+          0.028278889508094464
+        ]
+      }
+    }
+  },
+  {
+    "model": "stochastic_volatility_2d",
+    "filter": "ledh_ot_sigma2",
+    "num_chains": 4,
+    "params": {},
+    "error": "missing file: /Users/haowuduan/Documents/githubrepos/JPMLCOE/code/outputs/dpf/hmc/stochastic_volatility_2d/ledh_ot_sigma2_c1/samples_sigma2.npy"
+  }
+]

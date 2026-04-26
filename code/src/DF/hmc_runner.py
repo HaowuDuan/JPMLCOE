@@ -205,11 +205,16 @@ class DPFRunner:
                 )
 
         # Adaptive step size
+        # shrinkage_target=initial_step_size anchors DA at the initial value
+        # instead of the default 10*init, which prevents runaway growth on
+        # cliffy targets (LEDH+OT crashes in backward at large step sizes).
+        # TFP takes log(shrinkage_target) internally, so we pass the value, not its log.
         num_adaptation_steps = int(adaptation_rate * num_burnin)
         adaptive_kernel = tfp.mcmc.DualAveragingStepSizeAdaptation(
             inner_kernel,
             num_adaptation_steps=num_adaptation_steps,
-            target_accept_prob=target_accept_prob
+            target_accept_prob=target_accept_prob,
+            shrinkage_target=tf.constant(step_size, dtype=dtype),
         )
 
         if seed is not None:

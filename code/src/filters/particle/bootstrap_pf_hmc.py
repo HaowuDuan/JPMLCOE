@@ -30,7 +30,7 @@ class BootstrapPFHMC(ParticleFilterTF):
         stop_gradient_resampling: bool = True,
         hmc_resampling_method: Optional[str] = None,
         hmc_resampling_config: Optional[Dict[str, Any]] = None,
-        always_resample: bool = False,
+        always_resample: bool = True,
         eager_mode: bool = False,
         **kwargs
     ):
@@ -40,10 +40,11 @@ class BootstrapPFHMC(ParticleFilterTF):
                 resampling in the HMC path.
             hmc_resampling_method: Override resampling method for HMC path.
             hmc_resampling_config: Config dict for HMC resampling method.
-            always_resample: If True, set resample threshold to N so every
-                timestep resamples. Eliminates tf.cond branch-switching
-                discontinuity that causes HMC step size collapse. Use with
-                soft resampling (near-no-op when ESS is already high).
+            always_resample: If True (default), set resample threshold to N
+                so every timestep resamples. Eliminates tf.cond branch-
+                switching discontinuity that causes HMC step size collapse.
+                Set False only for diagnostic scans that need to observe the
+                conditional-resampling path.
             eager_mode: If True, run without @tf.function.
         """
         super().__init__(*args, **kwargs)
