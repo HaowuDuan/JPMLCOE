@@ -304,17 +304,27 @@ def run_dpf_experiment(cfg: DictConfig) -> Dict[str, Any]:
         )
 
         with _PerfTracker() as perf:
+            # step_size may be scalar (float) or list (per-axis). Convert ListConfig to plain list.
+            _step_size = hmc_cfg.step_size
+            if hasattr(_step_size, '_content') or isinstance(_step_size, (list, tuple)):
+                _step_size = [float(x) for x in OmegaConf.to_container(_step_size, resolve=True)] \
+                    if hasattr(_step_size, '_content') else [float(x) for x in _step_size]
+            else:
+                _step_size = float(_step_size)
             result = runner.run_inference(
                 observations=observations,
                 num_samples=hmc_cfg.num_samples,
                 num_burnin=hmc_cfg.num_burnin,
-                step_size=hmc_cfg.step_size,
+                step_size=_step_size,
                 num_leapfrog_steps=hmc_cfg.get('num_leapfrog_steps', 10),
                 adaptation_rate=hmc_cfg.get('adaptation_rate', 0.8),
                 target_accept_prob=hmc_cfg.get('target_accept_prob', 0.75),
                 seed=hmc_cfg.get('seed', 42),
                 max_tree_depth=hmc_cfg.get('max_tree_depth', 10),
                 grad_clip_norm=float(hmc_cfg.get('grad_clip_norm', 100.0)),
+                step_count_smoothing=int(hmc_cfg.get('step_count_smoothing', 10)),
+                pre_warmup_map_steps=int(hmc_cfg.get('pre_warmup_map_steps', 0)),
+                pre_warmup_map_lr=float(hmc_cfg.get('pre_warmup_map_lr', 0.01)),
             )
 
     # 6. Print results
@@ -345,7 +355,12 @@ def run_dpf_experiment(cfg: DictConfig) -> Dict[str, Any]:
     if 'acceptance_rate' in result.diagnostics:
         print(f"  Acceptance rate: {result.diagnostics['acceptance_rate']:.1%}")
     if 'final_step_size' in result.diagnostics:
-        print(f"  Final step size: {result.diagnostics['final_step_size']:.6f}")
+        _fss = result.diagnostics['final_step_size']
+        if isinstance(_fss, (list, tuple)):
+            _fss_str = "[" + ", ".join(f"{x:.6f}" for x in _fss) + "]"
+        else:
+            _fss_str = f"{_fss:.6f}"
+        print(f"  Final step size: {_fss_str}")
     if 'ess' in result.diagnostics:
         print(f"  ESS: {result.diagnostics['ess']}")
     if 'rhat' in result.diagnostics:

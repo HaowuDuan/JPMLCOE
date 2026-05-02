@@ -1,6 +1,6 @@
 # @package _global_
-# RB + LEDH+OT HMC with diagonal mass matrix, chain 2 of 4 (for R-hat).
-# Mass = 1/var per axis from prior 4-chain pooled posterior (q-space std=0.146/0.110).
+# RB + LEDH+OT HMC with per-axis step_size, chain 2 of 4 (for R-hat).
+# step_size: [0.001, 0.004] = range axis 0.001, bearing axis 4x bigger.
 # Varies: seed=43, sigma_range init=0.1, sigma_bearing init=0.1.
 
 model:
@@ -37,13 +37,11 @@ dpf:
   hmc:
     num_samples: 400
     num_burnin: 200
-    step_size: 0.001
-    mass_vector: [47.26, 82.09]
-    num_leapfrog_steps: 5
+    step_size: [0.001, 0.004]
+    num_leapfrog_steps: 10
     max_tree_depth: 10
     adaptation_rate: 0.8
     target_accept_prob: 0.75
-    step_count_smoothing: 100
     seed: 43
 
 data:

@@ -136,6 +136,9 @@ class DPFRunner:
         seed: Optional[int] = None,
         max_tree_depth: int = 10,
         grad_clip_norm: float = 100.0,
+        step_count_smoothing: int = 10,
+        pre_warmup_map_steps: int = 0,
+        pre_warmup_map_lr: float = 0.01,
     ) -> DPFResult:
         """Run HMC or NUTS to sample from posterior p(theta | y).
 
@@ -172,6 +175,11 @@ class DPFRunner:
             )
             print(f"  mass_vector={self.mass_vector}  (p ~ N(0, diag(m)))")
 
+        # If step_size is a Python list (per-axis), convert to tensor matching state shape.
+        # TFP expects either a scalar or a single tensor (not a Python list of scalars).
+        if isinstance(step_size, (list, tuple)):
+            step_size = tf.constant(step_size, dtype=dtype)
+
         # Choose sampler
         if self.sampler == 'nuts':
             print(f"Using NUTS sampler (max_tree_depth={max_tree_depth})")
@@ -206,15 +214,17 @@ class DPFRunner:
 
         # Adaptive step size
         # shrinkage_target=initial_step_size anchors DA at the initial value
-        # instead of the default 10*init, which prevents runaway growth on
-        # cliffy targets (LEDH+OT crashes in backward at large step sizes).
-        # TFP takes log(shrinkage_target) internally, so we pass the value, not its log.
+        # (TFP takes log internally, so pass the value not its log).
+        # step_count_smoothing (t0) damps DA's response to early accept signals;
+        # default 10 matches Hoffman-Gelman/Stan; raise to ~100 for cliffy targets
+        # where 100% accept persists for many warmup iterations.
         num_adaptation_steps = int(adaptation_rate * num_burnin)
         adaptive_kernel = tfp.mcmc.DualAveragingStepSizeAdaptation(
             inner_kernel,
             num_adaptation_steps=num_adaptation_steps,
             target_accept_prob=target_accept_prob,
             shrinkage_target=tf.constant(step_size, dtype=dtype),
+            step_count_smoothing=step_count_smoothing,
         )
 
         if seed is not None:
@@ -224,6 +234,30 @@ class DPFRunner:
         print(f"Running {self.sampler.upper()}: {num_burnin} burn-in + {num_samples} sampling = {total_steps} total steps")
 
         current_state = self.param_handler.unconstrained_init
+
+        # Optional MAP pre-warmup: gradient ascent on log-posterior with Adam.
+        # Moves chain to high-density region before HMC starts so that the
+        # surface is locally sharp and DA does not run away on 100% accept.
+        # Disabled when pre_warmup_map_steps == 0 (default).
+        if pre_warmup_map_steps > 0:
+            print(f"  [pre-warmup MAP] {pre_warmup_map_steps} Adam steps, lr={pre_warmup_map_lr}")
+            map_var = tf.Variable(current_state, dtype=current_state.dtype)
+            map_opt = tf.optimizers.Adam(learning_rate=pre_warmup_map_lr)
+            for _i in range(pre_warmup_map_steps):
+                with tf.GradientTape() as _tape:
+                    _tape.watch(map_var)
+                    _nlp = -target_log_prob_fn(map_var)
+                _g = _tape.gradient(_nlp, map_var)
+                if _g is None or not bool(tf.reduce_all(tf.math.is_finite(_g)).numpy()):
+                    print(f"  [pre-warmup MAP] non-finite grad at step {_i}, stopping early")
+                    break
+                map_opt.apply_gradients([(_g, map_var)])
+                if (_i + 1) % max(1, pre_warmup_map_steps // 5) == 0:
+                    print(f"  [pre-warmup MAP step {_i+1}/{pre_warmup_map_steps}] "
+                          f"lp={float(-_nlp.numpy()):.4f}, |grad|={float(tf.norm(_g).numpy()):.4f}, "
+                          f"q={map_var.numpy()}")
+            current_state = tf.constant(map_var.numpy(), dtype=current_state.dtype)
+            print(f"  [pre-warmup MAP] done. Starting HMC from q={current_state.numpy()}")
 
         # One-time gradient diagnostic before HMC loop
         with tf.GradientTape() as _tape:
@@ -253,7 +287,11 @@ class DPFRunner:
                 step_times.append(dt)
 
                 accepted = bool(kernel_results.inner_results.is_accepted.numpy())
-                cur_step_size = float(kernel_results.new_step_size.numpy())
+                _ss_arr = kernel_results.new_step_size.numpy()
+                if np.ndim(_ss_arr) == 0:
+                    cur_step_size = float(_ss_arr)
+                else:
+                    cur_step_size = [float(x) for x in np.atleast_1d(_ss_arr)]
 
                 is_accepted_list.append(accepted)
                 step_size_list.append(cur_step_size)
@@ -624,8 +662,12 @@ class DPFRunner:
             is_accepted_list[-min(50, len(is_accepted_list)):]
         )
 
+        if isinstance(cur_step_size, list):
+            ss_str = "[" + ",".join(f"{x:.4f}" for x in cur_step_size) + "]"
+        else:
+            ss_str = f"{cur_step_size:.4f}"
         print(f"  [{phase} {idx}/{phase_total}] "
-              f"{dt:.1f}s | accept={accept_rate:.0%} | step_size={cur_step_size:.4f} | "
+              f"{dt:.1f}s | accept={accept_rate:.0%} | step_size={ss_str} | "
               f"{param_str} | ETA {eta:.0f}s")
 
         if trace_log is not None:
@@ -709,7 +751,11 @@ class DPFRunner:
         diagnostics['acceptance_rate'] = float(
             tf.reduce_mean(tf.cast(is_accepted, dtype)).numpy()
         )
-        diagnostics['final_step_size'] = float(step_sizes[-1].numpy())
+        _final_ss = step_sizes[-1].numpy()
+        if np.ndim(_final_ss) == 0:
+            diagnostics['final_step_size'] = float(_final_ss)
+        else:
+            diagnostics['final_step_size'] = [float(x) for x in np.atleast_1d(_final_ss)]
 
         # Suppress complex64->float32 warning from FFT-based autocorrelation in ESS
         import logging

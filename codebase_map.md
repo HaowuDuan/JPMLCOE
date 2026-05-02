@@ -1,0 +1,984 @@
+# Codebase Structural Map
+
+## 1. Directory tree
+- `code/config/` - directory not present in current workspace.
+- `code/src/`
+  - `.DS_Store` - Finder metadata file.
+  - `DF/`
+    - `__init__.py` - Package initializer that re-exports/imports submodules.
+    - `__pycache__/`
+      - `__init__.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+      - `__init__.cpython-314.pyc` - Compiled Python bytecode cache artifact.
+      - `differentiable_model.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+      - `hmc_runner.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+      - `mh_runner.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+      - `parameter_handler.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+      - `pgibbs_runner.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+      - `pmmh_runner.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+      - `smoke_test_linear_gaussian.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+      - `types.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+      - `types.cpython-314.pyc` - Compiled Python bytecode cache artifact.
+    - `differentiable_model.py` - Wrapper for models to support differentiable parameter updates during HMC.
+    - `example_usage.py` - Example usage of the Differentiable Filter Framework.
+    - `hmc_runner.py` - Main HMC/NUTS/PMMH runner for parameter inference with differentiable filters.
+    - `hmc_runner_old.py` - Main HMC/NUTS/PMMH runner for parameter inference with differentiable filters.
+    - `lr_schedules.py` - Learning rate schedules for MAP optimization.
+    - `mh_runner.py` - Standalone Metropolis-Hastings runner for parameter inference.
+    - `parameter_handler.py` - Parameter transformation and bijector management.
+    - `pgibbs_runner.py` - Particle Gibbs + HMC runner for joint parameter and state inference.
+    - `pmmh_runner.py` - Particle Marginal Metropolis-Hastings (PMMH) for parameter inference.
+    - `smoke_test_linear_gaussian.py` - Phase 1 Smoke Test: LinearGaussianModel + EKF + HMC/NUTS.
+    - `types.py` - Data types for differentiable filter framework.
+  - `__init__.py` - Package marker; minimal module.
+  - `__pycache__/`
+    - `__init__.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+    - `__init__.cpython-314.pyc` - Compiled Python bytecode cache artifact.
+  - `core/`
+    - `__init__.py` - Package initializer that re-exports/imports submodules.
+    - `__pycache__/`
+      - `__init__.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+      - `__init__.cpython-314.pyc` - Compiled Python bytecode cache artifact.
+      - `filter_base.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+      - `filter_base.cpython-314.pyc` - Compiled Python bytecode cache artifact.
+      - `model_base.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+      - `model_base.cpython-314.pyc` - Compiled Python bytecode cache artifact.
+      - `types.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+      - `types.cpython-314.pyc` - Compiled Python bytecode cache artifact.
+    - `differentiable.py` - Protocol for filters that support differentiable log-likelihood computation.
+    - `filter_base.py` - Abstract base class for filters.
+    - `model_base.py` - Abstract base class for state-space models (TensorFlow).
+    - `types.py` - Data types for filter results.
+  - `experiments/`
+    - `__init__.py` - Package initializer that re-exports/imports submodules.
+    - `__pycache__/`
+      - `__init__.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+      - `__init__.cpython-314.pyc` - Compiled Python bytecode cache artifact.
+      - `run_dpf_experiment.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+      - `run_experiment.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+      - `run_experiment.cpython-314.pyc` - Compiled Python bytecode cache artifact.
+      - `run_mc_experiment.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+      - `visualization.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+      - `visualization_hmc.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+    - `plot_flow_combined.py` - One-off combined flow comparison plots for report figures.
+    - `plot_hmc_diagnostics.py` - Build HMC trace, posterior, and diagnostics outputs for the report.
+    - `plot_map_convergence.py` - Build MAP convergence figures for the report.
+    - `plot_rb_ekf_ukf_combined.py` - One-off combined EKF/UKF range-bearing report plot.
+    - `plot_sinkhorn_and_gradient.py` - Plot Sinkhorn convergence and OT gradient validation figures.
+    - `plot_sv_ekf_ukf_combined.py` - One-off combined EKF/UKF plots for stochastic volatility.
+    - `run_dpf_experiment.py` - Hydra-based DPF experiment runner for HMC parameter inference.
+    - `run_experiment.py` - Hydra-based experiment runner for filter evaluation.
+    - `run_mc_experiment.py` - Monte Carlo experiment runner for single-filter evaluation.
+    - `visualization.py` - Visualization utilities for filter results.
+    - `visualization_hmc.py` - Visualization utilities for HMC and MAP inference results.
+  - `filters/`
+    - `__init__.py` - Package initializer that re-exports/imports submodules.
+    - `__pycache__/`
+      - `__init__.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+      - `__init__.cpython-314.pyc` - Compiled Python bytecode cache artifact.
+    - `kalman/`
+      - `__init__.py` - Package initializer that re-exports/imports submodules.
+      - `__pycache__/`
+        - `__init__.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+        - `__init__.cpython-314.pyc` - Compiled Python bytecode cache artifact.
+        - `augmented_ukf.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+        - `batched_ekf.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+        - `batched_ukf.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+        - `extended_kalman.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+        - `extended_kalman.cpython-314.pyc` - Compiled Python bytecode cache artifact.
+        - `filter_factory.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+        - `kalman.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+        - `kalman.cpython-314.pyc` - Compiled Python bytecode cache artifact.
+        - `unscented_kalman.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+        - `unscented_kalman.cpython-314.pyc` - Compiled Python bytecode cache artifact.
+      - `augmented_ukf.py` - Augmented Unscented Kalman Filter (Algorithm 5.15, Särkkä).
+      - `batched_ekf.py` - Batched EKF operations for per-particle filters.
+      - `batched_ukf.py` - Batched UKF operations for per-particle filters.
+      - `extended_kalman.py` - Extended Kalman Filter for nonlinear systems.
+      - `filter_factory.py` - Factory function for creating Kalman filter instances.
+      - `kalman.py` - Kalman Filter for linear-Gaussian systems.
+      - `unscented_kalman.py` - Unscented Kalman Filter for nonlinear systems.
+    - `particle/`
+      - `__init__.py` - Package initializer that re-exports/imports submodules.
+      - `__pycache__/`
+        - `__init__.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+        - `__init__.cpython-314.pyc` - Compiled Python bytecode cache artifact.
+        - `bootstrap_pf.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+        - `bootstrap_pf.cpython-314.pyc` - Compiled Python bytecode cache artifact.
+        - `bootstrap_pf_hmc.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+        - `bootstrap_pf_tf.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+        - `bootstrap_pf_tf.cpython-314.pyc` - Compiled Python bytecode cache artifact.
+        - `conditional_smc.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+        - `edh_flow.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+        - `edh_flow.cpython-314.pyc` - Compiled Python bytecode cache artifact.
+        - `edh_flow_global.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+        - `edh_invertible.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+        - `edh_invertible.cpython-314.pyc` - Compiled Python bytecode cache artifact.
+        - `flow_base.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+        - `flow_base.cpython-314.pyc` - Compiled Python bytecode cache artifact.
+        - `kernel_flow.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+        - `kernel_flow.cpython-314.pyc` - Compiled Python bytecode cache artifact.
+        - `kernel_local_flow.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+        - `kernel_local_flow.cpython-314.pyc` - Compiled Python bytecode cache artifact.
+        - `ledh_flow.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+        - `ledh_flow.cpython-314.pyc` - Compiled Python bytecode cache artifact.
+        - `ledh_invertible.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+        - `ledh_invertible.cpython-314.pyc` - Compiled Python bytecode cache artifact.
+        - `ledh_invertible_bimodal.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+        - `ledh_invertible_csmc.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+        - `ledh_invertible_hmc.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+        - `particle_base.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+        - `particle_base.cpython-314.pyc` - Compiled Python bytecode cache artifact.
+        - `particle_tfp.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+        - `particle_tfp.cpython-314.pyc` - Compiled Python bytecode cache artifact.
+        - `sde_local_correction.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+        - `stochastic_edh.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+        - `stochastic_edh.cpython-314.pyc` - Compiled Python bytecode cache artifact.
+        - `stochastic_edh_paper.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+      - `bootstrap_pf_hmc.py` - Bootstrap Particle Filter optimized for HMC gradient computation.
+      - `bootstrap_pf_hmc_old.py` - Bootstrap Particle Filter optimized for HMC gradient computation.
+      - `bootstrap_pf_tf.py` - Bootstrap Particle Filter - TensorFlow implementation.
+      - `conditional_smc.py` - Conditional SMC with Bootstrap Particle Filter.
+      - `edh_flow.py` - Exact Daum-Huang (EDH) particle flow filter.
+      - `edh_flow_global.py` - Exact Daum-Huang (EDH) particle flow filter with global (fixed) linearization.
+      - `edh_invertible.py` - Exact Daum-Huang (EDH) Invertible Particle Flow Filter.
+      - `flow_base.py` - Base class for particle flow filters.
+      - `kernel_flow.py` - Particle Flow Filter (Hu & van Leeuwen 2021) — TensorFlow.
+      - `ledh_flow.py` - Local Exact Daum-Huang (LEDH) particle flow filter.
+      - `ledh_invertible.py` - Local Exact Daum-Huang (LEDH) Invertible Particle Flow Filter. Algorithm 1.
+      - `ledh_invertible_bimodal.py` - LEDH Invertible Particle Flow Filter with look-ahead sign correction.
+      - `ledh_invertible_csmc.py` - Conditional SMC with LEDH Invertible Particle Flow.
+      - `ledh_invertible_hmc.py` - LEDH Particle Flow Filter optimized for HMC gradient computation.
+      - `ledh_invertible_hmc_old.py` - LEDH Particle Flow Filter optimized for HMC gradient computation.
+      - `ledh_invertible_info.py` - Information-form LEDH invertible particle flow filter.
+      - `particle_base.py` - Base class for particle filters with diagnostic tracking.
+      - `sde_local_correction.py` - Stochastic EDH with local linearization correction.
+      - `stochastic_edh.py` - Stochastic Exact Daum-Huang (EDH) particle flow filter.
+      - `stochastic_edh_paper.py` - StochasticEDHFlowPaper — paper-reproduction variant (arXiv:2107.04672, Section 4).
+  - `models/`
+    - `__init__.py` - Package initializer that re-exports/imports submodules.
+    - `__pycache__/`
+      - `__init__.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+      - `__init__.cpython-314.pyc` - Compiled Python bytecode cache artifact.
+      - `acoustic_tracking.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+      - `acoustic_tracking.cpython-314.pyc` - Compiled Python bytecode cache artifact.
+      - `acoustic_tracking_full.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+      - `acoustic_tracking_lite.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+      - `acoustic_tracking_test.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+      - `acoustic_tracking_test.cpython-314.pyc` - Compiled Python bytecode cache artifact.
+      - `base.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+      - `cubic_sensor.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+      - `kitagawa.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+      - `linear_gaussian.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+      - `linear_gaussian.cpython-314.pyc` - Compiled Python bytecode cache artifact.
+      - `lorenz96.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+      - `lorenz96.cpython-314.pyc` - Compiled Python bytecode cache artifact.
+      - `range_bearing.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+      - `range_bearing.cpython-314.pyc` - Compiled Python bytecode cache artifact.
+      - `stochastic_volatility.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+      - `stochastic_volatility.cpython-314.pyc` - Compiled Python bytecode cache artifact.
+      - `stochastic_volatility_2d.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+      - `two_sensor_bearing.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+      - `two_sensor_bearing.cpython-314.pyc` - Compiled Python bytecode cache artifact.
+      - `utils.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+      - `utils.cpython-314.pyc` - Compiled Python bytecode cache artifact.
+    - `acoustic_tracking.py` - Acoustic Tracking Model matching Li & Coates paper (TensorFlow).
+    - `acoustic_tracking_full.py` - Multi-Target Acoustic Tracking Model.
+    - `cubic_sensor.py` - Cubic Sensor Model — mildly nonlinear 1D state-space model.
+    - `kitagawa.py` - Kitagawa Model (Andrieu et al., 2010) — TensorFlow.
+    - `linear_gaussian.py` - Linear-Gaussian state-space model - TensorFlow version.
+    - `lorenz96.py` - Lorenz 96 model for high-dimensional filtering experiments (TensorFlow).
+    - `range_bearing.py` - Range-Bearing tracking model.
+    - `stochastic_volatility.py` - Stochastic Volatility model (TensorFlow).
+    - `stochastic_volatility_2d.py` - 2D Stochastic Volatility model (TensorFlow).
+    - `two_sensor_bearing.py` - Two-Sensor Bearing-Only Static Estimation Model.
+    - `utils.py` - Utilities for data generation and model testing.
+  - `resampling/`
+    - `__init__.py` - Package initializer that re-exports/imports submodules.
+    - `__pycache__/`
+      - `__init__.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+      - `diagnosis.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+      - `neural_operator_resample.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+      - `ot_entropy.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+      - `ot_entropy_approx.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+      - `soft.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+      - `systematic.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+      - `types.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+      - `utils.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+    - `diagnosis.py` - Utility functions for particle filter resampling (TensorFlow).
+    - `neural_operator_resample.py` - Map-based resampler using a trained neural operator.
+    - `ot_entropy.py` - Entropy-regularized optimal transport resampling for particle filters.
+    - `ot_entropy_approx.py` - Entropy-regularized optimal transport resampling for particle filters.
+    - `soft.py` - Library module defining classes/functions.
+    - `systematic.py` - Systematic resampling for particle filters (TensorFlow).
+    - `types.py` - Resampling result types.
+  - `utils/`
+    - `__init__.py` - Package initializer that re-exports/imports submodules.
+    - `__pycache__/`
+      - `__init__.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+      - `__init__.cpython-314.pyc` - Compiled Python bytecode cache artifact.
+      - `constants.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+      - `device.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+      - `distributions.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+      - `distributions.cpython-314.pyc` - Compiled Python bytecode cache artifact.
+      - `flow_params.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+      - `linalg.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+      - `linalg.cpython-314.pyc` - Compiled Python bytecode cache artifact.
+      - `ode_solvers.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+      - `ode_solvers.cpython-314.pyc` - Compiled Python bytecode cache artifact.
+      - `resampling_config.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+    - `constants.py` - Named constants for particle flow filters.
+    - `device.py` - TensorFlow device detection and configuration.
+    - `distributions.py` - Distribution utilities for stable probability computations - TensorFlow version.
+    - `flow_params.py` - Shared utilities for particle flow filters.
+    - `linalg.py` - Numerically stable linear algebra operations - TensorFlow version.
+    - `ode_solvers.py` - ODE solvers for particle flow integration - TensorFlow version.
+    - `resampling_config.py` - Shared resampling method resolution for particle filters.
+- `code/tests/`
+  - `.DS_Store` - Finder metadata file.
+  - `__pycache__/`
+    - `conftest.cpython-312-pytest-9.0.2.pyc` - Compiled Python bytecode cache artifact.
+    - `conftest_filters.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+    - `conftest_hmc_diag.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+    - `conftest_rb_diag.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+  - `conftest.py` - Root conftest — centralized sys.path setup for all tests.
+  - `conftest_filters.py` - Shared fixtures and helpers for particle filter correctness tests.
+  - `conftest_hmc_diag.py` - Shared fixtures and helpers for HMC gradient diagnostic tests.
+  - `conftest_rb_diag.py` - Shared fixtures and helpers for Range-Bearing HMC diagnostic tests.
+  - `docs/`
+    - `ledh_ot_gradient_variance_test_plan.md` - Markdown documentation/notes file.
+    - `results/`
+      - `test_bootstrap_pf_results.txt` - Text output/result artifact.
+      - `test_flow_filters_results.txt` - Text output/result artifact.
+      - `test_ledh_cubic_sensor_results.txt` - Text output/result artifact.
+      - `test_resampling_results.txt` - Text output/result artifact.
+  - `dpf/`
+    - `__pycache__/`
+      - `test_ledh_cubic_sensor.cpython-312-pytest-9.0.2.pyc` - Compiled Python bytecode cache artifact.
+    - `test_ledh_cubic_sensor.py` - LEDH invertible particle flow filter on cubic sensor model.
+  - `filters/`
+    - `__pycache__/`
+      - `test_bootstrap_pf.cpython-312-pytest-9.0.2.pyc` - Compiled Python bytecode cache artifact.
+      - `test_flow_filters.cpython-312-pytest-9.0.2.pyc` - Compiled Python bytecode cache artifact.
+      - `test_kalman_family.cpython-312-pytest-9.0.2.pyc` - Compiled Python bytecode cache artifact.
+    - `test_bootstrap_pf.py` - Bootstrap Particle Filter correctness and diagnostic tests.
+    - `test_flow_filters.py` - Flow filter correctness and diagnostic tests.
+    - `test_kalman_family.py` - Kalman family cross-validation tests.
+  - `hmc/`
+    - `__pycache__/`
+      - `_gradient_test_utils.cpython-312.pyc` - Compiled Python bytecode cache artifact.
+      - `conftest.cpython-312-pytest-9.0.2.pyc` - Compiled Python bytecode cache artifact.
+      - `test_gradient_validation_sweep.cpython-312-pytest-9.0.2.pyc` - Compiled Python bytecode cache artifact.
+      - `test_gradient_vs_numerical_lg_ot_approx.cpython-312-pytest-9.0.2.pyc` - Compiled Python bytecode cache artifact.
+      - `test_gradient_vs_numerical_lg_ot_implicit.cpython-312-pytest-9.0.2.pyc` - Compiled Python bytecode cache artifact.
+      - `test_ot_gradient_standalone.cpython-312-pytest-9.0.2.pyc` - Compiled Python bytecode cache artifact.
+      - `test_sinkhorn_convergence_trajectory.cpython-312-pytest-9.0.2.pyc` - Compiled Python bytecode cache artifact.
+    - `_gradient_test_utils.py` - Shared helpers for HMC gradient validation tests.
+    - `conftest.py` - Add tests/hmc/ to sys.path so test files can import local helpers.
+    - `gradient_explanation.md` - Markdown documentation/notes file.
+    - `ledh_invertible_hmc_ablation.py` - LEDH Particle Flow Filter optimized for HMC gradient computation.
+    - `ledh_sv2d_loss_surface_scan.py` - Loss-surface smoothness scan for LEDH+OT on 2D Stochastic Volatility.
+    - `ledh_sv2d_map_fixed_nonfixed_seed_comparison.py` - Paired MAP comparison: fixed PF seed vs fresh-per-step PF seed.
+    - `results/`
+      - `ledh_sv2d_loss_surface_scan.json` - Saved HMC diagnostic/test result artifact.
+      - `ledh_sv2d_map_fixed_nonfixed_seed_comparison.json` - Saved HMC diagnostic/test result artifact.
+      - `test_gradient_validation_sweep.json` - Saved HMC diagnostic/test result artifact.
+      - `test_gradient_vs_numerical_lg.json` - Saved HMC diagnostic/test result artifact.
+      - `test_gradient_vs_numerical_lg_bpf.json` - Saved HMC diagnostic/test result artifact.
+      - `test_gradient_vs_numerical_rb.json` - Saved HMC diagnostic/test result artifact.
+      - `test_gradient_vs_numerical_sv1d.json` - Saved HMC diagnostic/test result artifact.
+      - `test_gradient_vs_numerical_sv2d.json` - Saved HMC diagnostic/test result artifact.
+      - `test_gradient_vs_numerical_sv2d_n500.json` - Saved HMC diagnostic/test result artifact.
+      - `test_hmc_leapfrog_replay.json` - Saved HMC diagnostic/test result artifact.
+      - `test_hmc_seed_robustness.json` - Saved HMC diagnostic/test result artifact.
+      - `test_ledh_ablation.json` - Saved HMC diagnostic/test result artifact.
+      - `test_memory_and_jit.json` - Saved HMC diagnostic/test result artifact.
+      - `test_ot_gradient_standalone.json` - Saved HMC diagnostic/test result artifact.
+      - `test_pf_noise.json` - Saved HMC diagnostic/test result artifact.
+      - `test_pf_noise_cross_model.json` - Saved HMC diagnostic/test result artifact.
+      - `test_runner_vs_direct.json` - Saved HMC diagnostic/test result artifact.
+      - `test_sinkhorn_convergence.json` - Saved HMC diagnostic/test result artifact.
+      - `test_sinkhorn_convergence_trajectory.json` - Saved HMC diagnostic/test result artifact.
+    - `sv2d_diagnostics/`
+      - `__init__.py` - Package marker; minimal module.
+      - `_setup.py` - Shared setup for SV2D HMC diagnostics.
+      - `test_bpf_vs_ledh_gradient.py` - BPF+OT vs LEDH+OT gradient comparison on SV2D.
+      - `test_hmc_leapfrog_replay.py` - Diagnostics 1 and 2: leapfrog replay and step-size sweep.
+      - `test_pf_noise.py` - Diagnostic 4: particle filter Monte Carlo noise at the stuck point.
+      - `test_pf_noise_cross_model.py` - Cross-model PF noise characterization (Codex 4-metric design).
+      - `test_runner_vs_direct.py` - Diagnostic: what does the production runner do differently from a direct.
+    - `test_gradient_vs_numerical_lg.py` - Gradient validation: LEDH+OT autodiff vs numerical FD on Linear Gaussian.
+    - `test_gradient_vs_numerical_lg_bpf.py` - Gradient validation: BPF+OT autodiff vs numerical FD on Linear Gaussian.
+    - `test_gradient_vs_numerical_lg_ot_approx.py` - Gradient validation: LEDH+OT approximate Sinkhorn backward on LG.
+    - `test_gradient_vs_numerical_lg_ot_implicit.py` - Gradient validation: LEDH+OT implicit Sinkhorn backward on LG.
+    - `test_gradient_vs_numerical_rb.py` - Gradient validation: LEDH+OT autodiff vs numerical FD on Range-Bearing model.
+    - `test_gradient_vs_numerical_sv1d.py` - Gradient validation: LEDH+OT autodiff vs numerical FD on 1D Stochastic Volatility.
+    - `test_gradient_vs_numerical_sv2d.py` - Gradient validation: LEDH+OT autodiff vs numerical FD on 2D Stochastic Volatility.
+    - `test_ledh_ablation.py` - LEDH gradient ablation: isolate which gradient path causes any autodiff/FD mismatch.
+    - `test_memory_and_jit.py` - Tests for memory leak fix and JIT compilation improvements.
+    - `test_ot_gradient_standalone.py` - Standalone gradient validation for OT resampling.
+    - `test_sinkhorn_convergence.py` - Sinkhorn convergence tests: do transport plans satisfy marginal constraints?.
+    - `test_sinkhorn_convergence_trajectory.py` - Record Sinkhorn marginal-error trajectories for the OT report figure.
+  - `jit/`
+    - `_jit_test_utils.py` - Shared helpers for JIT compilation tests.
+    - `conftest.py` - Add tests/jit/ to sys.path so test files can import local helpers.
+    - `test_jit_compile.py` - JIT (XLA) compilation probe for HMC filter pipeline.
+    - `test_jit_value_and_grad.py` - XLA value-and-gradient validation.
+  - `papers/`
+    - `__pycache__/`
+      - `test_two_sensor_paper.cpython-312-pytest-9.0.2.pyc` - Compiled Python bytecode cache artifact.
+    - `test_two_sensor_paper.py` - Debug tests for Two-Sensor Bearing paper reproduction (arXiv:2107.04672, Section 4).
+  - `unit/`
+    - `__pycache__/`
+      - `test_resampling.cpython-312-pytest-9.0.2.pyc` - Compiled Python bytecode cache artifact.
+      - `test_sv_models.cpython-312-pytest-9.0.2.pyc` - Compiled Python bytecode cache artifact.
+      - `test_utils_distributions.cpython-312-pytest-9.0.2.pyc` - Compiled Python bytecode cache artifact.
+      - `test_utils_flow_params.cpython-312-pytest-9.0.2.pyc` - Compiled Python bytecode cache artifact.
+      - `test_utils_linalg.cpython-312-pytest-9.0.2.pyc` - Compiled Python bytecode cache artifact.
+      - `test_utils_ode_solvers.cpython-312-pytest-9.0.2.pyc` - Compiled Python bytecode cache artifact.
+    - `test_resampling.py` - Resampling method tests — systematic, soft, and OT entropy.
+    - `test_sv_models.py` - Tests for Stochastic Volatility models (1D log-space + 2D).
+    - `test_utils_distributions.py` - Tests for src/utils/distributions.py — stable probability computations.
+    - `test_utils_flow_params.py` - Tests for src/utils/flow_params.py — particle flow parameter computation.
+    - `test_utils_linalg.py` - Tests for src/utils/linalg.py — numerically stable linear algebra operations.
+    - `test_utils_ode_solvers.py` - Tests for src/utils/ode_solvers.py — ODE/SDE integration steps.
+
+## 2. Entry points
+- Files with direct executable main blocks (`if __name__ == "__main__"`):
+  - `code/src/DF/example_usage.py`
+  - `code/src/DF/smoke_test_linear_gaussian.py`
+  - `code/src/experiments/plot_flow_combined.py`
+  - `code/src/experiments/plot_hmc_diagnostics.py`
+  - `code/src/experiments/plot_map_convergence.py`
+  - `code/src/experiments/plot_rb_ekf_ukf_combined.py`
+  - `code/src/experiments/plot_sinkhorn_and_gradient.py`
+  - `code/src/experiments/plot_sv_ekf_ukf_combined.py`
+  - `code/src/experiments/run_dpf_experiment.py` (Hydra app)
+  - `code/src/experiments/run_experiment.py` (Hydra app)
+  - `code/src/experiments/run_mc_experiment.py` (Hydra app)
+  - `code/tests/filters/test_kalman_family.py`
+  - `code/tests/hmc/sv2d_diagnostics/test_bpf_vs_ledh_gradient.py`
+  - `code/tests/hmc/sv2d_diagnostics/test_hmc_leapfrog_replay.py`
+  - `code/tests/hmc/sv2d_diagnostics/test_pf_noise.py`
+  - `code/tests/hmc/sv2d_diagnostics/test_pf_noise_cross_model.py`
+  - `code/tests/hmc/sv2d_diagnostics/test_runner_vs_direct.py`
+  - `code/tests/hmc/test_ot_gradient_standalone.py`
+  - `code/tests/unit/test_utils_distributions.py`
+  - `code/tests/unit/test_utils_flow_params.py`
+  - `code/tests/unit/test_utils_linalg.py`
+  - `code/tests/unit/test_utils_ode_solvers.py`
+- Test files expected to be collected by pytest (name matches `test_*.py` under `code/tests/`):
+  - `code/tests/dpf/test_ledh_cubic_sensor.py`
+  - `code/tests/filters/test_bootstrap_pf.py`
+  - `code/tests/filters/test_flow_filters.py`
+  - `code/tests/filters/test_kalman_family.py`
+  - `code/tests/hmc/sv2d_diagnostics/test_bpf_vs_ledh_gradient.py`
+  - `code/tests/hmc/sv2d_diagnostics/test_hmc_leapfrog_replay.py`
+  - `code/tests/hmc/sv2d_diagnostics/test_pf_noise.py`
+  - `code/tests/hmc/sv2d_diagnostics/test_pf_noise_cross_model.py`
+  - `code/tests/hmc/sv2d_diagnostics/test_runner_vs_direct.py`
+  - `code/tests/hmc/test_gradient_vs_numerical_lg.py`
+  - `code/tests/hmc/test_gradient_vs_numerical_lg_bpf.py`
+  - `code/tests/hmc/test_gradient_vs_numerical_lg_ot_approx.py`
+  - `code/tests/hmc/test_gradient_vs_numerical_lg_ot_implicit.py`
+  - `code/tests/hmc/test_gradient_vs_numerical_rb.py`
+  - `code/tests/hmc/test_gradient_vs_numerical_sv1d.py`
+  - `code/tests/hmc/test_gradient_vs_numerical_sv2d.py`
+  - `code/tests/hmc/test_ledh_ablation.py`
+  - `code/tests/hmc/test_memory_and_jit.py`
+  - `code/tests/hmc/test_ot_gradient_standalone.py`
+  - `code/tests/hmc/test_sinkhorn_convergence.py`
+  - `code/tests/hmc/test_sinkhorn_convergence_trajectory.py`
+  - `code/tests/jit/test_jit_compile.py`
+  - `code/tests/jit/test_jit_value_and_grad.py`
+  - `code/tests/papers/test_two_sensor_paper.py`
+  - `code/tests/unit/test_resampling.py`
+  - `code/tests/unit/test_sv_models.py`
+  - `code/tests/unit/test_utils_distributions.py`
+  - `code/tests/unit/test_utils_flow_params.py`
+  - `code/tests/unit/test_utils_linalg.py`
+  - `code/tests/unit/test_utils_ode_solvers.py`
+- Test helper/non-collected modules (fixtures, helpers, docs/results, or non-`test_*.py` scripts):
+  - `code/tests/.DS_Store`
+  - `code/tests/__pycache__/conftest.cpython-312-pytest-9.0.2.pyc`
+  - `code/tests/__pycache__/conftest_filters.cpython-312.pyc`
+  - `code/tests/__pycache__/conftest_hmc_diag.cpython-312.pyc`
+  - `code/tests/__pycache__/conftest_rb_diag.cpython-312.pyc`
+  - `code/tests/conftest.py`
+  - `code/tests/conftest_filters.py`
+  - `code/tests/conftest_hmc_diag.py`
+  - `code/tests/conftest_rb_diag.py`
+  - `code/tests/docs/ledh_ot_gradient_variance_test_plan.md`
+  - `code/tests/docs/results/test_bootstrap_pf_results.txt`
+  - `code/tests/docs/results/test_flow_filters_results.txt`
+  - `code/tests/docs/results/test_ledh_cubic_sensor_results.txt`
+  - `code/tests/docs/results/test_resampling_results.txt`
+  - `code/tests/dpf/__pycache__/test_ledh_cubic_sensor.cpython-312-pytest-9.0.2.pyc`
+  - `code/tests/filters/__pycache__/test_bootstrap_pf.cpython-312-pytest-9.0.2.pyc`
+  - `code/tests/filters/__pycache__/test_flow_filters.cpython-312-pytest-9.0.2.pyc`
+  - `code/tests/filters/__pycache__/test_kalman_family.cpython-312-pytest-9.0.2.pyc`
+  - `code/tests/hmc/__pycache__/_gradient_test_utils.cpython-312.pyc`
+  - `code/tests/hmc/__pycache__/conftest.cpython-312-pytest-9.0.2.pyc`
+  - `code/tests/hmc/__pycache__/test_gradient_validation_sweep.cpython-312-pytest-9.0.2.pyc`
+  - `code/tests/hmc/__pycache__/test_gradient_vs_numerical_lg_ot_approx.cpython-312-pytest-9.0.2.pyc`
+  - `code/tests/hmc/__pycache__/test_gradient_vs_numerical_lg_ot_implicit.cpython-312-pytest-9.0.2.pyc`
+  - `code/tests/hmc/__pycache__/test_ot_gradient_standalone.cpython-312-pytest-9.0.2.pyc`
+  - `code/tests/hmc/__pycache__/test_sinkhorn_convergence_trajectory.cpython-312-pytest-9.0.2.pyc`
+  - `code/tests/hmc/_gradient_test_utils.py`
+  - `code/tests/hmc/conftest.py`
+  - `code/tests/hmc/gradient_explanation.md`
+  - `code/tests/hmc/ledh_invertible_hmc_ablation.py`
+  - `code/tests/hmc/ledh_sv2d_loss_surface_scan.py`
+  - `code/tests/hmc/ledh_sv2d_map_fixed_nonfixed_seed_comparison.py`
+  - `code/tests/hmc/results/ledh_sv2d_loss_surface_scan.json`
+  - `code/tests/hmc/results/ledh_sv2d_map_fixed_nonfixed_seed_comparison.json`
+  - `code/tests/hmc/results/test_gradient_validation_sweep.json`
+  - `code/tests/hmc/results/test_gradient_vs_numerical_lg.json`
+  - `code/tests/hmc/results/test_gradient_vs_numerical_lg_bpf.json`
+  - `code/tests/hmc/results/test_gradient_vs_numerical_rb.json`
+  - `code/tests/hmc/results/test_gradient_vs_numerical_sv1d.json`
+  - `code/tests/hmc/results/test_gradient_vs_numerical_sv2d.json`
+  - `code/tests/hmc/results/test_gradient_vs_numerical_sv2d_n500.json`
+  - `code/tests/hmc/results/test_hmc_leapfrog_replay.json`
+  - `code/tests/hmc/results/test_hmc_seed_robustness.json`
+  - `code/tests/hmc/results/test_ledh_ablation.json`
+  - `code/tests/hmc/results/test_memory_and_jit.json`
+  - `code/tests/hmc/results/test_ot_gradient_standalone.json`
+  - `code/tests/hmc/results/test_pf_noise.json`
+  - `code/tests/hmc/results/test_pf_noise_cross_model.json`
+  - `code/tests/hmc/results/test_runner_vs_direct.json`
+  - `code/tests/hmc/results/test_sinkhorn_convergence.json`
+  - `code/tests/hmc/results/test_sinkhorn_convergence_trajectory.json`
+  - `code/tests/hmc/sv2d_diagnostics/__init__.py`
+  - `code/tests/hmc/sv2d_diagnostics/_setup.py`
+  - `code/tests/jit/_jit_test_utils.py`
+  - `code/tests/jit/conftest.py`
+  - `code/tests/papers/__pycache__/test_two_sensor_paper.cpython-312-pytest-9.0.2.pyc`
+  - `code/tests/unit/__pycache__/test_resampling.cpython-312-pytest-9.0.2.pyc`
+  - `code/tests/unit/__pycache__/test_sv_models.cpython-312-pytest-9.0.2.pyc`
+  - `code/tests/unit/__pycache__/test_utils_distributions.cpython-312-pytest-9.0.2.pyc`
+  - `code/tests/unit/__pycache__/test_utils_flow_params.cpython-312-pytest-9.0.2.pyc`
+  - `code/tests/unit/__pycache__/test_utils_linalg.cpython-312-pytest-9.0.2.pyc`
+  - `code/tests/unit/__pycache__/test_utils_ode_solvers.cpython-312-pytest-9.0.2.pyc`
+
+## 3. Module inventory
+- `code/src/DF/__init__.py`
+  - Public classes/functions: None (or re-exports only)
+  - Purpose: Differentiable Filter Framework for parameter inference via HMC.
+  - Intra-repo imports: src
+- `code/src/DF/differentiable_model.py`
+  - Public classes/functions: DifferentiableModel
+  - Purpose: Wrapper for models to support differentiable parameter updates during HMC.
+  - Intra-repo imports: None
+- `code/src/DF/example_usage.py`
+  - Public classes/functions: example_stochastic_volatility
+  - Purpose: Example usage of the Differentiable Filter Framework.
+  - Intra-repo imports: src.DF, src.models.stochastic_volatility, src.filters.particle.edh_flow, src.models.utils
+- `code/src/DF/hmc_runner.py`
+  - Public classes/functions: DPFRunner
+  - Purpose: Main HMC/NUTS/PMMH runner for parameter inference with differentiable filters.
+  - Intra-repo imports: src.DF.types, src.DF.parameter_handler, src.DF.differentiable_model
+- `code/src/DF/hmc_runner_old.py`
+  - Public classes/functions: DPFRunner
+  - Purpose: Main HMC/NUTS/PMMH runner for parameter inference with differentiable filters.
+  - Intra-repo imports: src.DF.types, src.DF.parameter_handler, src.DF.differentiable_model
+- `code/src/DF/lr_schedules.py`
+  - Public classes/functions: WarmupConstantCosineDecay
+  - Purpose: Learning rate schedules for MAP optimization.
+  - Intra-repo imports: None
+- `code/src/DF/mh_runner.py`
+  - Public classes/functions: MHRunner
+  - Purpose: Standalone Metropolis-Hastings runner for parameter inference.
+  - Intra-repo imports: src.DF.types, src.DF.parameter_handler, src.DF.differentiable_model
+- `code/src/DF/parameter_handler.py`
+  - Public classes/functions: ParameterHandler
+  - Purpose: Parameter transformation and bijector management.
+  - Intra-repo imports: src.DF.types
+- `code/src/DF/pgibbs_runner.py`
+  - Public classes/functions: PGibbsRunner
+  - Purpose: Particle Gibbs + HMC runner for joint parameter and state inference.
+  - Intra-repo imports: src.DF.types, src.DF.parameter_handler, src.DF.differentiable_model
+- `code/src/DF/pmmh_runner.py`
+  - Public classes/functions: PMMHRunner
+  - Purpose: Particle Marginal Metropolis-Hastings (PMMH) for parameter inference.
+  - Intra-repo imports: src.DF.types
+- `code/src/DF/smoke_test_linear_gaussian.py`
+  - Public classes/functions: smoke_test_linear_gaussian
+  - Purpose: Phase 1 Smoke Test: LinearGaussianModel + EKF + HMC/NUTS
+  - Intra-repo imports: src.DF, src.filters.kalman.extended_kalman, src.models.linear_gaussian, src.models.utils
+- `code/src/DF/types.py`
+  - Public classes/functions: ParameterSpec, DPFResult
+  - Purpose: Data types for differentiable filter framework.
+  - Intra-repo imports: None
+- `code/src/__init__.py`
+  - Public classes/functions: None (or re-exports only)
+  - Purpose: Particle filtering framework for Part 1 experiments.
+  - Intra-repo imports: None
+- `code/src/core/__init__.py`
+  - Public classes/functions: None (or re-exports only)
+  - Purpose: Core abstractions for state-space models and filters.
+  - Intra-repo imports: src
+- `code/src/core/differentiable.py`
+  - Public classes/functions: DifferentiableFilter
+  - Purpose: Protocol for filters that support differentiable log-likelihood computation.
+  - Intra-repo imports: None
+- `code/src/core/filter_base.py`
+  - Public classes/functions: Filter
+  - Purpose: Abstract base class for filters.
+  - Intra-repo imports: src.core.types
+- `code/src/core/model_base.py`
+  - Public classes/functions: StateSpaceModel
+  - Purpose: Abstract base class for state-space models (TensorFlow).
+  - Intra-repo imports: None
+- `code/src/core/types.py`
+  - Public classes/functions: FilterState, FilterResult
+  - Purpose: Data types for filter results.
+  - Intra-repo imports: None
+- `code/src/experiments/__init__.py`
+  - Public classes/functions: None (or re-exports only)
+  - Purpose: Experiment utilities for running and visualizing filter results.
+  - Intra-repo imports: src
+- `code/src/experiments/plot_flow_combined.py`
+  - Public classes/functions: load_and_prepend, validate_pair, validate_many, ci95, sv_observation_proxy, rb_observation_position, sv2d_observation_proxy, lg_observation_proxy, plot_line_band, plot_sv, plot_rb, plot_stochastic_edh_rb_comparison, plot_sv2d, mean_spread, plot_pf_edh_ledh_rb, plot_pf_edh_ledh_sv_log, make_plot, make_multi_plot, plot_kalman_1d_linear, main
+  - Purpose: One-off combined flow comparison plots for report figures.
+  - Intra-repo imports: None
+- `code/src/experiments/plot_hmc_diagnostics.py`
+  - Public classes/functions: load_summary, load_samples, true_param, save, plot_lg_trace, plot_lg_histograms, plot_rb, plot_single, dict_mean, diag_row, latex_escape, write_diag_table, main
+  - Purpose: Build HMC trace, posterior, and diagnostics outputs for the report.
+  - Intra-repo imports: None
+- `code/src/experiments/plot_map_convergence.py`
+  - Public classes/functions: load_trace, load_summary, true_param, verify_rb_uses_ot, maybe_log_grad_axis, save, plot_learning_rate, plot_lg, plot_rb, plot_single, finish_composite, lr_schedule_status, main
+  - Purpose: Build MAP convergence figures for the report.
+  - Intra-repo imports: None
+- `code/src/experiments/plot_rb_ekf_ukf_combined.py`
+  - Public classes/functions: load_run, ci95, observations_to_position, prepend_initial, plot_dimension, main
+  - Purpose: One-off combined EKF/UKF range-bearing report plot.
+  - Intra-repo imports: None
+- `code/src/experiments/plot_sinkhorn_and_gradient.py`
+  - Public classes/functions: plot_sinkhorn_convergence, plot_gradient_validation, main
+  - Purpose: Plot Sinkhorn convergence and OT gradient validation figures.
+  - Intra-repo imports: None
+- `code/src/experiments/plot_sv_ekf_ukf_combined.py`
+  - Public classes/functions: load_run, prepend_initial, ci95, observation_proxy, validate_pair, plot_case, main
+  - Purpose: One-off combined EKF/UKF plots for stochastic volatility.
+  - Intra-repo imports: None
+- `code/src/experiments/run_dpf_experiment.py`
+  - Public classes/functions: _PerfTracker, run_dpf_experiment, save_dpf_results, main
+  - Purpose: Hydra-based DPF experiment runner for HMC parameter inference.
+  - Intra-repo imports: src.models.utils
+- `code/src/experiments/run_experiment.py`
+  - Public classes/functions: _PerfTracker, run_filter_experiment, save_results, main
+  - Purpose: Hydra-based experiment runner for filter evaluation.
+  - Intra-repo imports: src.models.utils
+- `code/src/experiments/run_mc_experiment.py`
+  - Public classes/functions: run_mc_experiment, save_and_plot, main
+  - Purpose: Monte Carlo experiment runner for single-filter evaluation.
+  - Intra-repo imports: None
+- `code/src/experiments/visualization.py`
+  - Public classes/functions: plot_filter_results, plot_comparison, plot_ess_history, plot_log_likelihood_comparison, plot_high_dim_results
+  - Purpose: Visualization utilities for filter results.
+  - Intra-repo imports: None
+- `code/src/experiments/visualization_hmc.py`
+  - Public classes/functions: plot_trace, plot_map_convergence, plot_posterior_histograms
+  - Purpose: Visualization utilities for HMC and MAP inference results.
+  - Intra-repo imports: None
+- `code/src/filters/__init__.py`
+  - Public classes/functions: None (or re-exports only)
+  - Purpose: Filter implementations for state estimation.
+  - Intra-repo imports: src
+- `code/src/filters/kalman/__init__.py`
+  - Public classes/functions: None (or re-exports only)
+  - Purpose: Kalman filter family.
+  - Intra-repo imports: src.filters
+- `code/src/filters/kalman/augmented_ukf.py`
+  - Public classes/functions: AugmentedUnscentedKalmanFilter
+  - Purpose: Augmented Unscented Kalman Filter (Algorithm 5.15, Särkkä).
+  - Intra-repo imports: src.filters.kalman.unscented_kalman, src.core.model_base, src.utils.linalg
+- `code/src/filters/kalman/batched_ekf.py`
+  - Public classes/functions: batched_ekf_predict, batched_ekf_update
+  - Purpose: Batched EKF operations for per-particle filters.
+  - Intra-repo imports: src.utils.linalg
+- `code/src/filters/kalman/batched_ukf.py`
+  - Public classes/functions: compute_ukf_weights, batched_ukf_predict, batched_ukf_update
+  - Purpose: Batched UKF operations for per-particle filters.
+  - Intra-repo imports: src.utils.linalg
+- `code/src/filters/kalman/extended_kalman.py`
+  - Public classes/functions: ExtendedKalmanFilter
+  - Purpose: Extended Kalman Filter for nonlinear systems.
+  - Intra-repo imports: src.core.filter_base, src.core.types, src.core.model_base, src.utils.linalg
+- `code/src/filters/kalman/filter_factory.py`
+  - Public classes/functions: create_kalman_filter
+  - Purpose: Factory function for creating Kalman filter instances.
+  - Intra-repo imports: src.filters.kalman.extended_kalman, src.filters.kalman.unscented_kalman
+- `code/src/filters/kalman/kalman.py`
+  - Public classes/functions: KalmanFilter
+  - Purpose: Kalman Filter for linear-Gaussian systems.
+  - Intra-repo imports: src.core.filter_base, src.core.types, src.core.model_base, src.utils.linalg
+- `code/src/filters/kalman/unscented_kalman.py`
+  - Public classes/functions: UnscentedKalmanFilter
+  - Purpose: Unscented Kalman Filter for nonlinear systems.
+  - Intra-repo imports: src.core.filter_base, src.core.types, src.core.model_base, src.utils.linalg
+- `code/src/filters/particle/__init__.py`
+  - Public classes/functions: None (or re-exports only)
+  - Purpose: Particle filter implementations.
+  - Intra-repo imports: src.filters
+- `code/src/filters/particle/bootstrap_pf_hmc.py`
+  - Public classes/functions: BootstrapPFHMC
+  - Purpose: Bootstrap Particle Filter optimized for HMC gradient computation.
+  - Intra-repo imports: src.filters.particle.bootstrap_pf_tf, src.resampling, src.resampling.diagnosis
+- `code/src/filters/particle/bootstrap_pf_hmc_old.py`
+  - Public classes/functions: BootstrapPFHMC
+  - Purpose: Bootstrap Particle Filter optimized for HMC gradient computation.
+  - Intra-repo imports: src.filters.particle.bootstrap_pf_tf, src.resampling, src.resampling.diagnosis
+- `code/src/filters/particle/bootstrap_pf_tf.py`
+  - Public classes/functions: ParticleFilterTF
+  - Purpose: Bootstrap Particle Filter - TensorFlow implementation.
+  - Intra-repo imports: src.filters.particle.particle_base, src.core.types, src.core.model_base, src.resampling
+- `code/src/filters/particle/conditional_smc.py`
+  - Public classes/functions: BootstrapConditionalSMC
+  - Purpose: Conditional SMC with Bootstrap Particle Filter.
+  - Intra-repo imports: src.core.model_base, src.utils.distributions, src.utils.linalg, src.resampling, src.resampling.diagnosis
+- `code/src/filters/particle/edh_flow.py`
+  - Public classes/functions: ExactDaumHuangFlow
+  - Purpose: Exact Daum-Huang (EDH) particle flow filter.
+  - Intra-repo imports: src.filters.particle.flow_base, src.filters.kalman.filter_factory, src.utils.flow_params, src.utils.linalg, src.utils.ode_solvers, src.utils.constants, src.utils.distributions, src.utils.resampling_config
+- `code/src/filters/particle/edh_flow_global.py`
+  - Public classes/functions: ExactDaumHuangFlowglobal
+  - Purpose: Exact Daum-Huang (EDH) particle flow filter with global (fixed) linearization.
+  - Intra-repo imports: src.filters.particle.flow_base, src.filters.kalman.filter_factory, src.utils.flow_params, src.utils.linalg, src.utils.ode_solvers, src.utils.constants, src.utils.distributions, src.utils.resampling_config
+- `code/src/filters/particle/edh_invertible.py`
+  - Public classes/functions: EDHParticleFlowFilter
+  - Purpose: Exact Daum-Huang (EDH) Invertible Particle Flow Filter
+  - Intra-repo imports: src.core.model_base, src.core.types, src.filters.kalman.filter_factory, src.utils.flow_params, src.utils.distributions, src.utils.linalg, src.utils.ode_solvers, src.utils.constants, src.utils.resampling_config, src.resampling.diagnosis
+- `code/src/filters/particle/flow_base.py`
+  - Public classes/functions: FlowFilterBase
+  - Purpose: Base class for particle flow filters.
+  - Intra-repo imports: src.core.types
+- `code/src/filters/particle/kernel_flow.py`
+  - Public classes/functions: KernelMappingPF
+  - Purpose: Particle Flow Filter (Hu & van Leeuwen 2021) — TensorFlow.
+  - Intra-repo imports: src.core.types
+- `code/src/filters/particle/ledh_flow.py`
+  - Public classes/functions: LocalExactDaumHuangFlow
+  - Purpose: Local Exact Daum-Huang (LEDH) particle flow filter
+  - Intra-repo imports: src.filters.particle.flow_base, src.filters.kalman.filter_factory, src.utils.flow_params, src.utils.linalg, src.utils.ode_solvers, src.utils.constants, src.utils.distributions, src.utils.resampling_config
+- `code/src/filters/particle/ledh_invertible.py`
+  - Public classes/functions: LEDHParticleFlowFilter
+  - Purpose: Local Exact Daum-Huang (LEDH) Invertible Particle Flow Filter. Algorithm 1
+  - Intra-repo imports: src.core.model_base, src.core.types, src.filters.kalman.batched_ekf, src.filters.kalman.batched_ukf, src.utils.flow_params, src.utils.distributions, src.utils.linalg, src.utils.constants, src.utils.resampling_config, src.resampling.diagnosis
+- `code/src/filters/particle/ledh_invertible_bimodal.py`
+  - Public classes/functions: LEDHInvertibleBimodal
+  - Purpose: LEDH Invertible Particle Flow Filter with look-ahead sign correction.
+  - Intra-repo imports: src.filters.particle.ledh_invertible, src.core.model_base, src.core.types, src.utils.flow_params, src.utils.distributions, src.utils.linalg, src.filters.kalman.batched_ekf, src.filters.kalman.batched_ukf, src.resampling.diagnosis
+- `code/src/filters/particle/ledh_invertible_csmc.py`
+  - Public classes/functions: LEDHConditionalSMC
+  - Purpose: Conditional SMC with LEDH Invertible Particle Flow.
+  - Intra-repo imports: src.core.model_base, src.filters.kalman.batched_ekf, src.filters.kalman.batched_ukf, src.utils.flow_params, src.utils.distributions, src.utils.linalg, src.utils.constants, src.utils.resampling_config, src.resampling.diagnosis
+- `code/src/filters/particle/ledh_invertible_hmc.py`
+  - Public classes/functions: LEDHParticleFlowFilterHMC
+  - Purpose: LEDH Particle Flow Filter optimized for HMC gradient computation.
+  - Intra-repo imports: src.filters.particle.ledh_invertible, src.filters.kalman.batched_ekf, src.filters.kalman.batched_ukf, src.utils.flow_params, src.utils.distributions, src.utils.linalg, src.resampling, src.resampling.diagnosis
+- `code/src/filters/particle/ledh_invertible_hmc_old.py`
+  - Public classes/functions: LEDHParticleFlowFilterHMC
+  - Purpose: LEDH Particle Flow Filter optimized for HMC gradient computation.
+  - Intra-repo imports: src.filters.particle.ledh_invertible, src.filters.kalman.batched_ekf, src.filters.kalman.batched_ukf, src.utils.flow_params, src.utils.distributions, src.utils.linalg, src.resampling, src.resampling.diagnosis
+- `code/src/filters/particle/ledh_invertible_info.py`
+  - Public classes/functions: LEDHInvertibleInfoFilter
+  - Purpose: Information-form LEDH invertible particle flow filter.
+  - Intra-repo imports: src.core.model_base, src.core.types, src.filters.kalman.batched_ekf, src.filters.kalman.batched_ukf, src.utils.distributions, src.utils.linalg, src.utils.constants, src.utils.resampling_config, src.resampling.diagnosis
+- `code/src/filters/particle/particle_base.py`
+  - Public classes/functions: ParticleFilterBase
+  - Purpose: Base class for particle filters with diagnostic tracking.
+  - Intra-repo imports: src.core.filter_base
+- `code/src/filters/particle/sde_local_correction.py`
+  - Public classes/functions: SDELocalCorrection
+  - Purpose: Stochastic EDH with local linearization correction.
+  - Intra-repo imports: src.filters.particle.stochastic_edh, src.utils.flow_params, src.utils.linalg, src.utils.ode_solvers
+- `code/src/filters/particle/stochastic_edh.py`
+  - Public classes/functions: StochasticEDHFlow
+  - Purpose: Stochastic Exact Daum-Huang (EDH) particle flow filter.
+  - Intra-repo imports: src.filters.particle.edh_flow, src.utils.flow_params, src.utils.linalg, src.utils.ode_solvers, src.utils.constants
+- `code/src/filters/particle/stochastic_edh_paper.py`
+  - Public classes/functions: StochasticEDHFlowPaper
+  - Purpose: StochasticEDHFlowPaper — paper-reproduction variant (arXiv:2107.04672, Section 4).
+  - Intra-repo imports: src.filters.particle.stochastic_edh
+- `code/src/models/__init__.py`
+  - Public classes/functions: None (or re-exports only)
+  - Purpose: State-space models for filtering experiments.
+  - Intra-repo imports: src, src.utils
+- `code/src/models/acoustic_tracking.py`
+  - Public classes/functions: AcousticTrackingModel
+  - Purpose: Acoustic Tracking Model matching Li & Coates paper (TensorFlow).
+  - Intra-repo imports: src.core.model_base
+- `code/src/models/acoustic_tracking_full.py`
+  - Public classes/functions: AcousticTrackingFullModel
+  - Purpose: Multi-Target Acoustic Tracking Model
+  - Intra-repo imports: src.core.model_base
+- `code/src/models/cubic_sensor.py`
+  - Public classes/functions: CubicSensorModel
+  - Purpose: Cubic Sensor Model — mildly nonlinear 1D state-space model.
+  - Intra-repo imports: src.core.model_base
+- `code/src/models/kitagawa.py`
+  - Public classes/functions: KitagawaModel
+  - Purpose: Kitagawa Model (Andrieu et al., 2010) — TensorFlow.
+  - Intra-repo imports: src.core.model_base
+- `code/src/models/linear_gaussian.py`
+  - Public classes/functions: LinearGaussianModel
+  - Purpose: Linear-Gaussian state-space model - TensorFlow version.
+  - Intra-repo imports: src.core.model_base
+- `code/src/models/lorenz96.py`
+  - Public classes/functions: Lorenz96Model
+  - Purpose: Lorenz 96 model for high-dimensional filtering experiments (TensorFlow).
+  - Intra-repo imports: src.core.model_base, src.utils.ode_solvers
+- `code/src/models/range_bearing.py`
+  - Public classes/functions: RangeBearingModel
+  - Purpose: Range-Bearing tracking model.
+  - Intra-repo imports: src.core.model_base
+- `code/src/models/stochastic_volatility.py`
+  - Public classes/functions: StochasticVolatilityModel
+  - Purpose: Stochastic Volatility model (TensorFlow).
+  - Intra-repo imports: src.core.model_base
+- `code/src/models/stochastic_volatility_2d.py`
+  - Public classes/functions: StochasticVolatility2DModel
+  - Purpose: 2D Stochastic Volatility model (TensorFlow).
+  - Intra-repo imports: src.core.model_base
+- `code/src/models/two_sensor_bearing.py`
+  - Public classes/functions: TwoSensorBearingOnlyModel
+  - Purpose: Two-Sensor Bearing-Only Static Estimation Model.
+  - Intra-repo imports: src.core.model_base
+- `code/src/models/utils.py`
+  - Public classes/functions: generate_data
+  - Purpose: Utilities for data generation and model testing.
+  - Intra-repo imports: src.core.model_base
+- `code/src/resampling/__init__.py`
+  - Public classes/functions: None (or re-exports only)
+  - Purpose: Resampling methods for particle filters (TensorFlow).
+  - Intra-repo imports: src
+- `code/src/resampling/diagnosis.py`
+  - Public classes/functions: effective_sample_size, normalize_log_weights, normalize_weights
+  - Purpose: Utility functions for particle filter resampling (TensorFlow).
+  - Intra-repo imports: None
+- `code/src/resampling/neural_operator_resample.py`
+  - Public classes/functions: NeuralOperatorResampler
+  - Purpose: Map-based resampler using a trained neural operator.
+  - Intra-repo imports: src.resampling.types
+- `code/src/resampling/ot_entropy.py`
+  - Public classes/functions: compute_cost_matrix, softmin, compute_diameter, sinkhorn_iteration, sinkhorn_with_epsilon_scaling, compute_transport_matrix_from_potentials, ot_entropy_resample
+  - Purpose: Entropy-regularized optimal transport resampling for particle filters.
+  - Intra-repo imports: src.resampling.types
+- `code/src/resampling/ot_entropy_approx.py`
+  - Public classes/functions: compute_cost_matrix, softmin, compute_diameter, sinkhorn_iteration, sinkhorn_with_epsilon_scaling, compute_transport_matrix_from_potentials, ot_entropy_resample
+  - Purpose: Entropy-regularized optimal transport resampling for particle filters.
+  - Intra-repo imports: src.resampling.types
+- `code/src/resampling/soft.py`
+  - Public classes/functions: soft_resample
+  - Purpose: Library module defining classes/functions.
+  - Intra-repo imports: src.resampling.types
+- `code/src/resampling/systematic.py`
+  - Public classes/functions: systematic_resample
+  - Purpose: Systematic resampling for particle filters (TensorFlow).
+  - Intra-repo imports: src.resampling.types
+- `code/src/resampling/types.py`
+  - Public classes/functions: ResampleResult
+  - Purpose: Resampling result types.
+  - Intra-repo imports: None
+- `code/src/utils/__init__.py`
+  - Public classes/functions: None (or re-exports only)
+  - Purpose: Numerical utilities for stable filtering.
+  - Intra-repo imports: src
+- `code/src/utils/constants.py`
+  - Public classes/functions: FlowScheduleConfig, DriftClipConfig, BVPShootingConfig
+  - Purpose: Named constants for particle flow filters.
+  - Intra-repo imports: None
+- `code/src/utils/device.py`
+  - Public classes/functions: setup_tensorflow_device
+  - Purpose: TensorFlow device detection and configuration.
+  - Intra-repo imports: None
+- `code/src/utils/distributions.py`
+  - Public classes/functions: log_gaussian_prob, log_sum_exp, normalize_log_weights, multivariate_normal_sample, sample_particles_cholesky, compute_flow_weights
+  - Purpose: Distribution utilities for stable probability computations - TensorFlow version.
+  - Intra-repo imports: src.utils.linalg
+- `code/src/utils/flow_params.py`
+  - Public classes/functions: compute_flow_params, compute_flow_params_global, compute_flow_params_batch, compute_flow_params_batch_global
+  - Purpose: Shared utilities for particle flow filters.
+  - Intra-repo imports: src.utils.linalg
+- `code/src/utils/linalg.py`
+  - Public classes/functions: safe_cholesky, safe_solve, log_det, safe_inv, safe_log_abs_det, graph_safe_inv, graph_safe_log_abs_det, graph_safe_log_abs_det_fast, graph_safe_log_abs_det_xla, graph_safe_log_abs_det_svd, symmetrize, matrix_sqrt, to_numpy
+  - Purpose: Numerically stable linear algebra operations - TensorFlow version.
+  - Intra-repo imports: None
+- `code/src/utils/ode_solvers.py`
+  - Public classes/functions: euler_step, rk4_step, euler_maruyama_step, integrate_ode
+  - Purpose: ODE solvers for particle flow integration - TensorFlow version.
+  - Intra-repo imports: None
+- `code/src/utils/resampling_config.py`
+  - Public classes/functions: resolve_resampling
+  - Purpose: Shared resampling method resolution for particle filters.
+  - Intra-repo imports: src.resampling
+
+## 4. Config inventory
+- Hydra config directory: `code/configs/` exists and contains 372 YAML files.
+- Root Hydra configs:
+  - `code/configs/config.yaml` is the main filter-experiment config. Defaults: `model: 1d_linear_gaussian`, `filter: kalman`, `_self_`, `experiment: null`, and Hydra logging overrides. Root keys include `seed`, `dtype`, `T`, `output_dir`, `plot`, `device`, `tf_log_level`, `verbose`, `show_progress`, and `hydra`.
+  - `code/configs/config_dpf.yaml` is the DPF parameter-inference config. Defaults: `_self_`, `optional dpf: null`, and Hydra logging overrides. Root keys include `dtype`, `tf_log_level`, and `hydra`.
+  - `code/configs/config_dpf_smoke.yaml` is the DPF smoke-test config. Defaults: `_self_`, `optional dpf_smoke: null`, and Hydra logging overrides. Root keys include `dtype`, `tf_log_level`, and `hydra`.
+- Hydra config groups:
+  - `code/configs/model/` has 16 direct model choices: `1d_linear_gaussian`, `1d_linear_gaussian_tiny_obs_noise`, `2d_linear_gaussian`, `2d_linear_gaussian_tiny_obs_noise`, `5d_linear_gaussian`, `5d_linear_gaussian_partial_strong`, `5d_linear_gaussian_partial_weak`, `acoustic_tracking_full`, `cubic_sensor`, `kitagawa`, `lorenz96`, `range_bearing`, `stochastic_volatility`, `stochastic_volatility_2d`, `stochastic_volatility_log`, and `two_sensor_bearing`.
+  - `code/configs/filter/` has 28 direct filter choices: `augmented_ukf`, `edh_flow`, `edh_flow_global`, `edh_invertible`, `edh_invertible_ot`, `ekf`, `kalman`, `kalman_cubic_sensor`, `kalman_joseph`, `kernel_flow`, `kernel_flow_matrix`, `kernel_flow_scalar`, `ledh_csmc`, `ledh_flow`, `ledh_invertible`, `ledh_invertible_bimodal`, `ledh_invertible_info`, `ledh_invertible_ot`, `ledh_invertible_soft`, `particle`, `particle_tf_ot`, `particle_tf_soft`, `sde_local_correction`, `stochastic_edh`, `stochastic_edh_optimal`, `stochastic_edh_paper`, `stochastic_edh_paper_optimal`, and `ukf`.
+  - `code/configs/experiment/` has 166 experiment choices grouped by scenario: `1d_linear` (9), `5d_linear` (13), `5d_linear_partial_strong` (13), `5d_linear_partial_weak` (13), `acoustic_tracking` (21), `cubic_sensor` (6), `kalman` (2), `kitagawa` (16), `lorenz96` (2), `range_bearing` (19), `stochastic_volatility` (36), `stochastic_volatility_2d` (14), and `two_sensor_bearing` (2).
+  - `code/configs/dpf/` has 86 DPF choices grouped by sampler: `hmc` (60), `map` (20), `mh` (2), and `pgibbs` (4).
+  - `code/configs/dpf_smoke/` has 73 smoke-test DPF choices grouped by sampler: `hmc` (54), `map` (13), `mh` (2), and `pgibbs` (4).
+- Composition patterns:
+  - `code/configs/config.yaml` composes the `model`, `filter`, and optional `experiment` groups; `code/configs/experiment/**/*.yaml` files use `defaults` entries that override `/model` and `/filter`, then set run-level keys such as `T`, `seed`, `plot`, and `output_dir`.
+  - `code/configs/config_dpf.yaml` composes one optional `dpf` selection; `code/configs/dpf/**/*.yaml` files are packaged at `_global_` and define their own `model`, `filter`, `dpf`, and `data` sections directly.
+  - `code/configs/config_dpf_smoke.yaml` composes one optional `dpf_smoke` selection; `code/configs/dpf_smoke/**/*.yaml` files mirror the DPF layout with smaller smoke-test settings.
+- Main key families present in config files:
+  - Model configs define `_target_` plus model parameters such as `F`, `B`, `H`, `D`, `mu_0`, `Sigma_0`, `sigma_range`, `sigma_bearing`, `alpha`, `sigma`, `beta`, `a1`, `a2`, `sigma1`, `sigma2`, and `log_space`.
+  - Filter configs define `_target_` plus filter parameters such as `n_particles`, `n_lambda_steps`, `resample_threshold`, `resampling_method`, `resampling_config`, `alpha`, `diffusion_scale`, `schedule_mu`, `kernel_type`, `use_joseph_form`, `lambda_schedule`, and local-correction/preconditioner settings.
+  - DPF configs define `model`, `filter`, `dpf.sampler`, `dpf.trainable_params`, sampler-specific blocks including `dpf.hmc`, `dpf.map`, `dpf.mh`, and `dpf.pgibbs`, plus `data.T`, `data.seed`, and `data.true_params`.
+- Hydra composition found in code:
+  - `code/src/experiments/run_dpf_experiment.py` uses `@hydra.main(version_base=None, config_path="../../configs", config_name="config_dpf")`.
+  - `code/src/experiments/run_experiment.py` uses `@hydra.main(version_base=None, config_path="../../configs", config_name="config")`.
+  - `code/src/experiments/run_mc_experiment.py` uses `@hydra.main(version_base=None, config_path="../../configs", config_name="config")`.
+- Config keys referenced from code (via `cfg.<...>`):
+  - `code/src/experiments/run_dpf_experiment.py`: `data.T`, `data.seed`, `data.true_params`, `dpf.get`, `dpf.hmc`, `dpf.map`, `dpf.mh`, `dpf.pgibbs`, `dpf.trainable_params`, `filter`, `filter._target_`, `filter._target_.split`, `filter.get`, `get`, `model`, `model._target_`.
+  - `code/src/experiments/run_experiment.py`: `filter`, `filter._target_`, `filter._target_.split`, `get`, `model`, `model._target_`, `model.get`, `seed`.
+  - `code/src/experiments/run_mc_experiment.py`: `filter`, `filter._target_.split`, `filter.get`, `filter.n_lambda_steps`, `filter.n_particles`, `get`, `model`, `model._target_.split`, `n_mc_runs`, `truth`, `z_fixed`.
+- Config ambiguities:
+  - `code/configs/dpf/**/*.yaml` and `code/configs/dpf_smoke/**/*.yaml` do not use Hydra `defaults`; they are selected as whole optional group entries by `code/configs/config_dpf.yaml` or `code/configs/config_dpf_smoke.yaml`.
+  - Some keys are scenario-specific and appear only in selected experiments or model/filter variants; section 4 lists the recurring key families rather than every scalar key in all 372 files.
+
+## 5. Test inventory
+- `code/tests/dpf/test_ledh_cubic_sensor.py` - LEDH invertible particle flow filter on cubic sensor model.. Uses `save_result`: no; uses `reset_results`: no.
+- `code/tests/filters/test_bootstrap_pf.py` - Bootstrap Particle Filter correctness and diagnostic tests.. Uses `save_result`: no; uses `reset_results`: no.
+- `code/tests/filters/test_flow_filters.py` - Flow filter correctness and diagnostic tests.. Uses `save_result`: no; uses `reset_results`: no.
+- `code/tests/filters/test_kalman_family.py` - Kalman family cross-validation tests.. Uses `save_result`: no; uses `reset_results`: no.
+- `code/tests/hmc/sv2d_diagnostics/test_bpf_vs_ledh_gradient.py` - BPF+OT vs LEDH+OT gradient comparison on SV2D.. Uses `save_result`: yes; uses `reset_results`: yes.
+- `code/tests/hmc/sv2d_diagnostics/test_hmc_leapfrog_replay.py` - Diagnostics 1 and 2: leapfrog replay and step-size sweep.. Uses `save_result`: yes; uses `reset_results`: yes.
+- `code/tests/hmc/sv2d_diagnostics/test_pf_noise.py` - Diagnostic 4: particle filter Monte Carlo noise at the stuck point.. Uses `save_result`: yes; uses `reset_results`: yes.
+- `code/tests/hmc/sv2d_diagnostics/test_pf_noise_cross_model.py` - Cross-model PF noise characterization (Codex 4-metric design).. Uses `save_result`: yes; uses `reset_results`: yes.
+- `code/tests/hmc/sv2d_diagnostics/test_runner_vs_direct.py` - Diagnostic: what does the production runner do differently from a direct. Uses `save_result`: yes; uses `reset_results`: yes.
+- `code/tests/hmc/test_gradient_vs_numerical_lg.py` - Gradient validation: LEDH+OT autodiff vs numerical FD on Linear Gaussian.. Uses `save_result`: no; uses `reset_results`: yes.
+- `code/tests/hmc/test_gradient_vs_numerical_lg_bpf.py` - Gradient validation: BPF+OT autodiff vs numerical FD on Linear Gaussian.. Uses `save_result`: no; uses `reset_results`: yes.
+- `code/tests/hmc/test_gradient_vs_numerical_lg_ot_approx.py` - Gradient validation: LEDH+OT approximate Sinkhorn backward on LG.. Uses `save_result`: no; uses `reset_results`: yes.
+- `code/tests/hmc/test_gradient_vs_numerical_lg_ot_implicit.py` - Gradient validation: LEDH+OT implicit Sinkhorn backward on LG.. Uses `save_result`: no; uses `reset_results`: yes.
+- `code/tests/hmc/test_gradient_vs_numerical_rb.py` - Gradient validation: LEDH+OT autodiff vs numerical FD on Range-Bearing model.. Uses `save_result`: no; uses `reset_results`: yes.
+- `code/tests/hmc/test_gradient_vs_numerical_sv1d.py` - Gradient validation: LEDH+OT autodiff vs numerical FD on 1D Stochastic Volatility.. Uses `save_result`: no; uses `reset_results`: yes.
+- `code/tests/hmc/test_gradient_vs_numerical_sv2d.py` - Gradient validation: LEDH+OT autodiff vs numerical FD on 2D Stochastic Volatility.. Uses `save_result`: no; uses `reset_results`: yes.
+- `code/tests/hmc/test_ledh_ablation.py` - LEDH gradient ablation: isolate which gradient path causes any autodiff/FD mismatch.. Uses `save_result`: yes; uses `reset_results`: yes.
+- `code/tests/hmc/test_memory_and_jit.py` - Tests for memory leak fix and JIT compilation improvements.. Uses `save_result`: yes; uses `reset_results`: yes.
+- `code/tests/hmc/test_ot_gradient_standalone.py` - Standalone gradient validation for OT resampling.. Uses `save_result`: yes; uses `reset_results`: yes.
+- `code/tests/hmc/test_sinkhorn_convergence.py` - Sinkhorn convergence tests: do transport plans satisfy marginal constraints?. Uses `save_result`: yes; uses `reset_results`: yes.
+- `code/tests/hmc/test_sinkhorn_convergence_trajectory.py` - Record Sinkhorn marginal-error trajectories for the OT report figure.. Uses `save_result`: yes; uses `reset_results`: yes.
+- `code/tests/jit/test_jit_compile.py` - JIT (XLA) compilation probe for HMC filter pipeline.. Uses `save_result`: yes; uses `reset_results`: yes.
+- `code/tests/jit/test_jit_value_and_grad.py` - XLA value-and-gradient validation.. Uses `save_result`: yes; uses `reset_results`: yes.
+- `code/tests/papers/test_two_sensor_paper.py` - Debug tests for Two-Sensor Bearing paper reproduction (arXiv:2107.04672, Section 4).. Uses `save_result`: no; uses `reset_results`: no.
+- `code/tests/unit/test_resampling.py` - Resampling method tests — systematic, soft, and OT entropy.. Uses `save_result`: no; uses `reset_results`: no.
+- `code/tests/unit/test_sv_models.py` - Tests for Stochastic Volatility models (1D log-space + 2D).. Uses `save_result`: no; uses `reset_results`: no.
+- `code/tests/unit/test_utils_distributions.py` - Tests for src/utils/distributions.py — stable probability computations.. Uses `save_result`: no; uses `reset_results`: no.
+- `code/tests/unit/test_utils_flow_params.py` - Tests for src/utils/flow_params.py — particle flow parameter computation.. Uses `save_result`: no; uses `reset_results`: no.
+- `code/tests/unit/test_utils_linalg.py` - Tests for src/utils/linalg.py — numerically stable linear algebra operations.. Uses `save_result`: no; uses `reset_results`: no.
+- `code/tests/unit/test_utils_ode_solvers.py` - Tests for src/utils/ode_solvers.py — ODE/SDE integration steps.. Uses `save_result`: no; uses `reset_results`: no.
+
+## 6. Dependency graph
+- Coarse package adjacency (only intra-repo imports from `code/src`):
+  - `src` -> (no cross-package imports)
+  - `src.DF` -> src, src.filters, src.models
+  - `src.core` -> src
+  - `src.experiments` -> src, src.models
+  - `src.filters` -> src, src.core, src.resampling, src.utils
+  - `src.models` -> src, src.core, src.utils
+  - `src.resampling` -> src
+  - `src.utils` -> src, src.resampling
+- Module-level adjacency list (intra-repo imports):
+  - `code/src/DF/__init__.py` -> src
+  - `code/src/DF/differentiable_model.py` -> None
+  - `code/src/DF/example_usage.py` -> src.DF, src.models.stochastic_volatility, src.filters.particle.edh_flow, src.models.utils
+  - `code/src/DF/hmc_runner.py` -> src.DF.types, src.DF.parameter_handler, src.DF.differentiable_model
+  - `code/src/DF/hmc_runner_old.py` -> src.DF.types, src.DF.parameter_handler, src.DF.differentiable_model
+  - `code/src/DF/lr_schedules.py` -> None
+  - `code/src/DF/mh_runner.py` -> src.DF.types, src.DF.parameter_handler, src.DF.differentiable_model
+  - `code/src/DF/parameter_handler.py` -> src.DF.types
+  - `code/src/DF/pgibbs_runner.py` -> src.DF.types, src.DF.parameter_handler, src.DF.differentiable_model
+  - `code/src/DF/pmmh_runner.py` -> src.DF.types
+  - `code/src/DF/smoke_test_linear_gaussian.py` -> src.DF, src.filters.kalman.extended_kalman, src.models.linear_gaussian, src.models.utils
+  - `code/src/DF/types.py` -> None
+  - `code/src/__init__.py` -> None
+  - `code/src/core/__init__.py` -> src
+  - `code/src/core/differentiable.py` -> None
+  - `code/src/core/filter_base.py` -> src.core.types
+  - `code/src/core/model_base.py` -> None
+  - `code/src/core/types.py` -> None
+  - `code/src/experiments/__init__.py` -> src
+  - `code/src/experiments/plot_flow_combined.py` -> None
+  - `code/src/experiments/plot_hmc_diagnostics.py` -> None
+  - `code/src/experiments/plot_map_convergence.py` -> None
+  - `code/src/experiments/plot_rb_ekf_ukf_combined.py` -> None
+  - `code/src/experiments/plot_sinkhorn_and_gradient.py` -> None
+  - `code/src/experiments/plot_sv_ekf_ukf_combined.py` -> None
+  - `code/src/experiments/run_dpf_experiment.py` -> src.models.utils
+  - `code/src/experiments/run_experiment.py` -> src.models.utils
+  - `code/src/experiments/run_mc_experiment.py` -> None
+  - `code/src/experiments/visualization.py` -> None
+  - `code/src/experiments/visualization_hmc.py` -> None
+  - `code/src/filters/__init__.py` -> src
+  - `code/src/filters/kalman/__init__.py` -> src.filters
+  - `code/src/filters/kalman/augmented_ukf.py` -> src.filters.kalman.unscented_kalman, src.core.model_base, src.utils.linalg
+  - `code/src/filters/kalman/batched_ekf.py` -> src.utils.linalg
+  - `code/src/filters/kalman/batched_ukf.py` -> src.utils.linalg
+  - `code/src/filters/kalman/extended_kalman.py` -> src.core.filter_base, src.core.types, src.core.model_base, src.utils.linalg
+  - `code/src/filters/kalman/filter_factory.py` -> src.filters.kalman.extended_kalman, src.filters.kalman.unscented_kalman
+  - `code/src/filters/kalman/kalman.py` -> src.core.filter_base, src.core.types, src.core.model_base, src.utils.linalg
+  - `code/src/filters/kalman/unscented_kalman.py` -> src.core.filter_base, src.core.types, src.core.model_base, src.utils.linalg
+  - `code/src/filters/particle/__init__.py` -> src.filters
+  - `code/src/filters/particle/bootstrap_pf_hmc.py` -> src.filters.particle.bootstrap_pf_tf, src.resampling, src.resampling.diagnosis
+  - `code/src/filters/particle/bootstrap_pf_hmc_old.py` -> src.filters.particle.bootstrap_pf_tf, src.resampling, src.resampling.diagnosis
+  - `code/src/filters/particle/bootstrap_pf_tf.py` -> src.filters.particle.particle_base, src.core.types, src.core.model_base, src.resampling
+  - `code/src/filters/particle/conditional_smc.py` -> src.core.model_base, src.utils.distributions, src.utils.linalg, src.resampling, src.resampling.diagnosis
+  - `code/src/filters/particle/edh_flow.py` -> src.filters.particle.flow_base, src.filters.kalman.filter_factory, src.utils.flow_params, src.utils.linalg, src.utils.ode_solvers, src.utils.constants, src.utils.distributions, src.utils.resampling_config
+  - `code/src/filters/particle/edh_flow_global.py` -> src.filters.particle.flow_base, src.filters.kalman.filter_factory, src.utils.flow_params, src.utils.linalg, src.utils.ode_solvers, src.utils.constants, src.utils.distributions, src.utils.resampling_config
+  - `code/src/filters/particle/edh_invertible.py` -> src.core.model_base, src.core.types, src.filters.kalman.filter_factory, src.utils.flow_params, src.utils.distributions, src.utils.linalg, src.utils.ode_solvers, src.utils.constants, src.utils.resampling_config, src.resampling.diagnosis
+  - `code/src/filters/particle/flow_base.py` -> src.core.types
+  - `code/src/filters/particle/kernel_flow.py` -> src.core.types
+  - `code/src/filters/particle/ledh_flow.py` -> src.filters.particle.flow_base, src.filters.kalman.filter_factory, src.utils.flow_params, src.utils.linalg, src.utils.ode_solvers, src.utils.constants, src.utils.distributions, src.utils.resampling_config
+  - `code/src/filters/particle/ledh_invertible.py` -> src.core.model_base, src.core.types, src.filters.kalman.batched_ekf, src.filters.kalman.batched_ukf, src.utils.flow_params, src.utils.distributions, src.utils.linalg, src.utils.constants, src.utils.resampling_config, src.resampling.diagnosis
+  - `code/src/filters/particle/ledh_invertible_bimodal.py` -> src.filters.particle.ledh_invertible, src.core.model_base, src.core.types, src.utils.flow_params, src.utils.distributions, src.utils.linalg, src.filters.kalman.batched_ekf, src.filters.kalman.batched_ukf, src.resampling.diagnosis
+  - `code/src/filters/particle/ledh_invertible_csmc.py` -> src.core.model_base, src.filters.kalman.batched_ekf, src.filters.kalman.batched_ukf, src.utils.flow_params, src.utils.distributions, src.utils.linalg, src.utils.constants, src.utils.resampling_config, src.resampling.diagnosis
+  - `code/src/filters/particle/ledh_invertible_hmc.py` -> src.filters.particle.ledh_invertible, src.filters.kalman.batched_ekf, src.filters.kalman.batched_ukf, src.utils.flow_params, src.utils.distributions, src.utils.linalg, src.resampling, src.resampling.diagnosis
+  - `code/src/filters/particle/ledh_invertible_hmc_old.py` -> src.filters.particle.ledh_invertible, src.filters.kalman.batched_ekf, src.filters.kalman.batched_ukf, src.utils.flow_params, src.utils.distributions, src.utils.linalg, src.resampling, src.resampling.diagnosis
+  - `code/src/filters/particle/ledh_invertible_info.py` -> src.core.model_base, src.core.types, src.filters.kalman.batched_ekf, src.filters.kalman.batched_ukf, src.utils.distributions, src.utils.linalg, src.utils.constants, src.utils.resampling_config, src.resampling.diagnosis
+  - `code/src/filters/particle/particle_base.py` -> src.core.filter_base
+  - `code/src/filters/particle/sde_local_correction.py` -> src.filters.particle.stochastic_edh, src.utils.flow_params, src.utils.linalg, src.utils.ode_solvers
+  - `code/src/filters/particle/stochastic_edh.py` -> src.filters.particle.edh_flow, src.utils.flow_params, src.utils.linalg, src.utils.ode_solvers, src.utils.constants
+  - `code/src/filters/particle/stochastic_edh_paper.py` -> src.filters.particle.stochastic_edh
+  - `code/src/models/__init__.py` -> src, src.utils
+  - `code/src/models/acoustic_tracking.py` -> src.core.model_base
+  - `code/src/models/acoustic_tracking_full.py` -> src.core.model_base
+  - `code/src/models/cubic_sensor.py` -> src.core.model_base
+  - `code/src/models/kitagawa.py` -> src.core.model_base
+  - `code/src/models/linear_gaussian.py` -> src.core.model_base
+  - `code/src/models/lorenz96.py` -> src.core.model_base, src.utils.ode_solvers
+  - `code/src/models/range_bearing.py` -> src.core.model_base
+  - `code/src/models/stochastic_volatility.py` -> src.core.model_base
+  - `code/src/models/stochastic_volatility_2d.py` -> src.core.model_base
+  - `code/src/models/two_sensor_bearing.py` -> src.core.model_base
+  - `code/src/models/utils.py` -> src.core.model_base
+  - `code/src/resampling/__init__.py` -> src
+  - `code/src/resampling/diagnosis.py` -> None
+  - `code/src/resampling/neural_operator_resample.py` -> src.resampling.types
+  - `code/src/resampling/ot_entropy.py` -> src.resampling.types
+  - `code/src/resampling/ot_entropy_approx.py` -> src.resampling.types
+  - `code/src/resampling/soft.py` -> src.resampling.types
+  - `code/src/resampling/systematic.py` -> src.resampling.types
+  - `code/src/resampling/types.py` -> None
+  - `code/src/utils/__init__.py` -> src
+  - `code/src/utils/constants.py` -> None
+  - `code/src/utils/device.py` -> None
+  - `code/src/utils/distributions.py` -> src.utils.linalg
+  - `code/src/utils/flow_params.py` -> src.utils.linalg
+  - `code/src/utils/linalg.py` -> None
+  - `code/src/utils/ode_solvers.py` -> None
+  - `code/src/utils/resampling_config.py` -> src.resampling
+
+## Ambiguities
+- `code/config/` was requested but does not exist; Hydra decorators in `code/src/experiments/*.py` reference `../../configs`, which is outside the allowed scan scope and was not read.
+- Several files under `code/tests/hmc/` define `unittest.TestCase` tests but have non-`test_*.py` names; pytest collection of these depends on runner configuration not available in the scanned scope.
+- `__pycache__/*.pyc` and `.DS_Store` entries are binary/cache metadata; their functional intent is inferred from path/type, not source code text.

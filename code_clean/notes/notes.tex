@@ -1,0 +1,447 @@
+\documentclass[11pt]{report}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath, amssymb}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{tcolorbox}
+\tcbuselibrary{listings, breakable, skins}
+
+\definecolor{tfblue}{RGB}{0,100,160}
+\definecolor{codebg}{RGB}{248,248,248}
+\definecolor{commentgreen}{RGB}{0,128,0}
+\definecolor{strorange}{RGB}{200,100,0}
+
+\lstdefinestyle{python}{
+  language=Python,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{tfblue}\bfseries,
+  commentstyle=\color{commentgreen},
+  stringstyle=\color{strorange},
+  backgroundcolor=\color{codebg},
+  showstringspaces=false,
+  breaklines=true,
+  frame=single,
+  framesep=4pt,
+}
+\lstdefinestyle{shell}{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{codebg},
+  breaklines=true,
+  frame=single,
+  framesep=4pt,
+}
+
+% Box for "new TF/TFP command" callouts.
+\newtcolorbox{tfcmd}[1]{
+  colback=blue!4, colframe=tfblue, fonttitle=\bfseries,
+  title={New command: \texttt{#1}}, breakable
+}
+% Box for test-result summaries.
+\newtcolorbox{testresult}[1]{
+  colback=green!4, colframe=green!50!black, fonttitle=\bfseries,
+  title={Test result: #1}, breakable
+}
+
+\title{JPML\_TF Rebuild Notes}
+\author{Haowu Duan}
+\date{}
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+\chapter{Introduction}
+
+This document is a working log of the from-scratch TensorFlow rebuild of
+the \texttt{JPMLCOE} codebase under \texttt{code\_clean/jpml\_tf/}. It
+serves three purposes:
+
+\begin{enumerate}
+  \item Track what was built at each phase, in build order, with the
+    exact files involved.
+  \item Explain every new TensorFlow or TensorFlow Probability command
+    the first time it appears, in plain language. Standard library
+    functions (\texttt{json}, \texttt{pathlib}, etc.) are not explained.
+  \item Capture the test command and test result for every stage, with
+    a short justification of why the result demonstrates the code is
+    correct at that point.
+\end{enumerate}
+
+The plan being executed is in
+\texttt{rebuilt\_plan/00\_overview.md} through
+\texttt{08\_migration.md}. Each chapter below corresponds to one phase
+in that plan; sections within a chapter correspond to incremental
+sub-pieces inside the phase.
+
+\paragraph{Environment.} Python 3.12, TensorFlow 2.16.2,
+TensorFlow Probability 0.24.0, Pydantic 2.13.3, pytest 9.0.2,
+PyYAML 6.0.3. Package manager: \texttt{uv} 0.11.8. Virtualenv at
+\texttt{code/.venv/}. The \texttt{code\_clean/} tree is the new code
+root; the legacy \texttt{code/} tree is untouched.
+
+\paragraph{Convention.} Code listings show the file path immediately
+above the listing. New TensorFlow commands appear in blue boxes labelled
+\textit{New command}. Test results appear in green boxes that include
+the exact \texttt{pytest} command, the captured output, and a short
+justification.
+
+\chapter{Phase 01 --- Foundation, Config, Results Sink}
+
+Phase~01 builds the package import boundary, the global TensorFlow
+startup hook that pins \texttt{float64}, the Pydantic-validated scenario
+schema, and the uniform JSON test-result sink. Every later phase loads
+through these.
+
+This chapter is built in sub-pieces. Each sub-piece introduces the
+smallest possible change, has its own gate test, and is documented
+before the next one starts.
+
+\section{Sub-piece 1.1 --- Package import boundary}
+
+\subsection*{Goal}
+
+Establish the package root \texttt{jpml\_tf/} so that
+\texttt{import jpml\_tf} succeeds and has no import side effects, in
+particular it does not import TensorFlow. The dtype-policy invariant
+that later phases depend on requires that no TF code runs before
+\texttt{configure\_tf()} is called; that invariant is impossible to
+maintain unless the package root stays empty of computational imports.
+
+\subsection*{Files built}
+
+\begin{lstlisting}[style=python, caption={\texttt{code\_clean/jpml\_tf/\_\_init\_\_.py}}]
+"""jpml_tf -- TensorFlow rebuild of JPMLCOE.
+
+The package root is intentionally empty: importing ``jpml_tf`` must not
+trigger TensorFlow imports, scenario loading, or array creation. Every
+entry point (CLI, test, notebook) calls ``jpml_tf.startup.configure_tf()``
+explicitly before any computational module is imported.
+"""
+
+__version__ = "0.1.0"
+\end{lstlisting}
+
+\begin{lstlisting}[style=python, caption={\texttt{code\_clean/jpml\_tf/types.py}}]
+"""Shared cross-module types.
+
+Populated incrementally as later phases need them. Phase 01 only owns
+the package scaffold and does not yet require any types.
+"""
+\end{lstlisting}
+
+\begin{lstlisting}[style=python, caption={\texttt{code\_clean/tests/conftest.py}}]
+"""pytest configuration shared by all tests under ``code_clean/tests/``.
+
+Adds the package parent (``code_clean/``) to ``sys.path`` so tests can
+``import jpml_tf`` without installing the package.
+"""
+
+import sys
+from pathlib import Path
+
+_PKG_PARENT = Path(__file__).resolve().parent.parent  # code_clean/
+if str(_PKG_PARENT) not in sys.path:
+    sys.path.insert(0, str(_PKG_PARENT))
+\end{lstlisting}
+
+\begin{lstlisting}[style=python, caption={\texttt{code\_clean/tests/test\_01\_imports.py} (excerpt)}]
+def test_jpml_tf_imports() -> None:
+    import jpml_tf  # noqa: F401
+
+
+def test_jpml_tf_exposes_version_string() -> None:
+    import jpml_tf
+
+    assert isinstance(jpml_tf.__version__, str)
+    assert len(jpml_tf.__version__) > 0
+
+
+def test_jpml_tf_does_not_import_tensorflow() -> None:
+    for mod in [m for m in sys.modules
+                if m == "tensorflow" or m.startswith("tensorflow.")]:
+        del sys.modules[mod]
+
+    import jpml_tf  # noqa: F401
+
+    tf_loaded = [m for m in sys.modules
+                 if m == "tensorflow" or m.startswith("tensorflow.")]
+    assert tf_loaded == [], (
+        f"Importing jpml_tf must not load TensorFlow, but found: {tf_loaded[:5]}"
+    )
+\end{lstlisting}
+
+\subsection*{New commands introduced}
+
+This sub-piece introduces no TensorFlow or TensorFlow Probability
+commands. The only library-level facts in play are standard Python:
+\texttt{sys.modules} (the dictionary of every module Python has
+imported in the current process) and \texttt{Path(\_\_file\_\_).resolve().parent}
+(the absolute directory containing the current source file).
+
+\subsection*{Test command and result}
+
+\begin{lstlisting}[style=shell]
+cd code_clean
+python -m pytest tests/test_01_imports.py -v
+\end{lstlisting}
+
+\begin{testresult}{3 passed, 0.01s}
+\begin{lstlisting}[style=shell]
+tests/test_01_imports.py::test_jpml_tf_imports                  PASSED [ 33%]
+tests/test_01_imports.py::test_jpml_tf_exposes_version_string   PASSED [ 66%]
+tests/test_01_imports.py::test_jpml_tf_does_not_import_tensorflow PASSED [100%]
+============================== 3 passed in 0.01s ===============================
+\end{lstlisting}
+\end{testresult}
+
+\subsection*{Why this result is sufficient}
+
+The first two tests are smoke checks: the package imports and exposes
+its version string. They would fail if \texttt{\_\_init\_\_.py} had a
+syntax error or if \texttt{\_\_version\_\_} were misspelled.
+
+The third test is the load-bearing one. It clears any TensorFlow
+modules from \texttt{sys.modules}, imports \texttt{jpml\_tf}, and then
+asserts that no TensorFlow module re-appeared. This proves that the
+package root has no transitive import path to TensorFlow. As long as
+this test passes on every change, the dtype-policy invariant introduced
+in the next sub-piece (configure \texttt{float64} \emph{before} TF
+creates any tensor) cannot be silently broken by an accidental import.
+
+There are no JSON-saved numerical results yet because the uniform
+result sink is built later in this phase (sub-piece~1.3). Once the sink
+exists, all phase tests --- including these three --- will route their
+results through it.
+
+\section{Sub-piece 1.2 --- TensorFlow startup hook}
+
+\subsection*{Goal}
+
+Provide a single function ``configure\_tf()'' that callers (CLI, test,
+notebook) invoke once per process, before any computational module of
+\texttt{jpml\_tf} is imported and before any TensorFlow tensor is
+created. The function locks the global numeric mode to \texttt{float64},
+configures device visibility, and optionally enables deterministic ops.
+Phase~01 of the rebuild plan locks \texttt{float64} as the only
+critical-path dtype; this sub-piece is where that lock physically lives.
+
+\subsection*{Files built}
+
+\begin{lstlisting}[style=python, caption={\texttt{code\_clean/jpml\_tf/startup.py}}]
+"""Process-level TensorFlow configuration."""
+
+from __future__ import annotations
+
+import os
+
+_CONFIGURED = False
+
+
+def configure_tf(
+    *,
+    force_cpu: bool = False,
+    allow_gpu_growth: bool = True,
+    deterministic_ops: bool = False,
+    legacy_keras: bool = True,
+) -> None:
+    """Lock global TF numeric and device policy to rebuild defaults."""
+    global _CONFIGURED
+
+    os.environ["TF_USE_LEGACY_KERAS"] = "1" if legacy_keras else "0"
+
+    import tensorflow as tf
+
+    if force_cpu:
+        tf.config.set_visible_devices([], "GPU")
+    elif allow_gpu_growth:
+        for gpu in tf.config.list_physical_devices("GPU"):
+            try:
+                tf.config.experimental.set_memory_growth(gpu, True)
+            except RuntimeError:
+                pass
+
+    if deterministic_ops:
+        tf.config.experimental.enable_op_determinism()
+
+    tf.keras.backend.set_floatx("float64")
+    tf.keras.mixed_precision.set_global_policy("float64")
+
+    _CONFIGURED = True
+
+
+def is_configured() -> bool:
+    return _CONFIGURED
+\end{lstlisting}
+
+\begin{lstlisting}[style=python, caption={\texttt{code\_clean/tests/test\_01\_startup.py}}]
+import os
+
+
+def test_configure_tf_sets_float64() -> None:
+    from jpml_tf.startup import configure_tf
+    configure_tf()
+
+    import tensorflow as tf
+    assert tf.keras.backend.floatx() == "float64"
+    assert tf.keras.mixed_precision.global_policy().compute_dtype == "float64"
+
+
+def test_configure_tf_is_idempotent() -> None:
+    from jpml_tf.startup import configure_tf, is_configured
+    configure_tf()
+    configure_tf()
+    assert is_configured()
+
+    import tensorflow as tf
+    assert tf.keras.backend.floatx() == "float64"
+
+
+def test_configure_tf_sets_legacy_keras_env_var() -> None:
+    from jpml_tf.startup import configure_tf
+    configure_tf(legacy_keras=True)
+    assert os.environ.get("TF_USE_LEGACY_KERAS") == "1"
+\end{lstlisting}
+
+\subsection*{New commands introduced}
+
+\begin{tfcmd}{tf.keras.backend.set\_floatx, tf.keras.backend.floatx}
+TensorFlow's Keras submodule has a process-wide default float dtype
+called \emph{floatx}. It controls the dtype of any Keras layer, Keras
+optimizer state, or anything that asks Keras ``what's your default
+float?'' \texttt{set\_floatx("float64")} flips that default;
+\texttt{floatx()} reads the current value. Default at TF startup is
+\texttt{"float32"}.
+
+\textbf{Caveat to remember.} \emph{floatx} only governs Keras-aware code.
+Plain \texttt{tf.constant(1.0)} still gives \texttt{float32} regardless
+of \texttt{floatx}, because \texttt{tf.constant} infers dtype from the
+literal's Python type. The rebuild's discipline is to always pass
+explicit \texttt{dtype=tf.float64} when constructing tensors; setting
+\emph{floatx} catches the Keras-side defaults that explicit-dtype
+discipline cannot reach.
+\end{tfcmd}
+
+\begin{tfcmd}{tf.keras.mixed\_precision.set\_global\_policy, .global\_policy}
+The mixed-precision API in Keras lets you say ``compute in this dtype,
+store variables in that dtype.'' Setting the \emph{global policy} to
+\texttt{"float64"} forces Keras to use float64 for both compute and
+variables. It is a stronger lock than \emph{floatx}: any Keras layer
+that asks ``what compute dtype should I use?'' gets ``float64'' from
+the policy, even if the layer was constructed with no explicit
+\texttt{dtype} argument.
+
+\textbf{Why both \emph{floatx} and the policy.} They control overlapping
+but not identical surfaces. \emph{floatx} is the older API, used by
+some optimizers and helpers. The policy API is the newer, broader
+mechanism. Setting both belt-and-braces is cheap and avoids ``it works
+in some versions of Keras but not others'' surprises.
+\end{tfcmd}
+
+\begin{tfcmd}{tf.config.list\_physical\_devices, tf.config.set\_visible\_devices}
+\texttt{list\_physical\_devices("GPU")} returns the list of GPUs TF can
+see on this machine, as a list of \texttt{PhysicalDevice} objects.
+
+\texttt{set\_visible\_devices([], "GPU")} hides all GPUs from TF for
+the rest of the process: every subsequent op runs on CPU. This is the
+clean way to force CPU-only mode --- much more reliable than setting
+\texttt{CUDA\_VISIBLE\_DEVICES} after TF has already initialised.
+
+\textbf{Order matters.} Both calls must happen before TF places any op
+on a device. After the first computation runs, TF locks the device
+visibility for the process; later calls error out.
+\end{tfcmd}
+
+\begin{tfcmd}{tf.config.experimental.set\_memory\_growth}
+By default, TF eagerly allocates almost all of a GPU's memory the
+moment it touches that GPU. \texttt{set\_memory\_growth(gpu, True)}
+asks TF to grow its memory pool incrementally instead, which lets
+multiple TF processes share a GPU and prevents spurious OOM errors
+from one greedy process. The trade-off is a small fragmentation cost.
+The \texttt{experimental} prefix means the API name might change in a
+future TF version, but it has been in this form since TF~2.0.
+\end{tfcmd}
+
+\begin{tfcmd}{tf.config.experimental.enable\_op\_determinism}
+Some TF ops (e.g. cuDNN convolutions, segment reductions, parallel
+reductions) are intentionally non-deterministic so they can use faster
+parallel implementations. \texttt{enable\_op\_determinism()} forces TF
+to use deterministic implementations everywhere. The result: the same
+input plus the same seed always produces the same output, at the cost
+of slower training. Useful for debugging and for paper-quality
+reproducibility runs; disabled by default in the rebuild because most
+training is faster without it.
+\end{tfcmd}
+
+\begin{tfcmd}{TF\_USE\_LEGACY\_KERAS environment variable}
+Not a TF command, but the only knob that controls which Keras backend
+TensorFlow uses. TF~2.16+ ships Keras~3 by default; setting
+\texttt{TF\_USE\_LEGACY\_KERAS=1} switches it to the older Keras~2.x
+backend (\texttt{tf-keras}, installed separately). The rebuild defaults
+to legacy Keras for compatibility with the existing TFP HMC kernels,
+which still target the Keras~2.x backend on the office RTX~3090 box.
+TF reads this variable on its first import; setting it later has no
+effect.
+\end{tfcmd}
+
+\subsection*{Test command and result}
+
+\begin{lstlisting}[style=shell]
+cd code_clean
+python -m pytest tests/ -v
+\end{lstlisting}
+
+\begin{testresult}{6 passed, 2.56s}
+\begin{lstlisting}[style=shell]
+tests/test_01_imports.py::test_jpml_tf_imports                       PASSED
+tests/test_01_imports.py::test_jpml_tf_exposes_version_string        PASSED
+tests/test_01_imports.py::test_jpml_tf_does_not_import_tensorflow    PASSED
+tests/test_01_startup.py::test_configure_tf_sets_float64             PASSED
+tests/test_01_startup.py::test_configure_tf_is_idempotent            PASSED
+tests/test_01_startup.py::test_configure_tf_sets_legacy_keras_env_var PASSED
+================== 6 passed, 2 warnings in 2.56s =====================
+\end{lstlisting}
+\end{testresult}
+
+\subsection*{Why this result is sufficient}
+
+The first new test asserts the two complementary dtype locks took
+effect: \texttt{floatx()} is \texttt{"float64"} \emph{and} the
+mixed-precision compute dtype is \texttt{"float64"}. Either one alone
+would leave gaps that the other closes; both together cover every
+Keras code path the rebuild touches.
+
+The second test asserts idempotence. Real entry points may call
+\texttt{configure\_tf()} more than once --- a script that imports a
+test fixture which itself calls it, for example. Idempotence guarantees
+this is safe: nothing throws, and the dtype stays locked.
+
+The third test asserts that \texttt{TF\_USE\_LEGACY\_KERAS=1} actually
+landed in \texttt{os.environ}. This is a surface check: the env var is
+the only public signal that controls Keras-2 versus Keras-3 mode, and
+later phases assume Keras~2 semantics for layer dtype propagation.
+
+The test result is currently captured only as pytest stdout in this
+document. Sub-piece~1.3 builds the uniform JSON result sink; once it
+exists, all six tests above will be re-run with their assertions
+recorded as JSON records keyed by test name.
+
+\subsection*{State of \texttt{code\_clean/} after this sub-piece}
+
+\begin{lstlisting}[style=shell]
+code_clean/
+  jpml_tf/
+    __init__.py
+    startup.py               (new)
+    types.py
+  tests/
+    __init__.py
+    conftest.py
+    test_01_imports.py
+    test_01_startup.py       (new)
+  notes/
+    notes.tex                (this document)
+    notes.pdf                (compiled output)
+\end{lstlisting}
+
+\end{document}

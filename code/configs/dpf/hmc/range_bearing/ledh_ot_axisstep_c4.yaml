@@ -1,12 +1,12 @@
 # @package _global_
-# RB + LEDH+OT HMC with diagonal mass matrix, chain 2 of 4 (for R-hat).
-# Mass = 1/var per axis from prior 4-chain pooled posterior (q-space std=0.146/0.110).
-# Varies: seed=43, sigma_range init=0.1, sigma_bearing init=0.1.
+# RB + LEDH+OT HMC with per-axis step_size, chain 4 of 4 (for R-hat).
+# step_size: [0.001, 0.004] = range axis 0.001, bearing axis 4x bigger.
+# Varies: seed=45, sigma_range init=0.3, sigma_bearing init=0.3.
 
 model:
   _target_: src.models.range_bearing.RangeBearingModel
-  sigma_range: 0.1
-  sigma_bearing: 0.1
+  sigma_range: 0.3
+  sigma_bearing: 0.3
 
 filter:
   _target_: src.filters.particle.ledh_invertible_hmc.LEDHParticleFlowFilterHMC
@@ -37,14 +37,12 @@ dpf:
   hmc:
     num_samples: 400
     num_burnin: 200
-    step_size: 0.001
-    mass_vector: [47.26, 82.09]
+    step_size: [0.001, 0.004]
     num_leapfrog_steps: 5
     max_tree_depth: 10
     adaptation_rate: 0.8
     target_accept_prob: 0.75
-    step_count_smoothing: 100
-    seed: 43
+    seed: 45
 
 data:
   T: 50

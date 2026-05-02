@@ -43,6 +43,7 @@ dpf:
     max_tree_depth: 10
     adaptation_rate: 0.8
     target_accept_prob: 0.75
+    step_count_smoothing: 100
     seed: 42
 
 data:
