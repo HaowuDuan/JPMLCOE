@@ -101,9 +101,15 @@
 \contentsline {subsubsection}{\numberline {6.4.3}HMC on Range-Bearing}{63}{subsubsection.6.4.3}%
 \contentsline {subsubsection}{\numberline {6.4.4}HMC on 1D Stochastic Volatility}{64}{subsubsection.6.4.4}%
 \contentsline {paragraph}{Diagnostic summary table.}{65}{section*.52}%
-\contentsline {subsection}{\numberline {6.5}Gradient Diagnostics on SV2D: Unresolved Nonlinear Failure}{65}{subsection.6.5}%
-\contentsline {paragraph}{Symptom.}{66}{section*.53}%
-\contentsline {paragraph}{What I have ruled out.}{66}{section*.54}%
-\contentsline {paragraph}{Working hypotheses.}{66}{section*.55}%
-\contentsline {paragraph}{Closing framing.}{67}{section*.56}%
-\contentsline {subsection}{\numberline {6.6}Limitations}{67}{subsection.6.6}%
+\contentsline {subsection}{\numberline {6.5}Multi-Chain Convergence Diagnostics}{66}{subsection.6.5}%
+\contentsline {paragraph}{Attempted multi-chain configurations.}{66}{section*.53}%
+\contentsline {subsubsection}{\numberline {6.5.1}1D Linear Gaussian (BPF+OT and LEDH+OT)}{66}{subsubsection.6.5.1}%
+\contentsline {subsubsection}{\numberline {6.5.2}1D Stochastic Volatility (LEDH+OT)}{67}{subsubsection.6.5.2}%
+\contentsline {subsubsection}{\numberline {6.5.3}Range-Bearing (LEDH+OT, Per-Axis Step + $L=10$)}{68}{subsubsection.6.5.3}%
+\contentsline {paragraph}{Cross-comparison.}{69}{section*.54}%
+\contentsline {subsection}{\numberline {6.6}Gradient Diagnostics on SV2D: Unresolved Nonlinear Failure}{69}{subsection.6.6}%
+\contentsline {paragraph}{Symptom.}{70}{section*.55}%
+\contentsline {paragraph}{What I have ruled out.}{70}{section*.56}%
+\contentsline {paragraph}{Working hypotheses.}{70}{section*.57}%
+\contentsline {paragraph}{Closing framing.}{71}{section*.58}%
+\contentsline {subsection}{\numberline {6.7}Limitations}{71}{subsection.6.7}%

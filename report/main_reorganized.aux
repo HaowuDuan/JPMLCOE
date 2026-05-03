@@ -272,26 +272,50 @@
 \newlabel{sec:hmc-rb}{{6.4.3}{63}{HMC on Range-Bearing}{subsubsection.6.4.3}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {31}{\ignorespaces Range-bearing HMC post-burn-in traces, LEDH+OT filter. Two stacked panels for $\sigma _{\text  {range}}$ and $\sigma _{\text  {bearing}}$. Horizontal dashed lines at the true values ($0.1$ for both). Both chains oscillate around the truth without drift.}}{63}{figure.31}\protected@file@percent }
 \newlabel{fig:hmc_rb_trace}{{31}{63}{Range-bearing HMC post-burn-in traces, LEDH+OT filter. Two stacked panels for $\sigma _{\text {range}}$ and $\sigma _{\text {bearing}}$. Horizontal dashed lines at the true values ($0.1$ for both). Both chains oscillate around the truth without drift}{figure.31}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {32}{\ignorespaces Range-bearing HMC marginal posteriors, LEDH+OT filter. Two panels, one per parameter. True values as dashed vertical lines. Both marginals concentrate near the truth.}}{63}{figure.32}\protected@file@percent }
-\newlabel{fig:hmc_rb_histogram}{{32}{63}{Range-bearing HMC marginal posteriors, LEDH+OT filter. Two panels, one per parameter. True values as dashed vertical lines. Both marginals concentrate near the truth}{figure.32}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {32}{\ignorespaces Range-bearing HMC marginal posteriors, LEDH+OT filter. Two panels, one per parameter. True values as dashed vertical lines. Both marginals concentrate near the truth.}}{64}{figure.32}\protected@file@percent }
+\newlabel{fig:hmc_rb_histogram}{{32}{64}{Range-bearing HMC marginal posteriors, LEDH+OT filter. Two panels, one per parameter. True values as dashed vertical lines. Both marginals concentrate near the truth}{figure.32}{}}
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {6.4.4}HMC on 1D Stochastic Volatility}{64}{subsubsection.6.4.4}\protected@file@percent }
 \newlabel{sec:hmc-sv1d}{{6.4.4}{64}{HMC on 1D Stochastic Volatility}{subsubsection.6.4.4}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {33}{\ignorespaces 1D stochastic volatility HMC post-burn-in trace for $\alpha $, LEDH+OT filter. Dashed reference line at the true value $0.91$.}}{64}{figure.33}\protected@file@percent }
 \newlabel{fig:hmc_sv1d_trace}{{33}{64}{1D stochastic volatility HMC post-burn-in trace for $\alpha $, LEDH+OT filter. Dashed reference line at the true value $0.91$}{figure.33}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {34}{\ignorespaces 1D stochastic volatility HMC marginal posterior for $\alpha $, LEDH+OT filter.}}{64}{figure.34}\protected@file@percent }
-\newlabel{fig:hmc_sv1d_histogram}{{34}{64}{1D stochastic volatility HMC marginal posterior for $\alpha $, LEDH+OT filter}{figure.34}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {34}{\ignorespaces 1D stochastic volatility HMC marginal posterior for $\alpha $, LEDH+OT filter.}}{65}{figure.34}\protected@file@percent }
+\newlabel{fig:hmc_sv1d_histogram}{{34}{65}{1D stochastic volatility HMC marginal posterior for $\alpha $, LEDH+OT filter}{figure.34}{}}
 \@writefile{toc}{\contentsline {paragraph}{Diagnostic summary table.}{65}{section*.52}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {12}{\ignorespaces HMC diagnostics for all eight runs. ``Acceptance'' is the fraction of leapfrog proposals accepted; ``ESS'' is effective sample size at the reported $N_{\text  {samples}}$; ``split-$\hat  R$'' is the single-chain split potential-scale-reduction factor (values near $1$ are clean, values $> 1.1$ flag non-convergence, very-low values can flag a trapped chain). ``Wall'' is total burn-in + sampling wall time; ``Time/step'' is seconds per HMC iteration ($L = 5$ leapfrog steps per iteration for every run). Memory is not reported --- the current HMC logging does not store peak memory.}}{65}{table.12}\protected@file@percent }
-\newlabel{tab:hmc_diagnostics}{{12}{65}{HMC diagnostics for all eight runs. ``Acceptance'' is the fraction of leapfrog proposals accepted; ``ESS'' is effective sample size at the reported $N_{\text {samples}}$; ``split-$\hat R$'' is the single-chain split potential-scale-reduction factor (values near $1$ are clean, values $> 1.1$ flag non-convergence, very-low values can flag a trapped chain). ``Wall'' is total burn-in + sampling wall time; ``Time/step'' is seconds per HMC iteration ($L = 5$ leapfrog steps per iteration for every run). Memory is not reported --- the current HMC logging does not store peak memory}{table.12}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.5}Gradient Diagnostics on SV2D: Unresolved Nonlinear Failure}{65}{subsection.6.5}\protected@file@percent }
-\newlabel{sec:sv2d}{{6.5}{65}{Gradient Diagnostics on SV2D: Unresolved Nonlinear Failure}{subsection.6.5}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {35}{\ignorespaces 2D stochastic volatility HMC post-burn-in trace for $\sigma _2$, LEDH+OT filter. Dashed reference line at the true value $1.0$. The trace oscillates around the truth but see the paragraphs below for why this is insufficient to call the run a success.}}{66}{figure.35}\protected@file@percent }
-\newlabel{fig:hmc_sv2d_trace}{{35}{66}{2D stochastic volatility HMC post-burn-in trace for $\sigma _2$, LEDH+OT filter. Dashed reference line at the true value $1.0$. The trace oscillates around the truth but see the paragraphs below for why this is insufficient to call the run a success}{figure.35}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {36}{\ignorespaces 2D stochastic volatility HMC marginal posterior for $\sigma _2$, LEDH+OT filter. The posterior is broader than the SV1D and LG cases, reflecting the step-level gradient instability discussed below.}}{66}{figure.36}\protected@file@percent }
-\newlabel{fig:hmc_sv2d_histogram}{{36}{66}{2D stochastic volatility HMC marginal posterior for $\sigma _2$, LEDH+OT filter. The posterior is broader than the SV1D and LG cases, reflecting the step-level gradient instability discussed below}{figure.36}{}}
-\@writefile{toc}{\contentsline {paragraph}{Symptom.}{66}{section*.53}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{What I have ruled out.}{66}{section*.54}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Working hypotheses.}{66}{section*.55}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {12}{\ignorespaces HMC diagnostics for all eight single-chain runs. ``Acceptance'' is the fraction of leapfrog proposals accepted; ``ESS'' is effective sample size at the reported $N_{\text  {samples}}$; ``split-$\hat  R$'' is the single-chain split potential-scale-reduction factor (values near $1$ are clean, values $> 1.1$ flag non-convergence, very-low values can flag a trapped chain). ``Wall'' is total burn-in + sampling wall time; ``Time/step'' is seconds per HMC iteration ($L = 5$ leapfrog steps per iteration for every run). Memory is not reported --- the current HMC logging does not store peak memory. Multi-chain $\hat  R$ for retuned configurations is in Table~\ref {tab:hmc_multichain_attempts}.}}{65}{table.12}\protected@file@percent }
+\newlabel{tab:hmc_diagnostics}{{12}{65}{HMC diagnostics for all eight single-chain runs. ``Acceptance'' is the fraction of leapfrog proposals accepted; ``ESS'' is effective sample size at the reported $N_{\text {samples}}$; ``split-$\hat R$'' is the single-chain split potential-scale-reduction factor (values near $1$ are clean, values $> 1.1$ flag non-convergence, very-low values can flag a trapped chain). ``Wall'' is total burn-in + sampling wall time; ``Time/step'' is seconds per HMC iteration ($L = 5$ leapfrog steps per iteration for every run). Memory is not reported --- the current HMC logging does not store peak memory. Multi-chain $\hat R$ for retuned configurations is in Table~\ref {tab:hmc_multichain_attempts}}{table.12}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.5}Multi-Chain Convergence Diagnostics}{66}{subsection.6.5}\protected@file@percent }
+\newlabel{sec:hmc-multichain}{{6.5}{66}{Multi-Chain Convergence Diagnostics}{subsection.6.5}{}}
+\@writefile{toc}{\contentsline {paragraph}{Attempted multi-chain configurations.}{66}{section*.53}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {13}{\ignorespaces Multi-chain HMC runs attempted. ``Outcome'' is converged at split $\hat  R \le 1.01$, under-mixed at $\hat  R > 1.05$, marginal between, or crashed during burn-in. Rows with crashes record the failure mode in their own log.}}{66}{table.13}\protected@file@percent }
+\newlabel{tab:hmc_multichain_attempts}{{13}{66}{Multi-chain HMC runs attempted. ``Outcome'' is converged at split $\hat R \le 1.01$, under-mixed at $\hat R > 1.05$, marginal between, or crashed during burn-in. Rows with crashes record the failure mode in their own log}{table.13}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.5.1}1D Linear Gaussian (BPF+OT and LEDH+OT)}{66}{subsubsection.6.5.1}\protected@file@percent }
+\newlabel{sec:hmc-multichain-lg}{{6.5.1}{66}{1D Linear Gaussian (BPF+OT and LEDH+OT)}{subsubsection.6.5.1}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {14}{\ignorespaces 1D LG multi-chain diagnostics. Truth offset is $(\text  {posterior mean} - \text  {truth}) / \text  {posterior sd}$; it measures realization-specific posterior centering and is not a chain-failure metric.}}{66}{table.14}\protected@file@percent }
+\newlabel{tab:hmc_multichain_lg}{{14}{66}{1D LG multi-chain diagnostics. Truth offset is $(\text {posterior mean} - \text {truth}) / \text {posterior sd}$; it measures realization-specific posterior centering and is not a chain-failure metric}{table.14}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {35}{\ignorespaces 1D LG four-chain HMC, post-burn-in. Top row: BPF+OT with extended sample budget (2000 per chain). Bottom row: LEDH+OT (400 per chain). Left column: traces, four chains overlaid in distinct colors. Right column: pooled marginal posterior with truth at $1.0$ as the dashed vertical line.}}{67}{figure.35}\protected@file@percent }
+\newlabel{fig:hmc_lg_4chain}{{35}{67}{1D LG four-chain HMC, post-burn-in. Top row: BPF+OT with extended sample budget (2000 per chain). Bottom row: LEDH+OT (400 per chain). Left column: traces, four chains overlaid in distinct colors. Right column: pooled marginal posterior with truth at $1.0$ as the dashed vertical line}{figure.35}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.5.2}1D Stochastic Volatility (LEDH+OT)}{67}{subsubsection.6.5.2}\protected@file@percent }
+\newlabel{sec:hmc-multichain-sv1d}{{6.5.2}{67}{1D Stochastic Volatility (LEDH+OT)}{subsubsection.6.5.2}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {15}{\ignorespaces 1D SV multi-chain diagnostics, LEDH+OT.}}{67}{table.15}\protected@file@percent }
+\newlabel{tab:hmc_multichain_sv1d}{{15}{67}{1D SV multi-chain diagnostics, LEDH+OT}{table.15}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {36}{\ignorespaces 1D SV four-chain HMC, post-burn-in. Left: traces, four chains in distinct colors. Right: pooled marginal posterior for $\alpha $, dashed line at truth $0.91$.}}{68}{figure.36}\protected@file@percent }
+\newlabel{fig:hmc_sv1d_4chain}{{36}{68}{1D SV four-chain HMC, post-burn-in. Left: traces, four chains in distinct colors. Right: pooled marginal posterior for $\alpha $, dashed line at truth $0.91$}{figure.36}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.5.3}Range-Bearing (LEDH+OT, Per-Axis Step + $L=10$)}{68}{subsubsection.6.5.3}\protected@file@percent }
+\newlabel{sec:hmc-multichain-rb}{{6.5.3}{68}{Range-Bearing (LEDH+OT, Per-Axis Step + $L=10$)}{subsubsection.6.5.3}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {16}{\ignorespaces Range-bearing multi-chain diagnostics, LEDH+OT with axisstep and $L=10$.}}{68}{table.16}\protected@file@percent }
+\newlabel{tab:hmc_multichain_rb}{{16}{68}{Range-bearing multi-chain diagnostics, LEDH+OT with axisstep and $L=10$}{table.16}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {37}{\ignorespaces Range-bearing four-chain HMC, post-burn-in. Top row: $\sigma _{\text  {range}}$. Bottom row: $\sigma _{\text  {bearing}}$. Left column: four-chain traces. Right column: pooled marginal posteriors with dashed lines at the true values ($0.10$ for both).}}{69}{figure.37}\protected@file@percent }
+\newlabel{fig:hmc_rb_4chain}{{37}{69}{Range-bearing four-chain HMC, post-burn-in. Top row: $\sigma _{\text {range}}$. Bottom row: $\sigma _{\text {bearing}}$. Left column: four-chain traces. Right column: pooled marginal posteriors with dashed lines at the true values ($0.10$ for both)}{figure.37}{}}
+\@writefile{toc}{\contentsline {paragraph}{Cross-comparison.}{69}{section*.54}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.6}Gradient Diagnostics on SV2D: Unresolved Nonlinear Failure}{69}{subsection.6.6}\protected@file@percent }
+\newlabel{sec:sv2d}{{6.6}{69}{Gradient Diagnostics on SV2D: Unresolved Nonlinear Failure}{subsection.6.6}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {38}{\ignorespaces 2D stochastic volatility HMC post-burn-in trace for $\sigma _2$, LEDH+OT filter. Dashed reference line at the true value $1.0$. The trace oscillates around the truth but see the paragraphs below for why this is insufficient to call the run a success.}}{70}{figure.38}\protected@file@percent }
+\newlabel{fig:hmc_sv2d_trace}{{38}{70}{2D stochastic volatility HMC post-burn-in trace for $\sigma _2$, LEDH+OT filter. Dashed reference line at the true value $1.0$. The trace oscillates around the truth but see the paragraphs below for why this is insufficient to call the run a success}{figure.38}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {39}{\ignorespaces 2D stochastic volatility HMC marginal posterior for $\sigma _2$, LEDH+OT filter. The posterior is broader than the SV1D and LG cases, reflecting the step-level gradient instability discussed below.}}{70}{figure.39}\protected@file@percent }
+\newlabel{fig:hmc_sv2d_histogram}{{39}{70}{2D stochastic volatility HMC marginal posterior for $\sigma _2$, LEDH+OT filter. The posterior is broader than the SV1D and LG cases, reflecting the step-level gradient instability discussed below}{figure.39}{}}
+\@writefile{toc}{\contentsline {paragraph}{Symptom.}{70}{section*.55}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{What I have ruled out.}{70}{section*.56}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Working hypotheses.}{70}{section*.57}\protected@file@percent }
 \bibstyle{unsrt}
 \bibdata{main_reorganized}
 \bibcite{Särkkä2013BayesianFilteringAndSmoothing}{1}
@@ -303,11 +327,11 @@
 \bibcite{Pulido2019}{7}
 \bibcite{HuVanLeeuwen2021}{8}
 \bibcite{reich2013nonparametric}{9}
+\@writefile{lot}{\contentsline {table}{\numberline {17}{\ignorespaces Candidate root causes for the SV2D HMC gradient failure.}}{71}{table.17}\protected@file@percent }
+\newlabel{tab:sv2d-hypotheses}{{17}{71}{Candidate root causes for the SV2D HMC gradient failure}{table.17}{}}
+\@writefile{toc}{\contentsline {paragraph}{Closing framing.}{71}{section*.58}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.7}Limitations}{71}{subsection.6.7}\protected@file@percent }
 \bibcite{corenflos-differentiable-2021}{10}
-\@writefile{lot}{\contentsline {table}{\numberline {13}{\ignorespaces Candidate root causes for the SV2D HMC gradient failure.}}{67}{table.13}\protected@file@percent }
-\newlabel{tab:sv2d-hypotheses}{{13}{67}{Candidate root causes for the SV2D HMC gradient failure}{table.13}{}}
-\@writefile{toc}{\contentsline {paragraph}{Closing framing.}{67}{section*.56}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.6}Limitations}{67}{subsection.6.6}\protected@file@percent }
 \bibcite{karkus2018particle}{11}
 \bibcite{Cuturi2013SinkhornDL}{12}
 \bibcite{cremers2022unifiedframeworkimplicit}{13}
@@ -316,4 +340,4 @@
 \bibcite{Neal-2012-MCMC-Hamiltonian-Dynamics-ARXIV-1206-1901v1}{16}
 \bibcite{hoffman2014nuts}{17}
 \bibcite{beskos2013optimal}{18}
-\gdef \@abspage@last{68}
+\gdef \@abspage@last{72}
