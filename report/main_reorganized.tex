@@ -2329,7 +2329,7 @@ Figures~\ref{fig:hmc_lg_histogram_kalman}, \ref{fig:hmc_lg_histogram_ekf}, \ref{
 \end{figure}
 
 \paragraph{Diagnostic readout.}
-Table~\ref{tab:hmc_diagnostics} collects the diagnostics for the 1D LG runs (and the other three nonlinear runs below). Range-bearing and SV1D are discussed in \S\ref{sec:hmc-rb} and \S\ref{sec:hmc-sv1d}. Kalman, EKF, and UKF all hit acceptance $\ge 0.97$ with ESS saturating at the sample count $200$ --- the low apparent split-$\hat R$ of $0.83$ is a finite-sample artefact of running a single $N=200$ chain and is not a convergence problem. LEDH+OT achieves acceptance $0.91$ with ESS $33.7$ over $400$ samples and split-$\hat R = 0.999$, which is the cleanest "non-trivial" result: the flow filter with the full three-term derivative chain matches the Kalman posterior shape. BPF+OT lands at split-$\hat R = 1.15$, above the standard non-convergence threshold of $1.1$ --- its chain did not mix well enough at this sample count, which is visible in Figure~\ref{fig:hmc_lg_histogram_bpf_ot} as an asymmetric histogram relative to the Kalman outline. The BPF+OT result is therefore a known gap: the gradient chain is correct (§\ref{sec:sinkhorn-backward}), the MAP converges cleanly (§\ref{sec:map-smoke-test}), but the HMC chain needs either more samples, a longer burn-in, or step-size re-tuning before the posterior can be trusted. I record the run here rather than omit it --- the diagnostic is what tells us the chain is not ready.
+Table~\ref{tab:hmc_diagnostics} collects the diagnostics for the 1D LG runs (and the other three nonlinear runs below). Range-bearing and SV1D are discussed in \S\ref{sec:hmc-rb} and \S\ref{sec:hmc-sv1d}. Kalman, EKF, and UKF all hit acceptance $\ge 0.97$ with ESS saturating at the sample count $200$ --- the low apparent split-$\hat R$ of $0.83$ is a finite-sample artefact of running a single $N=200$ chain and is not a convergence problem. LEDH+OT achieves acceptance $0.91$ with ESS $33.7$ over $400$ samples and split-$\hat R = 0.999$, which is the cleanest "non-trivial" result: the flow filter with the full three-term derivative chain matches the Kalman posterior shape. BPF+OT lands at split-$\hat R = 1.15$, above the standard non-convergence threshold of $1.1$ --- its chain did not mix well enough at this sample count, which is visible in Figure~\ref{fig:hmc_lg_histogram_bpf_ot} as an asymmetric histogram relative to the Kalman outline. The BPF+OT result is therefore a known gap: the gradient chain is correct (§\ref{sec:sinkhorn-backward}), the MAP converges cleanly (§\ref{sec:map-smoke-test}), but the HMC chain needs either more samples, a longer burn-in, or step-size re-tuning before the posterior can be trusted. I record the run here rather than omit it --- the diagnostic is what tells us the chain is not ready. The split-$\hat R$ values quoted here are single-chain estimates; multi-chain $\hat R$ for the retuned BPF+OT run is reported in \S\ref{sec:hmc-multichain}.
 
 \subsubsection{Multi-Dimensional Model, 1 Parameter}
 \label{sec:multi-d-lg}
@@ -2375,7 +2375,7 @@ Figures~\ref{fig:hmc_sv1d_trace} and~\ref{fig:hmc_sv1d_histogram} show the SV1D 
     \label{fig:hmc_sv1d_histogram}
 \end{figure}
 
-The diagnostic readout is the red flag in this section. Acceptance rate $0.77$ is fine, but ESS is $\mathbf{4.0}$ over $500$ samples --- effectively no independent information is extracted from the chain, it is moving in a tight oscillation that happens to pass the acceptance test without exploring the posterior. Split-$\hat R = 0.66$ is below $1$ by enough to suggest the chain is trapped rather than mixing. The posterior in Figure~\ref{fig:hmc_sv1d_histogram} therefore represents a very tight local region, not a faithful marginal over $\alpha$. I include this run as an honest diagnostic: the corresponding flow-family filters track SV1D at $\mathrm{RMSE} \approx 1.16$ in \S\ref{sec:particle-methods-section} and the gradient path is validated (Table~\ref{tab:gradient_validation}), but the HMC chain did not mix at the sample budget and step-size tuning I used here. This run is a known gap.
+The diagnostic readout for this single-chain run is the red flag in this section. Acceptance rate $0.77$ is fine, but ESS is $\mathbf{4.0}$ over $500$ samples --- effectively no independent information is extracted from the chain, it is moving in a tight oscillation that happens to pass the acceptance test without exploring the posterior. Split-$\hat R = 0.66$ is below $1$ by enough to suggest the chain is trapped rather than mixing. The posterior in Figure~\ref{fig:hmc_sv1d_histogram} therefore represents a very tight local region, not a faithful marginal over $\alpha$. I include this run as an honest diagnostic: the corresponding flow-family filters track SV1D at $\mathrm{RMSE} \approx 1.16$ in \S\ref{sec:particle-methods-section} and the gradient path is validated (Table~\ref{tab:gradient_validation}), but this single-chain run did not mix at the sample budget and step-size tuning I used. The four-chain rerun with the same filter and a fresh DA from each independent start does converge cleanly (\S\ref{sec:hmc-multichain-sv1d}), so the trapped-chain reading here was an artifact of one chain's DA initialization rather than a property of the SV1D posterior.
 
 \paragraph{Diagnostic summary table.}
 Table~\ref{tab:hmc_diagnostics} collects the diagnostics for all eight HMC runs in this report --- the five 1D LG runs above, plus the two nonlinear runs just described, plus the SV2D run discussed in \S\ref{sec:sv2d}.
@@ -2383,7 +2383,7 @@ Table~\ref{tab:hmc_diagnostics} collects the diagnostics for all eight HMC runs 
 \begin{table}[H]
 \centering
 \footnotesize
-\caption{HMC diagnostics for all eight runs. ``Acceptance'' is the fraction of leapfrog proposals accepted; ``ESS'' is effective sample size at the reported $N_{\text{samples}}$; ``split-$\hat R$'' is the single-chain split potential-scale-reduction factor (values near $1$ are clean, values $> 1.1$ flag non-convergence, very-low values can flag a trapped chain). ``Wall'' is total burn-in + sampling wall time; ``Time/step'' is seconds per HMC iteration ($L = 5$ leapfrog steps per iteration for every run). Memory is not reported --- the current HMC logging does not store peak memory.}
+\caption{HMC diagnostics for all eight single-chain runs. ``Acceptance'' is the fraction of leapfrog proposals accepted; ``ESS'' is effective sample size at the reported $N_{\text{samples}}$; ``split-$\hat R$'' is the single-chain split potential-scale-reduction factor (values near $1$ are clean, values $> 1.1$ flag non-convergence, very-low values can flag a trapped chain). ``Wall'' is total burn-in + sampling wall time; ``Time/step'' is seconds per HMC iteration ($L = 5$ leapfrog steps per iteration for every run). Memory is not reported --- the current HMC logging does not store peak memory. Multi-chain $\hat R$ for retuned configurations is in Table~\ref{tab:hmc_multichain_attempts}.}
 \label{tab:hmc_diagnostics}
 \begin{tabular}{lcccccccc}
 \toprule
@@ -2403,7 +2403,132 @@ SV2D LEDH+OT & $0.75$ & $27.9$  & $1.021$ & $36{,}456$ & $52.08$ & $500$ & $200$
 {\footnotesize $^{*}$Diagnostic red flag. BPF+OT on LG has split-$\hat R > 1.1$ (non-convergence threshold); SV1D LEDH+OT has ESS $= 4$ effectively zero independent samples and split-$\hat R \ll 1$ suggesting a trapped chain. Both are recorded honestly rather than omitted; neither represents a faithful posterior.}
 \end{table}
 
-Four of the eight runs are cleanly converged (all three LG Kalman-family runs plus LG LEDH+OT). RB LEDH+OT and SV2D LEDH+OT are converged on the standard threshold but sit at relatively low ESS given their sample budgets. LG BPF+OT and SV1D LEDH+OT are the two red flags, for different reasons: BPF+OT has a mixing problem on LG (split-$\hat R = 1.15$), and SV1D has a trapped chain (ESS $= 4$). These gaps are the reason the SV2D failure mode discussed in \S\ref{sec:sv2d} is flagged as an \emph{open} problem rather than a clean negative result.
+Four of the eight runs are cleanly converged (all three LG Kalman-family runs plus LG LEDH+OT). RB LEDH+OT and SV2D LEDH+OT are converged on the standard threshold but sit at relatively low ESS given their sample budgets. LG BPF+OT and the original SV1D LEDH+OT runs are the two red flags at the configurations used here; both are revisited with retuned settings and proper four-chain diagnostics in \S\ref{sec:hmc-multichain}. The SV2D failure mode discussed in \S\ref{sec:sv2d} remains open.
+
+\subsection{Multi-Chain Convergence Diagnostics}
+\label{sec:hmc-multichain}
+
+The HMC benchmarks in \S\ref{sec:linear-gaussian-benchmark} report single-chain runs as exploratory diagnostics. This subsection extends that with proper multi-chain convergence checks: four chains per configuration with varied initial conditions, a fixed PF seed of \texttt{[42, 0]} per HMC step, independent dual-averaging per chain, and the modern split rank-normalized $\hat R \le 1.01$ threshold (Vehtari et al.\ 2021). I report only configurations where all four chains converged; the configurations where multi-chain still failed are listed alongside so the section is not selection by hindsight.
+
+\paragraph{Attempted multi-chain configurations.}
+Table~\ref{tab:hmc_multichain_attempts} screens every multi-chain run I attempted. Four cleanly converged --- 1D LG with BPF+OT (extended sample budget) and LEDH+OT, 1D SV with LEDH+OT, and range-bearing with LEDH+OT under per-axis step-size and longer integration. Three failed for distinct reasons: BPF+OT on LG was under-mixed at the original 400-sample budget; the default range-bearing config had $\hat R = 1.094$ on $\sigma_{\text{bearing}}$ from uneven per-axis mixing; the SV2D LEDH+OT chain crashed in the OT backward pass. The mass-matrix tuned range-bearing run also crashed, for reasons detailed in \S\ref{sec:hmc-multichain-rb} below.
+
+\begin{table}[H]
+\centering
+\footnotesize
+\caption{Multi-chain HMC runs attempted. ``Outcome'' is converged at split $\hat R \le 1.01$, under-mixed at $\hat R > 1.05$, marginal between, or crashed during burn-in. Rows with crashes record the failure mode in their own log.}
+\label{tab:hmc_multichain_attempts}
+\begin{tabular}{lllc}
+\toprule
+Model & Filter / config & Outcome & Split $\hat R$ \\
+\midrule
+1D LG & BPF+OT, 400 samples/chain & under-mixed & $1.087$ \\
+1D LG & BPF+OT, 2000 samples/chain & converged & $1.001$ \\
+1D LG & LEDH+OT, 400 samples/chain & converged & $1.000$ \\
+1D SV & LEDH+OT, 400 samples/chain & converged & $1.005$ \\
+RB & LEDH+OT, default scalar step, $L=5$ & under-mixed & $1.094$ ($\sigma_{\text{bearing}}$) \\
+RB & LEDH+OT, mass\_vector $[47, 82]$ & crashed (DA runaway, OT backward) & --- \\
+RB & LEDH+OT, axisstep $[\,0.001, 0.004\,]$, $L=5$ & marginal & $1.025$ ($\sigma_{\text{bearing}}$) \\
+RB & LEDH+OT, axisstep $[\,0.001, 0.004\,]$, $L=10$ & converged & $1.005$ ($\sigma_{\text{bearing}}$) \\
+SV2D & LEDH+OT, scalar step & crashed (OT backward MatrixSolve singular) & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{1D Linear Gaussian (BPF+OT and LEDH+OT)}
+\label{sec:hmc-multichain-lg}
+
+Both filters target the same scalar parameter $\sigma_{\text{obs}}$ at true value $1.0$ on the same observation sequence. The chains initialize at $\sigma_{\text{obs}} \in \{0.5, 1.0, 1.5, 2.0\}$ for chains 1--4. BPF+OT requires an extended sample budget because the 400-sample run had split $\hat R = 1.087$; doubling the sample count to 2000 brings $\hat R$ down to $1.001$, with bulk ESS $7829$ and tail ESS $5638$ across all four chains. LEDH+OT converges at the original 400-sample budget with bulk ESS $672$ and tail ESS $634$. The per-chain final step sizes after dual-averaging are tightly clustered ($\varepsilon \approx 0.34$ for both filters, with chain-to-chain variation under $4\%$), confirming that DA settled consistently across independent inits.
+
+Table~\ref{tab:hmc_multichain_lg} gives the full diagnostics. Figure~\ref{fig:hmc_lg_4chain} shows the four-chain traces and the pooled posteriors. Both filters deliver the same posterior centered near $1.20$, offset $+1.15\sigma$ from truth. The offset is realization-specific --- both filters infer the same posterior given this dataset, but the dataset's empirical likelihood concentrates above the true value. This is a property of the data, not a chain failure.
+
+\begin{table}[H]
+\centering
+\footnotesize
+\caption{1D LG multi-chain diagnostics. Truth offset is $(\text{posterior mean} - \text{truth}) / \text{posterior sd}$; it measures realization-specific posterior centering and is not a chain-failure metric.}
+\label{tab:hmc_multichain_lg}
+\begin{tabular}{lcccccccc}
+\toprule
+Filter & Truth & Mean & Sd & 90\% CI & Offset/sd & Split $\hat R$ & Bulk ESS & Tail ESS \\
+\midrule
+BPF+OT (long) & $1.0$ & $1.194$ & $0.168$ & $[0.92, 1.47]$ & $+1.15$ & $1.001$ & $7829$ & $5638$ \\
+LEDH+OT       & $1.0$ & $1.202$ & $0.179$ & $[0.91, 1.50]$ & $+1.13$ & $1.000$ & $672$  & $634$  \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\linewidth]{figures/hmc_lg_4chain_combined.png}
+    \caption{1D LG four-chain HMC, post-burn-in. Top row: BPF+OT with extended sample budget (2000 per chain). Bottom row: LEDH+OT (400 per chain). Left column: traces, four chains overlaid in distinct colors. Right column: pooled marginal posterior with truth at $1.0$ as the dashed vertical line.}
+    \label{fig:hmc_lg_4chain}
+\end{figure}
+
+\subsubsection{1D Stochastic Volatility (LEDH+OT)}
+\label{sec:hmc-multichain-sv1d}
+
+The 1D SV chain estimates the persistence parameter $\alpha$ at true value $0.91$ on the log-squared-transformed model. Chains 1--4 initialize $\alpha \in \{0.6, 0.8, 0.91, 0.97\}$. The four-chain run converges with split $\hat R = 1.005$, bulk ESS $607$, and tail ESS $615$ over $400$ samples per chain. Final step sizes cluster at $\varepsilon \approx 0.40$ with acceptance $0.87$--$0.92$ across chains. The posterior mean is $0.921 \pm 0.028$, offset only $+0.38\sigma$ from truth --- the closest match in the four converged runs.
+
+This contrasts with the single-chain SV1D run reported in \S\ref{sec:hmc-sv1d}, where the chain showed split $\hat R = 0.66$ and ESS $= 4$ at a different step-size setting. That single-chain reading was an artifact of one chain settling into a tight oscillatory mode under the original DA initialization; the four-chain run with the same filter and a fresh DA from each independent start does not reproduce that pathology.
+
+\begin{table}[H]
+\centering
+\footnotesize
+\caption{1D SV multi-chain diagnostics, LEDH+OT.}
+\label{tab:hmc_multichain_sv1d}
+\begin{tabular}{cccccccc}
+\toprule
+Truth & Mean & Sd & 90\% CI & Offset/sd & Split $\hat R$ & Bulk ESS & Tail ESS \\
+\midrule
+$0.91$ & $0.921$ & $0.028$ & $[0.876, 0.967]$ & $+0.38$ & $1.005$ & $607$ & $615$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\linewidth]{figures/hmc_sv1d_4chain_combined.png}
+    \caption{1D SV four-chain HMC, post-burn-in. Left: traces, four chains in distinct colors. Right: pooled marginal posterior for $\alpha$, dashed line at truth $0.91$.}
+    \label{fig:hmc_sv1d_4chain}
+\end{figure}
+
+\subsubsection{Range-Bearing (LEDH+OT, Per-Axis Step + $L=10$)}
+\label{sec:hmc-multichain-rb}
+
+Range-bearing is the case that exposed the most multi-chain tuning effort. The default scalar-step LEDH+OT config (matching the run in \S\ref{sec:hmc-rb}) gives split $\hat R = 1.003$ on $\sigma_{\text{range}}$ but $1.094$ on $\sigma_{\text{bearing}}$. Per-chain bearing standard deviations vary by a factor of $1.83$ across the four chains while the bearing means agree --- the chains converge to the same posterior centering but disagree on the posterior width. That signature points to per-axis mixing rate: $\sigma_{\text{bearing}}$ has both a narrower posterior in unconstrained space (q-space std $0.110$ versus $0.146$ for $\sigma_{\text{range}}$) and a noisier likelihood gradient via the $\arctan2$ observation, so the bearing axis explores its tails more slowly than range under a shared scalar step.
+
+A diagonal mass-matrix attempt $M = \mathrm{diag}(1/\mathrm{Var}(q)) = [47.26,\,82.09]$ crashed during burn-in. The larger random-momentum scale ($|p| \sim \sqrt{M} \approx 7\text{--}9$ per axis) dominated the gradient signal in the first iterations, producing $100\%$ acceptance trivially, which DA misread as ``step too small''. DA then grew the step exponentially until the OT backward MatrixSolve became singular and the chain crashed at burn-in step 19. Stan-style windowed mass-matrix adaptation re-initializes the step size after each metric update; the single-pass offline approach used here does not, and that mismatch is what failed.
+
+The successful configuration replaces the mass matrix with per-axis step sizes $\varepsilon = [\,0.001,\,0.004\,]$ --- range axis at the original scalar value, bearing axis four times larger. DA preserves the $4\times$ ratio because its scalar log-step update applies identically to both axes. This addresses the per-axis mixing imbalance without rescaling the random momentum, so the early-burn-in pathology of the mass-matrix attempt does not recur. Adding $L = 10$ leapfrog steps per HMC iteration (versus the default $L = 5$) doubles the trajectory length per iteration and cuts $\sigma_{\text{bearing}}$ split $\hat R$ further, from $1.025$ at $L = 5$ to $1.005$ at $L = 10$. Final adapted step sizes across chains are $\varepsilon \approx [\,0.034,\,0.137\,]$ with the $4\times$ ratio preserved. Acceptance is $0.86$--$0.91$ across chains.
+
+The posterior mean for $\sigma_{\text{range}}$ is $0.107 \pm 0.014$ ($+0.49\sigma$ from truth), and for $\sigma_{\text{bearing}}$ is $0.130 \pm 0.016$ ($+1.86\sigma$ from truth). The bearing offset is realization-specific: a separate 1D likelihood scan at $\sigma_{\text{range}}$ fixed to truth shows $\sigma_{\text{bearing}}$'s empirical likelihood peaks near $0.119$ regardless of particle count, $\lambda$-step count, or seed, indicating the offset is a property of this $T = 50$ observation sequence rather than a chain failure.
+
+\begin{table}[H]
+\centering
+\footnotesize
+\caption{Range-bearing multi-chain diagnostics, LEDH+OT with axisstep and $L=10$.}
+\label{tab:hmc_multichain_rb}
+\begin{tabular}{lcccccccc}
+\toprule
+Parameter & Truth & Mean & Sd & 90\% CI & Offset/sd & Split $\hat R$ & Bulk ESS & Tail ESS \\
+\midrule
+$\sigma_{\text{range}}$  & $0.10$ & $0.107$ & $0.014$ & $[0.084, 0.130]$ & $+0.49$ & $0.998$ & $1600$ & $1092$ \\
+$\sigma_{\text{bearing}}$ & $0.10$ & $0.130$ & $0.016$ & $[0.106, 0.154]$ & $+1.86$ & $1.005$ & $632$  & $787$  \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\linewidth]{figures/hmc_rb_4chain_combined.png}
+    \caption{Range-bearing four-chain HMC, post-burn-in. Top row: $\sigma_{\text{range}}$. Bottom row: $\sigma_{\text{bearing}}$. Left column: four-chain traces. Right column: pooled marginal posteriors with dashed lines at the true values ($0.10$ for both).}
+    \label{fig:hmc_rb_4chain}
+\end{figure}
+
+\paragraph{Cross-comparison.}
+Across the four converged runs, split $\hat R$ ranges from $0.998$ to $1.005$, all well below the $1.01$ Vehtari threshold. Bulk ESS varies by an order of magnitude, driven mostly by sample budget: BPF+OT-long has $7829$ at $N=2000$ per chain, the four-hundred-sample runs sit at $607\text{--}1600$. Tail ESS tracks bulk closely, indicating no severe tail-sampling deficiency. The truth offset, by contrast, is dataset-specific and unrelated to chain quality: the closest hit is SV1D at $+0.38\sigma$, the largest is range-bearing's bearing parameter at $+1.86\sigma$. The offset says how informative this particular observation sequence is about the parameter, not whether the chain found that information.
+
+The cost differs sharply across runs. BPF+OT-long is the cheapest per sample (acceptance $0.77$, scalar step) but needed $5\times$ more samples. Range-bearing was the most expensive per sample (twice the leapfrog budget, two-axis step tuning) and needed the most engineering to converge. SV2D remains the open case --- the OT backward instability under the gradient path that worked for the other models is the subject of \S\ref{sec:sv2d}.
 
 \subsection{Gradient Diagnostics on SV2D: Unresolved Nonlinear Failure}
 \label{sec:sv2d}
@@ -2456,7 +2581,7 @@ Initial-state prior choice & none & Lyapunov-stationary, matches §2 principle a
 
 \subsection{Limitations}
 
-To collect the caveats that have been raised section-by-section: (i)~the differentiable-filter HMC pipeline is validated cleanly on linear Gaussian targets and demonstrated on range-bearing, but it is not yet reliable on SV1D or SV2D --- the SV1D chain is trapped (ESS $=4.0$) and the SV2D chain has the step-level gradient spikes described in \S\ref{sec:sv2d}; (ii)~$\hat{R}$ in this report is a single-chain split $\hat R$, not a true multi-chain diagnostic.
+To collect the caveats that have been raised section-by-section: (i)~the differentiable-filter HMC pipeline is validated cleanly on linear Gaussian targets and on 1D SV and range-bearing under retuned multi-chain settings (\S\ref{sec:hmc-multichain}); SV2D is the remaining open case --- the chain has the step-level gradient spikes described in \S\ref{sec:sv2d} and the multi-chain attempt crashed in the OT backward pass; (ii)~the single-chain split-$\hat R$ values reported in \S\ref{sec:linear-gaussian-benchmark} are exploratory diagnostics; multi-chain $\hat R$ for the retuned configurations is reported in \S\ref{sec:hmc-multichain}.
 % 
 % % \newpage
 % 
