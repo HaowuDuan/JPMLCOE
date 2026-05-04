@@ -11,3 +11,6 @@ code/outputs/acoustic_tracking/acoustic_tracking_pf_1e6/weights_history.npy
 code/neural_operator/tests/results/
 code/neural_operator/tests/.pytest_cache/
 code/neural_operator/.pytest_cache/
+
+code_clean 
+rebuilt_plan
