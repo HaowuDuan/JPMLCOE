@@ -106,6 +106,30 @@ def ess_bulk(chains: np.ndarray) -> float:
     return ess_geyer(rank_normalize(chains))
 
 
+def fold_around_median(chains: np.ndarray) -> np.ndarray:
+    """Fold each sample as |y - median(pooled)|. Used for tail R-hat."""
+    med = float(np.median(chains))
+    return np.abs(chains - med)
+
+
+def rhat_bulk(chains: np.ndarray) -> float:
+    """Rank-normalized split R-hat (Vehtari 2021). Split-R-hat applied to the
+    rank-normalized chain — sensitive to any difference in distribution, not
+    just mean/variance, since ranks are uniform under the null."""
+    return split_rhat(rank_normalize(chains))
+
+
+def rhat_tail(chains: np.ndarray) -> float:
+    """Rank-normalized split R-hat on |y - median(pooled)| (Vehtari 2021).
+    Catches scale/tail mismatches that bulk R-hat can miss."""
+    return split_rhat(rank_normalize(fold_around_median(chains)))
+
+
+def rhat_modern(chains: np.ndarray) -> float:
+    """Stan's default: max(rhat_bulk, rhat_tail)."""
+    return max(rhat_bulk(chains), rhat_tail(chains))
+
+
 def ess_tail(chains: np.ndarray, q_lo: float = 0.05, q_hi: float = 0.95) -> float:
     """Tail ESS: min(ESS on indicator(samples < q5), ESS on indicator(samples > q95))."""
     flat = chains.flatten()
@@ -128,6 +152,8 @@ def stats_for_param(chains: np.ndarray, truth: float) -> dict:
     q95 = float(np.quantile(flat, 0.95))
     truth_offset = (mean - truth) / std if std > 0 else float('nan')
     rhat_split = split_rhat(chains)
+    rhat_bulk_v = rhat_bulk(chains)
+    rhat_tail_v = rhat_tail(chains)
     bulk = ess_bulk(chains)
     tail = ess_tail(chains)
     chain_means = [float(m) for m in chains.mean(axis=1)]
@@ -139,6 +165,9 @@ def stats_for_param(chains: np.ndarray, truth: float) -> dict:
         "q95": q95,
         "truth_offset_in_std": truth_offset,
         "split_rhat": rhat_split,
+        "rhat_bulk": rhat_bulk_v,
+        "rhat_tail": rhat_tail_v,
+        "rhat_max": max(rhat_bulk_v, rhat_tail_v),
         "ess_bulk": bulk,
         "ess_tail": tail,
         "chain_means": chain_means,
@@ -214,6 +243,42 @@ def plot_lg_combined(stats: dict):
     }
 
 
+def plot_lg_kalman_family_combined(stats: dict, filters: list = None):
+    """4-chain figure for KF / EKF / UKF on 1D LG.
+
+    `filters` is a list of (config-prefix, label) tuples. Defaults to all three;
+    pass a subset (e.g. KF+EKF only) when UKF chains are not yet ready.
+    """
+    if filters is None:
+        filters = [
+            ("kalman_c", "Kalman"),
+            ("ekf_c", "EKF"),
+            ("ukf_c", "UKF"),
+        ]
+    truth = 1.0
+    n = len(filters)
+    fig, axs = plt.subplots(n, 2, figsize=(12, 4 * n))
+    if n == 1:
+        axs = np.array([axs])
+
+    if "lg" not in stats:
+        stats["lg"] = {}
+    for i, (prefix, label) in enumerate(filters):
+        chains = load_chains("linear_gaussian", prefix, 4, ["obs_noise_std"])["obs_noise_std"]
+        plot_trace_hist_pair(axs[i], chains, truth,
+                             f"LG, {label} (N={chains.shape[1]}/chain)",
+                             r"$\sigma_{\mathrm{obs}}$")
+        # strip trailing "_c" so the JSON key is e.g. "kalman" not "kalman_c"
+        key = prefix.rstrip("_c").rstrip("_")
+        stats["lg"][key] = {"obs_noise_std": stats_for_param(chains, truth)}
+
+    fig.tight_layout()
+    out = FIG_DIR / "hmc_lg_kalman_family_4chain.png"
+    fig.savefig(out, dpi=140)
+    plt.close(fig)
+    return out
+
+
 def plot_sv1d_combined(stats: dict):
     chains = load_chains("stochastic_volatility", "ledh_ot_c", 4, ["alpha"])["alpha"]
     truth = 0.91
@@ -260,10 +325,44 @@ def plot_rb_combined(stats: dict):
 # -----------------------------------------------------------------------------
 
 def main():
+    """Run all canonical figures. Pass --kalman-family to regenerate just the
+    KF/EKF/UKF figure (useful while UKF chains are still running)."""
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--kalman-family", action="store_true",
+                        help="Only regenerate the KF/EKF/UKF 4-chain figure.")
+    parser.add_argument("--filters", nargs="+", default=None,
+                        help="Subset of kalman_family filters (e.g. kalman_c ekf_c).")
+    args = parser.parse_args()
+
     FIG_DIR.mkdir(parents=True, exist_ok=True)
+
+    # If --kalman-family, merge into existing stats rather than overwriting.
+    if args.kalman_family:
+        stats = json.loads(STATS_PATH.read_text()) if STATS_PATH.exists() else {}
+        filters = None
+        if args.filters:
+            label_map = {"kalman_c": "Kalman", "ekf_c": "EKF", "ukf_c": "UKF"}
+            filters = [(p, label_map.get(p, p)) for p in args.filters]
+        print("Generating KF/EKF/UKF combined figure…")
+        out = plot_lg_kalman_family_combined(stats, filters)
+        with open(STATS_PATH, "w") as f:
+            json.dump(stats, f, indent=2)
+        print(f"\nFigure: {out}")
+        print(f"Stats:  {STATS_PATH}")
+        for filt, by_param in stats.get("lg", {}).items():
+            for p, s in by_param.items():
+                print(f"  lg/{filt}/{p}: mean={s['mean']:.4f} ± {s['std']:.4f}, "
+                      f"R̂={s['split_rhat']:.4f} (bulk={s['rhat_bulk']:.4f}, tail={s['rhat_tail']:.4f}, "
+                      f"max={s['rhat_max']:.4f}), bulk_ESS={s['ess_bulk']:.0f}, "
+                      f"tail_ESS={s['ess_tail']:.0f}, offset={s['truth_offset_in_std']:+.2f}σ")
+        return
+
     stats = {}
     print("Generating LG combined figure…")
     plot_lg_combined(stats)
+    print("Generating KF/EKF/UKF combined figure…")
+    plot_lg_kalman_family_combined(stats)
     print("Generating SV1D combined figure…")
     plot_sv1d_combined(stats)
     print("Generating RB combined figure…")
@@ -278,8 +377,9 @@ def main():
         for filt, by_param in by_filter.items():
             for p, s in by_param.items():
                 print(f"  {model}/{filt}/{p}: mean={s['mean']:.4f} ± {s['std']:.4f}, "
-                      f"R-hat={s['split_rhat']:.4f}, bulk_ESS={s['ess_bulk']:.0f}, "
-                      f"tail_ESS={s['ess_tail']:.0f}, truth_offset={s['truth_offset_in_std']:+.2f}σ")
+                      f"R̂={s['split_rhat']:.4f} (bulk={s['rhat_bulk']:.4f}, tail={s['rhat_tail']:.4f}, "
+                      f"max={s['rhat_max']:.4f}), bulk_ESS={s['ess_bulk']:.0f}, "
+                      f"tail_ESS={s['ess_tail']:.0f}, offset={s['truth_offset_in_std']:+.2f}σ")
 
 
 if __name__ == "__main__":

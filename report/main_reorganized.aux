@@ -164,79 +164,89 @@
 \newlabel{sec:entropic-ot}{{5.3}{40}{Entropy-Regularized OT (Sinkhorn) Resampling}{subsection.5.3}{}}
 \@writefile{toc}{\contentsline {paragraph}{Convention used in the algorithm below.}{40}{section*.23}\protected@file@percent }
 \newlabel{eq:gibbs-kernel}{{92}{40}{Convention used in the algorithm below}{equation.92}{}}
+\citation{reich2013nonparametric}
 \newlabel{eq:vanilla-sinkhorn}{{94}{41}{Convention used in the algorithm below}{equation.94}{}}
 \@writefile{loa}{\contentsline {algorithm}{\numberline {15}{\ignorespaces Sinkhorn Iteration (Dual Potentials)}}{41}{algorithm.15}\protected@file@percent }
 \@writefile{loa}{\contentsline {algorithm}{\numberline {16}{\ignorespaces Entropy-Regularized Optimal Transport Resampling}}{41}{algorithm.16}\protected@file@percent }
+\citation{reich2013nonparametric}
 \citation{karkus2018particle}
-\citation{corenflos-differentiable-2021}
+\@writefile{toc}{\contentsline {paragraph}{Consistency: why the output is a realisation of $q$.}{42}{section*.24}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {5.4}The Derivative Chain through Resampling}{42}{subsection.5.4}\protected@file@percent }
 \newlabel{sec:ot-derivative-chain}{{5.4}{42}{The Derivative Chain through Resampling}{subsection.5.4}{}}
-\@writefile{toc}{\contentsline {paragraph}{Systematic resampling with stop gradient.}{42}{section*.24}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Soft resampling.}{42}{section*.25}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{OT resampling.}{42}{section*.26}\protected@file@percent }
-\newlabel{eq:ot-three-terms}{{98}{42}{OT resampling}{equation.98}{}}
+\@writefile{toc}{\contentsline {paragraph}{Systematic resampling with stop gradient.}{42}{section*.25}\protected@file@percent }
+\citation{corenflos-differentiable-2021}
+\@writefile{toc}{\contentsline {paragraph}{Soft resampling.}{43}{section*.26}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{OT resampling.}{43}{section*.27}\protected@file@percent }
+\newlabel{eq:ot-three-terms}{{99}{43}{OT resampling}{equation.99}{}}
 \@writefile{lot}{\contentsline {table}{\numberline {7}{\ignorespaces Resampling strategies for differentiable particle filters.}}{43}{table.7}\protected@file@percent }
 \newlabel{tab:resampling_grad}{{7}{43}{Resampling strategies for differentiable particle filters}{table.7}{}}
-\@writefile{toc}{\contentsline {paragraph}{Implications for HMC.}{43}{section*.27}\protected@file@percent }
-\newlabel{par:soft-vs-ot}{{5.4}{43}{Empirical check: soft vs.\ OT resampling on stochastic volatility}{section*.28}{}}
-\@writefile{toc}{\contentsline {paragraph}{Empirical check: soft vs.\ OT resampling on stochastic volatility.}{43}{section*.28}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {8}{\ignorespaces Resampling comparison on stochastic volatility (1D, $T=500$, $N=200$). Headline: OT adds roughly $20$--$180\times $ wall-time vs.\ systematic / soft depending on $\epsilon $, with the HMC-relevant settings typically around $60$--$100\times $, and gives no RMSE improvement. Soft resampling ties stop-gradient on RMSE at the same cost. Systematic is the cheapest and has the best RMSE of this group; OT's value is gradient quality under HMC (\S  \ref {sec:param-estimation}), not filtering accuracy.}}{43}{table.8}\protected@file@percent }
-\newlabel{tab:soft-vs-ot-sv}{{8}{43}{Resampling comparison on stochastic volatility (1D, $T=500$, $N=200$). Headline: OT adds roughly $20$--$180\times $ wall-time vs.\ systematic / soft depending on $\epsilon $, with the HMC-relevant settings typically around $60$--$100\times $, and gives no RMSE improvement. Soft resampling ties stop-gradient on RMSE at the same cost. Systematic is the cheapest and has the best RMSE of this group; OT's value is gradient quality under HMC (\S \ref {sec:param-estimation}), not filtering accuracy}{table.8}{}}
-\citation{cremers2022unifiedframeworkimplicit}
+\@writefile{toc}{\contentsline {paragraph}{Implications for HMC.}{44}{section*.28}\protected@file@percent }
+\newlabel{par:soft-vs-ot}{{5.4}{44}{Empirical check: soft vs.\ OT resampling on stochastic volatility}{section*.29}{}}
+\@writefile{toc}{\contentsline {paragraph}{Empirical check: soft vs.\ OT resampling on stochastic volatility.}{44}{section*.29}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {8}{\ignorespaces Resampling comparison on stochastic volatility (1D, $T=500$, $N=200$). Headline: OT adds roughly $20$--$180\times $ wall-time vs.\ systematic / soft depending on $\epsilon $, with the HMC-relevant settings typically around $60$--$100\times $, and gives no RMSE improvement. Soft resampling ties stop-gradient on RMSE at the same cost. Systematic is the cheapest and has the best RMSE of this group; OT's value is gradient quality under HMC (\S  \ref {sec:param-estimation}), not filtering accuracy.}}{44}{table.8}\protected@file@percent }
+\newlabel{tab:soft-vs-ot-sv}{{8}{44}{Resampling comparison on stochastic volatility (1D, $T=500$, $N=200$). Headline: OT adds roughly $20$--$180\times $ wall-time vs.\ systematic / soft depending on $\epsilon $, with the HMC-relevant settings typically around $60$--$100\times $, and gives no RMSE improvement. Soft resampling ties stop-gradient on RMSE at the same cost. Systematic is the cheapest and has the best RMSE of this group; OT's value is gradient quality under HMC (\S \ref {sec:param-estimation}), not filtering accuracy}{table.8}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {5.5}Approximate vs Implicit Sinkhorn Backward}{44}{subsection.5.5}\protected@file@percent }
 \newlabel{sec:sinkhorn-backward}{{5.5}{44}{Approximate vs Implicit Sinkhorn Backward}{subsection.5.5}{}}
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {5.5.1}The Extrapolation Approximation}{44}{subsubsection.5.5.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.5.2}Implicit Differentiation at the Fixed Point}{44}{subsubsection.5.5.2}\protected@file@percent }
-\@writefile{loa}{\contentsline {algorithm}{\numberline {17}{\ignorespaces Implicit differentiation backward pass for the Sinkhorn transport plan}}{45}{algorithm.17}\protected@file@percent }
-\newlabel{alg:sinkhorn_implicit_backward}{{17}{45}{Implicit Differentiation at the Fixed Point}{algorithm.17}{}}
+\citation{cremers2022unifiedframeworkimplicit}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.5.2}Implicit Differentiation at the Fixed Point}{45}{subsubsection.5.5.2}\protected@file@percent }
+\@writefile{loa}{\contentsline {algorithm}{\numberline {17}{\ignorespaces Implicit differentiation backward pass for the Sinkhorn transport plan}}{46}{algorithm.17}\protected@file@percent }
+\newlabel{alg:sinkhorn_implicit_backward}{{17}{46}{Implicit Differentiation at the Fixed Point}{algorithm.17}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {19}{\ignorespaces Sinkhorn iteration marginal violation $\|\mathbf  {P}\mathbf  {1} - \mathbf  {a}\|_\infty $ vs iteration number $\ell $, for four regularisation strengths $\epsilon \in \{0.01, 0.05, 0.1, 0.5\}$ on the same $N = 200$ weighted cloud (seed $42$, log-normal weights). Smaller $\epsilon $ gives sharper transport plans but requires more iterations to reach the same tolerance.}}{46}{figure.19}\protected@file@percent }
 \newlabel{fig:sinkhorn_convergence}{{19}{46}{Sinkhorn iteration marginal violation $\|\mathbf {P}\mathbf {1} - \mathbf {a}\|_\infty $ vs iteration number $\ell $, for four regularisation strengths $\epsilon \in \{0.01, 0.05, 0.1, 0.5\}$ on the same $N = 200$ weighted cloud (seed $42$, log-normal weights). Smaller $\epsilon $ gives sharper transport plans but requires more iterations to reach the same tolerance}{figure.19}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {9}{\ignorespaces Gradient validation summary. The columns are defined in the paragraph above the table; all rows use the implicit Sinkhorn backward.}}{46}{table.9}\protected@file@percent }
-\newlabel{tab:gradient_validation}{{9}{46}{Gradient validation summary. The columns are defined in the paragraph above the table; all rows use the implicit Sinkhorn backward}{table.9}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {9}{\ignorespaces Gradient validation summary. The columns are defined in the paragraph above the table; all rows use the implicit Sinkhorn backward.}}{47}{table.9}\protected@file@percent }
+\newlabel{tab:gradient_validation}{{9}{47}{Gradient validation summary. The columns are defined in the paragraph above the table; all rows use the implicit Sinkhorn backward}{table.9}{}}
 \@writefile{lot}{\contentsline {table}{\numberline {10}{\ignorespaces SV1D LEDH+OT gradient validation cases. The finite-difference slopes use radii $1,\ldots  ,5$ times the base step $10^{-4}$; the finite-difference median is the median of those five slopes.}}{47}{table.10}\protected@file@percent }
 \newlabel{tab:gradient_validation_sv1d}{{10}{47}{SV1D LEDH+OT gradient validation cases. The finite-difference slopes use radii $1,\ldots ,5$ times the base step $10^{-4}$; the finite-difference median is the median of those five slopes}{table.10}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {5.6}Neural Acceleration}{47}{subsection.5.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{First-principles design.}{47}{section*.29}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{What the Monge--Amp\`ere equation is here.}{47}{section*.30}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Input and output of the operator.}{48}{section*.31}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Ansatz.}{48}{section*.32}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Inference path.}{48}{section*.33}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Current status.}{48}{section*.34}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Next step.}{49}{section*.35}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{The principle.}{47}{section*.30}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{What Sinkhorn does (recap).}{47}{section*.31}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{The neural map's design.}{48}{section*.32}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{From discrete to continuous.}{48}{section*.33}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Loss and inference.}{48}{section*.34}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Status.}{48}{section*.35}\protected@file@percent }
 \citation{Metropolis1953}
 \citation{Duane1987}
 \citation{Neal-2012-MCMC-Hamiltonian-Dynamics-ARXIV-1206-1901v1}
-\@writefile{toc}{\contentsline {section}{\numberline {6}Parameter Estimation with Differentiable Particle Filters}{50}{section.6}\protected@file@percent }
-\newlabel{sec:param-estimation}{{6}{50}{Parameter Estimation with Differentiable Particle Filters}{section.6}{}}
-\@writefile{toc}{\contentsline {paragraph}{Filtering accuracy is not gradient quality.}{50}{section*.36}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Markov Chain Monte Carlo}{50}{subsection.6.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.1.1}Metropolis-Hastings}{50}{subsubsection.6.1.1}\protected@file@percent }
-\newlabel{sec:metropolis-hastings}{{6.1.1}{50}{Metropolis-Hastings}{subsubsection.6.1.1}{}}
-\newlabel{eq:hmc-log-posterior}{{116}{50}{Metropolis-Hastings}{equation.116}{}}
-\newlabel{eq:mh-acceptance}{{117}{50}{Metropolis-Hastings}{equation.117}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Parameter Estimation with Differentiable Particle Filters}{49}{section.6}\protected@file@percent }
+\newlabel{sec:param-estimation}{{6}{49}{Parameter Estimation with Differentiable Particle Filters}{section.6}{}}
+\@writefile{toc}{\contentsline {paragraph}{Filtering accuracy is not gradient quality.}{49}{section*.36}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Markov Chain Monte Carlo}{49}{subsection.6.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.1.1}Metropolis-Hastings}{49}{subsubsection.6.1.1}\protected@file@percent }
+\newlabel{sec:metropolis-hastings}{{6.1.1}{49}{Metropolis-Hastings}{subsubsection.6.1.1}{}}
+\newlabel{eq:hmc-log-posterior}{{110}{49}{Metropolis-Hastings}{equation.110}{}}
+\newlabel{eq:mh-acceptance}{{111}{49}{Metropolis-Hastings}{equation.111}{}}
 \citation{hoffman2014nuts}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.1.2}Hamiltonian Monte Carlo}{51}{subsubsection.6.1.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Leapfrog integration.}{51}{section*.37}\protected@file@percent }
-\newlabel{eq:hmc-acceptance}{{122}{51}{Leapfrog integration}{equation.122}{}}
-\@writefile{toc}{\contentsline {paragraph}{Step size and tuning.}{51}{section*.38}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.1.2}Hamiltonian Monte Carlo}{50}{subsubsection.6.1.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Leapfrog integration.}{50}{section*.37}\protected@file@percent }
+\newlabel{eq:hmc-acceptance}{{116}{50}{Leapfrog integration}{equation.116}{}}
+\@writefile{toc}{\contentsline {paragraph}{Step size and tuning.}{50}{section*.38}\protected@file@percent }
 \citation{beskos2013optimal}
-\@writefile{toc}{\contentsline {paragraph}{Mass matrix.}{52}{section*.39}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.1.3}MCMC Diagnostics}{52}{subsubsection.6.1.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Acceptance rate.}{52}{section*.40}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Effective sample size (ESS).}{52}{section*.41}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{$\hat  {R}$: Potential Scale Reduction Factor.}{52}{section*.42}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Mass matrix.}{51}{section*.39}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.1.3}MCMC Diagnostics}{51}{subsubsection.6.1.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Acceptance rate.}{51}{section*.40}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Effective sample size (ESS).}{51}{section*.41}\protected@file@percent }
+\newlabel{eq:ess-def}{{120}{51}{Effective sample size (ESS)}{equation.120}{}}
+\@writefile{toc}{\contentsline {subparagraph}{Computing $\rho _k$ from the chain.}{51}{section*.42}\protected@file@percent }
+\newlabel{eq:autocorr-def}{{121}{51}{Computing $\rho _k$ from the chain}{equation.121}{}}
+\newlabel{eq:autocorr-fft}{{122}{51}{Computing $\rho _k$ from the chain}{equation.122}{}}
+\@writefile{toc}{\contentsline {subparagraph}{Truncating the infinite sum.}{52}{section*.43}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{$\hat  {R}$: Potential Scale Reduction Factor.}{52}{section*.44}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Multi-chain split-$\hat  R$.}{52}{section*.45}\protected@file@percent }
+\newlabel{eq:rhat-multichain}{{128}{52}{Multi-chain split-$\hat R$}{equation.128}{}}
+\@writefile{toc}{\contentsline {subparagraph}{Rank-normalized $\hat  R$ (Stan default).}{52}{section*.46}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Parameter Prior Selection}{53}{subsection.6.2}\protected@file@percent }
 \newlabel{sec:param-prior-selection}{{6.2}{53}{Parameter Prior Selection}{subsection.6.2}{}}
-\@writefile{toc}{\contentsline {paragraph}{What the prior is doing here.}{53}{section*.43}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Families I used.}{53}{section*.44}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{What the prior is doing here.}{53}{section*.47}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Families I used.}{53}{section*.48}\protected@file@percent }
 \@writefile{lot}{\contentsline {table}{\numberline {11}{\ignorespaces Parameter priors used by the HMC configurations.}}{54}{table.11}\protected@file@percent }
 \newlabel{tab:param-priors}{{11}{54}{Parameter priors used by the HMC configurations}{table.11}{}}
-\@writefile{toc}{\contentsline {paragraph}{Bijectors and the Jacobian term.}{54}{section*.45}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Effect on HMC.}{54}{section*.46}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Worked example: range-bearing noise.}{54}{section*.47}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Bijectors and the Jacobian term.}{54}{section*.49}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Effect on HMC.}{54}{section*.50}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Worked example: range-bearing noise.}{54}{section*.51}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {6.3}MAP as a Pipeline Smoke Test}{55}{subsection.6.3}\protected@file@percent }
 \newlabel{sec:map-smoke-test}{{6.3}{55}{MAP as a Pipeline Smoke Test}{subsection.6.3}{}}
-\@writefile{toc}{\contentsline {paragraph}{MAP convergence across four benchmarks.}{55}{section*.48}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{MAP convergence across four benchmarks.}{55}{section*.52}\protected@file@percent }
 \@writefile{lof}{\contentsline {figure}{\numberline {20}{\ignorespaces Learning-rate schedules for the four MAP runs. All four use the same cosine warm-down schedule; the curves overlap exactly, so any convergence-speed differences in the figures below come from the loss surface, not from tuning.}}{55}{figure.20}\protected@file@percent }
 \newlabel{fig:map_learning_rate}{{20}{55}{Learning-rate schedules for the four MAP runs. All four use the same cosine warm-down schedule; the curves overlap exactly, so any convergence-speed differences in the figures below come from the loss surface, not from tuning}{figure.20}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {21}{\ignorespaces MAP convergence on the 1D linear Gaussian benchmark, with BPF+OT (blue) and LEDH+OT (green) running the same optimizer schedule against the same data. Both filters converge to the same neighbourhood of the true $\sigma _{\text  {obs}} = 1.0$; the fact that LEDH+OT --- which passes the full three-term derivative chain --- matches BPF+OT (where only the weight gradient is active) is the cleanest check that the flow-filter gradient path is not introducing a systematic bias on linear Gaussian targets.}}{56}{figure.21}\protected@file@percent }
@@ -245,92 +255,55 @@
 \newlabel{fig:map_rb}{{22}{57}{MAP convergence on range-bearing with LEDH+OT, estimating two parameters simultaneously. The bottom panel plots $\sigma _{\text {range}}$ (blue) and $\sigma _{\text {bearing}}$ (green) with the true values $\sigma _{\text {range}} = \sigma _{\text {bearing}} = 0.1$ as dashed reference lines. Both converge cleanly to the true values; the joint estimation does not introduce a noticeable coupling in the gradient-norm profile}{figure.22}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {23}{\ignorespaces MAP convergence on 1D stochastic volatility with LEDH+OT, estimating the persistence parameter $\alpha $ with true value $0.91$. The trajectory approaches the true value within the allotted optimizer steps; the MAP mode sits slightly below the median of the weakly-informative $\mathrm  {LogNormal}$ prior, which is expected given the prior and the data together should land close to truth.}}{58}{figure.23}\protected@file@percent }
 \newlabel{fig:map_sv1d}{{23}{58}{MAP convergence on 1D stochastic volatility with LEDH+OT, estimating the persistence parameter $\alpha $ with true value $0.91$. The trajectory approaches the true value within the allotted optimizer steps; the MAP mode sits slightly below the median of the weakly-informative $\mathrm {LogNormal}$ prior, which is expected given the prior and the data together should land close to truth}{figure.23}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {24}{\ignorespaces MAP convergence on 2D stochastic volatility with LEDH+OT, estimating $\sigma _2$ with true value $1.0$. The MAP optimizer clears the filter-level objective; \S  \ref {sec:sv2d} shows why this is not enough for HMC.}}{59}{figure.24}\protected@file@percent }
-\newlabel{fig:map_sv2d}{{24}{59}{MAP convergence on 2D stochastic volatility with LEDH+OT, estimating $\sigma _2$ with true value $1.0$. The MAP optimizer clears the filter-level objective; \S \ref {sec:sv2d} shows why this is not enough for HMC}{figure.24}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.4}HMC Benchmarks}{59}{subsection.6.4}\protected@file@percent }
-\newlabel{sec:linear-gaussian-benchmark}{{6.4}{59}{HMC Benchmarks}{subsection.6.4}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.4.1}1-D Model, 1 Parameter}{59}{subsubsection.6.4.1}\protected@file@percent }
-\newlabel{sec:lg-hmc-1d}{{6.4.1}{59}{1-D Model, 1 Parameter}{subsubsection.6.4.1}{}}
-\@writefile{toc}{\contentsline {paragraph}{HMC trace.}{60}{section*.49}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {25}{\ignorespaces Post-burn-in chains for $\sigma _{\text  {obs}}$ on 1D LG. Kalman is the reference; the particle-filter chains should sit on the same posterior region.}}{60}{figure.25}\protected@file@percent }
-\newlabel{fig:hmc_lg_trace}{{25}{60}{Post-burn-in chains for $\sigma _{\text {obs}}$ on 1D LG. Kalman is the reference; the particle-filter chains should sit on the same posterior region}{figure.25}{}}
-\@writefile{toc}{\contentsline {paragraph}{HMC posteriors.}{60}{section*.50}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {26}{\ignorespaces 1D LG HMC posterior: Kalman filter. This is the HMC reference other filters are compared against.}}{61}{figure.26}\protected@file@percent }
-\newlabel{fig:hmc_lg_histogram_kalman}{{26}{61}{1D LG HMC posterior: Kalman filter. This is the HMC reference other filters are compared against}{figure.26}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {27}{\ignorespaces 1D LG HMC posterior: EKF. Kalman outline in grey, true value as dashed vertical.}}{61}{figure.27}\protected@file@percent }
-\newlabel{fig:hmc_lg_histogram_ekf}{{27}{61}{1D LG HMC posterior: EKF. Kalman outline in grey, true value as dashed vertical}{figure.27}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {28}{\ignorespaces 1D LG HMC posterior: UKF.}}{61}{figure.28}\protected@file@percent }
-\newlabel{fig:hmc_lg_histogram_ukf}{{28}{61}{1D LG HMC posterior: UKF}{figure.28}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {29}{\ignorespaces 1D LG HMC posterior: LEDH+OT. This is the main flow-filter HMC check.}}{62}{figure.29}\protected@file@percent }
-\newlabel{fig:hmc_lg_histogram_ledh_ot}{{29}{62}{1D LG HMC posterior: LEDH+OT. This is the main flow-filter HMC check}{figure.29}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {30}{\ignorespaces 1D LG HMC posterior: BPF+OT. Split-$\hat  R = 1.15$ on this run (see Table~\ref {tab:hmc_diagnostics}), meaning the chain did not converge cleanly --- the posterior shape should be read with that caveat.}}{62}{figure.30}\protected@file@percent }
-\newlabel{fig:hmc_lg_histogram_bpf_ot}{{30}{62}{1D LG HMC posterior: BPF+OT. Split-$\hat R = 1.15$ on this run (see Table~\ref {tab:hmc_diagnostics}), meaning the chain did not converge cleanly --- the posterior shape should be read with that caveat}{figure.30}{}}
-\@writefile{toc}{\contentsline {paragraph}{Diagnostic readout.}{62}{section*.51}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.4.2}Multi-Dimensional Model, 1 Parameter}{62}{subsubsection.6.4.2}\protected@file@percent }
-\newlabel{sec:multi-d-lg}{{6.4.2}{62}{Multi-Dimensional Model, 1 Parameter}{subsubsection.6.4.2}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.4.3}HMC on Range-Bearing}{63}{subsubsection.6.4.3}\protected@file@percent }
-\newlabel{sec:hmc-rb}{{6.4.3}{63}{HMC on Range-Bearing}{subsubsection.6.4.3}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {31}{\ignorespaces Range-bearing HMC post-burn-in traces, LEDH+OT filter. Two stacked panels for $\sigma _{\text  {range}}$ and $\sigma _{\text  {bearing}}$. Horizontal dashed lines at the true values ($0.1$ for both). Both chains oscillate around the truth without drift.}}{63}{figure.31}\protected@file@percent }
-\newlabel{fig:hmc_rb_trace}{{31}{63}{Range-bearing HMC post-burn-in traces, LEDH+OT filter. Two stacked panels for $\sigma _{\text {range}}$ and $\sigma _{\text {bearing}}$. Horizontal dashed lines at the true values ($0.1$ for both). Both chains oscillate around the truth without drift}{figure.31}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {32}{\ignorespaces Range-bearing HMC marginal posteriors, LEDH+OT filter. Two panels, one per parameter. True values as dashed vertical lines. Both marginals concentrate near the truth.}}{64}{figure.32}\protected@file@percent }
-\newlabel{fig:hmc_rb_histogram}{{32}{64}{Range-bearing HMC marginal posteriors, LEDH+OT filter. Two panels, one per parameter. True values as dashed vertical lines. Both marginals concentrate near the truth}{figure.32}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.4.4}HMC on 1D Stochastic Volatility}{64}{subsubsection.6.4.4}\protected@file@percent }
-\newlabel{sec:hmc-sv1d}{{6.4.4}{64}{HMC on 1D Stochastic Volatility}{subsubsection.6.4.4}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {33}{\ignorespaces 1D stochastic volatility HMC post-burn-in trace for $\alpha $, LEDH+OT filter. Dashed reference line at the true value $0.91$.}}{64}{figure.33}\protected@file@percent }
-\newlabel{fig:hmc_sv1d_trace}{{33}{64}{1D stochastic volatility HMC post-burn-in trace for $\alpha $, LEDH+OT filter. Dashed reference line at the true value $0.91$}{figure.33}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {34}{\ignorespaces 1D stochastic volatility HMC marginal posterior for $\alpha $, LEDH+OT filter.}}{65}{figure.34}\protected@file@percent }
-\newlabel{fig:hmc_sv1d_histogram}{{34}{65}{1D stochastic volatility HMC marginal posterior for $\alpha $, LEDH+OT filter}{figure.34}{}}
-\@writefile{toc}{\contentsline {paragraph}{Diagnostic summary table.}{65}{section*.52}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {12}{\ignorespaces HMC diagnostics for all eight single-chain runs. ``Acceptance'' is the fraction of leapfrog proposals accepted; ``ESS'' is effective sample size at the reported $N_{\text  {samples}}$; ``split-$\hat  R$'' is the single-chain split potential-scale-reduction factor (values near $1$ are clean, values $> 1.1$ flag non-convergence, very-low values can flag a trapped chain). ``Wall'' is total burn-in + sampling wall time; ``Time/step'' is seconds per HMC iteration ($L = 5$ leapfrog steps per iteration for every run). Memory is not reported --- the current HMC logging does not store peak memory. Multi-chain $\hat  R$ for retuned configurations is in Table~\ref {tab:hmc_multichain_attempts}.}}{65}{table.12}\protected@file@percent }
-\newlabel{tab:hmc_diagnostics}{{12}{65}{HMC diagnostics for all eight single-chain runs. ``Acceptance'' is the fraction of leapfrog proposals accepted; ``ESS'' is effective sample size at the reported $N_{\text {samples}}$; ``split-$\hat R$'' is the single-chain split potential-scale-reduction factor (values near $1$ are clean, values $> 1.1$ flag non-convergence, very-low values can flag a trapped chain). ``Wall'' is total burn-in + sampling wall time; ``Time/step'' is seconds per HMC iteration ($L = 5$ leapfrog steps per iteration for every run). Memory is not reported --- the current HMC logging does not store peak memory. Multi-chain $\hat R$ for retuned configurations is in Table~\ref {tab:hmc_multichain_attempts}}{table.12}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.5}Multi-Chain Convergence Diagnostics}{66}{subsection.6.5}\protected@file@percent }
-\newlabel{sec:hmc-multichain}{{6.5}{66}{Multi-Chain Convergence Diagnostics}{subsection.6.5}{}}
-\@writefile{toc}{\contentsline {paragraph}{Attempted multi-chain configurations.}{66}{section*.53}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {13}{\ignorespaces Multi-chain HMC runs attempted. ``Outcome'' is converged at split $\hat  R \le 1.01$, under-mixed at $\hat  R > 1.05$, marginal between, or crashed during burn-in. Rows with crashes record the failure mode in their own log.}}{66}{table.13}\protected@file@percent }
-\newlabel{tab:hmc_multichain_attempts}{{13}{66}{Multi-chain HMC runs attempted. ``Outcome'' is converged at split $\hat R \le 1.01$, under-mixed at $\hat R > 1.05$, marginal between, or crashed during burn-in. Rows with crashes record the failure mode in their own log}{table.13}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.5.1}1D Linear Gaussian (BPF+OT and LEDH+OT)}{66}{subsubsection.6.5.1}\protected@file@percent }
-\newlabel{sec:hmc-multichain-lg}{{6.5.1}{66}{1D Linear Gaussian (BPF+OT and LEDH+OT)}{subsubsection.6.5.1}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {14}{\ignorespaces 1D LG multi-chain diagnostics. Truth offset is $(\text  {posterior mean} - \text  {truth}) / \text  {posterior sd}$; it measures realization-specific posterior centering and is not a chain-failure metric.}}{66}{table.14}\protected@file@percent }
-\newlabel{tab:hmc_multichain_lg}{{14}{66}{1D LG multi-chain diagnostics. Truth offset is $(\text {posterior mean} - \text {truth}) / \text {posterior sd}$; it measures realization-specific posterior centering and is not a chain-failure metric}{table.14}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {35}{\ignorespaces 1D LG four-chain HMC, post-burn-in. Top row: BPF+OT with extended sample budget (2000 per chain). Bottom row: LEDH+OT (400 per chain). Left column: traces, four chains overlaid in distinct colors. Right column: pooled marginal posterior with truth at $1.0$ as the dashed vertical line.}}{67}{figure.35}\protected@file@percent }
-\newlabel{fig:hmc_lg_4chain}{{35}{67}{1D LG four-chain HMC, post-burn-in. Top row: BPF+OT with extended sample budget (2000 per chain). Bottom row: LEDH+OT (400 per chain). Left column: traces, four chains overlaid in distinct colors. Right column: pooled marginal posterior with truth at $1.0$ as the dashed vertical line}{figure.35}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.5.2}1D Stochastic Volatility (LEDH+OT)}{67}{subsubsection.6.5.2}\protected@file@percent }
-\newlabel{sec:hmc-multichain-sv1d}{{6.5.2}{67}{1D Stochastic Volatility (LEDH+OT)}{subsubsection.6.5.2}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {15}{\ignorespaces 1D SV multi-chain diagnostics, LEDH+OT.}}{67}{table.15}\protected@file@percent }
-\newlabel{tab:hmc_multichain_sv1d}{{15}{67}{1D SV multi-chain diagnostics, LEDH+OT}{table.15}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {36}{\ignorespaces 1D SV four-chain HMC, post-burn-in. Left: traces, four chains in distinct colors. Right: pooled marginal posterior for $\alpha $, dashed line at truth $0.91$.}}{68}{figure.36}\protected@file@percent }
-\newlabel{fig:hmc_sv1d_4chain}{{36}{68}{1D SV four-chain HMC, post-burn-in. Left: traces, four chains in distinct colors. Right: pooled marginal posterior for $\alpha $, dashed line at truth $0.91$}{figure.36}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.5.3}Range-Bearing (LEDH+OT, Per-Axis Step + $L=10$)}{68}{subsubsection.6.5.3}\protected@file@percent }
-\newlabel{sec:hmc-multichain-rb}{{6.5.3}{68}{Range-Bearing (LEDH+OT, Per-Axis Step + $L=10$)}{subsubsection.6.5.3}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {16}{\ignorespaces Range-bearing multi-chain diagnostics, LEDH+OT with axisstep and $L=10$.}}{68}{table.16}\protected@file@percent }
-\newlabel{tab:hmc_multichain_rb}{{16}{68}{Range-bearing multi-chain diagnostics, LEDH+OT with axisstep and $L=10$}{table.16}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {37}{\ignorespaces Range-bearing four-chain HMC, post-burn-in. Top row: $\sigma _{\text  {range}}$. Bottom row: $\sigma _{\text  {bearing}}$. Left column: four-chain traces. Right column: pooled marginal posteriors with dashed lines at the true values ($0.10$ for both).}}{69}{figure.37}\protected@file@percent }
-\newlabel{fig:hmc_rb_4chain}{{37}{69}{Range-bearing four-chain HMC, post-burn-in. Top row: $\sigma _{\text {range}}$. Bottom row: $\sigma _{\text {bearing}}$. Left column: four-chain traces. Right column: pooled marginal posteriors with dashed lines at the true values ($0.10$ for both)}{figure.37}{}}
-\@writefile{toc}{\contentsline {paragraph}{Cross-comparison.}{69}{section*.54}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.6}Gradient Diagnostics on SV2D: Unresolved Nonlinear Failure}{69}{subsection.6.6}\protected@file@percent }
-\newlabel{sec:sv2d}{{6.6}{69}{Gradient Diagnostics on SV2D: Unresolved Nonlinear Failure}{subsection.6.6}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {38}{\ignorespaces 2D stochastic volatility HMC post-burn-in trace for $\sigma _2$, LEDH+OT filter. Dashed reference line at the true value $1.0$. The trace oscillates around the truth but see the paragraphs below for why this is insufficient to call the run a success.}}{70}{figure.38}\protected@file@percent }
-\newlabel{fig:hmc_sv2d_trace}{{38}{70}{2D stochastic volatility HMC post-burn-in trace for $\sigma _2$, LEDH+OT filter. Dashed reference line at the true value $1.0$. The trace oscillates around the truth but see the paragraphs below for why this is insufficient to call the run a success}{figure.38}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {39}{\ignorespaces 2D stochastic volatility HMC marginal posterior for $\sigma _2$, LEDH+OT filter. The posterior is broader than the SV1D and LG cases, reflecting the step-level gradient instability discussed below.}}{70}{figure.39}\protected@file@percent }
-\newlabel{fig:hmc_sv2d_histogram}{{39}{70}{2D stochastic volatility HMC marginal posterior for $\sigma _2$, LEDH+OT filter. The posterior is broader than the SV1D and LG cases, reflecting the step-level gradient instability discussed below}{figure.39}{}}
-\@writefile{toc}{\contentsline {paragraph}{Symptom.}{70}{section*.55}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{What I have ruled out.}{70}{section*.56}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Working hypotheses.}{70}{section*.57}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {24}{\ignorespaces MAP convergence on 2D stochastic volatility with LEDH+OT, estimating $\sigma _2$ with true value $1.0$. The MAP optimizer clears the filter-level objective; the HMC inner-loop fails for SV2D under the same gradient path (open failure case, see Limitations).}}{59}{figure.24}\protected@file@percent }
+\newlabel{fig:map_sv2d}{{24}{59}{MAP convergence on 2D stochastic volatility with LEDH+OT, estimating $\sigma _2$ with true value $1.0$. The MAP optimizer clears the filter-level objective; the HMC inner-loop fails for SV2D under the same gradient path (open failure case, see Limitations)}{figure.24}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.4}Mass Matrix Tuning}{59}{subsection.6.4}\protected@file@percent }
+\newlabel{sec:mass-matrix-tuning}{{6.4}{59}{Mass Matrix Tuning}{subsection.6.4}{}}
+\@writefile{toc}{\contentsline {paragraph}{The intuition.}{59}{section*.53}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{The standard procedure (Stan-style windowed adaptation).}{60}{section*.54}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Why the obvious shortcut crashes.}{60}{section*.55}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{What worked instead: per-axis step size.}{60}{section*.56}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Practical guidance.}{60}{section*.57}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.5}Multi-Chain Convergence Diagnostics}{61}{subsection.6.5}\protected@file@percent }
+\newlabel{sec:hmc-multichain}{{6.5}{61}{Multi-Chain Convergence Diagnostics}{subsection.6.5}{}}
+\@writefile{toc}{\contentsline {paragraph}{Attempted multi-chain configurations.}{61}{section*.58}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {12}{\ignorespaces Multi-chain HMC runs attempted. ``Outcome'' is converged at split $\hat  R \le 1.01$, under-mixed at $\hat  R > 1.05$, marginal between, or crashed during burn-in. Rows with crashes record the failure mode in their own log.}}{61}{table.12}\protected@file@percent }
+\newlabel{tab:hmc_multichain_attempts}{{12}{61}{Multi-chain HMC runs attempted. ``Outcome'' is converged at split $\hat R \le 1.01$, under-mixed at $\hat R > 1.05$, marginal between, or crashed during burn-in. Rows with crashes record the failure mode in their own log}{table.12}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.5.1}1D Linear Gaussian (Kalman, EKF, UKF)}{61}{subsubsection.6.5.1}\protected@file@percent }
+\newlabel{sec:hmc-multichain-lg-kalman-family}{{6.5.1}{61}{1D Linear Gaussian (Kalman, EKF, UKF)}{subsubsection.6.5.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {25}{\ignorespaces 1D LG four-chain HMC for the Kalman-family filters, post-burn-in. Rows: Kalman, EKF, UKF. Left column: traces, four chains overlaid in distinct colors with the truth $\sigma _{\text  {obs}} = 1.0$ as the dashed horizontal line. Right column: pooled marginal posterior with truth at $1.0$ as the dashed vertical line. All three runs at \texttt  {target\_accept\_prob} $= 0.65$, $400$ samples per chain.}}{62}{figure.25}\protected@file@percent }
+\newlabel{fig:hmc_lg_kalman_family_4chain}{{25}{62}{1D LG four-chain HMC for the Kalman-family filters, post-burn-in. Rows: Kalman, EKF, UKF. Left column: traces, four chains overlaid in distinct colors with the truth $\sigma _{\text {obs}} = 1.0$ as the dashed horizontal line. Right column: pooled marginal posterior with truth at $1.0$ as the dashed vertical line. All three runs at \texttt {target\_accept\_prob} $= 0.65$, $400$ samples per chain}{figure.25}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.5.2}1D Linear Gaussian (BPF+OT and LEDH+OT)}{62}{subsubsection.6.5.2}\protected@file@percent }
+\newlabel{sec:hmc-multichain-lg}{{6.5.2}{62}{1D Linear Gaussian (BPF+OT and LEDH+OT)}{subsubsection.6.5.2}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {13}{\ignorespaces 1D LG multi-chain diagnostics. Truth offset is $(\text  {posterior mean} - \text  {truth}) / \text  {posterior sd}$; it measures realization-specific posterior centering and is not a chain-failure metric. ``Max $\hat  R$'' is $\max (\text  {bulk-}\hat  R, \text  {tail-}\hat  R)$ on rank-normalized samples (Stan default); raw split-$\hat  R$ on $\theta $ is also reported for comparison. All five filters target the same observation sequence and share the truth $\sigma _{\text  {obs}} = 1.0$.}}{63}{table.13}\protected@file@percent }
+\newlabel{tab:hmc_multichain_lg}{{13}{63}{1D LG multi-chain diagnostics. Truth offset is $(\text {posterior mean} - \text {truth}) / \text {posterior sd}$; it measures realization-specific posterior centering and is not a chain-failure metric. ``Max $\hat R$'' is $\max (\text {bulk-}\hat R, \text {tail-}\hat R)$ on rank-normalized samples (Stan default); raw split-$\hat R$ on $\theta $ is also reported for comparison. All five filters target the same observation sequence and share the truth $\sigma _{\text {obs}} = 1.0$}{table.13}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {26}{\ignorespaces 1D LG four-chain HMC, post-burn-in. Top row: BPF+OT with extended sample budget (2000 per chain). Bottom row: LEDH+OT (400 per chain). Left column: traces, four chains overlaid in distinct colors. Right column: pooled marginal posterior with truth at $1.0$ as the dashed vertical line.}}{63}{figure.26}\protected@file@percent }
+\newlabel{fig:hmc_lg_4chain}{{26}{63}{1D LG four-chain HMC, post-burn-in. Top row: BPF+OT with extended sample budget (2000 per chain). Bottom row: LEDH+OT (400 per chain). Left column: traces, four chains overlaid in distinct colors. Right column: pooled marginal posterior with truth at $1.0$ as the dashed vertical line}{figure.26}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.5.3}1D Stochastic Volatility (LEDH+OT)}{63}{subsubsection.6.5.3}\protected@file@percent }
+\newlabel{sec:hmc-multichain-sv1d}{{6.5.3}{63}{1D Stochastic Volatility (LEDH+OT)}{subsubsection.6.5.3}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {14}{\ignorespaces 1D SV multi-chain diagnostics, LEDH+OT. ``Max $\hat  R$'' is $\max (\text  {bulk-}\hat  R, \text  {tail-}\hat  R)$ on rank-normalized samples.}}{63}{table.14}\protected@file@percent }
+\newlabel{tab:hmc_multichain_sv1d}{{14}{63}{1D SV multi-chain diagnostics, LEDH+OT. ``Max $\hat R$'' is $\max (\text {bulk-}\hat R, \text {tail-}\hat R)$ on rank-normalized samples}{table.14}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {27}{\ignorespaces 1D SV four-chain HMC, post-burn-in. Left: traces, four chains in distinct colors. Right: pooled marginal posterior for $\alpha $, dashed line at truth $0.91$.}}{64}{figure.27}\protected@file@percent }
+\newlabel{fig:hmc_sv1d_4chain}{{27}{64}{1D SV four-chain HMC, post-burn-in. Left: traces, four chains in distinct colors. Right: pooled marginal posterior for $\alpha $, dashed line at truth $0.91$}{figure.27}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.5.4}Range-Bearing (LEDH+OT, Per-Axis Step + $L=10$)}{64}{subsubsection.6.5.4}\protected@file@percent }
+\newlabel{sec:hmc-multichain-rb}{{6.5.4}{64}{Range-Bearing (LEDH+OT, Per-Axis Step + $L=10$)}{subsubsection.6.5.4}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {15}{\ignorespaces Range-bearing multi-chain diagnostics, LEDH+OT with axisstep and $L=10$. ``Max $\hat  R$'' is $\max (\text  {bulk-}\hat  R, \text  {tail-}\hat  R)$ on rank-normalized samples.}}{64}{table.15}\protected@file@percent }
+\newlabel{tab:hmc_multichain_rb}{{15}{64}{Range-bearing multi-chain diagnostics, LEDH+OT with axisstep and $L=10$. ``Max $\hat R$'' is $\max (\text {bulk-}\hat R, \text {tail-}\hat R)$ on rank-normalized samples}{table.15}{}}
 \bibstyle{unsrt}
 \bibdata{main_reorganized}
 \bibcite{Särkkä2013BayesianFilteringAndSmoothing}{1}
 \bibcite{daum2010exact}{2}
 \bibcite{daum2011particle}{3}
 \bibcite{Li-Particle-Filtering-2017}{4}
+\@writefile{lof}{\contentsline {figure}{\numberline {28}{\ignorespaces Range-bearing four-chain HMC, post-burn-in. Top row: $\sigma _{\text  {range}}$. Bottom row: $\sigma _{\text  {bearing}}$. Left column: four-chain traces. Right column: pooled marginal posteriors with dashed lines at the true values ($0.10$ for both).}}{65}{figure.28}\protected@file@percent }
+\newlabel{fig:hmc_rb_4chain}{{28}{65}{Range-bearing four-chain HMC, post-burn-in. Top row: $\sigma _{\text {range}}$. Bottom row: $\sigma _{\text {bearing}}$. Left column: four-chain traces. Right column: pooled marginal posteriors with dashed lines at the true values ($0.10$ for both)}{figure.28}{}}
+\@writefile{toc}{\contentsline {paragraph}{Cross-comparison.}{65}{section*.59}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.6}Limitations}{65}{subsection.6.6}\protected@file@percent }
 \bibcite{dai-new-2021}{5}
 \bibcite{ding2012implementation}{6}
 \bibcite{Pulido2019}{7}
 \bibcite{HuVanLeeuwen2021}{8}
 \bibcite{reich2013nonparametric}{9}
-\@writefile{lot}{\contentsline {table}{\numberline {17}{\ignorespaces Candidate root causes for the SV2D HMC gradient failure.}}{71}{table.17}\protected@file@percent }
-\newlabel{tab:sv2d-hypotheses}{{17}{71}{Candidate root causes for the SV2D HMC gradient failure}{table.17}{}}
-\@writefile{toc}{\contentsline {paragraph}{Closing framing.}{71}{section*.58}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.7}Limitations}{71}{subsection.6.7}\protected@file@percent }
 \bibcite{corenflos-differentiable-2021}{10}
 \bibcite{karkus2018particle}{11}
 \bibcite{Cuturi2013SinkhornDL}{12}
@@ -340,4 +313,4 @@
 \bibcite{Neal-2012-MCMC-Hamiltonian-Dynamics-ARXIV-1206-1901v1}{16}
 \bibcite{hoffman2014nuts}{17}
 \bibcite{beskos2013optimal}{18}
-\gdef \@abspage@last{72}
+\gdef \@abspage@last{66}

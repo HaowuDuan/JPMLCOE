@@ -1,0 +1,4 @@
+\beamer@sectionintoc {1}{Big picture: HMC + OT + LEDH-invertible}{3}{0}{1}
+\beamer@sectionintoc {2}{Sequential Monte Carlo and LEDH-invertible}{6}{0}{2}
+\beamer@sectionintoc {3}{OT resampling, Sinkhorn, and the neural operator}{14}{0}{3}
+\beamer@sectionintoc {4}{HMC + LEDH + OT pipeline}{39}{0}{4}

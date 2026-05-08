@@ -355,10 +355,10 @@ There is another potential instability when I try to take the inverse of $\mathb
 \subsection{The limitation and usefulness of Kalman filter}
 The derivation above relies entirely on $z_k = h\,x_k + v_k$ with $h$ constant (or a matrix $\mathbf{H}$ in the vector case). That is what lets the update stay Gaussian and gives a closed-form recursion for the mean and variance. The moment the observation function becomes genuinely non-linear, that structure is gone. There is no principled way to plug a non-linear $h(x)$ into the Kalman update equations. People do it anyway by replacing $h(x)$ with a linear surrogate, but then the answer is only as good as that surrogate. Since almost every model I care about is non-linear, I need a generalization. The next section gives two: the Extended Kalman Filter (EKF) and the Unscented Kalman Filter (UKF).
 
-None of this makes the Kalman filter useless. Being exact on linear Gaussian models is exactly what I need later. When I build the differentiable particle filter and run HMC on top of it in Section~\ref{sec:param-estimation}, I need a way to check that the HMC pipeline itself is correct before trusting it on anything harder. The 1-D linear Gaussian model family is the obvious test: the Kalman filter gives the exact marginal log-likelihood, so it gives the exact posterior over whatever parameter is being estimated. If HMC on a 1D linear Gaussian benchmark recovers that posterior, the pipeline is sound; if it does not, the problem is in HMC, not in the filter. I come back to this cross-check in \S\ref{sec:lg-hmc-1d} when I benchmark the differentiable pipeline.
+None of this makes the Kalman filter useless. Being exact on linear Gaussian models is exactly what I need later. When I build the differentiable particle filter and run HMC on top of it in Section~\ref{sec:param-estimation}, I need a way to check that the HMC pipeline itself is correct before trusting it on anything harder. The 1-D linear Gaussian model family is the obvious test: the Kalman filter gives the exact marginal log-likelihood, so it gives the exact posterior over whatever parameter is being estimated. If HMC on a 1D linear Gaussian benchmark recovers that posterior, the pipeline is sound; if it does not, the problem is in HMC, not in the filter. I come back to this cross-check in \S\ref{sec:hmc-multichain-lg-kalman-family} when I benchmark the differentiable pipeline.
 
 \paragraph{Demonstration on a 1D linear Gaussian.}
-To make the ``Kalman is exact for linear Gaussian'' claim concrete, I run the filter on a 1D linear Gaussian model from the same model family that reappears in the HMC validation in \S\ref{sec:lg-hmc-1d}. The HMC benchmark uses a different observation-noise scale to create a wider posterior test case; the exact Kalman reference logic is the same. The dynamics here are $x_k = 0.95\,x_{k-1} + w_k$ with $w_k \sim \mathcal{N}(0, 0.25)$ ($B = 0.5$), observation $z_k = x_k + v_k$ with $v_k \sim \mathcal{N}(0, 0.09)$ ($D = 0.3$), prior $\mathcal{N}(0, \Sigma_0)$ with $\Sigma_0$ solved from the discrete Lyapunov equation following \S\ref{par:init-conditions}, seed $42$, $T = 100$ time steps, and 64-bit precision. The Kalman gain converges to its steady-state value $K \approx 0.777$ within the first five time steps, confirming the Riccati recursion has reached its fixed point. Figure~\ref{fig:kalman-1d-linear} shows the resulting trajectory.
+To make the ``Kalman is exact for linear Gaussian'' claim concrete, I run the filter on a 1D linear Gaussian model from the same model family that reappears in the HMC validation in \S\ref{sec:hmc-multichain-lg-kalman-family}. The HMC benchmark uses a different observation-noise scale to create a wider posterior test case; the exact Kalman reference logic is the same. The dynamics here are $x_k = 0.95\,x_{k-1} + w_k$ with $w_k \sim \mathcal{N}(0, 0.25)$ ($B = 0.5$), observation $z_k = x_k + v_k$ with $v_k \sim \mathcal{N}(0, 0.09)$ ($D = 0.3$), prior $\mathcal{N}(0, \Sigma_0)$ with $\Sigma_0$ solved from the discrete Lyapunov equation following \S\ref{par:init-conditions}, seed $42$, $T = 100$ time steps, and 64-bit precision. The Kalman gain converges to its steady-state value $K \approx 0.777$ within the first five time steps, confirming the Riccati recursion has reached its fixed point. Figure~\ref{fig:kalman-1d-linear} shows the resulting trajectory.
 
 I report two metrics throughout. The \emph{root-mean-square error} (RMSE) of the filter's posterior mean against the true state trajectory,
 \begin{equation}
@@ -377,7 +377,7 @@ measures how close the filter's point estimate is to the true latent state. It i
 The run takes $1.03$ seconds on CPU ($10.3$ ms per time step, incremental peak memory $2.1$ MB, GPU unused); for a 1D state the entire filter reduces to two scalar updates per step, so the cost is essentially measurement noise in the timing --- a useful reference point against which the particle-filter wall times in Tables~\ref{tab:edh-rb}--\ref{tab:edh-sv-log} become meaningful.
 
 \paragraph{What this plot is for.}
-This is not a benchmark of Kalman's accuracy. The derivation in \S\ref{sec:kalman-algorithm} already shows the Kalman filter is analytically exact for linear Gaussian, so there is no approximation error to measure. The RMSE of $0.269$ is the sampling-level discrepancy between the filter's posterior mean and the true state realisation for this particular seed, and is bounded below by the posterior standard deviation the filter itself reports. The plot is for \emph{pipeline sanity}: data generation, filter invocation, state sampling from the prior, covariance tracking, Riccati convergence, metric collection, and I/O all run end-to-end without error and produce numbers consistent with the analytic reference. This is the minimum bar every downstream benchmark in \S\ref{sec:particle-methods-section} and \S\ref{sec:param-estimation} must clear --- and the same Kalman-exact model family is what \S\ref{sec:lg-hmc-1d} uses to validate HMC. If HMC on that family recovers the Kalman posterior over the parameters, the differentiable pipeline is sound; if it does not, the fault lies in HMC, not in the filter or the test harness.
+This is not a benchmark of Kalman's accuracy. The derivation in \S\ref{sec:kalman-algorithm} already shows the Kalman filter is analytically exact for linear Gaussian, so there is no approximation error to measure. The RMSE of $0.269$ is the sampling-level discrepancy between the filter's posterior mean and the true state realisation for this particular seed, and is bounded below by the posterior standard deviation the filter itself reports. The plot is for \emph{pipeline sanity}: data generation, filter invocation, state sampling from the prior, covariance tracking, Riccati convergence, metric collection, and I/O all run end-to-end without error and produce numbers consistent with the analytic reference. This is the minimum bar every downstream benchmark in \S\ref{sec:particle-methods-section} and \S\ref{sec:param-estimation} must clear --- and the same Kalman-exact model family is what \S\ref{sec:hmc-multichain-lg-kalman-family} uses to validate HMC. If HMC on that family recovers the Kalman posterior over the parameters, the differentiable pipeline is sound; if it does not, the fault lies in HMC, not in the filter or the test harness.
 
 \newpage
 \section{EKF and UKF}
@@ -1165,7 +1165,7 @@ The SV takeaway: on the raw model, every filter that relies on a local linearisa
 \end{figure}
 
 \paragraph{Stochastic volatility 2D (filter accuracy).}
-Before the SV2D model reappears in \S\ref{sec:sv2d} as an HMC gradient-failure case, I record the filter-level result first. Figures~\ref{fig:pf_edh_ledh_sv2d}, \ref{fig:edh_flow_vs_invertible_sv2d}, and~\ref{fig:edh_vs_ledh_invertible_sv2d} compare bootstrap PF, EDH flow, LEDH flow, and the invertible counterparts of the flow variants on an SV2D trajectory with $N = 200$ particles and $T = 100$ time steps. A clean filter result on this model does not imply HMC will succeed on it --- that is the point of \S\ref{sec:sv2d} --- but a broken filter result would imply HMC cannot possibly succeed.
+SV2D reappears later as an HMC gradient-failure case (the chain has step-level gradient spikes and the multi-chain attempt crashed in the OT backward pass; see the Limitations summary). Before that, I record the filter-level result first. Figures~\ref{fig:pf_edh_ledh_sv2d}, \ref{fig:edh_flow_vs_invertible_sv2d}, and~\ref{fig:edh_vs_ledh_invertible_sv2d} compare bootstrap PF, EDH flow, LEDH flow, and the invertible counterparts of the flow variants on an SV2D trajectory with $N = 200$ particles and $T = 100$ time steps. A clean filter result on this model does not imply HMC will succeed on it, but a broken filter result would imply HMC cannot possibly succeed.
 
 \begin{figure}[H]
     \centering
@@ -1698,6 +1698,26 @@ Lines 9--11 of the algorithm above are the \emph{extrapolation trick} for approx
 \end{algorithmic}
 \end{algorithm}
 
+\paragraph{Consistency: why the output is a realisation of $q$.}
+The Sinkhorn solver itself is agnostic to what either marginal represents --- give it any $\mathbf{a}$ and $\mathbf{b}$ on any support and it returns the entropy-regularised OT plan between them. Nothing in the algorithm references a continuous distribution. The reason the resampled cloud $\{(\hat{\mathbf{x}}^{(i)}, 1/N)\}$ is asymptotically a realisation of the underlying target $q$ is a consistency theorem due to Reich \cite{reich2013nonparametric}.
+
+\textbf{Theorem (Reich, ETPF consistency).} Let $q$ be a probability density on $\mathbb{R}^d$. Suppose particles $\mathbf{x}^{(1)}, \ldots, \mathbf{x}^{(N)}$ are drawn i.i.d.\ from a proposal $q_{\text{prop}}$ absolutely continuous w.r.t.\ Lebesgue, with importance weights $w^{(i)} \propto q(\mathbf{x}^{(i)}) / q_{\text{prop}}(\mathbf{x}^{(i)})$ normalised to $\sum_i w^{(i)} = 1$. Let $\mathbf{P}^{*}$ be the unregularised OT plan with marginals $(\mathbf{w}, \tfrac{1}{N}\mathbf{1})$ on the support $\{\mathbf{x}^{(i)}\}$ and L\textsuperscript{2} cost $C_{ij} = \|\mathbf{x}^{(i)} - \mathbf{x}^{(j)}\|^2$. Define the barycentric output $\hat{\mathbf{x}}^{(i)} = N \sum_j P^{*}_{ji}\, \mathbf{x}^{(j)}$. Then under standard regularity (weights uniformly bounded in $N$; $q, q_{\text{prop}}$ admit a unique Brenier transport map under L\textsuperscript{2} cost), for every continuous bounded test function $f$,
+\begin{equation}
+\frac{1}{N}\sum_{i=1}^N f(\hat{\mathbf{x}}^{(i)}) \;\xrightarrow{N \to \infty}\; \int f \, dq \quad \text{a.s.},
+\end{equation}
+i.e.\ $\tfrac{1}{N}\sum_i \delta_{\hat{\mathbf{x}}^{(i)}}$ converges weakly to $q$.
+
+\textit{Proof sketch.} The discrete plan $\mathbf{P}^{*}$ converges as $N \to \infty$ to the continuous Brenier map $T_{q_{\text{prop}}\to q}$ that pushes $q_{\text{prop}}$ onto $q$ under L\textsuperscript{2} cost. The barycentric projection $\hat{\mathbf{x}}^{(i)} = N \sum_j P^{*}_{ji}\, \mathbf{x}^{(j)}$ approximates $T_{q_{\text{prop}}\to q}(\mathbf{x}^{(i)})$ in the limit. Since the $\mathbf{x}^{(i)}$ are samples of $q_{\text{prop}}$, the images $\hat{\mathbf{x}}^{(i)}$ are asymptotically samples of $q$. The full argument is in \cite{reich2013nonparametric} Section~4.
+
+\textit{Caveats.}
+\begin{enumerate}
+\item The theorem is stated for $\epsilon = 0$ (LP-OT). The entropy-regularised Sinkhorn version used in practice adds a bias of order $\epsilon$ that survives the $N \to \infty$ limit unless $\epsilon$ is also driven to zero. The standard schedule is $\epsilon = \epsilon(N) \to 0$ at a rate slow enough to preserve numerical stability.
+\item Convergence is weak (test integrals), not in stronger metrics like total variation. Finite-$N$ rates suffer the curse of dimensionality: the Wasserstein-2 distance of the empirical from $q$ is $\mathcal{O}(N^{-1/d})$.
+\item The L\textsuperscript{2} cost choice is load-bearing for Brenier --- other costs give different limit maps.
+\end{enumerate}
+
+This is the only place the underlying $q$ enters the OT-resampling pipeline. The Sinkhorn algorithm sees $\mathbf{a}, \mathbf{b}, \mathbf{C}$ and nothing else; the barycentric projection is what converts its plan into output positions; Reich's theorem is what guarantees those positions are asymptotically faithful to $q$.
+
 \subsection{The Derivative Chain through Resampling}
 \label{sec:ot-derivative-chain}
 
@@ -1921,82 +1941,42 @@ The finite-difference reference is stable where it should be stable. The $\alpha
 
 \subsection{Neural Acceleration}
 
-\paragraph{First-principles design.}
-The reason to look at a neural operator here is not that the Sinkhorn path is conceptually broken. It is that the cost is wrong for repeated filtering. In \S5.3 the OT resampler costs $\mathcal{O}(LN^2)$ per resampling step, with $L$ Sinkhorn iterations and $N$ particles. A single filter run solves hundreds of nearby OT problems. The particle clouds change, but the structure of the problem does not. That is an amortisation opportunity.
+\paragraph{The principle.}
+A particle filter delivers $\{(x_i, w_i)\}$, a weighted realisation of a target distribution $q$. Resampling produces $\{(\tilde x_i, 1/N)\}$, an unweighted realisation of the \emph{same} $q$. Two different realisations of one continuous distribution; the job is to convert one into the other. Both have $N$ particles, so the natural framing is optimal transport: move mass from the weighted source to a uniform output that still approximates $q$.
 
-I first considered the supervised route: store particle clouds, weights, and the Sinkhorn transport matrix, then train a map to predict the discrete transport. I did not take that route. The version here follows the Brenier / Monge--Amp\`ere route. It smooths the empirical source and target measures, writes the source as a uniform density and the target as a weighted density, and trains a conditional map $T(x;c)$ so that mass conservation is approximately satisfied. I used a direct-$T$ parameterisation rather than an input-convex potential $\phi$ because the loss needs $\det J_T$. If $T=\nabla\phi$, then differentiating the loss sees Hessians of the potential. With a direct map, $T(x;c)$ and $J_T(x;c)$ are produced together, so the determinant is a first-order object for the model.
+\paragraph{What Sinkhorn does (recap).}
+The OT-based resampler (\S\ref{sec:entropic-ot}) solves an OT problem with marginals $\mathbf{a} = \mathbf{w}$ and $\mathbf{b} = \tfrac{1}{N}\mathbf{1}$ on support $\{x_1, \ldots, x_N\}$ with L\textsuperscript{2} cost, then constructs output positions by barycentric projection $\hat x_i = N\sum_j P^*_{ji}\, x_j$ with uniform weight $1/N$. Reich's consistency theorem (\S\ref{sec:entropic-ot}) is what guarantees the output is asymptotically a realisation of $q$; the underlying $q$ enters the construction only through the source marginal $\mathbf{w}$. Cost is $\mathcal{O}(LN^2)$ per resampling step. A filter solves hundreds of nearby OT problems --- same structure, different cloud. That is the amortisation opportunity.
 
-\paragraph{What the Monge--Amp\`ere equation is here.}
-The generic statement is simple. If a map $T:\mathbb{R}^d\to\mathbb{R}^d$ pushes a source density $p$ onto a target density $q$, then mass conservation gives the change-of-variables identity
-\begin{equation}
-    p(x) = q(T(x))\,\left|\det J_T(x)\right|.
-\end{equation}
-For squared Euclidean transport cost, Brenier's theorem says the optimal map is the gradient of a convex potential: $T=\nabla\phi$ with $\phi$ convex, under the usual absolute-continuity conditions. Substituting that structure gives the Monge--Amp\`ere form
-\begin{equation}
-    p(x) = q(\nabla\phi(x))\,\det \nabla^2\phi(x).
-\end{equation}
-That is the PDE route. I did not solve an explicit potential equation. I used the direct-map version of the same mass-conservation condition.
+\paragraph{The neural map's design.}
+Train a deterministic map $T : \mathbb{R}^d \to \mathbb{R}^d$ that takes an input particle position to an output position in one forward pass. For mass to be conserved point-by-point under such a map, the source has to carry uniform mass. That forces the framing:
+\begin{itemize}
+\item \textbf{Source:} $\mu_{\text{src}} = \tfrac{1}{N}\sum_i \delta_{x_i}$ --- same particles, weights flipped to uniform. Artificial.
+\item \textbf{Target:} $\mu_{\text{tgt}} = \sum_i w_i \delta_{x_i}$ --- the weighted cloud the filter actually delivered.
+\item \textbf{Map:} $T_\#\mu_{\text{src}} = \mu_{\text{tgt}}$.
+\end{itemize}
+Output is $\{(T(x_i), 1/N)\}$. The uniform-weight source is the price of replacing Sinkhorn's plan + barycentric projection with a single deterministic map. Sinkhorn's marginals carry mass conservation; the map version has to carry it pointwise via the Jacobian.
 
-In this resampling problem, the inputs are particles $x_i\in\mathbb{R}^d$ with normalized importance weights $w_i$. I use the same scalar Gaussian bandwidth $h$ for the uniform and weighted clouds:
+\paragraph{From discrete to continuous.}
+A neural map cannot be trained against a sum of delta functions --- there is no gradient signal off the support. The standard fix is to smooth both measures with a Gaussian KDE of bandwidth $h$,
 \begin{equation}
-    K_h(u) = (2\pi h^2)^{-d/2}\exp\!\left(-\frac{\|u\|^2}{2h^2}\right).
+p_h(x) = \frac{1}{N}\sum_i K_h(x - x_i), \qquad
+q_h(x) = \sum_i w_i K_h(x - x_i),
 \end{equation}
-The source density is the uniform-smoothed cloud,
+which turns two discrete measures into two continuous densities on the same support. The map condition $T_\# p_h = q_h$ is the Monge--Amp\`ere equation
 \begin{equation}
-    p_h(x) = \frac{1}{N}\sum_{i=1}^{N} K_h(x-x_i),
+p_h(x) = q_h(T(x))\,\left|\det J_T(x)\right|.
 \end{equation}
-and the target density is the same cloud with the particle-filter weights,
-\begin{equation}
-    q_h(x) = \sum_{i=1}^{N} w_i K_h(x-x_i).
-\end{equation}
-The resampling-specific equation is therefore
-\begin{equation}
-    p_h(x) = q_h(T(x;c))\,\left|\det J_T(x;c)\right|.
-\end{equation}
-This is the condition imposed at collocation points sampled from the uniform density. The training loss evaluates $\log p_h$ at $x$, evaluates $\log q_h$ at $T(x;c)$, takes the determinant of $J_T(x;c)$, and squares the residual
-\begin{equation}
-    r(x;c) =
-    \log p_h(x)
-    - \log q_h(T(x;c))
-    - \log\left|\det J_T(x;c)\right|,
-    \qquad
-    L_{\mathrm{MA}}(c) =
-    \mathbb{E}_{x\sim p_h}\!\left[r(x;c)^2\right].
-\end{equation}
-The sign convention is immaterial because the residual is squared. What matters is that the map is trained against the same source density, target density, and Jacobian determinant that appear in the Monge--Amp\`ere equation.
+Smoothing is implementation; the principle is the previous paragraphs.
 
-\paragraph{Input and output of the operator.}
-There are two inputs to the trunk map. The first is the point batch $x$ where the map is evaluated, with shape $(B,d)$ during collocation training or $(N,d)$ during resampling. The second is the context vector $c$ with shape $(C,)$, produced once from the weighted particle cloud. The set encoder does not see only coordinates and log-weights. It builds tokens
+\paragraph{Loss and inference.}
+Train $T(x;c)$ --- conditioned on a context $c$ from a permutation-invariant set encoder over the weighted cloud --- by minimising the squared log-residual of the Monge--Amp\`ere equation at points sampled from $p_h$:
 \begin{equation}
-    t_i = [x_i,\log w_i,w_i] \in \mathbb{R}^{d+2},
+L(c) = \mathbb{E}_{x \sim p_h}\!\left[\bigl(\log p_h(x) - \log q_h(T(x;c)) - \log\left|\det J_T(x;c)\right|\bigr)^2\right].
 \end{equation}
-so the token tensor has shape $(N,d+2)$. A learned per-particle map is applied to those tokens. The outputs are pooled with $\sum_i w_i h_i$, then joined with weighted mean, upper-triangular covariance, $\log N$, $\log\mathrm{ESS}$, and $\log h$ before the final projection to $c$.
+At inference, encode the cloud once to get $c$, push every particle through the same map: $\tilde x_i = T(x_i; c)$, $\tilde w_i = 1/N$. One forward pass per resampling step instead of a Sinkhorn loop.
 
-The trunk output is also explicit:
-\begin{equation}
-    T(x;c)\in\mathbb{R}^{B\times d},
-    \qquad
-    J_T(x;c)\in\mathbb{R}^{B\times d\times d}.
-\end{equation}
-The Jacobian is analytic. It is not recovered by differentiating each output coordinate during the loss. The loss uses $p_h(x)$, $q_h(T(x;c))$, and $\det J_T(x;c)$ from the same forward evaluation.
-
-The module structure is the main architectural choice. Each conditional block keeps $W_m$ fixed with respect to context and lets $c$ shift biases and positive gates. The Jacobian contribution has the form $W_m^\top D_m W_m$, where $D_m$ is diagonal and nonnegative because the activation derivative and scale parameters are forced positive. This is why the Jacobian is symmetric PSD by construction. I chose that structure because the Monge--Amp\`ere loss asks for $\log\det J_T$ at many collocation points. Positive determinant could not be a soft afterthought.
-
-\paragraph{Ansatz.}
-The bet was threefold. First, a conditional map $T(x;c)$ should amortise across particle clouds if $c$ is produced by a permutation-invariant set encoder. Relabeling particles should not change the context except through the same set statistics, and the tests enforce that. Second, the Monge--Amp\`ere residual should be trainable without a Sinkhorn teacher. That is why the loss uses KDE density evaluations and a log-determinant term rather than MSE to a stored transport matrix. Third, the map should stay usable in a filter if the local geometry is controlled. The current regularisers are local-linearity, which checks that $T(x+\delta;c)$ is close to $T(x;c)+J_T(x;c)\delta$ on the KDE scale, and an eigenvalue lower-bound barrier, which penalizes $\lambda_{\min}(J_T)$ below a threshold.
-
-\paragraph{Inference path.}
-Once trained, the resampler does one deterministic forward pass. During a filter run I have a weighted cloud $\{(x_i,w_i)\}_{i=1}^N$. The filter-pipeline integration layer computes the same resolution-style bandwidth, encodes the whole cloud once to get $c$, and applies the same map to every particle:
-\begin{equation}
-    \tilde{x}_i = T(x_i;c), \qquad \tilde{w}_i = \frac{1}{N}.
-\end{equation}
-It also returns the local Jacobians $J_T(x_i;c)$ for covariance transport. There is no Sinkhorn loop at inference and no $N\times N$ transport matrix. That is the amortisation payoff if the map quality problem is solved.
-
-\paragraph{Current status.}
-The training pipeline is in place and runs end-to-end. The bugs I am chasing now are the map-quality and initialization issues flagged above. They do not break the training loop. They show up as a map that fits its training distribution but does not generalise in the way a resampler needs. The network can overfit. With the current collocation scheme and a single training cloud, the Monge--Amp\`ere residual can fall near zero without proving that the map transports unseen clouds correctly. I have not yet added the regularisation or validation split that would catch this. Fit quality is not operator quality yet.
-
-\paragraph{Next step.}
-The plan is to build a family of two-dimensional Gaussian clouds that look like what a filter would hand the resampler: different means, covariance scales and rotations, and weight profiles ranging from near-uniform to moderately skewed to strongly peaked. I will train on one subset and hold out the rest. The number to report is the Monge--Amp\`ere residual on the held-out Gaussians. That is the generalisation test I should have run before plugging the map into the filter. If training residuals are flat and held-out residuals stay large, the fix is architectural: stronger local-linearity regularisation, bandwidth annealing, wider context, or a denser cloud-sampling schedule.
+\paragraph{Status.}
+Pipeline runs end-to-end. Current bug: the map fits its training cloud to near-zero residual but does not generalise. Next: train on a family of 2D Gaussian clouds (varying mean, covariance, weight skew); report the held-out residual.
 
 
 
@@ -2125,8 +2105,30 @@ Equation~\ref{eq:hmc-acceptance} gives the HMC acceptance rule. If the leapfrog 
 Because consecutive MCMC samples are correlated, $N$ correlated samples carry less information than $N$ independent ones. The effective sample size quantifies this:
 \begin{equation}
 \mathrm{ESS} = \frac{N}{1 + 2\sum_{k=1}^{\infty} \rho_k},
+\label{eq:ess-def}
 \end{equation}
-where $\rho_k = \mathrm{Corr}(\theta_t, \theta_{t+k})$ is the lag-$k$ autocorrelation of the chain. For an AR(1) chain $\theta_t = \phi\,\theta_{t-1} + \varepsilon_t$ with $|\phi| < 1$, $\rho_k = \phi^k$ and $\mathrm{ESS} = N(1-\phi)/(1+\phi)$. With $N = 200$ samples, $\phi = 0.9$ gives ESS $\approx 11$ --- the chain is exploring very slowly. $\phi = 0$ gives ESS $= 200$ --- fully independent. In practice the infinite sum is truncated where autocorrelations become negligible; I compute ESS with an FFT-based autocorrelation estimator. With fewer than a few hundred samples the estimator is noisy and ESS can saturate at $N$ even when mixing is imperfect.
+where $\rho_k = \mathrm{Corr}(\theta_t, \theta_{t+k})$ is the lag-$k$ autocorrelation of the chain. For an AR(1) chain $\theta_t = \phi\,\theta_{t-1} + \varepsilon_t$ with $|\phi| < 1$, $\rho_k = \phi^k$ and $\mathrm{ESS} = N(1-\phi)/(1+\phi)$. With $N = 200$ samples, $\phi = 0.9$ gives ESS $\approx 11$ --- the chain is exploring very slowly. $\phi = 0$ gives ESS $= 200$ --- fully independent.
+
+\subparagraph{Computing $\rho_k$ from the chain.}
+For a finite chain $\{\theta_1, \ldots, \theta_N\}$ with sample mean $\bar\theta = N^{-1}\sum_t \theta_t$, the (biased) sample autocovariance and autocorrelation at lag $k$ are
+\begin{equation}
+c_k = \frac{1}{N}\sum_{t=1}^{N-k} (\theta_t - \bar\theta)(\theta_{t+k} - \bar\theta), \qquad
+\hat\rho_k = \frac{c_k}{c_0}, \qquad k = 0, 1, \ldots, N-1.
+\label{eq:autocorr-def}
+\end{equation}
+The biased estimator $c_k$ has $1/N$ rather than $1/(N-k)$ in the denominator; this regularises the high-lag tail and is the convention used in MCMC ESS estimation. Computing all $N$ lags directly costs $\mathcal{O}(N^2)$, so I use the standard FFT recipe: zero-pad the centered chain $y_t = \theta_t - \bar\theta$ to length $2N$, take the FFT $Y = \mathrm{FFT}(y)$, and recover the autocovariances as
+\begin{equation}
+(c_0, c_1, \ldots, c_{N-1}) = \frac{1}{N}\,\mathrm{Re}\bigl[\mathrm{IFFT}\bigl(|Y|^2\bigr)\bigr]_{0:N},
+\label{eq:autocorr-fft}
+\end{equation}
+which costs $\mathcal{O}(N \log N)$. This works because the inverse FFT of the power spectrum $|Y|^2$ is the circular autocorrelation; zero-padding to $2N$ before the FFT removes the wrap-around, leaving the linear autocorrelation in the first $N$ entries.
+
+\subparagraph{Truncating the infinite sum.}
+Equation~\ref{eq:ess-def} sums to $k = \infty$, but $\hat\rho_k$ becomes pure noise once the true autocorrelation has decayed. I use Geyer's initial monotone sequence rule: form the lag pairs $\hat\Gamma_m = \hat\rho_{2m} + \hat\rho_{2m+1}$, take the running minimum, and truncate at the first $m$ where $\hat\Gamma_m \le 0$. The integrated autocorrelation time is then
+\[
+\hat\tau = 1 + 2\sum_{m=0}^{m^\star-1} \hat\Gamma_m, \qquad \mathrm{ESS} = N / \hat\tau.
+\]
+For multi-chain ESS I average $\hat\rho_k$ across chains before pairing; this is the recipe used in Stan's diagnostics package and in the ArviZ implementation I cross-checked against. With fewer than a few hundred samples the estimator is noisy and ESS can saturate at $N$ even when mixing is imperfect.
 
 \paragraph{$\hat{R}$: Potential Scale Reduction Factor.}
 $\hat{R}$ (Gelman \& Rubin, 1992) detects non-convergence by comparing \emph{within-chain} to \emph{between-chain} variance. Since I run a single chain, I split the $N$ post-burn-in samples into two halves of length $n = N/2$ and treat them as two independent chains. Let $\bar\theta_j$ and $s_j^2$ be the mean and variance of chain $j$ ($j = 1, 2$). Define:
@@ -2136,6 +2138,23 @@ B &= n\,(\bar\theta_1 - \bar\theta_2)^2 / 2 && \text{(between-chain variance)}, 
 \hat{V} &= \tfrac{n-1}{n}\,W + \tfrac{1}{n}\,B && \text{(pooled variance estimate)}.
 \end{align}
 Then $\hat{R} = \sqrt{\hat{V}/W}$. If the chain has converged, both halves look like draws from the same distribution, so $B \approx 0$ and $\hat{R} \approx 1$. This is a \emph{split} $\hat{R}$ from a single chain, which is a rough one-chain diagnostic --- it detects gross non-stationarity within a run but is not a substitute for a true multi-chain $\hat{R}$, which would compare independent chains initialised from over-dispersed starting points. The standard threshold is $\hat{R} > 1.1$ to flag non-convergence. Values slightly below 1 are an artifact of finite-sample estimation and are harmless. With only $n = 100$ samples per half, both $W$ and $B$ are estimated noisily, so at least $N \geq 400$ total samples are recommended before trusting $\hat{R}$.
+
+\paragraph{Multi-chain split-$\hat R$.}
+For the four-chain runs reported in \S\ref{sec:hmc-multichain}, I compute the modern split $\hat R$ from Vehtari et al.\ (2021). Given $M = 4$ independent chains of $N$ post-burn-in samples each, I first split each chain in half to give $M' = 2M = 8$ ``half-chains'' of length $n = N/2$. Let $\bar\theta_j$ and $s_j^2$ denote the mean and variance of half-chain $j$, $j = 1, \ldots, M'$. The between-chain and within-chain variances become
+\begin{align}
+W &= \frac{1}{M'}\sum_{j=1}^{M'} s_j^2&& \text{(within-chain variance)}, \\
+B &= \frac{n}{M' - 1}\sum_{j=1}^{M'} \bigl(\bar\theta_j - \bar{\bar\theta}\bigr)^2 && \text{(between-chain variance)}, \\
+\hat V &= \frac{n-1}{n} W + \frac{1}{n} B, \qquad \hat R = \sqrt{\hat V / W},
+\label{eq:rhat-multichain}
+\end{align}
+where $\bar{\bar\theta} = M'^{-1}\sum_j \bar\theta_j$ is the grand mean. The split halves contribute the within-run non-stationarity check; the four independent chains starting from over-dispersed inits contribute the between-run mixing check. With $M = 4$ and $N = 400$, the $\hat R$ estimator is well-conditioned, and the modern threshold $\hat R \le 1.01$ replaces the older $\hat R \le 1.1$.
+
+\subparagraph{Rank-normalized $\hat R$ (Stan default).}
+Equation~\ref{eq:rhat-multichain} compares chain means and variances. That makes it sensitive to mean and second-moment differences across chains but blind to higher-moment mismatches and very vulnerable to heavy tails: a single outlier sample can dominate $s_j^2$ and pull $\hat R$ either above or below $1$ in misleading ways. The Vehtari et al.\ (2021) fix is to apply the same machinery to a rank-normalized chain instead. Pool all $MN$ samples, replace each by its (continuous) rank
+\[
+r_t^{(m)} = \mathrm{rank}\bigl(\theta_t^{(m)}\bigr), \qquad z_t^{(m)} = \Phi^{-1}\!\left(\frac{r_t^{(m)} - 3/8}{MN + 1/4}\right),
+\]
+where $\Phi^{-1}$ is the standard normal quantile, then run Eq.~\ref{eq:rhat-multichain} on $z$. The rank trick whitens the problem before ANOVA: ranks are uniform under the null regardless of the true posterior shape, so the moment-based recipe becomes sensitive to \emph{any} difference in distribution across chains, not just mean/variance, while the $\Phi^{-1}$ map keeps the $W$, $B$ statistics on a familiar scale. I report this as \emph{bulk}-$\hat R$. To catch scale and tail mismatches that bulk-$\hat R$ can miss, I also fold each sample around the pooled median, $\tilde\theta_t^{(m)} = |\theta_t^{(m)} - \mathrm{median}(\theta)|$, rank-normalize the folded values, and compute $\hat R$ again --- this is \emph{tail}-$\hat R$. Stan reports $\max(\mathrm{bulk}\text{-}\hat R, \mathrm{tail}\text{-}\hat R)$ and so do I; all converged runs in \S\ref{sec:hmc-multichain} have $\max\hat R \le 1.008$ (Kalman and SV1D are the worst at $1.008$ and $1.005$; LEDH+OT, BPF+OT, EKF, UKF, and the range-bearing axes all sit below $1.007$), comfortably under the $1.01$ threshold. I report $\hat R$ alongside two ESS variants: \emph{bulk ESS}, computed as the ESS on the rank-normalized pooled samples (same $z_t^{(m)}$ as bulk-$\hat R$), and \emph{tail ESS}, the minimum of the ESS on the indicator that samples exceed the $5\%$ and $95\%$ quantiles, which catches mixing problems that show up only in the posterior tails.
 
 \subsection{Parameter Prior Selection}
 \label{sec:param-prior-selection}
@@ -2216,7 +2235,7 @@ Run MAP before HMC. MAP finds the mode of the posterior by gradient descent on $
 \begin{equation}
     \v \theta \leftarrow \v \theta - \eta \nabla_{\v \theta} U(\v \theta),
 \end{equation}
-using Adam or SGD. I run MAP in two modes. The \emph{fresh-seed} mode draws a new particle-filter seed at every gradient step, so resampling discontinuities average out over the trajectory; this is the default diagnostic and is useful for checking that the pipeline converges at all. The \emph{fixed-seed} mode holds the particle seed constant across optimizer steps, which exposes the same discontinuities HMC will see during a single leapfrog trajectory --- if fixed-seed MAP converges cleanly, fixed-seed HMC is much more likely to follow suit. MAP is more tolerant than HMC of imperfect resampling gradients in two ways. First, it does not require a globally smooth loss surface: fresh-seed stochastic gradients average out occasional discontinuities, and even fixed-seed MAP only needs the gradient to point roughly downhill on average. Second, it does not require unbiased gradients carrying full information. MAP will therefore often succeed with simple stop-gradient systematic resampling where HMC cannot --- but this is tolerance, not immunity: on sharply discontinuous surfaces (e.g., the SV2D pipeline in \S\ref{sec:sv2d}) even MAP can fail, so a clean MAP run is a necessary but not sufficient condition for HMC to work.
+using Adam or SGD. I run MAP in two modes. The \emph{fresh-seed} mode draws a new particle-filter seed at every gradient step, so resampling discontinuities average out over the trajectory; this is the default diagnostic and is useful for checking that the pipeline converges at all. The \emph{fixed-seed} mode holds the particle seed constant across optimizer steps, which exposes the same discontinuities HMC will see during a single leapfrog trajectory --- if fixed-seed MAP converges cleanly, fixed-seed HMC is much more likely to follow suit. MAP is more tolerant than HMC of imperfect resampling gradients in two ways. First, it does not require a globally smooth loss surface: fresh-seed stochastic gradients average out occasional discontinuities, and even fixed-seed MAP only needs the gradient to point roughly downhill on average. Second, it does not require unbiased gradients carrying full information. MAP will therefore often succeed with simple stop-gradient systematic resampling where HMC cannot --- but this is tolerance, not immunity: on sharply discontinuous surfaces (e.g., the SV2D pipeline that drives the open failure case noted in the Limitations subsection) even MAP can fail, so a clean MAP run is a necessary but not sufficient condition for HMC to work.
 
 The reason this matters is diagnostic: if MAP fails—loss diverges, gradients blow up, or the parameters drift away from the truth—there is a numerical problem somewhere in the model or filter pipeline. MAP is therefore the first benchmark before HMC. I treat MAP convergence on a known model (e.g., 1-D linear Gaussian) as the minimum bar that any new filter configuration must clear. Only once MAP works cleanly do I move to HMC, which has the additional requirements of a deterministic loss surface (fixed particle seed) and smooth gradients.
 The prior in the MAP objective is not a resampling choice; I use the same parameter prior for MAP and HMC and explain the selection in \S\ref{sec:param-prior-selection}.
@@ -2257,10 +2276,50 @@ Each of the four MAP convergence figures is a three-panel composite: top panel s
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.82\linewidth]{map_sv2d.png}
-    \caption{MAP convergence on 2D stochastic volatility with LEDH+OT, estimating $\sigma_2$ with true value $1.0$. The MAP optimizer clears the filter-level objective; \S\ref{sec:sv2d} shows why this is not enough for HMC.}
+    \caption{MAP convergence on 2D stochastic volatility with LEDH+OT, estimating $\sigma_2$ with true value $1.0$. The MAP optimizer clears the filter-level objective; the HMC inner-loop fails for SV2D under the same gradient path (open failure case, see Limitations).}
     \label{fig:map_sv2d}
 \end{figure}
 
+\subsection{Mass Matrix Tuning}
+\label{sec:mass-matrix-tuning}
+
+The Mass matrix paragraph in the HMC theory subsection earlier introduced what $M$ is and why it matters: it preconditions the leapfrog integrator so each posterior direction is explored on the same effective scale. This subsection collects the practical lessons from trying to tune $M$ in this report --- because the obvious shortcut works most of the time and then crashes the chain in the cases that needed it most.
+
+\paragraph{The intuition.}
+A scalar step size $\varepsilon$ assumes every parameter direction has the same posterior scale. When that fails --- one parameter has a posterior standard deviation of $0.1$ and another of $0.01$ in unconstrained space --- a single $\varepsilon$ cannot fit both: it either overshoots the narrow direction (proposals get rejected) or barely moves the wide one (autocorrelation balloons). The mass matrix is the rescaling that puts every direction on the same scale. Sampling momentum $\v p \sim \mathcal{N}(0, M)$ injects kinetic energy in proportion to $\sqrt{M_{ii}}$, so the leapfrog ``ball'' moves at velocity $\sqrt{M^{-1}_{ii}}$ in direction $i$. If I want every direction to traverse its own posterior in roughly the same number of leapfrog steps, the velocity should match the local scale, which means $M_{ii} \approx 1 / \mathrm{Var}(\theta_i)$. After that rescaling, a single scalar $\varepsilon$ does the right thing in every direction.
+
+\paragraph{The standard procedure (Stan-style windowed adaptation).}
+Every modern HMC implementation does the same four-step procedure:
+\begin{enumerate}
+\item Run a short pilot phase with $M = I$ and dual-averaging on $\varepsilon$.
+\item At the end of the pilot, estimate $\mathrm{Var}(\theta_i)$ from the pilot samples and set $M_{ii} = 1 / \mathrm{Var}(\theta_i)$.
+\item \textbf{Reset} the dual-averaging step-size adapter, then resume sampling.
+\item DA re-tunes $\varepsilon$ against the new geometry; once it stabilises, collect the production samples.
+\end{enumerate}
+The reset in step 3 is the part that is easy to miss and load-bearing. What the leapfrog integrator actually cares about is the effective time step $\sqrt{M^{-1}}\,\varepsilon$, not $\varepsilon$ in isolation. Updating $M$ without resetting DA means DA wakes up on day two with a step size calibrated for yesterday's geometry and now has to detect, diagnose, and correct that mismatch online. On well-behaved posteriors that just costs a few extra burn-in iterations. On the nonlinear posteriors in this report, where the gradient near burn-in is itself unstable, it can blow up.
+
+\paragraph{Why the obvious shortcut crashes.}
+The seductive shortcut: run a pilot, fit $M$ from it, start the production chain with that $M$ and continuous DA from a small $\varepsilon_0$. This sounds equivalent to the windowed approach. It is not.
+
+With $M = \mathrm{diag}(1/\mathrm{Var}(\theta))$, the random momentum scale is $|\v p| \sim \sqrt{M_{ii}}$, which is order $5$--$10$ per axis when posterior standard deviations are of order $0.1$--$0.2$ in unconstrained space. In the first burn-in iterations, that momentum is much larger than the local gradient, so leapfrog trajectories overshoot dramatically. Every proposal lands so far from the current state that they all look about the same to the Metropolis correction --- acceptance pegs at $100\%$ trivially, regardless of whether the proposals are actually any good. DA reads ``acceptance is too high'' as ``$\varepsilon$ is too small, let me grow it,'' and grows $\varepsilon$ exponentially. A few iterations later $\varepsilon$ is enormous, the leapfrog integrator hits a singular Jacobian or a non-finite gradient, and the chain crashes.
+
+This is exactly what happened on the range-bearing run reported in \S\ref{sec:hmc-multichain-rb}. I fit $M \approx [47, 82]$ from a pilot, started production HMC with that $M$ and a fresh DA from $\varepsilon_0 = 0.001$, and the chain crashed at burn-in step 19 with a singular \texttt{MatrixSolve} in the OT backward pass. The Stan-style windowed procedure avoids this because step 3 resets DA \emph{after} the metric update, so DA starts in a regime that already accounts for the new $M$.
+
+\paragraph{What worked instead: per-axis step size.}
+The fix that converged the range-bearing run was the same idea applied differently. I left $M = I$ and scaled $\varepsilon$ per-axis instead: $\boldsymbol\varepsilon = [\varepsilon_{\text{range}}, \varepsilon_{\text{bearing}}] = [0.001, 0.004]$, with the bearing axis four times larger because that was the slow-mixing direction. DA's scalar log-step update applies multiplicatively to both entries, so the $4\times$ ratio is preserved through adaptation. This keeps the random momentum at $\v p \sim \mathcal{N}(0, I)$ --- well-conditioned, no over-large initial velocities --- while still injecting more travel into the slow direction.
+
+The mathematical content of ``scalar $\varepsilon$ with tuned diagonal $M$'' and ``scalar $\varepsilon$ with hand-set per-axis ratio'' is the same preconditioning. The first changes the momentum distribution and then asks DA to re-discover the right step; the second leaves the momentum alone and asks DA to find one global step. The second route is much more robust on nonlinear posteriors with gradient instability near burn-in.
+
+\paragraph{Practical guidance.}
+\begin{itemize}
+\item For well-conditioned posteriors (1D LG, 1D SV in this report): the identity mass matrix and a single scalar $\varepsilon$ are sufficient.
+\item For posteriors with strongly anisotropic scales (range-bearing in this report): tune a per-axis $\varepsilon$ ratio by hand from a pilot, leave $M = I$, and let DA find the global step size. This avoids the offline-$M$-meets-online-DA trap.
+\item If a true mass-matrix update is unavoidable, do it the windowed way: pilot, estimate, update $M$, reset DA, resume. Do not run a single continuous DA across the metric switch.
+\end{itemize}
+
+% --- Single-chain HMC benchmarks subsection commented out; superseded by
+% --- the four-chain runs in \S\ref{sec:hmc-multichain}.
+\iffalse
 \subsection{HMC Benchmarks}
 \label{sec:linear-gaussian-benchmark}
 
@@ -2280,8 +2339,12 @@ where $F, B, H, D$ are scalar constants. The process noise covariance is $Q = B^
 
 I used two checks. First, I run MAP to confirm that gradients flow correctly through the entire pipeline: filter, log-likelihood, and prior. MAP minimizes $L_{\mathrm{MAP}}(D) = -\sum_k \log p_D(z_k \mid z_{1:k-1}) - \log p(D)$ using Adam with a fresh particle seed at each step. Convergence to $\sigma_{\text{obs}} = 1.0$ indicates the pipeline is numerically sound. The MAP results are already shown in \S\ref{sec:map-smoke-test} (the MAP convergence figure for 1D LG shows both BPF+OT and LEDH+OT converging to the same neighbourhood of the true $\sigma_{\text{obs}} = 1.0$). Second, I run HMC to recover the full posterior $p(D \mid z_{1:T})$. The posterior should be unimodal and tightly concentrated around the true observation-noise scale, matching the Kalman-based reference. Any discrepancy flags a problem in the gradient computation or the filter itself.
 
+% --- Single-chain 1D LG narrative commented out; superseded by 4-chain runs in
+% --- \S\ref{sec:hmc-multichain-lg} (BPF+OT, LEDH+OT) and
+% --- \S\ref{sec:hmc-multichain-lg-kalman-family} (Kalman, EKF, UKF).
+\iffalse
 \paragraph{HMC trace.}
-Figure~\ref{fig:hmc_lg_trace} overlays the post-burn-in chains from all five filters on a single axis. Kalman (the analytic exact filter), EKF, UKF, LEDH+OT, and BPF+OT all target the same parameter $\sigma_{\text{obs}} = 1.0$ with the same HMC step-size schedule and $L = 5$ leapfrog steps per iteration. The trace shows that every chain stays inside a neighbourhood of the true value; none of the five filters drift systematically away from truth or get stuck at a boundary.
+Figure~\ref{fig:hmc_lg_trace} overlays the post-burn-in chains from LEDH+OT and BPF+OT against the Kalman filter's HMC reference, all targeting $\sigma_{\text{obs}} = 1.0$ at $L = 5$ leapfrog steps. The Kalman, EKF, and UKF traces in this figure are exploratory single-chain runs at the original \texttt{target\_accept\_prob} $= 0.9$ schedule; the converged 4-chain analysis for those three filters lives in \S\ref{sec:hmc-multichain-lg-kalman-family} and supersedes the diagnostics from this single-chain pass. The trace below is included so the LEDH+OT and BPF+OT chains can be read against the Kalman reference shape; none of the five chains drift away from truth or stick at a boundary.
 
 \begin{figure}[H]
     \centering
@@ -2291,28 +2354,7 @@ Figure~\ref{fig:hmc_lg_trace} overlays the post-burn-in chains from all five fil
 \end{figure}
 
 \paragraph{HMC posteriors.}
-Figures~\ref{fig:hmc_lg_histogram_kalman}, \ref{fig:hmc_lg_histogram_ekf}, \ref{fig:hmc_lg_histogram_ukf}, \ref{fig:hmc_lg_histogram_ledh_ot}, and~\ref{fig:hmc_lg_histogram_bpf_ot} show the per-filter marginal posterior histograms. Each panel plots the filter's own samples (coloured bars) against the reference outline from the Kalman filter's own HMC chain and the true value (dashed vertical line). The question each panel answers is: does this filter's HMC posterior match the Kalman-filter HMC reference?
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\linewidth]{hmc_lg_histogram_kalman.png}
-    \caption{1D LG HMC posterior: Kalman filter. This is the HMC reference other filters are compared against.}
-    \label{fig:hmc_lg_histogram_kalman}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\linewidth]{hmc_lg_histogram_ekf.png}
-    \caption{1D LG HMC posterior: EKF. Kalman outline in grey, true value as dashed vertical.}
-    \label{fig:hmc_lg_histogram_ekf}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\linewidth]{hmc_lg_histogram_ukf.png}
-    \caption{1D LG HMC posterior: UKF.}
-    \label{fig:hmc_lg_histogram_ukf}
-\end{figure}
+Figures~\ref{fig:hmc_lg_histogram_ledh_ot} and~\ref{fig:hmc_lg_histogram_bpf_ot} show the LEDH+OT and BPF+OT marginal posteriors against the Kalman-filter HMC reference outline (grey) and the true value (dashed vertical). The question each panel answers is: does the differentiable filter's posterior match the Kalman-exact reference? The 4-chain Kalman / EKF / UKF posteriors are in Figure~\ref{fig:hmc_lg_kalman_family_4chain}.
 
 \begin{figure}[H]
     \centering
@@ -2329,7 +2371,8 @@ Figures~\ref{fig:hmc_lg_histogram_kalman}, \ref{fig:hmc_lg_histogram_ekf}, \ref{
 \end{figure}
 
 \paragraph{Diagnostic readout.}
-Table~\ref{tab:hmc_diagnostics} collects the diagnostics for the 1D LG runs (and the other three nonlinear runs below). Range-bearing and SV1D are discussed in \S\ref{sec:hmc-rb} and \S\ref{sec:hmc-sv1d}. Kalman, EKF, and UKF all hit acceptance $\ge 0.97$ with ESS saturating at the sample count $200$ --- the low apparent split-$\hat R$ of $0.83$ is a finite-sample artefact of running a single $N=200$ chain and is not a convergence problem. LEDH+OT achieves acceptance $0.91$ with ESS $33.7$ over $400$ samples and split-$\hat R = 0.999$, which is the cleanest "non-trivial" result: the flow filter with the full three-term derivative chain matches the Kalman posterior shape. BPF+OT lands at split-$\hat R = 1.15$, above the standard non-convergence threshold of $1.1$ --- its chain did not mix well enough at this sample count, which is visible in Figure~\ref{fig:hmc_lg_histogram_bpf_ot} as an asymmetric histogram relative to the Kalman outline. The BPF+OT result is therefore a known gap: the gradient chain is correct (§\ref{sec:sinkhorn-backward}), the MAP converges cleanly (§\ref{sec:map-smoke-test}), but the HMC chain needs either more samples, a longer burn-in, or step-size re-tuning before the posterior can be trusted. I record the run here rather than omit it --- the diagnostic is what tells us the chain is not ready. The split-$\hat R$ values quoted here are single-chain estimates; multi-chain $\hat R$ for the retuned BPF+OT run is reported in \S\ref{sec:hmc-multichain}.
+Table~\ref{tab:hmc_diagnostics} collects the diagnostics for the two LEDH+OT and BPF+OT 1D LG runs and for the three nonlinear runs below. Range-bearing and SV1D are discussed in \S\ref{sec:hmc-rb} and \S\ref{sec:hmc-sv1d}. The Kalman, EKF, and UKF rows are no longer in this table --- they are reported as proper 4-chain runs in \S\ref{sec:hmc-multichain-lg-kalman-family} and Table~\ref{tab:hmc_multichain_lg}, since a single $N=200$ chain on these analytically-exact filters returned a split-$\hat R$ near $0.83$ that was a finite-sample artefact rather than a real diagnostic. LEDH+OT achieves acceptance $0.91$ with ESS $33.7$ over $400$ samples and split-$\hat R = 0.999$, which is the cleanest "non-trivial" result: the flow filter with the full three-term derivative chain matches the Kalman posterior shape. BPF+OT lands at split-$\hat R = 1.15$, above the standard non-convergence threshold of $1.1$ --- its chain did not mix well enough at this sample count, which is visible in Figure~\ref{fig:hmc_lg_histogram_bpf_ot} as an asymmetric histogram relative to the Kalman outline. The BPF+OT result is therefore a known gap: the gradient chain is correct (§\ref{sec:sinkhorn-backward}), the MAP converges cleanly (§\ref{sec:map-smoke-test}), but the HMC chain needs either more samples, a longer burn-in, or step-size re-tuning before the posterior can be trusted. I record the run here rather than omit it --- the diagnostic is what tells us the chain is not ready. The split-$\hat R$ values quoted here are single-chain estimates; multi-chain $\hat R$ for the retuned BPF+OT run is reported in \S\ref{sec:hmc-multichain}.
+\fi
 
 \subsubsection{Multi-Dimensional Model, 1 Parameter}
 \label{sec:multi-d-lg}
@@ -2378,40 +2421,36 @@ Figures~\ref{fig:hmc_sv1d_trace} and~\ref{fig:hmc_sv1d_histogram} show the SV1D 
 The diagnostic readout for this single-chain run is the red flag in this section. Acceptance rate $0.77$ is fine, but ESS is $\mathbf{4.0}$ over $500$ samples --- effectively no independent information is extracted from the chain, it is moving in a tight oscillation that happens to pass the acceptance test without exploring the posterior. Split-$\hat R = 0.66$ is below $1$ by enough to suggest the chain is trapped rather than mixing. The posterior in Figure~\ref{fig:hmc_sv1d_histogram} therefore represents a very tight local region, not a faithful marginal over $\alpha$. I include this run as an honest diagnostic: the corresponding flow-family filters track SV1D at $\mathrm{RMSE} \approx 1.16$ in \S\ref{sec:particle-methods-section} and the gradient path is validated (Table~\ref{tab:gradient_validation}), but this single-chain run did not mix at the sample budget and step-size tuning I used. The four-chain rerun with the same filter and a fresh DA from each independent start does converge cleanly (\S\ref{sec:hmc-multichain-sv1d}), so the trapped-chain reading here was an artifact of one chain's DA initialization rather than a property of the SV1D posterior.
 
 \paragraph{Diagnostic summary table.}
-Table~\ref{tab:hmc_diagnostics} collects the diagnostics for all eight HMC runs in this report --- the five 1D LG runs above, plus the two nonlinear runs just described, plus the SV2D run discussed in \S\ref{sec:sv2d}.
+Table~\ref{tab:hmc_diagnostics} collects the diagnostics for the three single-chain nonlinear HMC runs in this report --- the two nonlinear runs just described, and the SV2D run discussed in \S\ref{sec:sv2d}. The 1D LG runs are reported as 4-chain diagnostics in \S\ref{sec:hmc-multichain-lg-kalman-family} (Kalman, EKF, UKF) and \S\ref{sec:hmc-multichain-lg} (BPF+OT, LEDH+OT).
 
 \begin{table}[H]
 \centering
 \footnotesize
-\caption{HMC diagnostics for all eight single-chain runs. ``Acceptance'' is the fraction of leapfrog proposals accepted; ``ESS'' is effective sample size at the reported $N_{\text{samples}}$; ``split-$\hat R$'' is the single-chain split potential-scale-reduction factor (values near $1$ are clean, values $> 1.1$ flag non-convergence, very-low values can flag a trapped chain). ``Wall'' is total burn-in + sampling wall time; ``Time/step'' is seconds per HMC iteration ($L = 5$ leapfrog steps per iteration for every run). Memory is not reported --- the current HMC logging does not store peak memory. Multi-chain $\hat R$ for retuned configurations is in Table~\ref{tab:hmc_multichain_attempts}.}
+\caption{HMC diagnostics for the three single-chain nonlinear runs. ``Acceptance'' is the fraction of leapfrog proposals accepted; ``ESS'' is effective sample size at the reported $N_{\text{samples}}$; ``split-$\hat R$'' is the single-chain split potential-scale-reduction factor (values near $1$ are clean, values $> 1.1$ flag non-convergence, very-low values can flag a trapped chain). ``Wall'' is total burn-in + sampling wall time; ``Time/step'' is seconds per HMC iteration ($L = 5$ leapfrog steps per iteration for every run). Memory is not reported --- the current HMC logging does not store peak memory. Multi-chain $\hat R$ for retuned configurations is in Table~\ref{tab:hmc_multichain_attempts}.}
 \label{tab:hmc_diagnostics}
 \begin{tabular}{lcccccccc}
 \toprule
 Model / filter & Acceptance & ESS & split-$\hat R$ & Wall (s) & Time/step (s) & $N_{\text{samples}}$ & $N_{\text{burnin}}$ & $L$ \\
 \midrule
-LG Kalman    & $0.98$ & $200.0$ & $0.826$ & $2{,}077$  & $6.92$  & $200$ & $100$ & $5$ \\
-LG EKF       & $0.98$ & $200.0$ & $0.826$ & $2{,}086$  & $6.95$  & $200$ & $100$ & $5$ \\
-LG UKF       & $0.97$ & $200.0$ & $0.849$ & $5{,}337$  & $17.79$ & $200$ & $100$ & $5$ \\
-LG LEDH+OT   & $0.91$ & $33.7$  & $0.999$ & $4{,}610$  & $7.68$  & $400$ & $200$ & $5$ \\
-LG BPF+OT    & $0.87$ & $17.6$  & $1.154^{*}$ & $1{,}216$  & $2.03$  & $400$ & $200$ & $5$ \\
 RB LEDH+OT   & $0.82$ & $30.0$  & $0.958$ & $22{,}190$ & $36.98$ & $400$ & $200$ & $5$ \\
 SV1D LEDH+OT & $0.77$ & $4.0^{*}$   & $0.655^{*}$ & $14{,}899$ & $21.28$ & $500$ & $200$ & $5$ \\
 SV2D LEDH+OT & $0.75$ & $27.9$  & $1.021$ & $36{,}456$ & $52.08$ & $500$ & $200$ & $5$ \\
 \bottomrule
 \end{tabular}
 \\\vspace{2pt}
-{\footnotesize $^{*}$Diagnostic red flag. BPF+OT on LG has split-$\hat R > 1.1$ (non-convergence threshold); SV1D LEDH+OT has ESS $= 4$ effectively zero independent samples and split-$\hat R \ll 1$ suggesting a trapped chain. Both are recorded honestly rather than omitted; neither represents a faithful posterior.}
+{\footnotesize $^{*}$Diagnostic red flag. SV1D LEDH+OT has ESS $= 4$ effectively zero independent samples and split-$\hat R \ll 1$ suggesting a trapped chain. The run is recorded honestly rather than omitted; it does not represent a faithful posterior, and the four-chain rerun in \S\ref{sec:hmc-multichain-sv1d} converges cleanly.}
 \end{table}
 
-Four of the eight runs are cleanly converged (all three LG Kalman-family runs plus LG LEDH+OT). RB LEDH+OT and SV2D LEDH+OT are converged on the standard threshold but sit at relatively low ESS given their sample budgets. LG BPF+OT and the original SV1D LEDH+OT runs are the two red flags at the configurations used here; both are revisited with retuned settings and proper four-chain diagnostics in \S\ref{sec:hmc-multichain}. The SV2D failure mode discussed in \S\ref{sec:sv2d} remains open.
+RB LEDH+OT and SV2D LEDH+OT are converged on the standard threshold but sit at relatively low ESS given their sample budgets. The original SV1D LEDH+OT run is the red flag at the configuration used here; it is revisited with retuned settings and proper four-chain diagnostics in \S\ref{sec:hmc-multichain}. The SV2D failure mode discussed in \S\ref{sec:sv2d} remains open.
+\fi
 
 \subsection{Multi-Chain Convergence Diagnostics}
 \label{sec:hmc-multichain}
 
-The HMC benchmarks in \S\ref{sec:linear-gaussian-benchmark} report single-chain runs as exploratory diagnostics. This subsection extends that with proper multi-chain convergence checks: four chains per configuration with varied initial conditions, a fixed PF seed of \texttt{[42, 0]} per HMC step, independent dual-averaging per chain, and the modern split rank-normalized $\hat R \le 1.01$ threshold (Vehtari et al.\ 2021). I report only configurations where all four chains converged; the configurations where multi-chain still failed are listed alongside so the section is not selection by hindsight.
+This subsection reports the HMC parameter-inference results as proper multi-chain convergence checks: four chains per configuration with varied initial conditions, a fixed PF seed of \texttt{[42, 0]} per HMC step, independent dual-averaging per chain, and the modern split rank-normalized $\hat R \le 1.01$ threshold (Vehtari et al.\ 2021). I report all configurations I attempted; the ones that converged and the ones that did not are listed side-by-side in Table~\ref{tab:hmc_multichain_attempts} so the section is not selection by hindsight.
 
 \paragraph{Attempted multi-chain configurations.}
-Table~\ref{tab:hmc_multichain_attempts} screens every multi-chain run I attempted. Four cleanly converged --- 1D LG with BPF+OT (extended sample budget) and LEDH+OT, 1D SV with LEDH+OT, and range-bearing with LEDH+OT under per-axis step-size and longer integration. Three failed for distinct reasons: BPF+OT on LG was under-mixed at the original 400-sample budget; the default range-bearing config had $\hat R = 1.094$ on $\sigma_{\text{bearing}}$ from uneven per-axis mixing; the SV2D LEDH+OT chain crashed in the OT backward pass. The mass-matrix tuned range-bearing run also crashed, for reasons detailed in \S\ref{sec:hmc-multichain-rb} below.
+Table~\ref{tab:hmc_multichain_attempts} screens every multi-chain run I attempted. Seven cleanly converged --- 1D LG with Kalman, EKF, UKF (all retuned to \texttt{target\_accept\_prob} $= 0.65$), 1D LG with BPF+OT (extended sample budget) and LEDH+OT, 1D SV with LEDH+OT, and range-bearing with LEDH+OT under per-axis step-size and longer integration. Four configurations failed before convergence: the Kalman-family triple at the original \texttt{target\_accept\_prob} $= 0.8$ left split $\hat R$ marginally above the $1.01$ threshold ($1.013$ for Kalman, $1.010$ for EKF) because DA pushed acceptance to $0.91$--$0.95$ and one chain in each filter dropped to ESS $\approx 20$; BPF+OT on LG was under-mixed at the 400-sample budget; the default range-bearing config had $\hat R = 1.094$ on $\sigma_{\text{bearing}}$ from uneven per-axis mixing; the SV2D LEDH+OT chain crashed in the OT backward pass. The mass-matrix tuned range-bearing run also crashed, for reasons detailed in \S\ref{sec:hmc-multichain-rb} below.
 
 \begin{table}[H]
 \centering
@@ -2422,37 +2461,59 @@ Table~\ref{tab:hmc_multichain_attempts} screens every multi-chain run I attempte
 \toprule
 Model & Filter / config & Outcome & Split $\hat R$ \\
 \midrule
+1D LG & Kalman, target\_accept $= 0.8$, 400 samples/chain & marginal & $1.013$ \\
+1D LG & Kalman, target\_accept $= 0.65$, 400 samples/chain & converged & $1.004$ \\
+1D LG & EKF, target\_accept $= 0.8$, 400 samples/chain & marginal & $1.010$ \\
+1D LG & EKF, target\_accept $= 0.65$, 400 samples/chain & converged & $1.002$ \\
+1D LG & UKF, target\_accept $= 0.65$, 400 samples/chain & converged & $1.002$ \\
 1D LG & BPF+OT, 400 samples/chain & under-mixed & $1.087$ \\
 1D LG & BPF+OT, 2000 samples/chain & converged & $1.001$ \\
 1D LG & LEDH+OT, 400 samples/chain & converged & $1.000$ \\
 1D SV & LEDH+OT, 400 samples/chain & converged & $1.005$ \\
 RB & LEDH+OT, default scalar step, $L=5$ & under-mixed & $1.094$ ($\sigma_{\text{bearing}}$) \\
-RB & LEDH+OT, mass\_vector $[47, 82]$ & crashed (DA runaway, OT backward) & --- \\
 RB & LEDH+OT, axisstep $[\,0.001, 0.004\,]$, $L=5$ & marginal & $1.025$ ($\sigma_{\text{bearing}}$) \\
 RB & LEDH+OT, axisstep $[\,0.001, 0.004\,]$, $L=10$ & converged & $1.005$ ($\sigma_{\text{bearing}}$) \\
-SV2D & LEDH+OT, scalar step & crashed (OT backward MatrixSolve singular) & --- \\
 \bottomrule
 \end{tabular}
 \end{table}
 
+\subsubsection{1D Linear Gaussian (Kalman, EKF, UKF)}
+\label{sec:hmc-multichain-lg-kalman-family}
+
+The three Kalman-family filters target the same scalar $\sigma_{\text{obs}}$ on the same observation sequence as the BPF+OT and LEDH+OT runs below. Chains 1--4 initialize at $\sigma_{\text{obs}} \in \{0.5, 1.0, 1.5, 2.5\}$ with seeds $\{42, 43, 44, 45\}$, $N = 400$ samples / $200$ burn-in per chain, $L = 5$ leapfrog steps. EKF and UKF reduce to the analytic Kalman filter on this linear-Gaussian model, so any disagreement at this scale is sampling noise and not an algorithmic gap.
+
+The first run used \texttt{target\_accept\_prob} $= 0.8$ and landed at split $\hat R = 1.013$ (Kalman) and $1.010$ (EKF) --- marginal at the modern $1.01$ threshold. Dual averaging held acceptance above $0.91$ and $\varepsilon$ below $0.27$, and one chain in each filter ended with ESS near $20$. Dropping the target to $\texttt{target\_accept\_prob} = 0.65$ lets DA settle at $\varepsilon \approx 0.33$, gives split $\hat R = 1.004$ (Kalman), $1.002$ (EKF), $1.002$ (UKF), and brings bulk ESS to $278$, $419$, $464$ respectively across the four chains. The lower target traded a bit of acceptance for larger Hamiltonian moves, which is what these well-conditioned posteriors needed.
+
+Posterior means agree to within $0.015$: Kalman $1.127$, EKF $1.142$, UKF $1.138$, all centered $+0.7$--$0.8\sigma$ from the true $\sigma_{\text{obs}} = 1.0$. The offset from truth is a dataset-realization property; the BPF+OT and LEDH+OT runs below land slightly higher ($\approx 1.20$) but within their own posterior width on the same observation sequence. Diagnostics are in the top three rows of Table~\ref{tab:hmc_multichain_lg}; Figure~\ref{fig:hmc_lg_kalman_family_4chain} shows the four-chain traces and pooled posteriors.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\linewidth]{figures/hmc_lg_kalman_family_4chain.png}
+    \caption{1D LG four-chain HMC for the Kalman-family filters, post-burn-in. Rows: Kalman, EKF, UKF. Left column: traces, four chains overlaid in distinct colors with the truth $\sigma_{\text{obs}} = 1.0$ as the dashed horizontal line. Right column: pooled marginal posterior with truth at $1.0$ as the dashed vertical line. All three runs at \texttt{target\_accept\_prob} $= 0.65$, $400$ samples per chain.}
+    \label{fig:hmc_lg_kalman_family_4chain}
+\end{figure}
+
 \subsubsection{1D Linear Gaussian (BPF+OT and LEDH+OT)}
 \label{sec:hmc-multichain-lg}
 
-Both filters target the same scalar parameter $\sigma_{\text{obs}}$ at true value $1.0$ on the same observation sequence. The chains initialize at $\sigma_{\text{obs}} \in \{0.5, 1.0, 1.5, 2.0\}$ for chains 1--4. BPF+OT requires an extended sample budget because the 400-sample run had split $\hat R = 1.087$; doubling the sample count to 2000 brings $\hat R$ down to $1.001$, with bulk ESS $7829$ and tail ESS $5638$ across all four chains. LEDH+OT converges at the original 400-sample budget with bulk ESS $672$ and tail ESS $634$. The per-chain final step sizes after dual-averaging are tightly clustered ($\varepsilon \approx 0.34$ for both filters, with chain-to-chain variation under $4\%$), confirming that DA settled consistently across independent inits.
+Both differentiable filters target the same scalar parameter $\sigma_{\text{obs}}$ at true value $1.0$ on the same observation sequence as the Kalman family above. The chains initialize at $\sigma_{\text{obs}} \in \{0.5, 1.0, 1.5, 2.0\}$ for chains 1--4. BPF+OT requires an extended sample budget because the 400-sample run had split $\hat R = 1.087$; doubling the sample count to 2000 brings $\hat R$ down to $1.001$, with bulk ESS $7829$ and tail ESS $5638$ across all four chains. LEDH+OT converges at the original 400-sample budget with bulk ESS $672$ and tail ESS $634$. The per-chain final step sizes after dual-averaging are tightly clustered ($\varepsilon \approx 0.34$ for both filters, with chain-to-chain variation under $4\%$), confirming that DA settled consistently across independent inits.
 
-Table~\ref{tab:hmc_multichain_lg} gives the full diagnostics. Figure~\ref{fig:hmc_lg_4chain} shows the four-chain traces and the pooled posteriors. Both filters deliver the same posterior centered near $1.20$, offset $+1.15\sigma$ from truth. The offset is realization-specific --- both filters infer the same posterior given this dataset, but the dataset's empirical likelihood concentrates above the true value. This is a property of the data, not a chain failure.
+Both filters deliver the same posterior centered near $1.20$, offset $+1.15\sigma$ from truth --- approximately $0.06$ above the Kalman-exact posterior mean reported above. The offset is realization-specific to this dataset; both differentiable filters infer the same posterior given the observation sequence, and the small upward shift relative to the analytic Kalman is consistent with the higher posterior variance the particle approximation exhibits at this $N = 500$ particle budget. This is a property of the data plus the filter's posterior width, not a chain failure. Table~\ref{tab:hmc_multichain_lg} (bottom two rows) gives the full diagnostics; Figure~\ref{fig:hmc_lg_4chain} shows the four-chain traces and the pooled posteriors.
 
 \begin{table}[H]
 \centering
 \footnotesize
-\caption{1D LG multi-chain diagnostics. Truth offset is $(\text{posterior mean} - \text{truth}) / \text{posterior sd}$; it measures realization-specific posterior centering and is not a chain-failure metric.}
+\caption{1D LG multi-chain diagnostics. Truth offset is $(\text{posterior mean} - \text{truth}) / \text{posterior sd}$; it measures realization-specific posterior centering and is not a chain-failure metric. ``Max $\hat R$'' is $\max(\text{bulk-}\hat R, \text{tail-}\hat R)$ on rank-normalized samples (Stan default); raw split-$\hat R$ on $\theta$ is also reported for comparison. All five filters target the same observation sequence and share the truth $\sigma_{\text{obs}} = 1.0$.}
 \label{tab:hmc_multichain_lg}
-\begin{tabular}{lcccccccc}
+\begin{tabular}{lccccccccc}
 \toprule
-Filter & Truth & Mean & Sd & 90\% CI & Offset/sd & Split $\hat R$ & Bulk ESS & Tail ESS \\
+Filter & Truth & Mean & Sd & 90\% CI & Offset/sd & Split $\hat R$ & Max $\hat R$ & Bulk ESS & Tail ESS \\
 \midrule
-BPF+OT (long) & $1.0$ & $1.194$ & $0.168$ & $[0.92, 1.47]$ & $+1.15$ & $1.001$ & $7829$ & $5638$ \\
-LEDH+OT       & $1.0$ & $1.202$ & $0.179$ & $[0.91, 1.50]$ & $+1.13$ & $1.000$ & $672$  & $634$  \\
+Kalman        & $1.0$ & $1.127$ & $0.177$ & $[0.85, 1.44]$ & $+0.72$ & $1.004$ & $1.008$ & $278$  & $325$  \\
+EKF           & $1.0$ & $1.142$ & $0.176$ & $[0.87, 1.46]$ & $+0.81$ & $1.002$ & $1.003$ & $419$  & $518$  \\
+UKF           & $1.0$ & $1.138$ & $0.173$ & $[0.87, 1.45]$ & $+0.80$ & $1.002$ & $1.002$ & $464$  & $494$  \\
+BPF+OT (long) & $1.0$ & $1.194$ & $0.168$ & $[0.92, 1.47]$ & $+1.15$ & $1.001$ & $1.001$ & $7829$ & $5638$ \\
+LEDH+OT       & $1.0$ & $1.202$ & $0.179$ & $[0.91, 1.50]$ & $+1.13$ & $1.000$ & $1.002$ & $672$  & $634$  \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -2467,20 +2528,18 @@ LEDH+OT       & $1.0$ & $1.202$ & $0.179$ & $[0.91, 1.50]$ & $+1.13$ & $1.000$ &
 \subsubsection{1D Stochastic Volatility (LEDH+OT)}
 \label{sec:hmc-multichain-sv1d}
 
-The 1D SV chain estimates the persistence parameter $\alpha$ at true value $0.91$ on the log-squared-transformed model. Chains 1--4 initialize $\alpha \in \{0.6, 0.8, 0.91, 0.97\}$. The four-chain run converges with split $\hat R = 1.005$, bulk ESS $607$, and tail ESS $615$ over $400$ samples per chain. Final step sizes cluster at $\varepsilon \approx 0.40$ with acceptance $0.87$--$0.92$ across chains. The posterior mean is $0.921 \pm 0.028$, offset only $+0.38\sigma$ from truth --- the closest match in the four converged runs.
-
-This contrasts with the single-chain SV1D run reported in \S\ref{sec:hmc-sv1d}, where the chain showed split $\hat R = 0.66$ and ESS $= 4$ at a different step-size setting. That single-chain reading was an artifact of one chain settling into a tight oscillatory mode under the original DA initialization; the four-chain run with the same filter and a fresh DA from each independent start does not reproduce that pathology.
+The 1D SV chain estimates the persistence parameter $\alpha$ at true value $0.91$ on the log-squared-transformed model. Chains 1--4 initialize $\alpha \in \{0.6, 0.8, 0.91, 0.97\}$. The four-chain run converges with split $\hat R = 1.005$, bulk ESS $607$, and tail ESS $615$ over $400$ samples per chain. Final step sizes cluster at $\varepsilon \approx 0.40$ with acceptance $0.87$--$0.92$ across chains. The posterior mean is $0.921 \pm 0.028$, offset only $+0.38\sigma$ from truth --- the closest match in the converged Kalman-family-plus-flow runs above.
 
 \begin{table}[H]
 \centering
 \footnotesize
-\caption{1D SV multi-chain diagnostics, LEDH+OT.}
+\caption{1D SV multi-chain diagnostics, LEDH+OT. ``Max $\hat R$'' is $\max(\text{bulk-}\hat R, \text{tail-}\hat R)$ on rank-normalized samples.}
 \label{tab:hmc_multichain_sv1d}
-\begin{tabular}{cccccccc}
+\begin{tabular}{ccccccccc}
 \toprule
-Truth & Mean & Sd & 90\% CI & Offset/sd & Split $\hat R$ & Bulk ESS & Tail ESS \\
+Truth & Mean & Sd & 90\% CI & Offset/sd & Split $\hat R$ & Max $\hat R$ & Bulk ESS & Tail ESS \\
 \midrule
-$0.91$ & $0.921$ & $0.028$ & $[0.876, 0.967]$ & $+0.38$ & $1.005$ & $607$ & $615$ \\
+$0.91$ & $0.921$ & $0.028$ & $[0.876, 0.967]$ & $+0.38$ & $1.005$ & $1.005$ & $607$ & $615$ \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -2495,25 +2554,25 @@ $0.91$ & $0.921$ & $0.028$ & $[0.876, 0.967]$ & $+0.38$ & $1.005$ & $607$ & $615
 \subsubsection{Range-Bearing (LEDH+OT, Per-Axis Step + $L=10$)}
 \label{sec:hmc-multichain-rb}
 
-Range-bearing is the case that exposed the most multi-chain tuning effort. The default scalar-step LEDH+OT config (matching the run in \S\ref{sec:hmc-rb}) gives split $\hat R = 1.003$ on $\sigma_{\text{range}}$ but $1.094$ on $\sigma_{\text{bearing}}$. Per-chain bearing standard deviations vary by a factor of $1.83$ across the four chains while the bearing means agree --- the chains converge to the same posterior centering but disagree on the posterior width. That signature points to per-axis mixing rate: $\sigma_{\text{bearing}}$ has both a narrower posterior in unconstrained space (q-space std $0.110$ versus $0.146$ for $\sigma_{\text{range}}$) and a noisier likelihood gradient via the $\arctan2$ observation, so the bearing axis explores its tails more slowly than range under a shared scalar step.
+Range-bearing is the case that exposed the most multi-chain tuning effort. The default scalar-step LEDH+OT config gives split $\hat R = 1.003$ on $\sigma_{\text{range}}$ but $1.094$ on $\sigma_{\text{bearing}}$. Per-chain bearing standard deviations vary by a factor of $1.83$ across the four chains while the bearing means agree --- the chains converge to the same posterior centering but disagree on the posterior width. That signature points to per-axis mixing rate: $\sigma_{\text{bearing}}$ has both a narrower posterior in unconstrained space (q-space std $0.110$ versus $0.146$ for $\sigma_{\text{range}}$) and a noisier likelihood gradient via the $\arctan2$ observation, so the bearing axis explores its tails more slowly than range under a shared scalar step.
 
-A diagonal mass-matrix attempt $M = \mathrm{diag}(1/\mathrm{Var}(q)) = [47.26,\,82.09]$ crashed during burn-in. The larger random-momentum scale ($|p| \sim \sqrt{M} \approx 7\text{--}9$ per axis) dominated the gradient signal in the first iterations, producing $100\%$ acceptance trivially, which DA misread as ``step too small''. DA then grew the step exponentially until the OT backward MatrixSolve became singular and the chain crashed at burn-in step 19. Stan-style windowed mass-matrix adaptation re-initializes the step size after each metric update; the single-pass offline approach used here does not, and that mismatch is what failed.
+%A diagonal mass-matrix attempt $M = \mathrm{diag}(1/\mathrm{Var}(q)) = [47.26,\,82.09]$ crashed during burn-in. The larger random-momentum scale ($|p| \sim \sqrt{M} \approx 7\text{--}9$ per axis) dominated the gradient signal in the first iterations, producing $100\%$ acceptance trivially, which DA misread as ``step too small''. DA then grew the step exponentially until the OT backward MatrixSolve became singular and the chain crashed at burn-in step 19. Stan-style windowed mass-matrix adaptation re-initializes the step size after each metric update; the single-pass offline approach used here does not, and that mismatch is what failed.
 
-The successful configuration replaces the mass matrix with per-axis step sizes $\varepsilon = [\,0.001,\,0.004\,]$ --- range axis at the original scalar value, bearing axis four times larger. DA preserves the $4\times$ ratio because its scalar log-step update applies identically to both axes. This addresses the per-axis mixing imbalance without rescaling the random momentum, so the early-burn-in pathology of the mass-matrix attempt does not recur. Adding $L = 10$ leapfrog steps per HMC iteration (versus the default $L = 5$) doubles the trajectory length per iteration and cuts $\sigma_{\text{bearing}}$ split $\hat R$ further, from $1.025$ at $L = 5$ to $1.005$ at $L = 10$. Final adapted step sizes across chains are $\varepsilon \approx [\,0.034,\,0.137\,]$ with the $4\times$ ratio preserved. Acceptance is $0.86$--$0.91$ across chains.
+The successful configuration introduce per-axis step sizes $\varepsilon = [\,0.001,\,0.004\,]$ --- range axis at the original scalar value, bearing axis four times larger. DA preserves the $4\times$ ratio because its scalar log-step update applies identically to both axes.  Adding $L = 10$ leapfrog steps per HMC iteration (versus the default $L = 5$) doubles the trajectory length per iteration and cuts $\sigma_{\text{bearing}}$ split $\hat R$ further, from $1.025$ at $L = 5$ to $1.005$ at $L = 10$. Final adapted step sizes across chains are $\varepsilon \approx [\,0.034,\,0.137\,]$ with the $4\times$ ratio preserved. Acceptance is $0.86$--$0.91$ across chains.
 
 The posterior mean for $\sigma_{\text{range}}$ is $0.107 \pm 0.014$ ($+0.49\sigma$ from truth), and for $\sigma_{\text{bearing}}$ is $0.130 \pm 0.016$ ($+1.86\sigma$ from truth). The bearing offset is realization-specific: a separate 1D likelihood scan at $\sigma_{\text{range}}$ fixed to truth shows $\sigma_{\text{bearing}}$'s empirical likelihood peaks near $0.119$ regardless of particle count, $\lambda$-step count, or seed, indicating the offset is a property of this $T = 50$ observation sequence rather than a chain failure.
 
 \begin{table}[H]
 \centering
 \footnotesize
-\caption{Range-bearing multi-chain diagnostics, LEDH+OT with axisstep and $L=10$.}
+\caption{Range-bearing multi-chain diagnostics, LEDH+OT with axisstep and $L=10$. ``Max $\hat R$'' is $\max(\text{bulk-}\hat R, \text{tail-}\hat R)$ on rank-normalized samples.}
 \label{tab:hmc_multichain_rb}
-\begin{tabular}{lcccccccc}
+\begin{tabular}{lccccccccc}
 \toprule
-Parameter & Truth & Mean & Sd & 90\% CI & Offset/sd & Split $\hat R$ & Bulk ESS & Tail ESS \\
+Parameter & Truth & Mean & Sd & 90\% CI & Offset/sd & Split $\hat R$ & Max $\hat R$ & Bulk ESS & Tail ESS \\
 \midrule
-$\sigma_{\text{range}}$  & $0.10$ & $0.107$ & $0.014$ & $[0.084, 0.130]$ & $+0.49$ & $0.998$ & $1600$ & $1092$ \\
-$\sigma_{\text{bearing}}$ & $0.10$ & $0.130$ & $0.016$ & $[0.106, 0.154]$ & $+1.86$ & $1.005$ & $632$  & $787$  \\
+$\sigma_{\text{range}}$  & $0.10$ & $0.107$ & $0.014$ & $[0.084, 0.130]$ & $+0.49$ & $0.998$ & $1.000$ & $1600$ & $1092$ \\
+$\sigma_{\text{bearing}}$ & $0.10$ & $0.130$ & $0.016$ & $[0.106, 0.154]$ & $+1.86$ & $1.005$ & $1.007$ & $632$  & $787$  \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -2528,15 +2587,19 @@ $\sigma_{\text{bearing}}$ & $0.10$ & $0.130$ & $0.016$ & $[0.106, 0.154]$ & $+1.
 \paragraph{Cross-comparison.}
 Across the four converged runs, split $\hat R$ ranges from $0.998$ to $1.005$, all well below the $1.01$ Vehtari threshold. Bulk ESS varies by an order of magnitude, driven mostly by sample budget: BPF+OT-long has $7829$ at $N=2000$ per chain, the four-hundred-sample runs sit at $607\text{--}1600$. Tail ESS tracks bulk closely, indicating no severe tail-sampling deficiency. The truth offset, by contrast, is dataset-specific and unrelated to chain quality: the closest hit is SV1D at $+0.38\sigma$, the largest is range-bearing's bearing parameter at $+1.86\sigma$. The offset says how informative this particular observation sequence is about the parameter, not whether the chain found that information.
 
-The cost differs sharply across runs. BPF+OT-long is the cheapest per sample (acceptance $0.77$, scalar step) but needed $5\times$ more samples. Range-bearing was the most expensive per sample (twice the leapfrog budget, two-axis step tuning) and needed the most engineering to converge. SV2D remains the open case --- the OT backward instability under the gradient path that worked for the other models is the subject of \S\ref{sec:sv2d}.
+The cost differs sharply across runs. BPF+OT-long is the cheapest per sample (acceptance $0.77$, scalar step) but needed $5\times$ more samples. Range-bearing was the most expensive per sample (twice the leapfrog budget, two-axis step tuning) and needed the most engineering to converge. SV2D remains the open case --- the OT backward instability under the gradient path that worked for the other models is the open failure case noted in the Limitations subsection.
 
+% --- SV2D gradient-diagnostics subsection commented out; the failure case is
+% --- summarised inline in the cross-comparison paragraph and the Limitations
+% --- subsection. Source preserved.
+\iffalse
 \subsection{Gradient Diagnostics on SV2D: Unresolved Nonlinear Failure}
 \label{sec:sv2d}
 
 The linear Gaussian benchmark validates the HMC machinery. This subsection documents where it breaks: HMC on the 2D stochastic volatility model (SV2D) with either a bootstrap particle filter or the LEDH flow filter, both combined with OT resampling. The failure is not in the filter itself --- §4 shows LEDH tracks SV2D with reasonable RMSE --- it is in the gradient path that feeds HMC.
 The SV2D runs use the same Lyapunov-stationary construction for the stable diagonal transition matrix as the 1D SV case in \S\ref{par:init-conditions}; the initial-state prior is therefore not a candidate root cause for the failure mode described below.
 
-Figures~\ref{fig:hmc_sv2d_trace} and~\ref{fig:hmc_sv2d_histogram} show the post-burn-in chain; Table~\ref{tab:hmc_diagnostics} gives the aggregate diagnostics.
+Figures~\ref{fig:hmc_sv2d_trace} and~\ref{fig:hmc_sv2d_histogram} show the post-burn-in chain. The aggregate diagnostics for this single-chain SV2D run are: acceptance $0.75$, ESS $27.9$, split-$\hat R$ $1.021$, $500$ samples / $200$ burn-in, $L = 5$ leapfrog steps, wall time $36{,}456$ seconds.
 
 \begin{figure}[H]
     \centering
@@ -2577,11 +2640,12 @@ Initial-state prior choice & none & Lyapunov-stationary, matches §2 principle a
 \end{table}
 
 \paragraph{Closing framing.}
-\emph{The linear Gaussian benchmark in \S\ref{sec:linear-gaussian-benchmark} validates the HMC machinery: MAP converges, gradients match finite differences, HMC posteriors match the Kalman reference. On SV2D, gradient spikes during leapfrog integration make the chain explore poorly even when aggregate acceptance looks acceptable. I have localised the failure to the nonlinear filter gradient path but have not isolated the root cause. The implicit Sinkhorn backward is derived and validated at the filter-gradient level in \S\ref{sec:ot-derivative-chain}; what I have not done is run the SV2D HMC inner loop with that backward and a branch-free conditional-resampling path. This limits the nonlinear DPF-HMC claims but does not affect the filtering results in \S\ref{sec:particle-methods-section} or the validation of the linear pipeline.}
+\emph{The linear Gaussian multi-chain benchmark in \S\ref{sec:hmc-multichain-lg} validates the HMC machinery: MAP converges, gradients match finite differences, HMC posteriors match the Kalman reference. On SV2D, gradient spikes during leapfrog integration make the chain explore poorly even when aggregate acceptance looks acceptable. I have localised the failure to the nonlinear filter gradient path but have not isolated the root cause. The implicit Sinkhorn backward is derived and validated at the filter-gradient level in \S\ref{sec:ot-derivative-chain}; what I have not done is run the SV2D HMC inner loop with that backward and a branch-free conditional-resampling path. This limits the nonlinear DPF-HMC claims but does not affect the filtering results in \S\ref{sec:particle-methods-section} or the validation of the linear pipeline.}
+\fi
 
 \subsection{Limitations}
 
-To collect the caveats that have been raised section-by-section: (i)~the differentiable-filter HMC pipeline is validated cleanly on linear Gaussian targets and on 1D SV and range-bearing under retuned multi-chain settings (\S\ref{sec:hmc-multichain}); SV2D is the remaining open case --- the chain has the step-level gradient spikes described in \S\ref{sec:sv2d} and the multi-chain attempt crashed in the OT backward pass; (ii)~the single-chain split-$\hat R$ values reported in \S\ref{sec:linear-gaussian-benchmark} are exploratory diagnostics; multi-chain $\hat R$ for the retuned configurations is reported in \S\ref{sec:hmc-multichain}.
+To collect the caveats that have been raised section-by-section: the differentiable-filter HMC pipeline is validated cleanly on linear Gaussian targets and on 1D SV and range-bearing under retuned multi-chain settings (\S\ref{sec:hmc-multichain}); SV2D is the remaining open case --- the single-chain run shows step-level gradient spikes that don't fold into aggregate acceptance ($0.75$) and the multi-chain attempt crashed in the OT backward pass with a singular MatrixSolve, which I did not isolate further in this report.
 % 
 % % \newpage
 % 

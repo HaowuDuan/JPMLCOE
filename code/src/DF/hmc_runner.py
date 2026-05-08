@@ -12,6 +12,29 @@ from .parameter_handler import ParameterHandler
 from .differentiable_model import DifferentiableModel
 
 
+def _extract_target_log_prob(kernel_results) -> Optional[float]:
+    """Read target log-prob at the current state from a TFP MCMC kernel_results.
+
+    Walks through DualAveragingStepSizeAdaptation -> (HMC | NUTS) layers and
+    returns the log-prob the kernel already computed during one_step. Returns
+    None if the field is not exposed (unknown kernel layout).
+    """
+    inner = getattr(kernel_results, 'inner_results', kernel_results)
+    # HMC = MetropolisHastings(UncalibratedHMC): accepted_results.target_log_prob
+    if hasattr(inner, 'accepted_results') and hasattr(inner.accepted_results, 'target_log_prob'):
+        try:
+            return float(inner.accepted_results.target_log_prob.numpy())
+        except Exception:
+            return None
+    # NUTS: target_log_prob directly on the kernel results
+    if hasattr(inner, 'target_log_prob'):
+        try:
+            return float(inner.target_log_prob.numpy())
+        except Exception:
+            return None
+    return None
+
+
 class DPFRunner:
     """
     Differentiable Filter runner for parameter inference via HMC/NUTS.
@@ -293,13 +316,17 @@ class DPFRunner:
                 else:
                     cur_step_size = [float(x) for x in np.atleast_1d(_ss_arr)]
 
+                # Log-posterior at the current state, read from kernel_results
+                # (already computed by the kernel; no extra evaluation, no RNG).
+                cur_lp = _extract_target_log_prob(kernel_results)
+
                 is_accepted_list.append(accepted)
                 step_size_list.append(cur_step_size)
 
                 self._print_progress(
                     i, num_burnin, num_samples, total_steps,
                     dt, step_times, cur_step_size, current_state,
-                    is_accepted_list, trace_log=trace_log
+                    is_accepted_list, trace_log=trace_log, log_prob=cur_lp,
                 )
 
                 if i >= num_burnin:
@@ -626,10 +653,11 @@ class DPFRunner:
             step_size_list.append(cur_eps)
             step_times.append(dt)
 
+            cur_lp = float(prop_lp.numpy()) if accepted else float(current_lp.numpy())
             self._print_progress(
                 i, num_burnin, num_samples, total_steps,
                 dt, step_times, cur_eps, q, is_accepted_list,
-                trace_log=trace_log
+                trace_log=trace_log, log_prob=cur_lp,
             )
 
             if i >= num_burnin:
@@ -643,7 +671,7 @@ class DPFRunner:
 
     def _print_progress(self, i, num_burnin, num_samples, total_steps,
                         dt, step_times, cur_step_size, current_state,
-                        is_accepted_list, trace_log=None):
+                        is_accepted_list, trace_log=None, log_prob=None):
         """Print progress for HMC step."""
         phase = "burn-in" if i < num_burnin else "sample"
         idx = i - num_burnin + 1 if i >= num_burnin else i + 1
@@ -678,6 +706,7 @@ class DPFRunner:
                 'dt': dt,
                 'accept_rate': float(accept_rate),
                 'step_size': cur_step_size,
+                'lp': log_prob,
             }
             for n, v in constrained.items():
                 row[n] = float(v.numpy())

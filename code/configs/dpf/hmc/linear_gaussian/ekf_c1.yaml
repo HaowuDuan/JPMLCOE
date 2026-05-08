@@ -1,0 +1,42 @@
+# @package _global_
+# LG + EKF HMC, chain 1 of 4 (for R-hat)
+# Varies: seed=42, obs_noise_std init=0.5
+
+model:
+  _target_: src.models.linear_gaussian.LinearGaussianModel
+  F: [[0.9]]
+  B: [[1.0]]
+  H: [[1.0]]
+  D: [[1.0]]
+  obs_noise_std: 0.5
+
+filter:
+  _target_: src.filters.kalman.extended_kalman.ExtendedKalmanFilter
+  sample_initial_mean: false
+
+dpf:
+  sampler: hmc
+
+  trainable_params:
+    obs_noise_std:
+      constraint: positive
+      prior:
+        _target_: tensorflow_probability.distributions.LogNormal
+        loc: 0.0
+        scale: 1.0
+
+  hmc:
+    num_samples: 400
+    num_burnin: 200
+    step_size: 0.001
+    num_leapfrog_steps: 5
+    max_tree_depth: 10
+    adaptation_rate: 0.8
+    target_accept_prob: 0.65
+    seed: 42
+
+data:
+  T: 50
+  seed: 42
+  true_params:
+    obs_noise_std: 1.0

@@ -294,38 +294,71 @@ def run_dpf_experiment(cfg: DictConfig) -> Dict[str, Any]:
         mass_vector = OmegaConf.to_container(hmc_cfg.mass_vector, resolve=True) \
             if 'mass_vector' in hmc_cfg else None
 
-        runner = DPFRunner(
-            base_model=inference_model,
-            filter_class=filter_class,
-            filter_kwargs=filter_kwargs,
-            param_specs=param_specs,
-            sampler=sampler,
-            mass_vector=mass_vector,
-        )
+        # Runner dispatch: 'tfp' (default, existing) or 'stan' (windowed adaptation).
+        runner_kind = str(hmc_cfg.get('runner', 'tfp')).lower()
 
-        with _PerfTracker() as perf:
-            # step_size may be scalar (float) or list (per-axis). Convert ListConfig to plain list.
-            _step_size = hmc_cfg.step_size
-            if hasattr(_step_size, '_content') or isinstance(_step_size, (list, tuple)):
-                _step_size = [float(x) for x in OmegaConf.to_container(_step_size, resolve=True)] \
-                    if hasattr(_step_size, '_content') else [float(x) for x in _step_size]
-            else:
-                _step_size = float(_step_size)
-            result = runner.run_inference(
-                observations=observations,
-                num_samples=hmc_cfg.num_samples,
-                num_burnin=hmc_cfg.num_burnin,
-                step_size=_step_size,
-                num_leapfrog_steps=hmc_cfg.get('num_leapfrog_steps', 10),
-                adaptation_rate=hmc_cfg.get('adaptation_rate', 0.8),
-                target_accept_prob=hmc_cfg.get('target_accept_prob', 0.75),
-                seed=hmc_cfg.get('seed', 42),
-                max_tree_depth=hmc_cfg.get('max_tree_depth', 10),
-                grad_clip_norm=float(hmc_cfg.get('grad_clip_norm', 100.0)),
-                step_count_smoothing=int(hmc_cfg.get('step_count_smoothing', 10)),
-                pre_warmup_map_steps=int(hmc_cfg.get('pre_warmup_map_steps', 0)),
-                pre_warmup_map_lr=float(hmc_cfg.get('pre_warmup_map_lr', 0.01)),
+        if runner_kind == 'stan':
+            from src.DF.stan_hmc_runner import StanDPFRunner
+
+            runner = StanDPFRunner(
+                base_model=inference_model,
+                filter_class=filter_class,
+                filter_kwargs=filter_kwargs,
+                param_specs=param_specs,
             )
+
+            with _PerfTracker() as perf:
+                result = runner.run_inference(
+                    observations=observations,
+                    num_samples=int(hmc_cfg.num_samples),
+                    num_warmup=int(hmc_cfg.get('num_warmup', hmc_cfg.get('num_burnin', 1000))),
+                    num_leapfrog_steps=int(hmc_cfg.get('num_leapfrog_steps', 5)),
+                    target_accept_prob=float(hmc_cfg.get('target_accept_prob', 0.8)),
+                    shrinkage_alpha=float(hmc_cfg.get('metric_shrinkage_alpha', 5.0)),
+                    shrinkage_target=float(hmc_cfg.get('metric_shrinkage_target', 1e-3)),
+                    da_shrinkage_factor=float(hmc_cfg.get('da_shrinkage_factor', 10.0)),
+                    divergence_threshold=float(hmc_cfg.get('divergence_dh_threshold', 1000.0)),
+                    min_window_samples=int(hmc_cfg.get('min_window_samples', 10)),
+                    abs_buffer_init=int(hmc_cfg.get('abs_buffer_init', 75)),
+                    abs_buffer_term=int(hmc_cfg.get('abs_buffer_term', 50)),
+                    abs_window_base=int(hmc_cfg.get('abs_window_base', 25)),
+                    short_warmup_threshold=int(hmc_cfg.get('short_warmup_threshold', 150)),
+                    skip_metric_threshold=int(hmc_cfg.get('skip_metric_threshold', 20)),
+                    seed=int(hmc_cfg.get('seed', 42)),
+                )
+        else:
+            runner = DPFRunner(
+                base_model=inference_model,
+                filter_class=filter_class,
+                filter_kwargs=filter_kwargs,
+                param_specs=param_specs,
+                sampler=sampler,
+                mass_vector=mass_vector,
+            )
+
+            with _PerfTracker() as perf:
+                # step_size may be scalar (float) or list (per-axis). Convert ListConfig to plain list.
+                _step_size = hmc_cfg.step_size
+                if hasattr(_step_size, '_content') or isinstance(_step_size, (list, tuple)):
+                    _step_size = [float(x) for x in OmegaConf.to_container(_step_size, resolve=True)] \
+                        if hasattr(_step_size, '_content') else [float(x) for x in _step_size]
+                else:
+                    _step_size = float(_step_size)
+                result = runner.run_inference(
+                    observations=observations,
+                    num_samples=hmc_cfg.num_samples,
+                    num_burnin=hmc_cfg.num_burnin,
+                    step_size=_step_size,
+                    num_leapfrog_steps=hmc_cfg.get('num_leapfrog_steps', 10),
+                    adaptation_rate=hmc_cfg.get('adaptation_rate', 0.8),
+                    target_accept_prob=hmc_cfg.get('target_accept_prob', 0.75),
+                    seed=hmc_cfg.get('seed', 42),
+                    max_tree_depth=hmc_cfg.get('max_tree_depth', 10),
+                    grad_clip_norm=float(hmc_cfg.get('grad_clip_norm', 100.0)),
+                    step_count_smoothing=int(hmc_cfg.get('step_count_smoothing', 10)),
+                    pre_warmup_map_steps=int(hmc_cfg.get('pre_warmup_map_steps', 0)),
+                    pre_warmup_map_lr=float(hmc_cfg.get('pre_warmup_map_lr', 0.01)),
+                )
 
     # 6. Print results
     true_params = OmegaConf.to_container(cfg.data.true_params, resolve=True)

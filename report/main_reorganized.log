@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.3.8)  3 MAY 2026 18:36
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.3.8)  6 MAY 2026 15:06
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -661,7 +661,7 @@ put line 236.
 
 
 [7]
-<kalman_1d_linear.png, id=412, 722.7pt x 325.215pt>
+<kalman_1d_linear.png, id=392, 722.7pt x 325.215pt>
 File: kalman_1d_linear.png Graphic file (type png)
 <use kalman_1d_linear.png>
 Package pdftex.def Info: kalman_1d_linear.png  used on input line 372.
@@ -691,18 +691,18 @@ pdfTeX warning (ext4): destination with the same identifier (name{table.1}) has
                                                   \__shipout_drop_firstpage_...
 l.591 
       ]
-<ekf_ukf_range_bearing_combined.png, id=527, 722.7pt x 433.62pt>
+<ekf_ukf_range_bearing_combined.png, id=507, 722.7pt x 433.62pt>
 File: ekf_ukf_range_bearing_combined.png Graphic file (type png)
 <use ekf_ukf_range_bearing_combined.png>
 Package pdftex.def Info: ekf_ukf_range_bearing_combined.png  used on input line
  594.
 (pdftex.def)             Requested size: 385.02547pt x 231.01509pt.
-<ekf_ukf_sv_raw_combined.png, id=528, 722.7pt x 325.215pt>
+<ekf_ukf_sv_raw_combined.png, id=508, 722.7pt x 325.215pt>
 File: ekf_ukf_sv_raw_combined.png Graphic file (type png)
 <use ekf_ukf_sv_raw_combined.png>
 Package pdftex.def Info: ekf_ukf_sv_raw_combined.png  used on input line 601.
 (pdftex.def)             Requested size: 385.02547pt x 173.2613pt.
-<ekf_ukf_sv_log_combined.png, id=529, 722.7pt x 325.215pt>
+<ekf_ukf_sv_log_combined.png, id=509, 722.7pt x 325.215pt>
 File: ekf_ukf_sv_log_combined.png Graphic file (type png)
 <use ekf_ukf_sv_log_combined.png>
 Package pdftex.def Info: ekf_ukf_sv_log_combined.png  used on input line 608.
@@ -734,12 +734,12 @@ l.616 \newpage
 [16]
 
 [17]
-<particle.png, id=580, 1002.3849pt x 713.064pt>
+<particle.png, id=560, 1002.3849pt x 713.064pt>
 File: particle.png Graphic file (type png)
 <use particle.png>
 Package pdftex.def Info: particle.png  used on input line 732.
 (pdftex.def)             Requested size: 362.37569pt x 257.78pt.
-<particle2.png, id=581, 1002.3849pt x 713.064pt>
+<particle2.png, id=561, 1002.3849pt x 713.064pt>
 File: particle2.png Graphic file (type png)
 <use particle2.png>
 Package pdftex.def Info: particle2.png  used on input line 739.
@@ -753,12 +753,12 @@ s been already used, duplicate ignored
                                                   \__shipout_drop_firstpage_...
 l.743 
        <./particle.png>]
-<particle3.png, id=598, 1000.4577pt x 713.064pt>
+<particle3.png, id=578, 1000.4577pt x 713.064pt>
 File: particle3.png Graphic file (type png)
 <use particle3.png>
 Package pdftex.def Info: particle3.png  used on input line 746.
 (pdftex.def)             Requested size: 362.37569pt x 258.2805pt.
-<particle4.png, id=599, 1002.6258pt x 713.064pt>
+<particle4.png, id=579, 1002.6258pt x 713.064pt>
 File: particle4.png Graphic file (type png)
 <use particle4.png>
 Package pdftex.def Info: particle4.png  used on input line 753.
@@ -792,7 +792,7 @@ l.784 \end{equation}
 [22]
 
 [23]
-<pf_edh_ledh_rb.png, id=692, 722.7pt x 433.62pt>
+<pf_edh_ledh_rb.png, id=671, 722.7pt x 433.62pt>
 File: pf_edh_ledh_rb.png Graphic file (type png)
 <use pf_edh_ledh_rb.png>
 Package pdftex.def Info: pf_edh_ledh_rb.png  used on input line 1085.
@@ -820,12 +820,12 @@ pdfTeX warning (ext4): destination with the same identifier (name{table.3}) has
                                                   \__shipout_drop_firstpage_...
 l.1131 
         <./pf_edh_ledh_rb.png>]
-<pf_edh_ledh_sv_log.png, id=730, 722.7pt x 325.215pt>
+<pf_edh_ledh_sv_log.png, id=710, 722.7pt x 325.215pt>
 File: pf_edh_ledh_sv_log.png Graphic file (type png)
 <use pf_edh_ledh_sv_log.png>
 Package pdftex.def Info: pf_edh_ledh_sv_log.png  used on input line 1155.
 (pdftex.def)             Requested size: 385.02547pt x 173.2613pt.
-<edh_vs_ledh_flow_sv_log.png, id=733, 722.7pt x 325.215pt>
+<edh_vs_ledh_flow_sv_log.png, id=713, 722.7pt x 325.215pt>
 File: edh_vs_ledh_flow_sv_log.png Graphic file (type png)
 <use edh_vs_ledh_flow_sv_log.png>
 Package pdftex.def Info: edh_vs_ledh_flow_sv_log.png  used on input line 1162.
@@ -851,12 +851,12 @@ as been already used, duplicate ignored
                                                   \__shipout_drop_firstpage_...
 l.1166 
         <./pf_edh_ledh_sv_log.png>]
-<pf_edh_ledh_sv2d.png, id=746, 722.7pt x 433.62pt>
+<pf_edh_ledh_sv2d.png, id=724, 722.7pt x 433.62pt>
 File: pf_edh_ledh_sv2d.png Graphic file (type png)
 <use pf_edh_ledh_sv2d.png>
 Package pdftex.def Info: pf_edh_ledh_sv2d.png  used on input line 1172.
 (pdftex.def)             Requested size: 407.66833pt x 244.59877pt.
-<edh_flow_vs_invertible_sv2d.png, id=747, 722.7pt x 433.62pt>
+<edh_flow_vs_invertible_sv2d.png, id=725, 722.7pt x 433.62pt>
 File: edh_flow_vs_invertible_sv2d.png Graphic file (type png)
 <use edh_flow_vs_invertible_sv2d.png>
 Package pdftex.def Info: edh_flow_vs_invertible_sv2d.png  used on input line 11
@@ -877,7 +877,7 @@ as been already used, duplicate ignored
                                                   \__shipout_drop_firstpage_...
 l.1183 
         <./edh_vs_ledh_flow_sv_log.png> <./pf_edh_ledh_sv2d.png>]
-<edh_vs_ledh_invertible_sv2d.png, id=758, 722.7pt x 433.62pt>
+<edh_vs_ledh_invertible_sv2d.png, id=736, 722.7pt x 433.62pt>
 File: edh_vs_ledh_invertible_sv2d.png Graphic file (type png)
 <use edh_vs_ledh_invertible_sv2d.png>
 Package pdftex.def Info: edh_vs_ledh_invertible_sv2d.png  used on input line 11
@@ -903,7 +903,7 @@ rtible_sv2d.png>]
 [29]
 
 [30]
-<edh_flow_vs_invertible_rb.png, id=807, 722.7pt x 433.62pt>
+<edh_flow_vs_invertible_rb.png, id=784, 722.7pt x 433.62pt>
 File: edh_flow_vs_invertible_rb.png Graphic file (type png)
 <use edh_flow_vs_invertible_rb.png>
 Package pdftex.def Info: edh_flow_vs_invertible_rb.png  used on input line 1292
@@ -912,7 +912,7 @@ Package pdftex.def Info: edh_flow_vs_invertible_rb.png  used on input line 1292
 
 
 [31]
-<ledh_flow_vs_invertible_rb.png, id=848, 722.7pt x 433.62pt>
+<ledh_flow_vs_invertible_rb.png, id=826, 722.7pt x 433.62pt>
 File: ledh_flow_vs_invertible_rb.png Graphic file (type png)
 <use ledh_flow_vs_invertible_rb.png>
 Package pdftex.def Info: ledh_flow_vs_invertible_rb.png  used on input line 129
@@ -935,7 +935,7 @@ as been already used, duplicate ignored
 l.1315 D
         eterministic EDH can re-linearise $H$ at each particle. That is the ...
  <./edh_flow_vs_invertible_rb.png> <./ledh_flow_vs_invertible_rb.png>]
-<stochastic_edh_rb_combined.png, id=860, 722.7pt x 433.62pt>
+<stochastic_edh_rb_combined.png, id=838, 722.7pt x 433.62pt>
 File: stochastic_edh_rb_combined.png Graphic file (type png)
 <use stochastic_edh_rb_combined.png>
 Package pdftex.def Info: stochastic_edh_rb_combined.png  used on input line 135
@@ -964,7 +964,7 @@ l.1381 \clearpage
 ]
 
 [36]
-<figure3_reproduction.png, id=915, 624.8946pt x 349.7868pt>
+<figure3_reproduction.png, id=892, 624.8946pt x 349.7868pt>
 File: figure3_reproduction.png Graphic file (type png)
 <use figure3_reproduction.png>
 Package pdftex.def Info: figure3_reproduction.png  used on input line 1518.
@@ -994,28 +994,23 @@ pdfTeX warning (ext4): destination with the same identifier (name{table.7}) has
  been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.1787 
-       
+l.1777 
+       ]
+
+[44
 pdfTeX warning (ext4): destination with the same identifier (name{table.8}) has
  been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.1787 
+l.1822 
        ]
 
-[44]
-<sinkhorn_convergence.png, id=1089, 578.16pt x 361.35pt>
+[45]
+<sinkhorn_convergence.png, id=1079, 578.16pt x 361.35pt>
 File: sinkhorn_convergence.png Graphic file (type png)
 <use sinkhorn_convergence.png>
-Package pdftex.def Info: sinkhorn_convergence.png  used on input line 1860.
+Package pdftex.def Info: sinkhorn_convergence.png  used on input line 1880.
 (pdftex.def)             Requested size: 385.02547pt x 240.63658pt.
-
-
-[45]
-Overfull \hbox (20.97528pt too wide) in paragraph at lines 1879--1891
- [][] 
- []
-
 
 
 [46
@@ -1023,112 +1018,117 @@ pdfTeX warning (ext4): destination with the same identifier (name{figure.19}) h
 as been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.1896 
-       
+l.1886 \begin{equation}
+                        <./sinkhorn_convergence.png>]
+Overfull \hbox (20.97528pt too wide) in paragraph at lines 1899--1911
+ [][] 
+ []
+
+
+
+[47
 pdfTeX warning (ext4): destination with the same identifier (name{table.9}) has
  been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.1896 
-        <./sinkhorn_convergence.png>]
-
-[47
+l.1949 
+       
 pdfTeX warning (ext4): destination with the same identifier (name{table.10}) ha
 s been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.1955 \end{equation}
-                     ]
+l.1949 
+       ]
 
 [48]
 
-[49]
-
-[50
+[49
 
 ]
+
+[50]
 
 [51]
 
 [52]
-Underfull \hbox (badness 10000) in paragraph at lines 2159--2159
+Underfull \hbox (badness 10000) in paragraph at lines 2178--2178
 []\OT1/cmr/m/n/7 Linear Gaus-sian
  []
 
 
-Underfull \hbox (badness 3954) in paragraph at lines 2159--2160
+Underfull \hbox (badness 3954) in paragraph at lines 2178--2179
 []\OT1/cmr/m/n/7 Median $1\OML/cmm/m/it/7 :\OT1/cmr/m/n/7 0$ matches the
  []
 
 
-Underfull \hbox (badness 1178) in paragraph at lines 2159--2160
+Underfull \hbox (badness 1178) in paragraph at lines 2178--2179
 \OT1/cmr/m/n/7 unit noise scale, but the
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2160--2160
+Underfull \hbox (badness 10000) in paragraph at lines 2179--2179
 []\OT1/cmr/m/n/7 Linear Gaus-sian
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2160--2160
+Underfull \hbox (badness 10000) in paragraph at lines 2179--2179
 []\OT1/cmr/m/n/7 observation noise
  []
 
 
-Underfull \hbox (badness 3601) in paragraph at lines 2161--2161
+Underfull \hbox (badness 3601) in paragraph at lines 2180--2180
 []\OT1/cmr/m/n/7 loc $= \OMS/cmsy/m/n/7 ^^@\OT1/cmr/m/n/7 0\OML/cmm/m/it/7 :\OT
 1/cmr/m/n/7 094$,
  []
 
 
-Underfull \hbox (badness 3260) in paragraph at lines 2161--2162
+Underfull \hbox (badness 3260) in paragraph at lines 2180--2181
 \OT1/cmr/m/n/7 the syn-thetic per-sis-tence;
  []
 
 
-Underfull \hbox (badness 3601) in paragraph at lines 2163--2163
+Underfull \hbox (badness 3601) in paragraph at lines 2182--2182
 []\OT1/cmr/m/n/7 loc $= \OMS/cmsy/m/n/7 ^^@\OT1/cmr/m/n/7 0\OML/cmm/m/it/7 :\OT
 1/cmr/m/n/7 693$,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2164--2164
+Underfull \hbox (badness 10000) in paragraph at lines 2183--2183
 []\OT1/cmr/m/n/7 SV2D all-
  []
 
 
-Underfull \hbox (badness 1205) in paragraph at lines 2164--2165
+Underfull \hbox (badness 1205) in paragraph at lines 2183--2184
 \OT1/cmr/m/n/7 ble per-sis-tence co-ef-fi-cient;
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2164--2165
+Underfull \hbox (badness 10000) in paragraph at lines 2183--2184
 \OT1/cmr/m/n/7 the guide would pre-fer
  []
 
 
-Underfull \hbox (badness 1859) in paragraph at lines 2164--2165
+Underfull \hbox (badness 1859) in paragraph at lines 2183--2184
 \OT1/cmr/m/n/7 an in-for-ma-tive $[](\OML/cmm/m/it/7 ; ^^L\OT1/cmr/m/n/7 )$
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2165--2165
+Underfull \hbox (badness 10000) in paragraph at lines 2184--2184
 []\OT1/cmr/m/n/7 SV2D all-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2166--2166
+Underfull \hbox (badness 10000) in paragraph at lines 2185--2185
 []\OT1/cmr/m/n/7 SV2D all-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2167--2167
+Underfull \hbox (badness 10000) in paragraph at lines 2186--2186
 []\OT1/cmr/m/n/7 SV2D all-
  []
 
 
-Overfull \hbox (40.13249pt too wide) in paragraph at lines 2155--2172
+Overfull \hbox (40.13249pt too wide) in paragraph at lines 2174--2191
  [][] 
  []
 
@@ -1141,12 +1141,12 @@ pdfTeX warning (ext4): destination with the same identifier (name{table.11}) ha
 s been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.2218 \end{equation}
+l.2237 \end{equation}
                      ]
-<map_learning_rate.png, id=1221, 578.16pt x 325.215pt>
+<map_learning_rate.png, id=1213, 578.16pt x 325.215pt>
 File: map_learning_rate.png Graphic file (type png)
 <use map_learning_rate.png>
-Package pdftex.def Info: map_learning_rate.png  used on input line 2229.
+Package pdftex.def Info: map_learning_rate.png  used on input line 2248.
 (pdftex.def)             Requested size: 362.37569pt x 203.8345pt.
 
 
@@ -1155,17 +1155,17 @@ pdfTeX warning (ext4): destination with the same identifier (name{figure.20}) h
 as been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.2235 
+l.2254 
         <./map_learning_rate.png>]
-<map_lg.png, id=1235, 578.16pt x 650.43pt>
+<map_lg.png, id=1227, 578.16pt x 650.43pt>
 File: map_lg.png Graphic file (type png)
 <use map_lg.png>
-Package pdftex.def Info: map_lg.png  used on input line 2238.
+Package pdftex.def Info: map_lg.png  used on input line 2257.
 (pdftex.def)             Requested size: 371.43698pt x 417.86174pt.
-<map_rb.png, id=1236, 578.16pt x 650.43pt>
+<map_rb.png, id=1228, 578.16pt x 650.43pt>
 File: map_rb.png Graphic file (type png)
 <use map_rb.png>
-Package pdftex.def Info: map_rb.png  used on input line 2245.
+Package pdftex.def Info: map_rb.png  used on input line 2264.
 (pdftex.def)             Requested size: 371.43698pt x 417.86174pt.
 
 
@@ -1174,12 +1174,12 @@ pdfTeX warning (ext4): destination with the same identifier (name{figure.21}) h
 as been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.2249 
+l.2268 
         <./map_lg.png>]
-<map_sv1d.png, id=1242, 578.16pt x 650.43pt>
+<map_sv1d.png, id=1234, 578.16pt x 650.43pt>
 File: map_sv1d.png Graphic file (type png)
 <use map_sv1d.png>
-Package pdftex.def Info: map_sv1d.png  used on input line 2252.
+Package pdftex.def Info: map_sv1d.png  used on input line 2271.
 (pdftex.def)             Requested size: 371.43698pt x 417.86174pt.
 
 
@@ -1188,12 +1188,12 @@ pdfTeX warning (ext4): destination with the same identifier (name{figure.22}) h
 as been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.2256 
+l.2275 
         <./map_rb.png>]
-<map_sv2d.png, id=1249, 578.16pt x 650.43pt>
+<map_sv2d.png, id=1241, 578.16pt x 650.43pt>
 File: map_sv2d.png Graphic file (type png)
 <use map_sv2d.png>
-Package pdftex.def Info: map_sv2d.png  used on input line 2259.
+Package pdftex.def Info: map_sv2d.png  used on input line 2278.
 (pdftex.def)             Requested size: 371.43698pt x 417.86174pt.
 
 
@@ -1202,7 +1202,7 @@ pdfTeX warning (ext4): destination with the same identifier (name{figure.23}) h
 as been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.2263 
+l.2282 
         <./map_sv1d.png>]
 
 [59
@@ -1210,330 +1210,121 @@ pdfTeX warning (ext4): destination with the same identifier (name{figure.24}) h
 as been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.2281 I
-         used two checks. First, I run MAP to confirm that gradients flow co...
+l.2294 \item R
+              un a short pilot phase with $M = I$ and dual-averaging on $\va...
  <./map_sv2d.png>]
-<hmc_lg_trace.png, id=1268, 722.7pt x 325.215pt>
-File: hmc_lg_trace.png Graphic file (type png)
-<use hmc_lg_trace.png>
-Package pdftex.def Info: hmc_lg_trace.png  used on input line 2288.
-(pdftex.def)             Requested size: 430.31812pt x 193.64178pt.
-<hmc_lg_histogram_kalman.png, id=1274, 505.89pt x 289.08pt>
-File: hmc_lg_histogram_kalman.png Graphic file (type png)
-<use hmc_lg_histogram_kalman.png>
-Package pdftex.def Info: hmc_lg_histogram_kalman.png  used on input line 2298.
-(pdftex.def)             Requested size: 317.07614pt x 181.19063pt.
 
-
-[60
-pdfTeX warning (ext4): destination with the same identifier (name{figure.25}) h
-as been already used, duplicate ignored
-<argument> ...shipout:D \box_use:N \l_shipout_box 
-                                                  \__shipout_drop_firstpage_...
-l.2302 
-        <./hmc_lg_trace.png>]
-<hmc_lg_histogram_ekf.png, id=1288, 505.89pt x 289.08pt>
-File: hmc_lg_histogram_ekf.png Graphic file (type png)
-<use hmc_lg_histogram_ekf.png>
-Package pdftex.def Info: hmc_lg_histogram_ekf.png  used on input line 2305.
-(pdftex.def)             Requested size: 317.07614pt x 181.19063pt.
-<hmc_lg_histogram_ukf.png, id=1289, 505.89pt x 289.08pt>
-File: hmc_lg_histogram_ukf.png Graphic file (type png)
-<use hmc_lg_histogram_ukf.png>
-Package pdftex.def Info: hmc_lg_histogram_ukf.png  used on input line 2312.
-(pdftex.def)             Requested size: 317.07614pt x 181.19063pt.
-<hmc_lg_histogram_ledh_ot.png, id=1290, 505.89pt x 289.08pt>
-File: hmc_lg_histogram_ledh_ot.png Graphic file (type png)
-<use hmc_lg_histogram_ledh_ot.png>
-Package pdftex.def Info: hmc_lg_histogram_ledh_ot.png  used on input line 2319.
-
-(pdftex.def)             Requested size: 317.07614pt x 181.19063pt.
+[60]
+<figures/hmc_lg_kalman_family_4chain.png, id=1272, 867.24pt x 867.24pt>
+File: figures/hmc_lg_kalman_family_4chain.png Graphic file (type png)
+<use figures/hmc_lg_kalman_family_4chain.png>
+Package pdftex.def Info: figures/hmc_lg_kalman_family_4chain.png  used on input
+ line 2491.
+(pdftex.def)             Requested size: 430.31812pt x 430.32393pt.
 
 
 [61
-pdfTeX warning (ext4): destination with the same identifier (name{figure.26}) h
-as been already used, duplicate ignored
-<argument> ...shipout:D \box_use:N \l_shipout_box 
-                                                  \__shipout_drop_firstpage_...
-l.2323 
-       
-pdfTeX warning (ext4): destination with the same identifier (name{figure.27}) h
-as been already used, duplicate ignored
-<argument> ...shipout:D \box_use:N \l_shipout_box 
-                                                  \__shipout_drop_firstpage_...
-l.2323 
-       
-pdfTeX warning (ext4): destination with the same identifier (name{figure.28}) h
-as been already used, duplicate ignored
-<argument> ...shipout:D \box_use:N \l_shipout_box 
-                                                  \__shipout_drop_firstpage_...
-l.2323 
-        <./hmc_lg_histogram_kalman.png> <./hmc_lg_histogram_ekf.png> <./hmc_lg_
-histogram_ukf.png>]
-<hmc_lg_histogram_bpf_ot.png, id=1299, 505.89pt x 289.08pt>
-File: hmc_lg_histogram_bpf_ot.png Graphic file (type png)
-<use hmc_lg_histogram_bpf_ot.png>
-Package pdftex.def Info: hmc_lg_histogram_bpf_ot.png  used on input line 2326.
-(pdftex.def)             Requested size: 317.07614pt x 181.19063pt.
-
-
-[62
-pdfTeX warning (ext4): destination with the same identifier (name{figure.29}) h
-as been already used, duplicate ignored
-<argument> ...shipout:D \box_use:N \l_shipout_box 
-                                                  \__shipout_drop_firstpage_...
-l.2338 \subsubsection
-                     {HMC on Range-Bearing}
-pdfTeX warning (ext4): destination with the same identifier (name{figure.30}) h
-as been already used, duplicate ignored
-<argument> ...shipout:D \box_use:N \l_shipout_box 
-                                                  \__shipout_drop_firstpage_...
-l.2338 \subsubsection
-                     {HMC on Range-Bearing} <./hmc_lg_histogram_ledh_ot.png> <.
-/hmc_lg_histogram_bpf_ot.png>]
-<hmc_rb_trace.png, id=1322, 722.7pt x 433.62pt>
-File: hmc_rb_trace.png Graphic file (type png)
-<use hmc_rb_trace.png>
-Package pdftex.def Info: hmc_rb_trace.png  used on input line 2345.
-(pdftex.def)             Requested size: 430.31812pt x 258.18906pt.
-<hmc_rb_histogram.png, id=1323, 722.7pt x 433.62pt>
-File: hmc_rb_histogram.png Graphic file (type png)
-<use hmc_rb_histogram.png>
-Package pdftex.def Info: hmc_rb_histogram.png  used on input line 2352.
-(pdftex.def)             Requested size: 430.31812pt x 258.18906pt.
-
-
-[63
-pdfTeX warning (ext4): destination with the same identifier (name{figure.31}) h
-as been already used, duplicate ignored
-<argument> ...shipout:D \box_use:N \l_shipout_box 
-                                                  \__shipout_drop_firstpage_...
-l.2356 
-        <./hmc_rb_trace.png>]
-<hmc_sv1d_trace.png, id=1335, 505.89pt x 289.08pt>
-File: hmc_sv1d_trace.png Graphic file (type png)
-<use hmc_sv1d_trace.png>
-Package pdftex.def Info: hmc_sv1d_trace.png  used on input line 2366.
-(pdftex.def)             Requested size: 317.07614pt x 181.19063pt.
-<hmc_sv1d_histogram.png, id=1336, 505.89pt x 289.08pt>
-File: hmc_sv1d_histogram.png Graphic file (type png)
-<use hmc_sv1d_histogram.png>
-Package pdftex.def Info: hmc_sv1d_histogram.png  used on input line 2373.
-(pdftex.def)             Requested size: 317.07614pt x 181.19063pt.
-
-
-[64
-pdfTeX warning (ext4): destination with the same identifier (name{figure.32}) h
-as been already used, duplicate ignored
-<argument> ...shipout:D \box_use:N \l_shipout_box 
-                                                  \__shipout_drop_firstpage_...
-l.2377 
-       
-pdfTeX warning (ext4): destination with the same identifier (name{figure.33}) h
-as been already used, duplicate ignored
-<argument> ...shipout:D \box_use:N \l_shipout_box 
-                                                  \__shipout_drop_firstpage_...
-l.2377 
-        <./hmc_rb_histogram.png> <./hmc_sv1d_trace.png>]
-
-[65
-pdfTeX warning (ext4): destination with the same identifier (name{figure.34}) h
-as been already used, duplicate ignored
-<argument> ...shipout:D \box_use:N \l_shipout_box 
-                                                  \__shipout_drop_firstpage_...
-l.2412 
-       
 pdfTeX warning (ext4): destination with the same identifier (name{table.12}) ha
 s been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.2412 
-        <./hmc_sv1d_histogram.png>]
-Overfull \hbox (8.46014pt too wide) in paragraph at lines 2421--2436
- [][] 
- []
+l.2495 
+       ]
 
-<figures/hmc_lg_4chain_combined.png, id=1368, 867.24pt x 578.16pt>
+[62
+pdfTeX warning (ext4): destination with the same identifier (name{figure.25}) h
+as been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.2520 
+        <./figures/hmc_lg_kalman_family_4chain.png>]
+<figures/hmc_lg_4chain_combined.png, id=1290, 867.24pt x 578.16pt>
 File: figures/hmc_lg_4chain_combined.png Graphic file (type png)
 <use figures/hmc_lg_4chain_combined.png>
 Package pdftex.def Info: figures/hmc_lg_4chain_combined.png  used on input line
- 2462.
+ 2523.
 (pdftex.def)             Requested size: 430.31812pt x 286.88261pt.
+<figures/hmc_sv1d_4chain_combined.png, id=1291, 867.24pt x 289.08pt>
+File: figures/hmc_sv1d_4chain_combined.png Graphic file (type png)
+<use figures/hmc_sv1d_4chain_combined.png>
+Package pdftex.def Info: figures/hmc_sv1d_4chain_combined.png  used on input li
+ne 2549.
+(pdftex.def)             Requested size: 430.31812pt x 143.4413pt.
 
 
-[66
+[63
 pdfTeX warning (ext4): destination with the same identifier (name{table.13}) ha
 s been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.2466 
+l.2553 
+       
+pdfTeX warning (ext4): destination with the same identifier (name{figure.26}) h
+as been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.2553 
        
 pdfTeX warning (ext4): destination with the same identifier (name{table.14}) ha
 s been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.2466 
-       ]
-<figures/hmc_sv1d_4chain_combined.png, id=1378, 867.24pt x 289.08pt>
-File: figures/hmc_sv1d_4chain_combined.png Graphic file (type png)
-<use figures/hmc_sv1d_4chain_combined.png>
-Package pdftex.def Info: figures/hmc_sv1d_4chain_combined.png  used on input li
-ne 2490.
-(pdftex.def)             Requested size: 430.31812pt x 143.4413pt.
+l.2553 
+        <./figures/hmc_lg_4chain_combined.png>]
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 2554.
 
 
-[67
-pdfTeX warning (ext4): destination with the same identifier (name{figure.35}) h
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 2554.
+
+<figures/hmc_rb_4chain_combined.png, id=1298, 867.24pt x 578.16pt>
+File: figures/hmc_rb_4chain_combined.png Graphic file (type png)
+<use figures/hmc_rb_4chain_combined.png>
+Package pdftex.def Info: figures/hmc_rb_4chain_combined.png  used on input line
+ 2582.
+(pdftex.def)             Requested size: 430.31812pt x 286.88261pt.
+
+
+[64
+pdfTeX warning (ext4): destination with the same identifier (name{figure.27}) h
 as been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.2494 
+l.2586 
        
 pdfTeX warning (ext4): destination with the same identifier (name{table.15}) ha
 s been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.2494 
-        <./figures/hmc_lg_4chain_combined.png>]
+l.2586 
+        <./figures/hmc_sv1d_4chain_combined.png>] (./main_reorganized.bbl
 
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 2495.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 2495.
-
-<figures/hmc_rb_4chain_combined.png, id=1388, 867.24pt x 578.16pt>
-File: figures/hmc_rb_4chain_combined.png Graphic file (type png)
-<use figures/hmc_rb_4chain_combined.png>
-Package pdftex.def Info: figures/hmc_rb_4chain_combined.png  used on input line
- 2523.
-(pdftex.def)             Requested size: 430.31812pt x 286.88261pt.
-
-
-[68
-pdfTeX warning (ext4): destination with the same identifier (name{figure.36}) h
+[65
+pdfTeX warning (ext4): destination with the same identifier (name{figure.28}) h
 as been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.2527 
-       
-pdfTeX warning (ext4): destination with the same identifier (name{table.16}) ha
-s been already used, duplicate ignored
-<argument> ...shipout:D \box_use:N \l_shipout_box 
-                                                  \__shipout_drop_firstpage_...
-l.2527 
-        <./figures/hmc_sv1d_4chain_combined.png>]
-<hmc_sv2d_trace.png, id=1401, 505.89pt x 289.08pt>
-File: hmc_sv2d_trace.png Graphic file (type png)
-<use hmc_sv2d_trace.png>
-Package pdftex.def Info: hmc_sv2d_trace.png  used on input line 2543.
-(pdftex.def)             Requested size: 317.07614pt x 181.19063pt.
+l.24 \bibitem{dai-new-2021}
+                            <./figures/hmc_rb_4chain_combined.png>])
 
-
-[69
-pdfTeX warning (ext4): destination with the same identifier (name{figure.37}) h
-as been already used, duplicate ignored
-<argument> ...shipout:D \box_use:N \l_shipout_box 
-                                                  \__shipout_drop_firstpage_...
-l.2547 
-        <./figures/hmc_rb_4chain_combined.png>]
-<hmc_sv2d_histogram.png, id=1411, 505.89pt x 289.08pt>
-File: hmc_sv2d_histogram.png Graphic file (type png)
-<use hmc_sv2d_histogram.png>
-Package pdftex.def Info: hmc_sv2d_histogram.png  used on input line 2550.
-(pdftex.def)             Requested size: 317.07614pt x 181.19063pt.
-
-Underfull \hbox (badness 10000) in paragraph at lines 2570--2570
-[]\OT1/cmr/m/n/8 Spikes co-in-cide with
- []
-
-
-Underfull \hbox (badness 3884) in paragraph at lines 2571--2571
-\OT1/cmr/m/n/8 im-plicit Sinkhorn back-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 2572--2572
-[]\OT1/cmr/m/n/8 Appears on LEDH+OT;
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 2572--2572
-\OT1/cmr/m/n/8 same spike ge-om-e-try on
- []
-
-
-Underfull \hbox (badness 5622) in paragraph at lines 2572--2572
-[]\OT1/cmr/m/n/8 Cross-filter per-sis-tence ar-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 2572--2573
-[]\OT1/cmr/m/n/8 Partially ruled
- []
-
-
-Underfull \hbox (badness 1460) in paragraph at lines 2573--2573
-[]\OT1/cmr/m/n/8 Stochastic PF es-ti-ma-tor
- []
-
-
-Underfull \hbox (badness 1142) in paragraph at lines 2573--2573
-[]\OT1/cmr/m/n/8 Fixed-seed runs still spike;
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 2574--2574
-[]\OT1/cmr/m/n/8 Lyapunov-stationary,
- []
-
-
-Underfull \hbox (badness 5077) in paragraph at lines 2574--2574
-\OT1/cmr/m/n/8 matches \TS1/cmr/m/n/8 §\OT1/cmr/m/n/8 2 prin-ci-ple and
- []
-
-
-
-[70
-pdfTeX warning (ext4): destination with the same identifier (name{figure.38}) h
-as been already used, duplicate ignored
-<argument> ...shipout:D \box_use:N \l_shipout_box 
-                                                  \__shipout_drop_firstpage_...
-l.2578 
-       
-pdfTeX warning (ext4): destination with the same identifier (name{figure.39}) h
-as been already used, duplicate ignored
-<argument> ...shipout:D \box_use:N \l_shipout_box 
-                                                  \__shipout_drop_firstpage_...
-l.2578 
-        <./hmc_sv2d_trace.png> <./hmc_sv2d_histogram.png>]
-(./main_reorganized.bbl
-
-[71
-pdfTeX warning (ext4): destination with the same identifier (name{table.17}) ha
-s been already used, duplicate ignored
-<argument> ...shipout:D \box_use:N \l_shipout_box 
-                                                  \__shipout_drop_firstpage_...
-l.50 \bibitem{corenflos-differentiable-2021}
-                                            ])
-
-[72] (./main_reorganized.aux)
+[66] (./main_reorganized.aux)
  ***********
 LaTeX2e <2024-11-01> patch level 2
 L3 programming layer <2025-01-18>
  ***********
 Package rerunfilecheck Info: File `main_reorganized.out' has not changed.
-(rerunfilecheck)             Checksum: DEC4D4A2E25617365B8A9714275E7D3F;11979.
+(rerunfilecheck)             Checksum: 3A08ABD81F829646D1730C4AF341EA6D;11057.
  ) 
 Here is how much of TeX's memory you used:
- 13961 strings out of 473190
- 210983 string characters out of 5715801
- 647176 words of memory out of 5000000
- 36354 multiletter control sequences out of 15000+600000
- 572704 words of font info for 86 fonts, out of 8000000 for 9000
+ 13849 strings out of 473190
+ 208341 string characters out of 5715801
+ 645272 words of memory out of 5000000
+ 36260 multiletter control sequences out of 15000+600000
+ 572326 words of font info for 86 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 75i,20n,79p,1560b,733s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 75i,20n,79p,1657b,733s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb
 ></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb>
 </usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx7.pfb></
@@ -1554,23 +1345,20 @@ ve/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/local/texlive/
 5/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/local/texlive/2025/t
 exmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/2025/te
 xmf-dist/fonts/type1/public/amsfonts/cm/cmsy5.pfb></usr/local/texlive/2025/texm
-f-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/local/texlive/2025/texmf-
-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/local/texlive/2025/texmf-di
-st/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texlive/2025/texmf-dist
-/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/local/texlive/2025/texmf-dist/
-fonts/type1/public/amsfonts/cm/cmti8.pfb></usr/local/texlive/2025/texmf-dist/fo
-nts/type1/public/amsfonts/cm/cmtt10.pfb></usr/local/texlive/2025/texmf-dist/fon
-ts/type1/public/amsfonts/symbols/msbm10.pfb></usr/local/texlive/2025/texmf-dist
-/fonts/type1/public/cm-super/sfbx1000.pfb></usr/local/texlive/2025/texmf-dist/f
-onts/type1/public/cm-super/sfrm0600.pfb></usr/local/texlive/2025/texmf-dist/fon
-ts/type1/public/cm-super/sfrm0700.pfb></usr/local/texlive/2025/texmf-dist/fonts
-/type1/public/cm-super/sfrm0800.pfb></usr/local/texlive/2025/texmf-dist/fonts/t
-ype1/public/cm-super/sfrm1000.pfb></usr/local/texlive/2025/texmf-dist/fonts/typ
-e1/public/cm-super/sfti1000.pfb>
-Output written on main_reorganized.pdf (72 pages, 9920205 bytes).
+f-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/local/texlive/2025/texmf-
+dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texlive/2025/texmf-di
+st/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/local/texlive/2025/texmf-dis
+t/fonts/type1/public/amsfonts/cm/cmti8.pfb></usr/local/texlive/2025/texmf-dist/
+fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/local/texlive/2025/texmf-dist/f
+onts/type1/public/amsfonts/symbols/msbm10.pfb></usr/local/texlive/2025/texmf-di
+st/fonts/type1/public/cm-super/sfbx1000.pfb></usr/local/texlive/2025/texmf-dist
+/fonts/type1/public/cm-super/sfrm0600.pfb></usr/local/texlive/2025/texmf-dist/f
+onts/type1/public/cm-super/sfrm0700.pfb></usr/local/texlive/2025/texmf-dist/fon
+ts/type1/public/cm-super/sfrm1000.pfb>
+Output written on main_reorganized.pdf (66 pages, 9989011 bytes).
 PDF statistics:
- 1721 PDF objects out of 1728 (max. 8388607)
- 1481 compressed objects within 15 object streams
- 663 named destinations out of 1000 (max. 500000)
- 676 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 1580 PDF objects out of 1728 (max. 8388607)
+ 1378 compressed objects within 14 object streams
+ 646 named destinations out of 1000 (max. 500000)
+ 589 words of extra memory for PDF output out of 10000 (max. 10000000)
 
