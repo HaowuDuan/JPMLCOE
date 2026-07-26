@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-REPO = Path("/Users/haowuduan/Documents/githubrepos/JPMLCOE")
+REPO = Path("/Users/haowuduan/Documents/githubrepos/HMC-DPF-OT")
 BASE = REPO / "code/outputs/stochastic_volatility"
 BETA = 0.5  # Confirmed from StochasticVolatilityModel default and saved configs.
 Y_FLOOR = 1e-8

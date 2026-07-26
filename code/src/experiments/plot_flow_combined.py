@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-REPO = Path("/Users/haowuduan/Documents/githubrepos/JPMLCOE")
+REPO = Path("/Users/haowuduan/Documents/githubrepos/HMC-DPF-OT")
 BETA = 0.5
 SV2D_B = 1.0
 SENSOR_POS = np.array([0.0, 0.0], dtype=np.float64)

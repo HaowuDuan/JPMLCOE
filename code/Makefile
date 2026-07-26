@@ -1,7 +1,7 @@
 REMOTE := office
 REMOTE_DIR := ~/JPML/code
 REMOTE_DIR_JIT := ~/JPML-jit/code
-LOCAL_DIR := /Users/haowuduan/Documents/githubrepos/JPMLCOE/code
+LOCAL_DIR := /Users/haowuduan/Documents/githubrepos/HMC-DPF-OT/code
 
 EXCLUDES := --exclude='.venv/' \
             --exclude='outputs/' \

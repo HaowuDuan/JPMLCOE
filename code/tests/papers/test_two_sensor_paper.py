@@ -6,7 +6,7 @@ identical MSE and tr(P), with tr(P) ~ 2.46 instead of paper's 1535.2 (linear) an
 1028.8 (optimal).
 
 Run:
-  cd /Users/haowuduan/Documents/githubrepos/JPMLCOE/code
+  cd /Users/haowuduan/Documents/githubrepos/HMC-DPF-OT/code
   python -m pytest tests/test_two_sensor_paper.py -v -s
 """
 
